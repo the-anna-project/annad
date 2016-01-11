@@ -7,19 +7,26 @@ At first, clone the repository.
 git clone git@github.com:xh3b4sd/anna.git
 ```
 
-To setup the go environment just execute the following in the project root
-directory. This only sets some environment variables needed for the go tools.
+Fetching all dependencies works with this.
 ```
-. ./gosetup
+make goget
 ```
 
 Just running the code without installing the binary can be achieved using the
 go tools.
 ```
-go run ./src/github.com/xh3b4sd/anna/main.go
+make gorun
 ```
 
-Installing the binary, if not yet done, can be achieved using the go tools.
+Cleanup the workspace can be done with this.
 ```
-go install ./src/github.com/xh3b4sd/anna/main.go
+make goclean
+```
+
+### pull requests
+Pull requests are only accepted and merged when there is only one commit to be
+merged. This means contributers need to squash their commits before. This can
+be done with the following command.
+```
+git rebase -i master
 ```
