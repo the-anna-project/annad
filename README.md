@@ -6,9 +6,10 @@ and self-improving software.
 TBD
 
 # documentation
-- Development
-- Concepts
-- Diary
+- [Concept](doc/concept)
+- [Development](doc/development)
+- [Diary](doc/diary)
+- [Roadmap](doc/roadmap)
 
 # contribution
 TBD
