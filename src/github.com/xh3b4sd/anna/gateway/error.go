@@ -1,4 +1,4 @@
-package textinterface
+package gateway
 
 import (
 	"github.com/juju/errgo"

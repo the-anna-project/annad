@@ -40,10 +40,11 @@ the system is not properly able to answer. Here only plain text is returned.
 
 ###### response body
 All network responses will have the following body. Fields are maybe omitted
-when they are empty.
+when they are empty. `data` can actually be everything.
 ```
 {
   "code": "<code>",
-  "text": "<text>"
+  "text": "<text>",
+  "data": "<data>",
 }
 ```

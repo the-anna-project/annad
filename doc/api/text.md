@@ -1,5 +1,5 @@
 # text
-Here we cover Annas text interface. This is used to read text over network.
+Here we cover Anna's text interface. This is used to read text over network.
 Text can either be pulled or pushed.
 
 ### fetch url
