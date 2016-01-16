@@ -17,9 +17,11 @@ This ambitious dream should drive this project. Wether it is driven by me, or
 somebody else, or some group of people way smarter than me. Live will find a way.
 
 # documentation
+- [api](doc/api)
 - [concept](doc/concept)
 - [development](doc/development)
 - [diary](doc/diary)
+- [godoc](https://godoc.org/github.com/xh3b4sd/anna/src/github.com/xh3b4sd/anna)
 - [philosophy](doc/philosophy)
 - [risk](doc/risk)
 - [roadmap](doc/roadmap)

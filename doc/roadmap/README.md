@@ -9,6 +9,8 @@ To get started we need to setup the project. Go is the language of choice.
 Finding a nice project structure and painless development workflows is key
 here.
 
+---
+
 ###### documentation
 This is rather an ongoing task. Especially when keeping the diary in mind.
 Anyway, some basic ideas, concepts, guidelines, etc need to be documented at
@@ -30,13 +32,19 @@ implementing something I would like to get an idea of different approaches to
 compare needs against technical details. Further backing up and restoring data
 also needs to be considered.
 
+---
+
 ###### backup data
 For failure recovery and testing purposes it is necessary to backup data
 automatically. Fast. Easy. Painless.
 
+---
+
 ###### restore data
 For failure recovery and testing purposes it is necessary to restore backed up
 data automatically. Fast. Easy. Painless.
+
+---
 
 ###### have neural networks
 Data needs to be processed. There are probably infinite ways of doing that,
@@ -45,12 +53,16 @@ to solve is to make Anna understand human language. So we need to come up with
 a concept of processing and finally understanding human language. Conceptual
 work and experimenting will be the key here.
 
+---
+
 ###### understand human language
 Reaching this level is in my opinion key to go further with all other smart
 achievements Anna can make. Understanding humans, its terminology and meanings
 of language will make interactions with Anna more easy. Pushing her into
 certain directions of thinking by interacting with her could prove her real
 power of inteligence.
+
+---
 
 ###### be distributed
 Being distributed is necssary to at least deal with huge amounts of data. It is
@@ -59,10 +71,14 @@ across physical machines or the like. Being distributed comes along with a
 whole lot of problems we need to find solutions for. Lets start small and grow,
 and see where the challenges are.
 
+---
+
 ###### replicate herself
 To make Anna self replicatable she needs to initialize a fresh copy of herself
 and finally teardown her old replica. For distributed nodes this needs to be
 coordinated as well.
+
+---
 
 ###### rewrite your own code
 Once capable of understanding human language it should be possible to

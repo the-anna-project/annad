@@ -6,7 +6,7 @@ GOPATH := ${PWD}/vendor:${GOPATH}
 export GOPATH
 
 gobuild:
-	@go build -o ./bin/anna ./src/${PROJECT}/...
+	@go build -o ./bin/anna ./src/${PROJECT}
 
 goclean:
 	@rm -rf ./bin
@@ -18,10 +18,10 @@ gofmt:
 
 goget:
 	@mkdir -p ./vendor/
-	@go get ./src/${PROJECT}/...
+	@go get -v ./src/${PROJECT}/...
 
-gorun: gobuild
-	@./bin/anna
+gorun:
+	@go run ./src/${PROJECT}/main.go
 
 gotest:
 	@go test ./src/${PROJECT}/...

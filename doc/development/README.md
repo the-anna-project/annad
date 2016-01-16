@@ -24,9 +24,17 @@ make goclean
 ```
 
 ### pull requests
+
+###### commits
 Pull requests are only accepted and merged when there is only one commit to be
 merged. This means contributers need to squash their commits before. This can
 be done with the following command.
 ```
 git rebase -i master
 ```
+
+###### diary
+Pull requests are only accepted and merged when there is some sort of process
+documentation. Goal of this is to keep track of influences and events that
+drove development and decisions. All ideas and walkthroughs are precious and
+good to know.
