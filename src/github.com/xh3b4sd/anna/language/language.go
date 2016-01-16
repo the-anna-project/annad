@@ -1,18 +1,16 @@
-package languagenetwork
+package language
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/xh3b4sd/anna/network"
 )
 
-type LanguageNetwork interface {
-	ImpulsGateway() chan network.Impuls
-}
-
-func NewNeuralNetwork() LanguageNetwork {
+func NewLanguageNetwork() network.Network {
 	ln := languageNetwork{
-		impulsGateway: make(chan network.Impuls, 1000),
+		NetworkGateway: network.NewGateway(),
+		NetworkState:   network.NewState(),
 	}
 
 	go ln.start()
@@ -21,18 +19,44 @@ func NewNeuralNetwork() LanguageNetwork {
 }
 
 type languageNetwork struct {
-	impulsGateway chan network.Impuls
+	NetworkGateway network.Gateway
+	NetworkState   network.State
 }
 
-func (ln languageNetwork) ImpulsGateway() chan network.Impuls {
-	return ln.impulsGateway
+func (ln languageNetwork) Age() time.Time {
+	return time.Time{}
+}
+
+func (ln languageNetwork) Connections() ([]network.Connection, error) {
+	return []network.Connection{}, nil
+}
+
+func (ln languageNetwork) Gateway() network.Gateway {
+	return ln.NetworkGateway
+}
+
+func (ln languageNetwork) Load(state network.State) {
+}
+
+func (ln languageNetwork) Merge(dst, src interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+func (ln languageNetwork) Neurons() ([]network.Neuron, error) {
+	return []network.Neuron{}, nil
 }
 
 func (ln languageNetwork) start() {
+	stringGateway := ln.Gateway().String()
+
 	for {
 		select {
-		case impuls := <-ln.impulsGateway:
-			fmt.Printf("language network received impuls: %s\n", impuls.String())
+		case input := <-stringGateway:
+			fmt.Printf("language network received string input: %s\n", input)
 		}
 	}
+}
+
+func (ln languageNetwork) State() network.State {
+	return ln.NetworkState
 }

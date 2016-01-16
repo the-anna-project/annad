@@ -13,7 +13,11 @@ type Neuron interface {
 
 	Impulses() ([]Impuls, error)
 
+	Load(state State)
+
 	Merge(dst, src Connection) (Connection, error)
 
 	Networks() ([]Network, error)
+
+	State() State
 }

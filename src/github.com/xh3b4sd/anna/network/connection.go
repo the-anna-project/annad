@@ -9,6 +9,8 @@ type Connection interface {
 
 	Impulses() ([]Impuls, error)
 
+	Load(state State)
+
 	Merge(dst, src Impuls) (Impuls, error)
 
 	Networks() ([]Network, error)
@@ -16,4 +18,6 @@ type Connection interface {
 	Neurons() ([]Neuron, error)
 
 	Trigger(impuls Impuls) (Impuls, error)
+
+	State() State
 }

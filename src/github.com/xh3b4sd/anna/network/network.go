@@ -5,11 +5,13 @@ import (
 )
 
 type Network interface {
-	Add(neuron Neuron) error
-
 	Age() time.Time
 
 	Connections() ([]Connection, error)
+
+	Gateway() Gateway
+
+	Load(state State)
 
 	// Merge merges dst with src by best effort and returns the result. Result
 	// can either be Neuron or Network.
@@ -17,5 +19,5 @@ type Network interface {
 
 	Neurons() ([]Neuron, error)
 
-	Remove(neuron Neuron) error
+	State() State
 }
