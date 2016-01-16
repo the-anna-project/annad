@@ -5,7 +5,7 @@ import (
 )
 
 type Connection interface {
-	Age() time.Time
+	Age() time.Duration
 
 	Impulses() ([]Impuls, error)
 

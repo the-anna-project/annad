@@ -5,7 +5,7 @@ import (
 )
 
 type Network interface {
-	Age() time.Time
+	Age() time.Duration
 
 	Connections() ([]Connection, error)
 

@@ -5,7 +5,7 @@ import (
 )
 
 type Impuls interface {
-	Age() time.Time
+	Age() time.Duration
 
 	Connections() ([]Connection, error)
 
@@ -23,7 +23,9 @@ type Impuls interface {
 	Neurons() ([]Neuron, error)
 
 	// Pause stops the activity of an impuls to keep it in its current state.
-	// This causes no further interaction to happen until Continue is called.
+	// This causes no further interaction to happen until Continue is called. It
+	// is important to pause a impuls before capturing its state to ensure
+	// reproducable snapshots.
 	Pause()
 
 	String() string
