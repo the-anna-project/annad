@@ -14,11 +14,11 @@ func Listen() {
 	ctx := context.Background()
 
 	// neural network
-	nn := neuralnetwork.NewNeuralNetwork()
+	nn := language.NewLanguageNetwork()
 
 	// text interface
 	config := textinterface.NewTextInterfaceConfig{
-		StringGateway: nn.StringGateway(),
+		NetworkConnection: nn.StringGateway(),
 	}
 	ti := textinterface.NewTextInterface(config)
 	handlers := textinterface.NewHandlers(ctx, ti)
