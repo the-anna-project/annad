@@ -3,7 +3,7 @@ package core
 type Connection interface {
 	SetState(state State)
 
-	State() State
+	GetState() State
 
-	Trigger(impuls Impuls) (Impuls, Neuron, error)
+	Trigger(impulse Impulse) (Impulse, Neuron, error)
 }

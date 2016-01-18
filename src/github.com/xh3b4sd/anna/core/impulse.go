@@ -1,13 +1,9 @@
 package core
 
-import (
-	"time"
-)
-
 type Impulse interface {
 	SetState(state State)
 
-	State() State
+	GetState() State
 
 	// Track tracks location information of objects that the impuls passes. v can
 	// either be Network, Neuron, or Connection.

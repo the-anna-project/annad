@@ -5,35 +5,43 @@ package core
 type Gateway interface {
 	Close() error
 
-	Text() TextGateway
+	GetTextGateway() TextGateway
 }
 
 func NewGateway() Gateway {
 	return gateway{
-		Text: NewTextGateway(),
+		TextGateway: NewTextGateway(),
 	}
 }
 
-func (g gateway) Text() TextGateway {
-	return g.StringGateway
+type gateway struct {
+	TextGateway TextGateway
+}
+
+func (g gateway) Close() error {
+	return nil
+}
+
+func (g gateway) GetTextGateway() TextGateway {
+	return g.TextGateway
 }
 
 // text gateway
 
 func NewTextGateway() TextGateway {
 	return textGateway{
-		String: make(chan string, 1000),
+		StringChannel: make(chan string, 1000),
 	}
 }
 
-type textGateway interface {
-	String() chan string
+type TextGateway interface {
+	GetStringChannel() chan string
 }
 
 type textGateway struct {
-	String chan string
+	StringChannel chan string
 }
 
-func (g textGateway) String() chan string {
-	return g.StringGateway
+func (g textGateway) GetStringChannel() chan string {
+	return g.StringChannel
 }

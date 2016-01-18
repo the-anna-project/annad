@@ -5,17 +5,17 @@ import (
 )
 
 type State interface {
-	Age() time.Duration
+	GetAge() time.Duration
 
-	Connections() ([]Connection, error)
+	GetConnections() ([]Connection, error)
 
-	Impulses() ([]Impuls, error)
+	GetImpulses() ([]Impulse, error)
 
 	MarshalJSON() ([]byte, error)
 
-	Networks() ([]Network, error)
+	GetNetworks() ([]Network, error)
 
-	Neurons() ([]Neuron, error)
+	GetNeurons() ([]Neuron, error)
 
 	SetConnection(connection Connection) error
 
@@ -35,15 +35,51 @@ func NewState() State {
 }
 
 type state struct {
-	CreatedAt time.Time `json:"created_at"`
+	Connections []Connection `json:"connections"`
+	CreatedAt   time.Time    `json:"created_at"`
+	Impulses    []Impulse    `json:"impulses"`
+	Networks    []Network    `json:"networks"`
+	Neurons     []Neuron     `json:"neurons"`
 }
 
-func (s State) Age() time.Duration {
-	return time.Since(n.CreatedAt)
+func (s state) GetAge() time.Duration {
+	return time.Since(s.CreatedAt)
+}
+
+func (s state) GetConnections() ([]Connection, error) {
+	return nil, nil
+}
+
+func (s state) GetImpulses() ([]Impulse, error) {
+	return nil, nil
 }
 
 func (s state) MarshalJSON() ([]byte, error) {
 	return nil, nil
+}
+
+func (s state) GetNetworks() ([]Network, error) {
+	return nil, nil
+}
+
+func (s state) GetNeurons() ([]Neuron, error) {
+	return nil, nil
+}
+
+func (s state) SetConnection(connection Connection) error {
+	return nil
+}
+
+func (s state) SetImpulse(impulse Impulse) error {
+	return nil
+}
+
+func (s state) SetNetwork(network Network) error {
+	return nil
+}
+
+func (s state) SetNeuron(neuron Neuron) error {
+	return nil
 }
 
 func (s state) UnmarshalJSON([]byte) error {

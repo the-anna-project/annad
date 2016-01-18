@@ -9,18 +9,24 @@ type TextInterface interface {
 	ReadPlain(plain string) error
 }
 
-type NewTextInterfaceConfig struct {
-	StringGateway chan string
+type TextInterfaceConfig struct {
+	StringChannel chan string
 }
 
-func NewTextInterface(config NewTextInterfaceConfig) TextInterface {
+func DefaultTextInterfaceConfig() TextInterfaceConfig {
+	return TextInterfaceConfig{
+		StringChannel: make(chan string),
+	}
+}
+
+func NewTextInterface(config TextInterfaceConfig) TextInterface {
 	return textInterface{
-		NewTextInterfaceConfig: config,
+		TextInterfaceConfig: config,
 	}
 }
 
 type textInterface struct {
-	NewTextInterfaceConfig
+	TextInterfaceConfig
 }
 
 // TODO this should actually fetch a url from the web
@@ -39,6 +45,6 @@ func (ti textInterface) ReadStream(stream string) error {
 }
 
 func (ti textInterface) ReadPlain(plain string) error {
-	ti.StringGateway <- plain
+	ti.StringChannel <- plain
 	return nil
 }

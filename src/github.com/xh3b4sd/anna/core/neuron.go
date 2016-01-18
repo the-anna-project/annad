@@ -1,13 +1,9 @@
 package core
 
-import (
-	"time"
-)
-
 type Neuron interface {
 	SetState(state State)
 
-	State() State
+	GetState() State
 
-	Trigger(impuls Impuls) (Impuls, Connection, error)
+	Trigger(impulse Impulse) (Impulse, Connection, error)
 }

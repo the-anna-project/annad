@@ -12,7 +12,6 @@
 ### references
 - https://en.wikipedia.org/wiki/Artificial_neural_network
 - https://en.wikipedia.org/wiki/Neural_coding
-- https://en.wikipedia.org/wiki/Behavior_tree_(artificial_intelligence,_robotics_and_control)
 - https://en.wikipedia.org/wiki/Connectome
 
 - http://neuralnetworksanddeeplearning.com/
