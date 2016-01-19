@@ -8,20 +8,21 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/core"
+	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/server/interface/text"
 )
 
 type ServerConfig struct {
-	Host    string
-	Port    int
-	Gateway core.Gateway
+	Host        string
+	Port        int
+	TextGateway gateway.Gateway
 }
 
 func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
-		Host: "127.0.0.1",
-		Port: 9119,
+		Host:        "127.0.0.1",
+		Port:        9119,
+		TextGateway: nil,
 	}
 }
 
@@ -46,7 +47,7 @@ func (s server) Listen() {
 
 	// text interface
 	newTextInterfaceConfig := textinterface.DefaultTextInterfaceConfig()
-	newTextInterfaceConfig.StringChannel = s.Gateway.GetTextGateway().GetStringChannel()
+	newTextInterfaceConfig.TextGateway = s.TextGateway
 	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
 	newTextInterfaceHandlers := textinterface.NewHandlers(ctx, newTextInterface)
 

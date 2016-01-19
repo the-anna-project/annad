@@ -2,10 +2,12 @@ package core
 
 import (
 	"fmt"
+
+	"github.com/xh3b4sd/anna/gateway"
 )
 
 type CoreConfig struct {
-	Gateway Gateway
+	TextGateway gateway.Gateway
 
 	LanguageNetwork Network
 
@@ -14,7 +16,7 @@ type CoreConfig struct {
 
 func DefaultCoreConfig() CoreConfig {
 	return CoreConfig{
-		Gateway:         NewGateway(),
+		TextGateway:     nil,
 		LanguageNetwork: nil,
 		State:           NewState(),
 	}
@@ -25,8 +27,6 @@ type Core interface {
 	// call to Boot blocks until the core is completely initialized, so you might
 	// want to call it in a separate goroutine.
 	Boot()
-
-	GetGateway() Gateway
 
 	SetState(state State)
 
@@ -53,18 +53,11 @@ func (c core) Boot() {
 }
 
 func (c core) listen() {
-	stringChannel := c.GetGateway().GetTextGateway().GetStringChannel()
-
 	for {
-		select {
-		case input := <-stringChannel:
-			fmt.Printf("core received string input: %s\n", input)
-		}
+		signal := c.TextGateway.ReceiveSignal()
+		fmt.Printf("core received string input: %s\n", signal.GetBytes())
+		signal.GetResponder() <- []byte("this is the core response")
 	}
-}
-
-func (c core) GetGateway() Gateway {
-	return c.Gateway
 }
 
 func (c core) SetState(state State) {
