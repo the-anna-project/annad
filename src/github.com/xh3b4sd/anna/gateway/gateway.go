@@ -1,50 +1,76 @@
 package gateway
 
-import ()
+import (
+	"sync"
+)
 
 type Gateway interface {
 	Close()
 
 	Open()
 
-	ReceiveSignal() Signal
+	ReceiveSignal() (Signal, error)
 
-	SendSignal(signal Signal)
+	SendSignal(signal Signal) error
 }
 
 func NewGateway() Gateway {
-	return gateway{
+	g := &gateway{
 		Link:   make(chan Signal, 1000),
-		Closer: make(chan struct{}),
-		Opener: make(chan struct{}),
+		Closed: false,
+		Mutex:  sync.Mutex{},
 	}
+
+	return g
 }
 
 type gateway struct {
 	Link   chan Signal
-	Closer chan struct{}
-	Opener chan struct{}
+	Closed bool
+	Mutex  sync.Mutex
 }
 
-func (g gateway) Close() {
-	g.Closer <- struct{}{}
+func (g *gateway) Close() {
+	g.Mutex.Lock()
+	defer g.Mutex.Unlock()
+	g.Closed = true
 }
 
-func (g gateway) Open() {
-	g.Opener <- struct{}{}
+func (g *gateway) Open() {
+	g.Mutex.Lock()
+	defer g.Mutex.Unlock()
+	g.Closed = false
 }
 
-func (g gateway) ReceiveSignal() Signal {
-	return <-g.Link
-}
-
-func (g gateway) SendSignal(signal Signal) {
-	select {
-	case <-g.Closer:
-		// In case the Closer kicks in, the gateway is closed until the opener
-		// receives its signal.
-		<-g.Opener
-	default:
-		g.Link <- signal
+func (g *gateway) ReceiveSignal() (Signal, error) {
+	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
+	// Link channel at the end of this function. Link might block until a signal
+	// can be read again. In this case Mutex.Unlock is never called and the mutex
+	// causes blocking of Gateway.Close, Gateway.Open and Gateway.SendSignal. So
+	// we need to explicitly unlock here.
+	g.Mutex.Lock()
+	if g.Closed {
+		g.Mutex.Unlock()
+		return nil, maskAny(gatewayClosedError)
 	}
+	g.Mutex.Unlock()
+
+	return <-g.Link, nil
+}
+
+func (g *gateway) SendSignal(signal Signal) error {
+	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
+	// Link channel at the end of this function. Link might block until a signal
+	// can be sent again. In this case Mutex.Unlock is never called and the mutex
+	// causes blocking of Gateway.Close, Gateway.Open and Gateway.ReceiveSignal.
+	// So we need to explicitly unlock here.
+	g.Mutex.Lock()
+	if g.Closed {
+		g.Mutex.Unlock()
+		return maskAny(gatewayClosedError)
+	}
+	g.Mutex.Unlock()
+
+	g.Link <- signal
+	return nil
 }

@@ -1,6 +1,9 @@
 package textinterface
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/xh3b4sd/anna/gateway"
 )
 
@@ -48,7 +51,26 @@ func (ti textInterface) ReadStream(stream string) ([]byte, error) {
 
 func (ti textInterface) ReadPlain(plain []byte) ([]byte, error) {
 	// TODO we need a task system here to make the calls asynchronous
-	signal := gateway.NewSignal(plain)
-	ti.TextGateway.SendSignal(signal)
-	return <-signal.GetResponder(), nil
+	newSignal := gateway.NewSignal(plain)
+
+	i := 0
+	for {
+		if i >= 5 {
+			return nil, maskAny(gatewayClosedError)
+		}
+		i++
+
+		err := ti.TextGateway.SendSignal(newSignal)
+		if gateway.IsGatewayClosed(err) {
+			fmt.Printf("gateway is closed\n")
+			time.Sleep(1 * time.Second)
+			continue
+		} else if err != nil {
+			fmt.Printf("%#v\n", maskAny(err))
+		} else {
+			break
+		}
+	}
+
+	return <-newSignal.GetResponder(), nil
 }

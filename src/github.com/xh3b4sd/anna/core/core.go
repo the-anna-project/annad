@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/xh3b4sd/anna/gateway"
 )
@@ -54,7 +55,15 @@ func (c core) Boot() {
 
 func (c core) listen() {
 	for {
-		signal := c.TextGateway.ReceiveSignal()
+		signal, err := c.TextGateway.ReceiveSignal()
+		if gateway.IsGatewayClosed(err) {
+			fmt.Printf("gateway is closed\n")
+			time.Sleep(1 * time.Second)
+			continue
+		} else if err != nil {
+			fmt.Printf("%#v\n", maskAny(err))
+		}
+
 		fmt.Printf("core received string input: %s\n", signal.GetBytes())
 		signal.GetResponder() <- []byte("this is the core response")
 	}
