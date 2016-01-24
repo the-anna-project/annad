@@ -46,6 +46,12 @@ documentation. Goal of this is to keep track of influences and events that
 drove development and decisions. All ideas and walkthroughs are precious and
 good to know.
 
+---
+
+###### tests
+Make sure there are tests where it makes sense and all tests pass reliably. No
+pull request is going to be merged as long as there are tests failing.
+
 ### guidelines
 
 ###### tracability

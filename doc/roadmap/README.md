@@ -4,26 +4,12 @@ This plan has the potential to change quickly.
 
 ### next 4 weeks
 
-###### project setup
-To get started we need to setup the project. Go is the language of choice.
-Finding a nice project structure and painless development workflows is key
-here.
-
----
-
-###### documentation
-This is rather an ongoing task. Especially when keeping the diary in mind.
-Anyway, some basic ideas, concepts, guidelines, etc need to be documented at
-first.
+###### annactl
+Because of the task system it is necessary to have a client that understands
+Annas API's. This is for convenience and for other cool stuff that needs to be
+controled remotely.
 
 ### next 4 months
-
-###### read text
-At first we need to provide a text interface. So Anna can read input to do
-something with her consumed data. Later on she also could have some voice
-interface.
-
-### next 4 years
 
 ###### store data
 Consumed input needs to be stored somehow. We can expect huge data amounts of
@@ -45,6 +31,8 @@ For failure recovery and testing purposes it is necessary to restore backed up
 data automatically. Fast. Easy. Painless.
 
 ---
+
+### next 4 years
 
 ###### have neural networks
 Data needs to be processed. There are probably infinite ways of doing that,

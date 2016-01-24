@@ -17,13 +17,11 @@ from the very top we consider the following 4 layers.
 
 4. The `core` layer describes the implementation of Anna's most inner workings.
    It bundles everything around data processing and intelligence. The core
-   itself contains multiple `networks`. Signals provided by the gateway are are
-   translated to impulses that, at first, pass the scheduler network. From
-   there impulses find their way through the networks to finally trigger
-   actions in form of a response to incoming signals.
+   itself is able to contain multiple `networks`. Signals provided by the
+   gateway are translated to impulses that pass through the networks.
 
 This is how it basically looks like. Note that the white pale boxes represent
 ideas that are not yet implemented. The strong grey boxes in fact represent
-components that are, at least partly, implemented.
+components that, at least partly, are implemented.
 
 ![anna](image/anna.png)

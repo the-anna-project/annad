@@ -5,4 +5,5 @@ be discussed, wether they are implemented or not.
 
 ### table of contents
 - [anna](anna.md)
+- [core](core.md)
 - [network](network.md)
