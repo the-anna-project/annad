@@ -1,27 +1,26 @@
-.PHONY: gobuild goclean gofmt goget gorun gotest
+.PHONY: all gobuild goclean gofmt goget gorun gotest
 
-PROJECT := github.com/xh3b4sd/anna
-
-GOPATH := ${PWD}/vendor:${GOPATH}
+GOPATH := ${PWD}/.workspace/:${GOPATH}
 export GOPATH
 
+all: goclean goget
+
 gobuild:
-	@go build -o ./bin/anna ./src/${PROJECT}
+	@go build -o .workspace/bin/anna github.com/xh3b4sd/anna
 
 goclean:
-	@rm -rf ./bin
-	@rm -rf ./pkg
-	@rm -rf ./vendor
+	@rm -rf .workspace/
 
 gofmt:
-	@go fmt ./src/${PROJECT}/...
+	@go fmt ./...
 
 goget:
-	@mkdir -p ./vendor/
-	@go get -v ./src/${PROJECT}/...
+	@mkdir -p .workspace/src/github.com/xh3b4sd/
+	@ln -s ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@go get -v github.com/xh3b4sd/anna
 
 gorun:
-	@go run ./src/${PROJECT}/main.go
+	@go run main.go
 
 gotest:
-	@go test ./src/${PROJECT}/...
+	@go test ./...
