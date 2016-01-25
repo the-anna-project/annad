@@ -1,12 +1,12 @@
-.PHONY: all gobuild goclean gofmt goget gorun gotest
+.PHONY: all client gobuild goclean gofmt goget gorun gotest server
 
 GOPATH := ${PWD}/.workspace/:${GOPATH}
 export GOPATH
 
-all: goclean goget
+all: goget client server
 
-gobuild:
-	@go build -o .workspace/bin/anna github.com/xh3b4sd/anna
+client:
+	@go build -o .workspace/bin/annactl github.com/xh3b4sd/anna/annactl
 
 goclean:
 	@rm -rf .workspace/
@@ -16,11 +16,12 @@ gofmt:
 
 goget:
 	@mkdir -p .workspace/src/github.com/xh3b4sd/
-	@ln -s ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@go get -v github.com/xh3b4sd/anna
-
-gorun:
-	@go run main.go
+	@go get -v github.com/xh3b4sd/anna/annactl
 
 gotest:
 	@go test ./...
+
+server:
+	@go build -o .workspace/bin/anna github.com/xh3b4sd/anna

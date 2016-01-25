@@ -5,54 +5,55 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
+	serverspec "github.com/xh3b4sd/anna/server/spec"
 )
 
-func fetchURLEndpoint(ti TextInterface) endpoint.Endpoint {
+func fetchURLEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(fetchURLRequest)
+		req := request.(FetchURLRequest)
 
 		response, err := ti.FetchURL(req.URL)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		return api.WithData(response), nil
+		return api.WithData(string(response)), nil
 	}
 }
 
-func readFileEndpoint(ti TextInterface) endpoint.Endpoint {
+func readFileEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(readFileRequest)
+		req := request.(ReadFileRequest)
 
 		response, err := ti.ReadFile(req.File)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		return api.WithData(response), nil
+		return api.WithData(string(response)), nil
 	}
 }
 
-func readStreamEndpoint(ti TextInterface) endpoint.Endpoint {
+func readStreamEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(readStreamRequest)
+		req := request.(ReadStreamRequest)
 
 		response, err := ti.ReadStream(req.Stream)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		return api.WithData(response), nil
+		return api.WithData(string(response)), nil
 	}
 }
 
-func readPlainEndpoint(ti TextInterface) endpoint.Endpoint {
+func readPlainEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(readPlainRequest)
+		req := request.(ReadPlainRequest)
 
 		var err error
 		var ID string
-		var response []byte
+		var response string
 
 		if req.ID == "" && req.Plain == "" {
 			// All empty means error.
@@ -65,13 +66,13 @@ func readPlainEndpoint(ti TextInterface) endpoint.Endpoint {
 			if err != nil {
 				return nil, maskAny(err)
 			}
-			return api.WithData(string(response)), nil
+			return api.WithData(response), nil
 		}
 
 		if req.ID == "" && req.Plain != "" {
 			// Only Plain given means we want to do something, but only return an ID
 			// in the first place.
-			ID, err = ti.ReadPlainWithPlain(ctx, []byte(req.Plain))
+			ID, err = ti.ReadPlainWithPlain(ctx, req.Plain)
 			if err != nil {
 				return nil, maskAny(err)
 			}
