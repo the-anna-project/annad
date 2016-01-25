@@ -1,25 +1,25 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/gateway"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server"
 )
 
 func main() {
-	fmt.Printf("%s\n", "hello, I am Anna")
+	newLog := log.NewLog(log.DefaultConfig())
+	newLog.V(6).Infof("%s", "hello, I am Anna")
 
 	textGateway := gateway.NewGateway()
 
-	fmt.Printf("%s\n", "booting core")
+	newLog.V(6).Infof("%s", "booting core")
 	newCoreConfig := core.DefaultConfig()
 	newCoreConfig.TextGateway = textGateway
 	newCore := core.NewCore(newCoreConfig)
 	go newCore.Boot()
 
-	fmt.Printf("%s\n", "starting server")
+	newLog.V(6).Infof("%s", "starting server")
 	newServerConfig := server.DefaultConfig()
 	newServerConfig.TextGateway = textGateway
 	newServer := server.NewServer(newServerConfig)
