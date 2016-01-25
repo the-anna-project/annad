@@ -4,8 +4,8 @@ import (
 	"github.com/kdar/factorlog"
 )
 
-func OnlySeverity(severity factorlog.Severity) []factorlog.Severity {
-	return []factorlog.Severity{severity, severity}
+func OnlyLevel(level Level) []factorlog.Severity {
+	return []factorlog.Severity{levelToSeverity(level), levelToSeverity(level)}
 }
 
 func wrapColorFormat(format string) string {
@@ -13,4 +13,19 @@ func wrapColorFormat(format string) string {
 	colorFormat += format
 	colorFormat += `%{Color "reset"}`
 	return colorFormat
+}
+
+func levelToSeverity(level Level) factorlog.Severity {
+	switch level {
+	case Debug:
+		return factorlog.DEBUG
+	case Info:
+		return factorlog.INFO
+	case Warn:
+		return factorlog.WARN
+	case Error:
+		return factorlog.ERROR
+	default:
+		return factorlog.DEBUG
+	}
 }
