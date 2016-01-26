@@ -135,7 +135,7 @@ func (c *core) listen() {
 				responder <- newSignal
 				return
 			}
-			impulseID, err := initCoreState.GetBytes("impulse-id")
+			impulseID, err := initCoreState.GetBytes(common.ImpulseIDKey)
 			if err != nil {
 				c.Log.V(1).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
@@ -227,7 +227,7 @@ func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		networkID, err := initCoreState.GetBytes("network-id")
+		networkID, err := initCoreState.GetBytes(common.NetworkIDKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
