@@ -6,6 +6,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/gateway"
 	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
@@ -26,7 +27,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		Host:        "127.0.0.1:9119",
 		Log:         log.NewLog(log.DefaultConfig()),
-		TextGateway: nil,
+		TextGateway: gateway.NewGateway(),
 	}
 
 	return newConfig
