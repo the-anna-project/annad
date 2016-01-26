@@ -8,7 +8,7 @@ import (
 // fetch url
 
 func fetchURLDecoder(r *http.Request) (interface{}, error) {
-	var request fetchURLRequest
+	var request FetchURLRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -25,7 +25,7 @@ func fetchURLEncoder(w http.ResponseWriter, response interface{}) error {
 // read file
 
 func readFileDecoder(r *http.Request) (interface{}, error) {
-	var request readFileRequest
+	var request ReadFileRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -42,7 +42,7 @@ func readFileEncoder(w http.ResponseWriter, response interface{}) error {
 // read stream
 
 func readStreamDecoder(r *http.Request) (interface{}, error) {
-	var request readStreamRequest
+	var request ReadStreamRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -59,7 +59,7 @@ func readStreamEncoder(w http.ResponseWriter, response interface{}) error {
 // read plain
 
 func readPlainDecoder(r *http.Request) (interface{}, error) {
-	var request readPlainRequest
+	var request ReadPlainRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}

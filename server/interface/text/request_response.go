@@ -6,36 +6,36 @@ import (
 
 // fetch url
 
-type fetchURLRequest struct {
+type FetchURLRequest struct {
 	ID  string `json:"id,omitempty"`
 	URL string `json:"url"`
 }
 
-type fetchURLResponse api.Response
+type FetchURLResponse api.Response
 
 // read file
 
-type readFileRequest struct {
+type ReadFileRequest struct {
 	File string `json:"file"`
 	ID   string `json:"id,omitempty"`
 }
 
-type readFileResponse api.Response
+type ReadFileResponse api.Response
 
 // read stream
 
-type readStreamRequest struct {
+type ReadStreamRequest struct {
 	ID     string `json:"id,omitempty"`
 	Stream string `json:"stream"`
 }
 
-type readStreamResponse api.Response
+type ReadStreamResponse api.Response
 
 // read plain
 
-type readPlainRequest struct {
+type ReadPlainRequest struct {
 	ID    string `json:"id,omitempty"`
 	Plain string `json:"plain,omitempty"`
 }
 
-type readPlainResponse api.Response
+type ReadPlainResponse api.Response

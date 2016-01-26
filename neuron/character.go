@@ -2,7 +2,6 @@ package neuron
 
 import (
 	"sync"
-	"time"
 
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -98,8 +97,6 @@ func (cn *characterNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron,
 		return nil, nil, maskAny(err)
 	}
 	neuronState.SetImpulse(imp)
-
-	time.Sleep(5 * time.Second)
 
 	response, err := impState.GetBytes("request")
 	if err != nil {

@@ -2,9 +2,7 @@ package server
 
 import (
 	"fmt"
-	"net"
 	"net/http"
-	"strconv"
 
 	"golang.org/x/net/context"
 
@@ -15,19 +13,19 @@ import (
 )
 
 type Config struct {
+	// Host is the host:port representation based on the golang convention for
+	// net.URL and http.ListenAndServe.
 	Host string
 
 	Log spec.Log `json:"-"`
 
-	Port        int
 	TextGateway gatewayspec.Gateway
 }
 
 func DefaultConfig() Config {
 	newConfig := Config{
-		Host:        "127.0.0.1",
+		Host:        "127.0.0.1:9119",
 		Log:         log.NewLog(log.DefaultConfig()),
-		Port:        9119,
 		TextGateway: nil,
 	}
 
@@ -63,7 +61,8 @@ func (s server) Listen() {
 	for url, handler := range newTextInterfaceHandlers {
 		http.Handle(url, handler)
 	}
-	err := http.ListenAndServe(net.JoinHostPort(s.Host, strconv.Itoa(s.Port)), nil)
+
+	err := http.ListenAndServe(s.Host, nil)
 	if err != nil {
 		fmt.Printf("%#v\n", maskAny(err))
 	}
