@@ -114,7 +114,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		neuronID, err := initNetworkState.GetBytes(common.FirstIDKey)
+		neuronID, err := initNetworkState.GetBytes(common.FirstNeuronIDKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -135,13 +135,13 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 			return nil, maskAny(err)
 		}
 		networkState.SetNeuron(neu)
-		networkState.SetBytes(common.FirstIDKey, []byte(neu.GetObjectID()))
+		networkState.SetBytes(common.FirstNeuronIDKey, []byte(neu.GetObjectID()))
 	} else {
 		defaultNetworkState, err := n.GetState(common.DefaultStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		neuronID, err := defaultNetworkState.GetBytes(common.FirstIDKey)
+		neuronID, err := defaultNetworkState.GetBytes(common.FirstNeuronIDKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}

@@ -1,7 +1,7 @@
 package common
 
 const (
-	CharacterIDKey = "character-neuron-id"
-	FirstIDKey     = "first-neuron-id"
-	JobIDKey       = "job-neuron-id"
+	CharacterNeuronIDKey = "character-neuron-id"
+	FirstNeuronIDKey     = "first-neuron-id"
+	JobNeuronIDKey       = "job-neuron-id"
 )

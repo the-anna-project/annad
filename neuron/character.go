@@ -87,7 +87,7 @@ func (cn *characterNeuron) SetState(key string, state spec.State) {
 
 // TODO
 func (cn *characterNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
-	cn.Log.V(12).Debugf("%s", "call Neuron.Trigger")
+	cn.Log.V(12).Debugf("call Neuron.Trigger")
 
 	// Track state.
 	impState, err := imp.GetState(common.DefaultStateKey)

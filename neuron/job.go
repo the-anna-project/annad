@@ -120,7 +120,7 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 				fmt.Printf("%#v\n", maskAny(err))
 				return
 			}
-			neuronID, err := initNeuronState.GetBytes(common.CharacterIDKey)
+			neuronID, err := initNeuronState.GetBytes(common.CharacterNeuronIDKey)
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				return

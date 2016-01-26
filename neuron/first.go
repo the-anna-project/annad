@@ -105,7 +105,7 @@ func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, err
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
-		neuronID, err := initNeuronState.GetBytes(common.JobIDKey)
+		neuronID, err := initNeuronState.GetBytes(common.JobNeuronIDKey)
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
