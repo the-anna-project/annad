@@ -8,6 +8,5 @@ be discussed, wether they are implemented or not.
 - [core](core.md)
 - [network](network.md)
 - neuron: TBD (behavior)
-- state: TBD (backup, restore)
+- state: TBD (backup, restore, dependency injection)
 - object: TBD (orderable, multiple states)
-- logging: TBD

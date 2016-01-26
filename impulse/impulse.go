@@ -3,6 +3,7 @@ package impulse
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
@@ -25,7 +26,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		Log: log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -61,14 +62,14 @@ func (i *impulse) GetObjectID() spec.ObjectID {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	return i.States["default"].GetObjectID()
+	return i.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (i *impulse) GetObjectType() spec.ObjectType {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	return i.States["default"].GetObjectType()
+	return i.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (i *impulse) GetState(key string) (spec.State, error) {

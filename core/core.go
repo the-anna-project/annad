@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
 	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/impulse"
@@ -32,7 +33,7 @@ func DefaultConfig() Config {
 		TextGateway: gateway.NewGateway(),
 		Log:         log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -55,7 +56,7 @@ type core struct {
 }
 
 func (c *core) Boot() {
-	c.Log.V(12).Debugf("%s", "call Core.Boot")
+	c.Log.V(12).Debugf("call Core.Boot")
 
 	go c.listen()
 }
@@ -74,14 +75,14 @@ func (c *core) GetObjectID() spec.ObjectID {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	return c.States["default"].GetObjectID()
+	return c.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (c *core) GetObjectType() spec.ObjectType {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
-	return c.States["default"].GetObjectType()
+	return c.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (c *core) GetState(key string) (spec.State, error) {
@@ -96,85 +97,71 @@ func (c *core) GetState(key string) (spec.State, error) {
 }
 
 func (c *core) listen() {
-	c.Log.V(12).Debugf("%s", "call Core.listen")
+	c.Log.V(12).Debugf("call Core.listen")
 
 	for {
 		newSignal, err := c.TextGateway.ReceiveSignal()
 		if gateway.IsGatewayClosed(err) {
-			c.Log.V(4).Warnf("%s", "gateway is closed")
+			c.Log.V(6).Warnf("gateway is closed")
 			time.Sleep(1 * time.Second)
 			continue
 		} else if err != nil {
-			c.Log.V(1).Errorf("%#v", maskAny(err))
+			c.Log.V(3).Errorf("%#v", maskAny(err))
 			continue
 		}
+		c.Log.V(12).Debugf("core received new signal '%s'", newSignal.GetID())
 
 		responder, err := newSignal.GetResponder()
 		if gateway.IsSignalCanceled(err) {
-			c.Log.V(4).Warnf("%s", "signal is canceled")
+			c.Log.V(6).Warnf("signal is canceled")
 			continue
 		} else if err != nil {
-			c.Log.V(1).Errorf("%#v", maskAny(err))
+			c.Log.V(3).Errorf("%#v", maskAny(err))
 			continue
 		}
 
 		go func(newSignal gatewayspec.Signal) {
 			request, err := newSignal.GetBytes("request")
 			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
+				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
 
-			initCoreState, err := c.GetState("init")
+			newImpulse, err := common.GetInitImpulseCopy(common.ImpulseIDKey, c)
 			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
+				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
-			impulseID, err := initCoreState.GetBytes("impulse-id")
-			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			initImpulse, err := initCoreState.GetImpulseByID(spec.ObjectID(impulseID))
-			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			newImpulse := initImpulse.Copy()
 
 			newStateConfig := state.DefaultConfig()
 			newStateConfig.Bytes["request"] = request
 			newStateConfig.ObjectID = spec.ObjectID(newSignal.GetID())
 			newStateConfig.ObjectType = impulse.ObjectType
 
-			newImpulse.SetState("default", state.NewState(newStateConfig))
+			newImpulse.SetState(common.DefaultStateKey, state.NewState(newStateConfig))
 
 			resImpulse, err := c.Trigger(newImpulse)
 			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
+				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
 
-			impState, err := resImpulse.GetState("default")
+			impState, err := resImpulse.GetState(common.DefaultStateKey)
 			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
+				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
 			response, err := impState.GetBytes("response")
 			if err != nil {
-				c.Log.V(1).Errorf("%#v", maskAny(err))
+				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -192,7 +179,7 @@ func (c *core) SetState(key string, state spec.State) {
 }
 
 func (c *core) Shutdown() {
-	c.Log.V(12).Debugf("%s", "call Core.Shutdown")
+	c.Log.V(12).Debugf("call Core.Shutdown")
 
 	// TODO close gateway
 	// TODO stop listening
@@ -201,32 +188,32 @@ func (c *core) Shutdown() {
 }
 
 func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	c.Log.V(12).Debugf("%s", "call Core.Trigger")
+	c.Log.V(12).Debugf("call Core.Trigger")
 
 	// Track state.
-	impState, err := imp.GetState("default")
+	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 	impState.SetCore(c)
-	coreState, err := c.GetState("default")
+	coreState, err := c.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 	coreState.SetImpulse(imp)
 
 	// Initialize network within core state if not already done.
-	defaultCoreState, err := c.GetState("default")
+	defaultCoreState, err := c.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 	networks := defaultCoreState.GetNetworks()
 	if len(networks) == 0 {
-		initCoreState, err := c.GetState("init")
+		initCoreState, err := c.GetState(common.InitStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		networkID, err := initCoreState.GetBytes("network-id")
+		networkID, err := initCoreState.GetBytes(common.NetworkIDKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -239,7 +226,7 @@ func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 
 	// Get network. Note that there is potential for multiple networks. For now
 	// we just have one.
-	coreState, err = c.GetState("default")
+	coreState, err = c.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}

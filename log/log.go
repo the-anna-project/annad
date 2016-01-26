@@ -21,7 +21,16 @@ type Config struct {
 	// Color decides to whether color log output or not.
 	Color bool
 
-	// Format describes how to structure log output.
+	// Format describes how to structure log output. The log output format should
+	// be simple and clean. In the first iteration the log format looks like
+	// this.
+	//
+	//   [short severity] [yyyy-mm-dd hh:mm:ss] message
+	//
+	// For example a log line then looks like this.
+	//
+	//   [I] [2016-01-26 23:37:03] hello, I am Anna
+	//
 	Format string
 
 	// LevelRange defines the log level to output by a min and a max value. Note
@@ -62,6 +71,8 @@ func DefaultConfig() Config {
 	return newDefaultConfig
 }
 
+// NewLog creates a new basic logger. Logging is important to comprehensible
+// track runtime information.
 func NewLog(config Config) spec.Log {
 	newFormat := config.Format
 	if config.Color {

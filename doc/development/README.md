@@ -29,6 +29,9 @@ make gotest
 ```
 
 ### pull requests
+All changes affecting the project MUST be provided in form of a proper PR. What
+exactly "proper" means evolves over time and is not written in stone. Some
+important points are listed as follows.
 
 ###### commits
 Pull requests are only accepted and merged when there is only one commit to be
@@ -40,17 +43,21 @@ git rebase -i master
 
 ---
 
-###### diary
-Pull requests are only accepted and merged when there is some sort of process
-documentation. Goal of this is to keep track of influences and events that
-drove development and decisions. All ideas and walkthroughs are precious and
-good to know.
+###### docs
+Pull requests are only accepted and merged when there is proper documentation.
+
+Conceptual documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/concept
+
+Process documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/diary
+
+Code documentation needs to be provided within the code: http://blog.golang.org/godoc-documenting-go-code
 
 ---
 
 ###### tests
-Make sure there are tests where it makes sense and all tests pass reliably. No
-pull request is going to be merged as long as there are tests failing.
+Pull requests are only accepted and merged when there are proper tests. Make
+sure there are tests where it makes sense and all tests pass reliably. No pull
+request is going to be merged as long as there are tests failing or flapping.
 
 ### guidelines
 
