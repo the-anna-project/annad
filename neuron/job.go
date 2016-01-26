@@ -116,23 +116,11 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 			}
 			defaultNeuronState.SetBytes("state", []byte("in-progress"))
 
-			initNeuronState, err := jn.GetState(common.InitStateKey)
+			neu, err := common.GetInitNeuronCopy(common.CharacterNeuronIDKey, jn)
 			if err != nil {
 				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
-			neuronID, err := initNeuronState.GetBytes(common.CharacterNeuronIDKey)
-			if err != nil {
-				jn.Log.V(3).Errorf("%#v", maskAny(err))
-				return
-			}
-			initCharacterNeuron, err := initNeuronState.GetNeuronByID(spec.ObjectID(neuronID))
-			if err != nil {
-				jn.Log.V(3).Errorf("%#v", maskAny(err))
-				return
-			}
-			neu := initCharacterNeuron.Copy()
-
 			defaultNeuronState.SetNeuron(neu)
 
 			imp, _, err = imp.WalkThrough(neu)

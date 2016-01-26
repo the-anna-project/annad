@@ -129,28 +129,13 @@ func (c *core) listen() {
 				return
 			}
 
-			initCoreState, err := c.GetState(common.InitStateKey)
+			newImpulse, err := common.GetInitImpulseCopy(common.ImpulseIDKey, c)
 			if err != nil {
 				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
-			impulseID, err := initCoreState.GetBytes(common.ImpulseIDKey)
-			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			initImpulse, err := initCoreState.GetImpulseByID(spec.ObjectID(impulseID))
-			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			newImpulse := initImpulse.Copy()
 
 			newStateConfig := state.DefaultConfig()
 			newStateConfig.Bytes["request"] = request

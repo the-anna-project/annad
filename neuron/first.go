@@ -103,19 +103,10 @@ func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, err
 	neu, err := neuronState.GetNeuronByID(imp.GetObjectID())
 	if state.IsNeuronNotFound(err) {
 		// Create new job neuron with the impulse ID.
-		initNeuronState, err := fn.GetState(common.InitStateKey)
+		neu, err := common.GetInitNeuronCopy(common.JobNeuronIDKey, fn)
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
-		neuronID, err := initNeuronState.GetBytes(common.JobNeuronIDKey)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		initJobNeuron, err := initNeuronState.GetNeuronByID(spec.ObjectID(neuronID))
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		neu = initJobNeuron.Copy()
 
 		newStateConfig := state.DefaultConfig()
 		newStateConfig.Bytes["state"] = []byte{}
