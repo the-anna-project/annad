@@ -3,12 +3,15 @@ package neuron
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
 type FirstNeuronConfig struct {
-	State spec.State `json:"state,omitempty"`
+	Log spec.Log `json:"-"`
+
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 func DefaultFirstNeuronConfig() FirstNeuronConfig {
@@ -16,7 +19,10 @@ func DefaultFirstNeuronConfig() FirstNeuronConfig {
 	newStateConfig.ObjectType = ObjectType
 
 	newDefaultJobNeuronConfig := FirstNeuronConfig{
-		State: state.NewState(newStateConfig),
+		Log: log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newDefaultJobNeuronConfig
@@ -34,65 +40,93 @@ func NewFirstNeuron(config FirstNeuronConfig) spec.Neuron {
 type firstNeuron struct {
 	FirstNeuronConfig
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
+	Mutex sync.Mutex `json:"-"`
+}
+
+func (fn *firstNeuron) Copy() spec.Neuron {
+	firstNeuronCopy := *fn
+
+	for key, state := range firstNeuronCopy.States {
+		firstNeuronCopy.States[key] = state.Copy()
+	}
+
+	return &firstNeuronCopy
 }
 
 func (fn *firstNeuron) GetObjectID() spec.ObjectID {
-	return fn.GetState().GetObjectID()
-}
+	fn.Mutex.Lock()
+	defer fn.Mutex.Unlock()
 
-func (fn *firstNeuron) GetNetwork() (spec.Network, error) {
-	networks := fn.GetState().GetNetworks()
-
-	if len(networks) != 1 {
-		return nil, maskAny(invalidNetworkRelationError)
-	}
-
-	var network spec.Network
-	for _, n := range fn.GetState().GetNetworks() {
-		network = n
-		break
-	}
-
-	return network, nil
+	return fn.States["default"].GetObjectID()
 }
 
 func (fn *firstNeuron) GetObjectType() spec.ObjectType {
-	return fn.GetState().GetObjectType()
-}
-
-func (fn *firstNeuron) GetState() spec.State {
 	fn.Mutex.Lock()
 	defer fn.Mutex.Unlock()
-	return fn.State
+
+	return fn.States["default"].GetObjectType()
 }
 
-func (fn *firstNeuron) SetState(state spec.State) {
+func (fn *firstNeuron) GetState(key string) (spec.State, error) {
 	fn.Mutex.Lock()
 	defer fn.Mutex.Unlock()
-	fn.State = state
+
+	if state, ok := fn.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
+}
+
+func (fn *firstNeuron) SetState(key string, state spec.State) {
+	fn.Mutex.Lock()
+	defer fn.Mutex.Unlock()
+	fn.States[key] = state
 }
 
 func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	// Track state.
-	imp.GetState().SetNeuron(fn)
-	fn.GetState().SetImpulse(imp)
+	impState, err := imp.GetState("default")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	impState.SetNeuron(fn)
+	neuronState, err := fn.GetState("default")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	neuronState.SetImpulse(imp)
 
-	neu, err := fn.GetState().GetNeuronByID(imp.GetObjectID())
+	neu, err := neuronState.GetNeuronByID(imp.GetObjectID())
 	if state.IsNeuronNotFound(err) {
 		// Create new job neuron with the impulse ID.
+		initNeuronState, err := fn.GetState("init")
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		neuronID, err := initNeuronState.GetBytes("job-id")
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		initJobNeuron, err := initNeuronState.GetNeuronByID(spec.ObjectID(neuronID))
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		neu = initJobNeuron.Copy()
+
 		newStateConfig := state.DefaultConfig()
 		newStateConfig.Bytes["state"] = []byte{}
 		newStateConfig.ObjectID = imp.GetObjectID()
 		newStateConfig.ObjectType = ObjectType
 
-		config := JobNeuronConfig{
-			State: state.NewState(newStateConfig),
-		}
-		neu = NewJobNeuron(config)
+		neu.SetState("default", state.NewState(newStateConfig))
 
 		// Track new neuron.
-		fn.GetState().SetNeuron(neu)
+		defaultNeuronState, err := fn.GetState("default")
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		defaultNeuronState.SetNeuron(neu)
 	} else if err != nil {
 		return nil, nil, maskAny(err)
 	}

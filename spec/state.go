@@ -5,13 +5,19 @@ import (
 )
 
 type State interface {
+	Copy() State
+
 	GetAge() time.Duration
 
 	GetBytes(key string) ([]byte, error)
 
-	GetCore() (Core, error)
+	GetCoreByID(objectID ObjectID) (Core, error)
+
+	GetCores() map[ObjectID]Core
 
 	GetObjectID() ObjectID
+
+	GetImpulseByID(objectID ObjectID) (Impulse, error)
 
 	GetImpulses() map[ObjectID]Impulse
 
@@ -31,7 +37,7 @@ type State interface {
 
 	SetImpulse(imp Impulse)
 
-	SetNetwork(neu Network)
+	SetNetwork(network Network)
 
 	SetNeuron(neu Neuron)
 }

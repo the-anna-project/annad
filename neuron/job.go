@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
 type JobNeuronConfig struct {
-	State spec.State `json:"state,omitempty"`
+	Log spec.Log `json:"-"`
+
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 func DefaultJobNeuronConfig() JobNeuronConfig {
@@ -17,7 +20,10 @@ func DefaultJobNeuronConfig() JobNeuronConfig {
 	newStateConfig.ObjectType = ObjectType
 
 	newDefaultJobNeuronConfig := JobNeuronConfig{
-		State: state.NewState(newStateConfig),
+		Log: log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newDefaultJobNeuronConfig
@@ -35,51 +41,64 @@ func NewJobNeuron(config JobNeuronConfig) spec.Neuron {
 type jobNeuron struct {
 	JobNeuronConfig
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
+	Mutex sync.Mutex `json:"-"`
+}
+
+func (jn *jobNeuron) Copy() spec.Neuron {
+	jobNeuronCopy := *jn
+
+	for key, state := range jobNeuronCopy.States {
+		jobNeuronCopy.States[key] = state.Copy()
+	}
+
+	return &jobNeuronCopy
 }
 
 func (jn *jobNeuron) GetObjectID() spec.ObjectID {
-	return jn.GetState().GetObjectID()
-}
+	jn.Mutex.Lock()
+	defer jn.Mutex.Unlock()
 
-func (jn *jobNeuron) GetNetwork() (spec.Network, error) {
-	networks := jn.GetState().GetNetworks()
-
-	if len(networks) != 1 {
-		return nil, maskAny(invalidNetworkRelationError)
-	}
-
-	var network spec.Network
-	for _, n := range jn.GetState().GetNetworks() {
-		network = n
-		break
-	}
-
-	return network, nil
+	return jn.States["default"].GetObjectID()
 }
 
 func (jn *jobNeuron) GetObjectType() spec.ObjectType {
-	return jn.GetState().GetObjectType()
-}
-
-func (jn *jobNeuron) GetState() spec.State {
 	jn.Mutex.Lock()
 	defer jn.Mutex.Unlock()
-	return jn.State
+
+	return jn.States["default"].GetObjectType()
 }
 
-func (jn *jobNeuron) SetState(state spec.State) {
+func (jn *jobNeuron) GetState(key string) (spec.State, error) {
 	jn.Mutex.Lock()
 	defer jn.Mutex.Unlock()
-	jn.State = state
+
+	if state, ok := jn.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
+}
+
+func (jn *jobNeuron) SetState(key string, state spec.State) {
+	jn.Mutex.Lock()
+	defer jn.Mutex.Unlock()
+	jn.States[key] = state
 }
 
 func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	// Track state.
-	imp.GetState().SetNeuron(jn)
-	jn.GetState().SetImpulse(imp)
+	impState, err := imp.GetState("default")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	impState.SetNeuron(jn)
+	neuronState, err := jn.GetState("default")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	neuronState.SetImpulse(imp)
 
-	bytes, err := jn.GetState().GetBytes("state")
+	bytes, err := neuronState.GetBytes("state")
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
@@ -88,10 +107,31 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 	case "":
 		// Create new impulse to process it asynchronously.
 		go func(imp spec.Impulse) {
-			jn.GetState().SetBytes("state", []byte("in-progress"))
+			defaultNeuronState, err := jn.GetState("default")
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				return
+			}
+			defaultNeuronState.SetBytes("state", []byte("in-progress"))
 
-			neu := NewCharacterNeuron(DefaultCharacterNeuronConfig())
-			jn.GetState().SetNeuron(neu)
+			initNeuronState, err := jn.GetState("init")
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				return
+			}
+			neuronID, err := initNeuronState.GetBytes("character-id")
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				return
+			}
+			initCharacterNeuron, err := initNeuronState.GetNeuronByID(spec.ObjectID(neuronID))
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				return
+			}
+			neu := initCharacterNeuron.Copy()
+
+			defaultNeuronState.SetNeuron(neu)
 
 			imp, _, err = imp.WalkThrough(neu)
 			if err != nil {
@@ -99,17 +139,22 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 				return
 			}
 
-			response, err := imp.GetState().GetBytes("response")
+			impState, err := imp.GetState("default")
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				return
 			}
-			jn.GetState().SetBytes("response", response)
-			jn.GetState().SetBytes("state", []byte("finished"))
+			response, err := impState.GetBytes("response")
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				return
+			}
+			defaultNeuronState.SetBytes("response", response)
+			defaultNeuronState.SetBytes("state", []byte("finished"))
 		}(imp)
 
 		// Return the impulse ID to signal a job registration.
-		imp.GetState().SetBytes("response", []byte(imp.GetState().GetObjectID()))
+		impState.SetBytes("response", []byte(impState.GetObjectID()))
 
 		return imp, nil, nil
 	case "in-progress":
@@ -117,12 +162,12 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 		return imp, nil, nil
 	case "finished":
 		// Return response.
-		response, err := jn.GetState().GetBytes("response")
+		response, err := neuronState.GetBytes("response")
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
 
-		imp.GetState().SetBytes("response", response)
+		impState.SetBytes("response", response)
 
 		return imp, nil, nil
 	}

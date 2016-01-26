@@ -1,13 +1,15 @@
 package spec
 
 type Impulse interface {
+	Copy() Impulse
+
 	GetObjectID() ObjectID
 
 	GetObjectType() ObjectType
 
-	GetState() State
+	GetState(key string) (State, error)
 
-	SetState(state State)
+	SetState(key string, state State)
 
 	WalkThrough(neu Neuron) (Impulse, Neuron, error)
 }

@@ -6,13 +6,15 @@ type Core interface {
 	// want to call it in a separate goroutine.
 	Boot()
 
+	Copy() Core
+
 	GetObjectID() ObjectID
 
 	GetObjectType() ObjectType
 
-	GetState() State
+	GetState(key string) (State, error)
 
-	SetState(state State)
+	SetState(key string, state State)
 
 	// Shutdown ends all processes of the core like shutting down a machine. The
 	// call to Boot blocks until the core is completely shut down, so you might

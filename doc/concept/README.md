@@ -7,3 +7,7 @@ be discussed, wether they are implemented or not.
 - [anna](anna.md)
 - [core](core.md)
 - [network](network.md)
+- neuron: TBD (behavior)
+- state: TBD (backup, restore)
+- object: TBD (orderable, multiple states)
+- logging: TBD

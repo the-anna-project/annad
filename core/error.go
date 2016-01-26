@@ -13,3 +13,9 @@ var connectionNotFoundError = errgo.New("connection not found")
 func IsConnectionNotFound(err error) bool {
 	return errgo.Cause(err) == connectionNotFoundError
 }
+
+var stateNotFoundError = errgo.New("state not found")
+
+func IsStateNotFound(err error) bool {
+	return errgo.Cause(err) == stateNotFoundError
+}

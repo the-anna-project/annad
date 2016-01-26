@@ -4,12 +4,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
 type CharacterNeuronConfig struct {
-	State spec.State `json:"state,omitempty"`
+	Log spec.Log `json:"-"`
+
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 func DefaultCharacterNeuronConfig() CharacterNeuronConfig {
@@ -17,7 +20,10 @@ func DefaultCharacterNeuronConfig() CharacterNeuronConfig {
 	newStateConfig.ObjectType = ObjectType
 
 	newDefaultCharacterNeuronConfig := CharacterNeuronConfig{
-		State: state.NewState(newStateConfig),
+		Log: log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newDefaultCharacterNeuronConfig
@@ -35,57 +41,71 @@ func NewCharacterNeuron(config CharacterNeuronConfig) spec.Neuron {
 type characterNeuron struct {
 	CharacterNeuronConfig
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
+	Mutex sync.Mutex `json:"-"`
+}
+
+func (cn *characterNeuron) Copy() spec.Neuron {
+	characterNeuronCopy := *cn
+
+	for key, state := range characterNeuronCopy.States {
+		characterNeuronCopy.States[key] = state.Copy()
+	}
+
+	return &characterNeuronCopy
 }
 
 func (cn *characterNeuron) GetObjectID() spec.ObjectID {
-	return cn.GetState().GetObjectID()
-}
+	cn.Mutex.Lock()
+	defer cn.Mutex.Unlock()
 
-func (cn *characterNeuron) GetNetwork() (spec.Network, error) {
-	networks := cn.GetState().GetNetworks()
-
-	if len(networks) != 1 {
-		return nil, maskAny(invalidNetworkRelationError)
-	}
-
-	var network spec.Network
-	for _, n := range cn.GetState().GetNetworks() {
-		network = n
-		break
-	}
-
-	return network, nil
+	return cn.States["default"].GetObjectID()
 }
 
 func (cn *characterNeuron) GetObjectType() spec.ObjectType {
-	return cn.GetState().GetObjectType()
-}
-
-func (cn *characterNeuron) GetState() spec.State {
 	cn.Mutex.Lock()
 	defer cn.Mutex.Unlock()
-	return cn.State
+
+	return cn.States["default"].GetObjectType()
 }
 
-func (cn *characterNeuron) SetState(state spec.State) {
+func (cn *characterNeuron) GetState(key string) (spec.State, error) {
 	cn.Mutex.Lock()
 	defer cn.Mutex.Unlock()
-	cn.State = state
+
+	if state, ok := cn.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
 }
 
+func (cn *characterNeuron) SetState(key string, state spec.State) {
+	cn.Mutex.Lock()
+	defer cn.Mutex.Unlock()
+	cn.States[key] = state
+}
+
+// TODO
 func (cn *characterNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	// Track state.
-	imp.GetState().SetNeuron(cn)
-	cn.GetState().SetImpulse(imp)
-
-	time.Sleep(5 * time.Second)
-
-	response, err := imp.GetState().GetBytes("request")
+	impState, err := imp.GetState("default")
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
-	imp.GetState().SetBytes("response", response)
+	impState.SetNeuron(cn)
+	neuronState, err := cn.GetState("default")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	neuronState.SetImpulse(imp)
+
+	time.Sleep(5 * time.Second)
+
+	response, err := impState.GetBytes("request")
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	impState.SetBytes("response", response)
 
 	return imp, nil, nil
 }

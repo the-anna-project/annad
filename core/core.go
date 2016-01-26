@@ -1,14 +1,13 @@
 package core
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/xh3b4sd/anna/gateway"
 	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/impulse"
-	"github.com/xh3b4sd/anna/network"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
@@ -16,9 +15,9 @@ import (
 type Config struct {
 	TextGateway gatewayspec.Gateway `json:"-"`
 
-	Network spec.Network `json:"network,omitempty"`
+	Log spec.Log `json:"-"`
 
-	State spec.State `json:"state,omitempty"`
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 const (
@@ -30,9 +29,11 @@ func DefaultConfig() Config {
 	newStateConfig.ObjectType = ObjectType
 
 	newConfig := Config{
-		TextGateway: nil,
-		Network:     network.NewNetwork(network.DefaultConfig()),
-		State:       state.NewState(newStateConfig),
+		TextGateway: gateway.NewGateway(),
+		Log:         log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newConfig
@@ -50,79 +51,130 @@ func NewCore(config Config) spec.Core {
 type core struct {
 	Config
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
+	Mutex sync.Mutex `json:"-"`
 }
 
 func (c *core) Boot() {
+	c.Log.V(12).Debugf("%s", "call Core.Boot")
+
 	go c.listen()
 }
 
+func (c *core) Copy() spec.Core {
+	coreCopy := *c
+
+	for key, state := range coreCopy.States {
+		coreCopy.States[key] = state.Copy()
+	}
+
+	return &coreCopy
+}
+
 func (c *core) GetObjectID() spec.ObjectID {
-	return c.GetState().GetObjectID()
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	return c.States["default"].GetObjectID()
 }
 
 func (c *core) GetObjectType() spec.ObjectType {
-	return c.GetState().GetObjectType()
-}
-
-func (c *core) GetState() spec.State {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
-	return c.State
+
+	return c.States["default"].GetObjectType()
+}
+
+func (c *core) GetState(key string) (spec.State, error) {
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	if state, ok := c.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
 }
 
 func (c *core) listen() {
+	c.Log.V(12).Debugf("%s", "call Core.listen")
+
 	for {
 		newSignal, err := c.TextGateway.ReceiveSignal()
 		if gateway.IsGatewayClosed(err) {
-			fmt.Printf("gateway is closed\n")
+			c.Log.V(4).Warnf("%s", "gateway is closed")
 			time.Sleep(1 * time.Second)
 			continue
 		} else if err != nil {
-			fmt.Printf("%#v\n", maskAny(err))
+			c.Log.V(1).Errorf("%#v", maskAny(err))
 			continue
 		}
 
 		responder, err := newSignal.GetResponder()
 		if gateway.IsSignalCanceled(err) {
-			fmt.Printf("signal is canceled\n")
+			c.Log.V(4).Warnf("%s", "signal is canceled")
 			continue
 		} else if err != nil {
-			fmt.Printf("%#v\n", maskAny(err))
+			c.Log.V(1).Errorf("%#v", maskAny(err))
 			continue
 		}
 
 		go func(newSignal gatewayspec.Signal) {
 			request, err := newSignal.GetBytes("request")
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				c.Log.V(1).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
+
+			initCoreState, err := c.GetState("init")
+			if err != nil {
+				c.Log.V(1).Errorf("%#v", maskAny(err))
+				newSignal.SetError(maskAny(err))
+				responder <- newSignal
+				return
+			}
+			impulseID, err := initCoreState.GetBytes("impulse-id")
+			if err != nil {
+				c.Log.V(1).Errorf("%#v", maskAny(err))
+				newSignal.SetError(maskAny(err))
+				responder <- newSignal
+				return
+			}
+			initImpulse, err := initCoreState.GetImpulseByID(spec.ObjectID(impulseID))
+			if err != nil {
+				c.Log.V(1).Errorf("%#v", maskAny(err))
+				newSignal.SetError(maskAny(err))
+				responder <- newSignal
+				return
+			}
+			newImpulse := initImpulse.Copy()
 
 			newStateConfig := state.DefaultConfig()
 			newStateConfig.Bytes["request"] = request
 			newStateConfig.ObjectID = spec.ObjectID(newSignal.GetID())
 			newStateConfig.ObjectType = impulse.ObjectType
-			newState := state.NewState(newStateConfig)
 
-			newImpulseConfig := impulse.DefaultConfig()
-			newImpulseConfig.State = newState
-
-			newImpulse := impulse.NewImpulse(newImpulseConfig)
+			newImpulse.SetState("default", state.NewState(newStateConfig))
 
 			resImpulse, err := c.Trigger(newImpulse)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				c.Log.V(1).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
 			}
 
-			response, err := resImpulse.GetState().GetBytes("response")
+			impState, err := resImpulse.GetState("default")
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				c.Log.V(1).Errorf("%#v", maskAny(err))
+				newSignal.SetError(maskAny(err))
+				responder <- newSignal
+				return
+			}
+			response, err := impState.GetBytes("response")
+			if err != nil {
+				c.Log.V(1).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -133,13 +185,15 @@ func (c *core) listen() {
 	}
 }
 
-func (c *core) SetState(state spec.State) {
+func (c *core) SetState(key string, state spec.State) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
-	c.State = state
+	c.States[key] = state
 }
 
 func (c *core) Shutdown() {
+	c.Log.V(12).Debugf("%s", "call Core.Shutdown")
+
 	// TODO close gateway
 	// TODO stop listening
 	// TODO wait for impulses to be processed
@@ -147,19 +201,49 @@ func (c *core) Shutdown() {
 }
 
 func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
+	c.Log.V(12).Debugf("%s", "call Core.Trigger")
+
 	// Track state.
-	imp.GetState().SetCore(c)
-	c.GetState().SetImpulse(imp)
+	impState, err := imp.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	impState.SetCore(c)
+	coreState, err := c.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	coreState.SetImpulse(imp)
 
 	// Initialize network within core state if not already done.
-	networks := c.GetState().GetNetworks()
+	defaultCoreState, err := c.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	networks := defaultCoreState.GetNetworks()
 	if len(networks) == 0 {
-		c.GetState().SetNetwork(c.Network)
+		initCoreState, err := c.GetState("init")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		networkID, err := initCoreState.GetBytes("network-id")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		network, err := initCoreState.GetNetworkByID(spec.ObjectID(networkID))
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		defaultCoreState.SetNetwork(network.Copy())
 	}
 
 	// Get network. Note that there is potential for multiple networks. For now
 	// we just have one.
-	for _, n := range c.GetState().GetNetworks() {
+	coreState, err = c.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	for _, n := range coreState.GetNetworks() {
 		// Initialize the impulses walk through the core via the scheduler network.
 		// The scheduler network implements the very first entry for impulses into
 		// the cores networks.

@@ -3,6 +3,7 @@ package impulse
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
@@ -12,7 +13,9 @@ const (
 )
 
 type Config struct {
-	State spec.State `json:"state,omitempty"`
+	Log spec.Log `json:"-"`
+
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 func DefaultConfig() Config {
@@ -20,7 +23,10 @@ func DefaultConfig() Config {
 	newStateConfig.ObjectType = ObjectType
 
 	newConfig := Config{
-		State: state.NewState(newStateConfig),
+		Log: log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newConfig
@@ -41,24 +47,45 @@ type impulse struct {
 	Mutex sync.Mutex `json:"mutex,omitempty"`
 }
 
+func (i *impulse) Copy() spec.Impulse {
+	impulseCopy := *i
+
+	for key, state := range impulseCopy.States {
+		impulseCopy.States[key] = state.Copy()
+	}
+
+	return &impulseCopy
+}
+
 func (i *impulse) GetObjectID() spec.ObjectID {
-	return i.GetState().GetObjectID()
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+
+	return i.States["default"].GetObjectID()
 }
 
 func (i *impulse) GetObjectType() spec.ObjectType {
-	return i.GetState().GetObjectType()
-}
-
-func (i *impulse) GetState() spec.State {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
-	return i.State
+
+	return i.States["default"].GetObjectType()
 }
 
-func (i *impulse) SetState(state spec.State) {
+func (i *impulse) GetState(key string) (spec.State, error) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
-	i.State = state
+
+	if state, ok := i.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
+}
+
+func (i *impulse) SetState(key string, state spec.State) {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+	i.States[key] = state
 }
 
 func (i *impulse) WalkThrough(neu spec.Neuron) (spec.Impulse, spec.Neuron, error) {

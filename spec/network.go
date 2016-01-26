@@ -1,13 +1,15 @@
 package spec
 
 type Network interface {
+	Copy() Network
+
 	GetObjectID() ObjectID
 
 	GetObjectType() ObjectType
 
-	GetState() State
+	GetState(key string) (State, error)
 
-	SetState(state State)
+	SetState(key string, state State)
 
 	Trigger(imp Impulse) (Impulse, error)
 }

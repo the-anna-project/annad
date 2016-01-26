@@ -40,3 +40,9 @@ var invalidImpulseStateError = errgo.New("invalid impulse state")
 func IsInvalidImpulseState(err error) bool {
 	return errgo.Cause(err) == invalidImpulseStateError
 }
+
+var stateNotFoundError = errgo.New("state not found")
+
+func IsStateNotFound(err error) bool {
+	return errgo.Cause(err) == stateNotFoundError
+}

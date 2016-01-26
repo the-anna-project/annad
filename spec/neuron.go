@@ -1,19 +1,15 @@
 package spec
 
 type Neuron interface {
-	GetObjectID() ObjectID
+	Copy() Neuron
 
-	// GetNetwork fetches the neurons related network from the internal state.
-	// Since State.GetNetworks is very generic, this call will always only return
-	// one network. This is due to the fact that a neuron can by design only
-	// relate to one network.
-	GetNetwork() (Network, error)
+	GetObjectID() ObjectID
 
 	GetObjectType() ObjectType
 
-	GetState() State
+	GetState(key string) (State, error)
 
-	SetState(state State)
+	SetState(key string, state State)
 
 	// Trigger starts processing of the given impulse within the current neuron.
 	// Magic happens here based on the implemented behaviour. There is always an

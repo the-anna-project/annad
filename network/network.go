@@ -3,13 +3,15 @@ package network
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/neuron"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
 type Config struct {
-	State spec.State `json:"state,omitempty"`
+	Log spec.Log `json:"-"`
+
+	States map[string]spec.State `json:"states,omitempty"`
 }
 
 const (
@@ -21,7 +23,10 @@ func DefaultConfig() Config {
 	newStateConfig.ObjectType = ObjectType
 
 	newConfig := Config{
-		State: state.NewState(newStateConfig),
+		Log: log.NewLog(log.DefaultConfig()),
+		States: map[string]spec.State{
+			"default": state.NewState(newStateConfig),
+		},
 	}
 
 	return newConfig
@@ -39,50 +44,109 @@ func NewNetwork(config Config) spec.Network {
 type network struct {
 	Config
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
+	Mutex sync.Mutex `json:"-"`
+}
+
+func (n *network) Copy() spec.Network {
+	networkCopy := *n
+
+	for key, state := range networkCopy.States {
+		networkCopy.States[key] = state.Copy()
+	}
+
+	return &networkCopy
 }
 
 func (n *network) GetObjectID() spec.ObjectID {
-	return n.GetState().GetObjectID()
+	n.Mutex.Lock()
+	defer n.Mutex.Unlock()
+
+	return n.States["default"].GetObjectID()
 }
 
 func (n *network) GetObjectType() spec.ObjectType {
-	return n.GetState().GetObjectType()
-}
-
-func (n *network) GetState() spec.State {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
-	return n.State
+
+	return n.States["default"].GetObjectType()
 }
 
-func (n *network) SetState(state spec.State) {
+func (n *network) GetState(key string) (spec.State, error) {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
-	n.State = state
+
+	if state, ok := n.States[key]; ok {
+		return state, nil
+	}
+
+	return nil, maskAny(stateNotFoundError)
+}
+
+func (n *network) SetState(key string, state spec.State) {
+	n.Mutex.Lock()
+	defer n.Mutex.Unlock()
+	n.States[key] = state
 }
 
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	// Track state.
-	imp.GetState().SetNetwork(n)
-	n.GetState().SetImpulse(imp)
+	impState, err := imp.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	impState.SetNetwork(n)
+	networkState, err := n.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	networkState.SetImpulse(imp)
 
 	// Get first neuron.
-	var err error
 	var neu spec.Neuron
-	neurons := n.GetState().GetNeurons()
+	defaultNetworkState, err := n.GetState("default")
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	neurons := defaultNetworkState.GetNeurons()
 	if len(neurons) == 0 {
-		neu = neuron.NewFirstNeuron(neuron.DefaultFirstNeuronConfig())
+		initNetworkState, err := n.GetState("init")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		neuronID, err := initNetworkState.GetBytes("first-id")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		initFirstNeuron, err := initNetworkState.GetNeuronByID(spec.ObjectID(neuronID))
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		neu = initFirstNeuron.Copy()
 
 		// Track state.
-		neu.GetState().SetNetwork(n)
-		n.GetState().SetNeuron(neu)
+		neuronState, err := neu.GetState("default")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		neuronState.SetNetwork(n)
+		networkState, err = n.GetState("default")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		networkState.SetNeuron(neu)
+		networkState.SetBytes("first-id", []byte(neu.GetObjectID()))
 	} else {
-		for _, n := range neurons {
-			// We just want the very first neuron here. So we just break after the
-			// first is iteration.
-			neu = n
-			break
+		defaultNetworkState, err := n.GetState("default")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		neuronID, err := defaultNetworkState.GetBytes("first-id")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		neu, err = defaultNetworkState.GetNeuronByID(spec.ObjectID(neuronID))
+		if err != nil {
+			return nil, maskAny(err)
 		}
 	}
 

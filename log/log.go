@@ -45,7 +45,7 @@ type Config struct {
 	//         0  disable logging
 	//    1 -  3  log level Error
 	//    4 -  6  log level Warn
-	//    6 -  9  log level Info
+	//    7 -  9  log level Info
 	//   10 - 12  log level Debug
 	//
 	Verbosity int

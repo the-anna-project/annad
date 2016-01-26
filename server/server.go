@@ -1,7 +1,7 @@
 package server
 
 import (
-	"log"
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
@@ -9,11 +9,16 @@ import (
 	"golang.org/x/net/context"
 
 	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 type Config struct {
-	Host        string
+	Host string
+
+	Log spec.Log `json:"-"`
+
 	Port        int
 	TextGateway gatewayspec.Gateway
 }
@@ -21,6 +26,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		Host:        "127.0.0.1",
+		Log:         log.NewLog(log.DefaultConfig()),
 		Port:        9119,
 		TextGateway: nil,
 	}
@@ -57,5 +63,8 @@ func (s server) Listen() {
 	for url, handler := range newTextInterfaceHandlers {
 		http.Handle(url, handler)
 	}
-	log.Fatal(http.ListenAndServe(net.JoinHostPort(s.Host, strconv.Itoa(s.Port)), nil))
+	err := http.ListenAndServe(net.JoinHostPort(s.Host, strconv.Itoa(s.Port)), nil)
+	if err != nil {
+		fmt.Printf("%#v\n", maskAny(err))
+	}
 }

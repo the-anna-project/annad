@@ -54,6 +54,15 @@ type state struct {
 	Mutex     sync.Mutex `json:"mutex,omitempty"`
 }
 
+func (s *state) Copy() spec.State {
+	stateCopy := *s
+
+	stateCopy.CreatedAt = time.Now()
+	stateCopy.ObjectID = id.NewID(id.Hex512)
+
+	return &stateCopy
+}
+
 func (s *state) GetAge() time.Duration {
 	return time.Since(s.CreatedAt)
 }
@@ -69,27 +78,38 @@ func (s *state) GetBytes(key string) ([]byte, error) {
 	return nil, maskAny(bytesNotFoundError)
 }
 
-func (s *state) GetCore() (spec.Core, error) {
+func (s *state) GetCoreByID(objectID spec.ObjectID) (spec.Core, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	if len(s.Cores) != 1 {
-		return nil, maskAny(invalidCoreRelationError)
+	if c, ok := s.Cores[objectID]; ok {
+		return c, nil
 	}
 
-	var core spec.Core
-	for _, c := range s.Cores {
-		core = c
-		break
-	}
+	return nil, maskAny(coreNotFoundError)
+}
 
-	return core, nil
+func (s *state) GetCores() map[spec.ObjectID]spec.Core {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	return s.Cores
 }
 
 func (s *state) GetObjectID() spec.ObjectID {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	return s.ObjectID
+}
+
+func (s *state) GetImpulseByID(objectID spec.ObjectID) (spec.Impulse, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if i, ok := s.Impulses[objectID]; ok {
+		return i, nil
+	}
+
+	return nil, maskAny(impulseNotFoundError)
 }
 
 func (s *state) GetImpulses() map[spec.ObjectID]spec.Impulse {

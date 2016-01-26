@@ -41,3 +41,19 @@ var bytesNotFoundError = errgo.New("bytes not found")
 func IsBytesNotFound(err error) bool {
 	return errgo.Cause(err) == bytesNotFoundError
 }
+
+var coreNotFoundError = errgo.New("core not found")
+
+// IsCoreNotFound checks for the given error to be coreNotFoundError.
+// This error is returned in case there is no core as required.
+func IsCoreNotFound(err error) bool {
+	return errgo.Cause(err) == coreNotFoundError
+}
+
+var impulseNotFoundError = errgo.New("impulse not found")
+
+// IsImpulseNotFound checks for the given error to be impulseNotFoundError.
+// This error is returned in case there is no impulse as required.
+func IsImpulseNotFound(err error) bool {
+	return errgo.Cause(err) == impulseNotFoundError
+}
