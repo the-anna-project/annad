@@ -3,6 +3,7 @@ package neuron
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
@@ -21,7 +22,7 @@ func DefaultCharacterNeuronConfig() CharacterNeuronConfig {
 	newDefaultCharacterNeuronConfig := CharacterNeuronConfig{
 		Log: log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -57,14 +58,14 @@ func (cn *characterNeuron) GetObjectID() spec.ObjectID {
 	cn.Mutex.Lock()
 	defer cn.Mutex.Unlock()
 
-	return cn.States["default"].GetObjectID()
+	return cn.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (cn *characterNeuron) GetObjectType() spec.ObjectType {
 	cn.Mutex.Lock()
 	defer cn.Mutex.Unlock()
 
-	return cn.States["default"].GetObjectType()
+	return cn.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (cn *characterNeuron) GetState(key string) (spec.State, error) {
@@ -86,13 +87,15 @@ func (cn *characterNeuron) SetState(key string, state spec.State) {
 
 // TODO
 func (cn *characterNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
+	cn.Log.V(12).Debugf("%s", "call Neuron.Trigger")
+
 	// Track state.
-	impState, err := imp.GetState("default")
+	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
 	impState.SetNeuron(cn)
-	neuronState, err := cn.GetState("default")
+	neuronState, err := cn.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}

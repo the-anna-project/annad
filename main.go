@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/juju/errgo"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/impulse"
@@ -53,7 +54,7 @@ func main() {
 	newCoreConfig.TextGateway = newTextGateway
 	newCore := core.NewCore(newCoreConfig)
 
-	impulseState, err := newImpulse.GetState("default")
+	impulseState, err := newImpulse.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -70,9 +71,9 @@ func main() {
 	impulseState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	impulseState.SetCore(newCore)
 	impulseState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newImpulse.SetState("init", impulseState)
+	newImpulse.SetState(common.InitStateKey, impulseState)
 
-	firstState, err := newFirst.GetState("default")
+	firstState, err := newFirst.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -89,9 +90,9 @@ func main() {
 	firstState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	firstState.SetCore(newCore)
 	firstState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newFirst.SetState("init", firstState)
+	newFirst.SetState(common.InitStateKey, firstState)
 
-	jobState, err := newJob.GetState("default")
+	jobState, err := newJob.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -108,9 +109,9 @@ func main() {
 	jobState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	jobState.SetCore(newCore)
 	jobState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newJob.SetState("init", jobState)
+	newJob.SetState(common.InitStateKey, jobState)
 
-	characterState, err := newCharacter.GetState("default")
+	characterState, err := newCharacter.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -127,9 +128,9 @@ func main() {
 	characterState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	characterState.SetCore(newCore)
 	characterState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newCharacter.SetState("init", characterState)
+	newCharacter.SetState(common.InitStateKey, characterState)
 
-	networkState, err := newNetwork.GetState("default")
+	networkState, err := newNetwork.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -146,9 +147,9 @@ func main() {
 	networkState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	networkState.SetCore(newCore)
 	networkState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newNetwork.SetState("init", networkState)
+	newNetwork.SetState(common.InitStateKey, networkState)
 
-	coreState, err := newCore.GetState("default")
+	coreState, err := newCore.GetState(common.DefaultStateKey)
 	if err != nil {
 		newLog.V(1).Errorf("%#v", maskAny(err))
 	}
@@ -165,7 +166,7 @@ func main() {
 	coreState.SetBytes("network-id", []byte(newNetwork.GetObjectID()))
 	coreState.SetCore(newCore)
 	coreState.SetBytes("core-id", []byte(newCore.GetObjectID()))
-	newCore.SetState("init", coreState)
+	newCore.SetState(common.InitStateKey, coreState)
 
 	newLog.V(7).Infof("%s", "booting core")
 	go newCore.Boot()

@@ -3,6 +3,7 @@ package network
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
@@ -25,7 +26,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		Log: log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -61,14 +62,14 @@ func (n *network) GetObjectID() spec.ObjectID {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
 
-	return n.States["default"].GetObjectID()
+	return n.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (n *network) GetObjectType() spec.ObjectType {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
 
-	return n.States["default"].GetObjectType()
+	return n.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (n *network) GetState(key string) (spec.State, error) {
@@ -90,12 +91,12 @@ func (n *network) SetState(key string, state spec.State) {
 
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	// Track state.
-	impState, err := imp.GetState("default")
+	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 	impState.SetNetwork(n)
-	networkState, err := n.GetState("default")
+	networkState, err := n.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -103,13 +104,13 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 
 	// Get first neuron.
 	var neu spec.Neuron
-	defaultNetworkState, err := n.GetState("default")
+	defaultNetworkState, err := n.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 	neurons := defaultNetworkState.GetNeurons()
 	if len(neurons) == 0 {
-		initNetworkState, err := n.GetState("init")
+		initNetworkState, err := n.GetState(common.InitStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -124,19 +125,19 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		neu = initFirstNeuron.Copy()
 
 		// Track state.
-		neuronState, err := neu.GetState("default")
+		neuronState, err := neu.GetState(common.DefaultStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		neuronState.SetNetwork(n)
-		networkState, err = n.GetState("default")
+		networkState, err = n.GetState(common.DefaultStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		networkState.SetNeuron(neu)
 		networkState.SetBytes("first-id", []byte(neu.GetObjectID()))
 	} else {
-		defaultNetworkState, err := n.GetState("default")
+		defaultNetworkState, err := n.GetState(common.DefaultStateKey)
 		if err != nil {
 			return nil, maskAny(err)
 		}

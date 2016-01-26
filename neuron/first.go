@@ -3,6 +3,7 @@ package neuron
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
@@ -21,7 +22,7 @@ func DefaultFirstNeuronConfig() FirstNeuronConfig {
 	newDefaultJobNeuronConfig := FirstNeuronConfig{
 		Log: log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -57,14 +58,14 @@ func (fn *firstNeuron) GetObjectID() spec.ObjectID {
 	fn.Mutex.Lock()
 	defer fn.Mutex.Unlock()
 
-	return fn.States["default"].GetObjectID()
+	return fn.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (fn *firstNeuron) GetObjectType() spec.ObjectType {
 	fn.Mutex.Lock()
 	defer fn.Mutex.Unlock()
 
-	return fn.States["default"].GetObjectType()
+	return fn.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (fn *firstNeuron) GetState(key string) (spec.State, error) {
@@ -86,12 +87,12 @@ func (fn *firstNeuron) SetState(key string, state spec.State) {
 
 func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	// Track state.
-	impState, err := imp.GetState("default")
+	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
 	impState.SetNeuron(fn)
-	neuronState, err := fn.GetState("default")
+	neuronState, err := fn.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
@@ -100,7 +101,7 @@ func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, err
 	neu, err := neuronState.GetNeuronByID(imp.GetObjectID())
 	if state.IsNeuronNotFound(err) {
 		// Create new job neuron with the impulse ID.
-		initNeuronState, err := fn.GetState("init")
+		initNeuronState, err := fn.GetState(common.InitStateKey)
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
@@ -119,10 +120,10 @@ func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, err
 		newStateConfig.ObjectID = imp.GetObjectID()
 		newStateConfig.ObjectType = ObjectType
 
-		neu.SetState("default", state.NewState(newStateConfig))
+		neu.SetState(common.DefaultStateKey, state.NewState(newStateConfig))
 
 		// Track new neuron.
-		defaultNeuronState, err := fn.GetState("default")
+		defaultNeuronState, err := fn.GetState(common.DefaultStateKey)
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}

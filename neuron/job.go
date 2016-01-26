@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
@@ -22,7 +23,7 @@ func DefaultJobNeuronConfig() JobNeuronConfig {
 	newDefaultJobNeuronConfig := JobNeuronConfig{
 		Log: log.NewLog(log.DefaultConfig()),
 		States: map[string]spec.State{
-			"default": state.NewState(newStateConfig),
+			common.DefaultStateKey: state.NewState(newStateConfig),
 		},
 	}
 
@@ -58,14 +59,14 @@ func (jn *jobNeuron) GetObjectID() spec.ObjectID {
 	jn.Mutex.Lock()
 	defer jn.Mutex.Unlock()
 
-	return jn.States["default"].GetObjectID()
+	return jn.States[common.DefaultStateKey].GetObjectID()
 }
 
 func (jn *jobNeuron) GetObjectType() spec.ObjectType {
 	jn.Mutex.Lock()
 	defer jn.Mutex.Unlock()
 
-	return jn.States["default"].GetObjectType()
+	return jn.States[common.DefaultStateKey].GetObjectType()
 }
 
 func (jn *jobNeuron) GetState(key string) (spec.State, error) {
@@ -87,12 +88,12 @@ func (jn *jobNeuron) SetState(key string, state spec.State) {
 
 func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	// Track state.
-	impState, err := imp.GetState("default")
+	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
 	impState.SetNeuron(jn)
-	neuronState, err := jn.GetState("default")
+	neuronState, err := jn.GetState(common.DefaultStateKey)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
@@ -107,14 +108,14 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 	case "":
 		// Create new impulse to process it asynchronously.
 		go func(imp spec.Impulse) {
-			defaultNeuronState, err := jn.GetState("default")
+			defaultNeuronState, err := jn.GetState(common.DefaultStateKey)
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				return
 			}
 			defaultNeuronState.SetBytes("state", []byte("in-progress"))
 
-			initNeuronState, err := jn.GetState("init")
+			initNeuronState, err := jn.GetState(common.InitStateKey)
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				return
@@ -139,7 +140,7 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 				return
 			}
 
-			impState, err := imp.GetState("default")
+			impState, err := imp.GetState(common.DefaultStateKey)
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				return
