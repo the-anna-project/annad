@@ -1,7 +1,6 @@
 package neuron
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/xh3b4sd/anna/common"
@@ -87,6 +86,8 @@ func (jn *jobNeuron) SetState(key string, state spec.State) {
 }
 
 func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
+	jn.Log.V(12).Debugf("call JobNetwork.Trigger")
+
 	// Track state.
 	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
@@ -110,24 +111,24 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 		go func(imp spec.Impulse) {
 			defaultNeuronState, err := jn.GetState(common.DefaultStateKey)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			defaultNeuronState.SetBytes("state", []byte("in-progress"))
 
 			initNeuronState, err := jn.GetState(common.InitStateKey)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			neuronID, err := initNeuronState.GetBytes(common.CharacterNeuronIDKey)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			initCharacterNeuron, err := initNeuronState.GetNeuronByID(spec.ObjectID(neuronID))
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			neu := initCharacterNeuron.Copy()
@@ -136,18 +137,18 @@ func (jn *jobNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error
 
 			imp, _, err = imp.WalkThrough(neu)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 
 			impState, err := imp.GetState(common.DefaultStateKey)
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			response, err := impState.GetBytes("response")
 			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
+				jn.Log.V(3).Errorf("%#v", maskAny(err))
 				return
 			}
 			defaultNeuronState.SetBytes("response", response)

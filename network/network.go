@@ -90,6 +90,8 @@ func (n *network) SetState(key string, state spec.State) {
 }
 
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
+	n.Log.V(12).Debugf("call Network.Trigger")
+
 	// Track state.
 	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {

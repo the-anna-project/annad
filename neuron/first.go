@@ -86,6 +86,8 @@ func (fn *firstNeuron) SetState(key string, state spec.State) {
 }
 
 func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
+	fn.Log.V(12).Debugf("call FirstNetwork.Trigger")
+
 	// Track state.
 	impState, err := imp.GetState(common.DefaultStateKey)
 	if err != nil {
