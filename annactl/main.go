@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"net"
+	"os"
+
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/client"
@@ -20,15 +24,21 @@ var (
 		Long:  "Interact with Anna",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			host, port, err := net.SplitHostPort(globalFlags.Host)
+			if err != nil {
+				fmt.Printf("%#v\n", maskAny(err))
+				os.Exit(1)
+			}
+
 			newTextInterfaceConfig := client.DefaultTextInterfaceConfig()
-			newTextInterfaceConfig.Host = globalFlags.Host
+			newTextInterfaceConfig.URL.Host = net.JoinHostPort(host, port)
 			textInterface = client.NewTextInterface(newTextInterfaceConfig)
 		},
 	}
 )
 
 func init() {
-	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "Host name to connect to bootxe service")
+	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to connect to Anna server")
 }
 
 func mainRun(cmd *cobra.Command, args []string) {

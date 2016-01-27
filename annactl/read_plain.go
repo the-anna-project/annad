@@ -27,13 +27,13 @@ func readPlainRun(cmd *cobra.Command, args []string) {
 	ctx := context.Background()
 
 	ID, err := textInterface.ReadPlainWithPlain(ctx, strings.Join(args, " "))
-	if len(args) == 0 {
+	if err != nil {
 		fmt.Printf("%#v\n", maskAny(err))
 		os.Exit(1)
 	}
 
 	data, err := textInterface.ReadPlainWithID(ctx, ID)
-	if len(args) == 0 {
+	if err != nil {
 		fmt.Printf("%#v\n", maskAny(err))
 		os.Exit(1)
 	}
