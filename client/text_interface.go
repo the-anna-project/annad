@@ -12,8 +12,7 @@ import (
 )
 
 type TextInterfaceConfig struct {
-	Host string
-	URL  *url.URL
+	URL *url.URL
 }
 
 func DefaultTextInterfaceConfig() TextInterfaceConfig {
@@ -63,7 +62,7 @@ func (ti textInterface) ReadStream(stream string) ([]byte, error) {
 func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
 	response, err := ti.readPlainWithID(ctx, textinterface.ReadPlainRequest{ID: ID})
 	if err != nil {
-		return "", maskAny(err)
+		return "", maskAnyWIthCause(err, invalidAPIResponseError)
 	}
 
 	apiResponse := response.(textinterface.ReadPlainResponse)
@@ -81,7 +80,7 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
 	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Plain: plain})
 	if err != nil {
-		return "", maskAny(err)
+		return "", maskAnyWIthCause(err, invalidAPIResponseError)
 	}
 
 	apiResponse := response.(textinterface.ReadPlainResponse)

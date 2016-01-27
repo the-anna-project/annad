@@ -8,6 +8,16 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
+func maskAnyWIthCause(underlying, cause error) error {
+	err := maskAny(errgo.WithCausef(underlying, cause, ""))
+
+	if e, _ := err.(*errgo.Err); e != nil {
+		e.SetLocation(1)
+	}
+
+	return err
+}
+
 var invalidAPIResponseError = errgo.New("invalid api response")
 
 // IsInvalidAPIResponse checks for the given error to be
