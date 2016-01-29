@@ -1,33 +1,38 @@
 package textinterface
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/xh3b4sd/anna/gateway"
-	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/gateway"
+	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-type TextInterfaceConfig struct {
+type Config struct {
+	Log spec.Log
+
 	TextGateway gatewayspec.Gateway
 }
 
-func DefaultTextInterfaceConfig() TextInterfaceConfig {
-	return TextInterfaceConfig{
-		TextGateway: nil,
+func DefaultConfig() Config {
+	return Config{
+		Log:         log.NewLog(log.DefaultConfig()),
+		TextGateway: gateway.NewGateway(),
 	}
 }
 
-func NewTextInterface(config TextInterfaceConfig) serverspec.TextInterface {
+func NewTextInterface(config Config) serverspec.TextInterface {
 	return textInterface{
-		TextInterfaceConfig: config,
+		Config: config,
 	}
 }
 
 type textInterface struct {
-	TextInterfaceConfig
+	Config
 }
 
 // TODO this should actually fetch a url from the web
@@ -47,9 +52,12 @@ func (ti textInterface) ReadStream(stream string) ([]byte, error) {
 
 // return response
 func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.ID = ID
-	newSignal := gateway.NewSignal(newSignalConfig)
+	ti.Log.V(11).Debugf("call TextInterface.ReadPlainWithID")
+
+	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Bytes["request"] = []byte{}
+	newConfig.ID = ID
+	newSignal := gateway.NewSignal(newConfig)
 
 	response, err := ti.waitForSignal(ctx, newSignal)
 	if err != nil {
@@ -61,9 +69,11 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 
 // return ID
 func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = []byte(plain)
-	newSignal := gateway.NewSignal(newSignalConfig)
+	ti.Log.V(11).Debugf("call TextInterface.ReadPlainWithPlain")
+
+	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Bytes["request"] = []byte(plain)
+	newSignal := gateway.NewSignal(newConfig)
 
 	response, err := ti.waitForSignal(ctx, newSignal)
 	if err != nil {
@@ -74,11 +84,14 @@ func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (s
 }
 
 func (ti textInterface) waitForSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
+	ti.Log.V(11).Debugf("call TextInterface.waitForSignal")
+
 	for {
 		response, err := ti.forwardSignal(ctx, signal)
 		if err != nil {
 			return "", maskAny(err)
 		}
+
 		if len(response) == 0 {
 			time.Sleep(1 * time.Second)
 		} else {
@@ -88,6 +101,8 @@ func (ti textInterface) waitForSignal(ctx context.Context, signal gatewayspec.Si
 }
 
 func (ti textInterface) forwardSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
+	ti.Log.V(11).Debugf("call TextInterface.forwardSignal")
+
 	var err error
 	var response []byte
 
@@ -100,7 +115,7 @@ func (ti textInterface) forwardSignal(ctx context.Context, signal gatewayspec.Si
 		err := ti.TextGateway.SendSignal(signal)
 		if gateway.IsGatewayClosed(err) {
 			i++
-			fmt.Printf("gateway is closed\n")
+			ti.Log.V(6).Warnf("gateway is closed")
 			time.Sleep(1 * time.Second)
 			continue
 		} else if err != nil {

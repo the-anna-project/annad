@@ -1,15 +1,13 @@
 package spec
 
+import (
+	"encoding/json"
+)
+
 type Network interface {
-	Copy() Network
+	json.Unmarshaler
 
-	GetObjectID() ObjectID
-
-	GetObjectType() ObjectType
-
-	GetState(key string) (State, error)
-
-	SetState(key string, state State)
+	Object
 
 	Trigger(imp Impulse) (Impulse, error)
 }

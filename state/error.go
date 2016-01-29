@@ -57,3 +57,29 @@ var impulseNotFoundError = errgo.New("impulse not found")
 func IsImpulseNotFound(err error) bool {
 	return errgo.Cause(err) == impulseNotFoundError
 }
+
+var invalidStateReaderError = errgo.New("invalid state reader")
+
+// IsInvalidStateReader checks for the given error to be
+// invalidStateReaderError. This error is returned in case there is no valid
+// state reader as required.
+func IsInvalidStateReader(err error) bool {
+	return errgo.Cause(err) == invalidStateReaderError
+}
+
+var invalidStateWriterError = errgo.New("invalid state writer")
+
+// IsInvalidStateWriter checks for the given error to be
+// invalidStateWriterError. This error is returned in case there is no valid
+// state writer as required.
+func IsInvalidStateWriter(err error) bool {
+	return errgo.Cause(err) == invalidStateWriterError
+}
+
+var invalidObjectTypeError = errgo.New("invalid object type")
+
+// IsInvalidObjectType checks for the given error to be invalidObjectTypeError.
+// This error is returned in case there is no valid object type as required.
+func IsInvalidObjectType(err error) bool {
+	return errgo.Cause(err) == invalidObjectTypeError
+}

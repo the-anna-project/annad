@@ -1,8 +1,8 @@
 package id
 
 import (
-	"math/rand"
-	"time"
+	"crypto/rand"
+	"math/big"
 
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -22,23 +22,24 @@ const (
 	// Hex2048 creates a new hexa decimal encoded, pseudo random, 2048 bit hash.
 	Hex2048 IDType = 256
 
-	// Hex4096 creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
+	// Hex4096Bit creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
 	Hex4096 IDType = 512
 )
 
 var (
-	randSrc   = rand.NewSource(time.Now().UnixNano())
 	hashChars = "abcdef0123456789"
 )
 
-func randWithLen(n int) string {
-	b := make([]byte, n)
+func NewObjectID(idType IDType) spec.ObjectID {
+	b := make([]byte, int(idType))
 	for i := range b {
-		b[i] = hashChars[randSrc.Int63()%int64(len(hashChars))]
+		max := big.NewInt(int64(len(hashChars)))
+		j, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			panic(err)
+		}
+		b[i] = hashChars[j.Int64()]
 	}
-	return string(b)
-}
 
-func NewID(idType IDType) spec.ObjectID {
-	return spec.ObjectID(randWithLen(int(idType)))
+	return spec.ObjectID(b)
 }

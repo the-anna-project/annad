@@ -6,40 +6,40 @@
 package core
 
 import (
+	"os"
+	"os/signal"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/gateway"
-	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
-	"github.com/xh3b4sd/anna/impulse"
+	"github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
 type Config struct {
-	TextGateway gatewayspec.Gateway `json:"-"`
+	FactoryClient spec.Factory `json:"-"`
 
 	Log spec.Log `json:"-"`
 
-	States map[string]spec.State `json:"states,omitempty"`
-}
+	State spec.State `json:"state,omitempty"`
 
-const (
-	ObjectType spec.ObjectType = "core"
-)
+	TextGateway gatewayspec.Gateway `json:"-"`
+}
 
 func DefaultConfig() Config {
 	newStateConfig := state.DefaultConfig()
-	newStateConfig.ObjectType = ObjectType
+	newStateConfig.ObjectType = common.ObjectType.Core
 
 	newConfig := Config{
-		TextGateway: gateway.NewGateway(),
-		Log:         log.NewLog(log.DefaultConfig()),
-		States: map[string]spec.State{
-			common.DefaultStateKey: state.NewState(newStateConfig),
-		},
+		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		Log:           log.NewLog(log.DefaultConfig()),
+		State:         state.NewState(newStateConfig),
+		TextGateway:   gateway.NewGateway(),
 	}
 
 	return newConfig
@@ -47,8 +47,9 @@ func DefaultConfig() Config {
 
 func NewCore(config Config) spec.Core {
 	newCore := &core{
-		Config: config,
-		Mutex:  sync.Mutex{},
+		Config:             config,
+		Mutex:              sync.Mutex{},
+		ImpulsesInProgress: 0,
 	}
 
 	return newCore
@@ -57,52 +58,19 @@ func NewCore(config Config) spec.Core {
 type core struct {
 	Config
 
-	Mutex sync.Mutex `json:"-"`
+	Mutex              sync.Mutex `json:"-"`
+	ImpulsesInProgress int64      `json:"-"`
 }
 
 func (c *core) Boot() {
-	c.Log.V(12).Debugf("call Core.Boot")
+	c.Log.V(11).Debugf("call Core.Boot")
 
-	go c.listen()
+	go c.listenToGateway()
+	go c.listenToSignal()
 }
 
-func (c *core) Copy() spec.Core {
-	coreCopy := *c
-
-	for key, state := range coreCopy.States {
-		coreCopy.States[key] = state.Copy()
-	}
-
-	return &coreCopy
-}
-
-func (c *core) GetObjectID() spec.ObjectID {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	return c.States[common.DefaultStateKey].GetObjectID()
-}
-
-func (c *core) GetObjectType() spec.ObjectType {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	return c.States[common.DefaultStateKey].GetObjectType()
-}
-
-func (c *core) GetState(key string) (spec.State, error) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-
-	if state, ok := c.States[key]; ok {
-		return state, nil
-	}
-
-	return nil, maskAny(stateNotFoundError)
-}
-
-func (c *core) listen() {
-	c.Log.V(12).Debugf("call Core.listen")
+func (c *core) listenToGateway() {
+	c.Log.V(11).Debugf("call Core.listenToGateway")
 
 	for {
 		newSignal, err := c.TextGateway.ReceiveSignal()
@@ -134,7 +102,7 @@ func (c *core) listen() {
 				return
 			}
 
-			newImpulse, err := common.GetInitImpulseCopy(common.ImpulseIDKey, c)
+			newImpulse, err := c.FactoryClient.NewImpulse()
 			if err != nil {
 				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
@@ -145,11 +113,19 @@ func (c *core) listen() {
 			newStateConfig := state.DefaultConfig()
 			newStateConfig.Bytes["request"] = request
 			newStateConfig.ObjectID = spec.ObjectID(newSignal.GetID())
-			newStateConfig.ObjectType = impulse.ObjectType
+			newStateConfig.ObjectType = common.ObjectType.Impulse
 
-			newImpulse.SetState(common.DefaultStateKey, state.NewState(newStateConfig))
+			newImpulse.SetState(state.NewState(newStateConfig))
+
+			// Increment the impulse count to track how many impulses are processed
+			// inside the core.
+			c.ImpulsesInProgress = atomic.AddInt64(&c.ImpulsesInProgress, 1)
 
 			resImpulse, err := c.Trigger(newImpulse)
+
+			// Decrement the impulse count once all hard work is done.
+			c.ImpulsesInProgress = atomic.AddInt64(&c.ImpulsesInProgress, -1)
+
 			if err != nil {
 				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
@@ -157,14 +133,7 @@ func (c *core) listen() {
 				return
 			}
 
-			impState, err := resImpulse.GetState(common.DefaultStateKey)
-			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			response, err := impState.GetBytes("response")
+			response, err := resImpulse.GetState().GetBytes("response")
 			if err != nil {
 				c.Log.V(3).Errorf("%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
@@ -172,70 +141,65 @@ func (c *core) listen() {
 				return
 			}
 			newSignal.SetBytes("response", response)
+
 			responder <- newSignal
 		}(newSignal)
 	}
 }
 
-func (c *core) SetState(key string, state spec.State) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-	c.States[key] = state
+func (c *core) listenToSignal() {
+	c.Log.V(11).Debugf("call Core.listenToSignal")
+
+	listener := make(chan os.Signal, 1)
+	signal.Notify(listener, os.Interrupt, os.Kill)
+
+	<-listener
+
+	c.Shutdown()
 }
 
 func (c *core) Shutdown() {
 	c.Log.V(12).Debugf("call Core.Shutdown")
 
-	// TODO close gateway
-	// TODO stop listening
-	// TODO wait for impulses to be processed
-	// TODO backup state
+	c.TextGateway.Close()
+
+	for {
+		impulsesInProgress := atomic.LoadInt64(&c.ImpulsesInProgress)
+		if impulsesInProgress == 0 {
+			// As soon as all impulses are processed we can go ahead to shutdown the
+			// core.
+			break
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	err := c.GetState().Write()
+	if err != nil {
+		c.Log.V(3).Errorf("%#v", maskAny(err))
+	}
+
+	os.Exit(0)
 }
 
 func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	c.Log.V(12).Debugf("call Core.Trigger")
-
-	// Track state.
-	impState, err := imp.GetState(common.DefaultStateKey)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	impState.SetCore(c)
-	coreState, err := c.GetState(common.DefaultStateKey)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	coreState.SetImpulse(imp)
+	c.Log.V(11).Debugf("call Core.Trigger")
 
 	// Initialize network within core state if not already done.
-	defaultCoreState, err := c.GetState(common.DefaultStateKey)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	networks := defaultCoreState.GetNetworks()
+	networks := c.GetState().GetNetworks()
 	if len(networks) == 0 {
-		initCoreState, err := c.GetState(common.InitStateKey)
+		c.Log.V(12).Debugf("create new network")
+
+		newNetwork, err := c.FactoryClient.NewNetwork()
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		networkID, err := initCoreState.GetBytes(common.NetworkIDKey)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		network, err := initCoreState.GetNetworkByID(spec.ObjectID(networkID))
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		defaultCoreState.SetNetwork(network.Copy())
+		c.GetState().SetNetwork(newNetwork)
 	}
 
 	// Get network. Note that there is potential for multiple networks. For now
 	// we just have one.
-	coreState, err = c.GetState(common.DefaultStateKey)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	for _, n := range coreState.GetNetworks() {
+	for _, n := range c.GetState().GetNetworks() {
 		// Initialize the impulses walk through the core via the scheduler network.
 		// The scheduler network implements the very first entry for impulses into
 		// the cores networks.

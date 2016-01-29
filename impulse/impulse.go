@@ -8,30 +8,28 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
 
-const (
-	ObjectType spec.ObjectType = "impulse"
-)
-
 type Config struct {
+	FactoryClient spec.Factory `json:"-"`
+
 	Log spec.Log `json:"-"`
 
-	States map[string]spec.State `json:"states,omitempty"`
+	State spec.State `json:"state,omitempty"`
 }
 
 func DefaultConfig() Config {
 	newStateConfig := state.DefaultConfig()
-	newStateConfig.ObjectType = ObjectType
+	newStateConfig.ObjectType = common.ObjectType.Impulse
 
 	newConfig := Config{
-		Log: log.NewLog(log.DefaultConfig()),
-		States: map[string]spec.State{
-			common.DefaultStateKey: state.NewState(newStateConfig),
-		},
+		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		Log:           log.NewLog(log.DefaultConfig()),
+		State:         state.NewState(newStateConfig),
 	}
 
 	return newConfig
@@ -49,51 +47,12 @@ func NewImpulse(config Config) spec.Impulse {
 type impulse struct {
 	Config
 
-	Mutex sync.Mutex `json:"mutex,omitempty"`
-}
-
-func (i *impulse) Copy() spec.Impulse {
-	impulseCopy := *i
-
-	for key, state := range impulseCopy.States {
-		impulseCopy.States[key] = state.Copy()
-	}
-
-	return &impulseCopy
-}
-
-func (i *impulse) GetObjectID() spec.ObjectID {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	return i.States[common.DefaultStateKey].GetObjectID()
-}
-
-func (i *impulse) GetObjectType() spec.ObjectType {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	return i.States[common.DefaultStateKey].GetObjectType()
-}
-
-func (i *impulse) GetState(key string) (spec.State, error) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	if state, ok := i.States[key]; ok {
-		return state, nil
-	}
-
-	return nil, maskAny(stateNotFoundError)
-}
-
-func (i *impulse) SetState(key string, state spec.State) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-	i.States[key] = state
+	Mutex sync.Mutex `json:"-"`
 }
 
 func (i *impulse) WalkThrough(neu spec.Neuron) (spec.Impulse, spec.Neuron, error) {
+	i.Log.V(11).Debugf("call Impulse.WalkThrough")
+
 	var err error
 	var imp spec.Impulse = i
 

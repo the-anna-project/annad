@@ -1,15 +1,13 @@
 package spec
 
+import (
+	"encoding/json"
+)
+
 type Neuron interface {
-	Copy() Neuron
+	json.Unmarshaler
 
-	GetObjectID() ObjectID
-
-	GetObjectType() ObjectType
-
-	GetState(key string) (State, error)
-
-	SetState(key string, state State)
+	Object
 
 	// Trigger starts processing of the given impulse within the current neuron.
 	// Magic happens here based on the implemented behaviour. There is always an

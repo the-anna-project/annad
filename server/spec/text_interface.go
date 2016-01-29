@@ -1,4 +1,4 @@
-package spec
+package serverspec
 
 import (
 	"golang.org/x/net/context"

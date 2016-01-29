@@ -8,28 +8,27 @@ import (
 )
 
 type SignalConfig struct {
-	Bytes map[string][]byte
-	ID    string
+	Bytes   map[string][]byte
+	ID      string
+	Objects map[string]interface{}
 }
 
 func DefaultSignalConfig() SignalConfig {
 	newSignalConfig := SignalConfig{
-		Bytes: map[string][]byte{
-			"request":  []byte{},
-			"response": []byte{},
-		},
-		ID: string(id.NewID(id.Hex512)),
+		Bytes:   map[string][]byte{},
+		ID:      string(id.NewObjectID(id.Hex128)),
+		Objects: map[string]interface{}{},
 	}
 
 	return newSignalConfig
 }
 
-func NewSignal(config SignalConfig) spec.Signal {
+func NewSignal(config SignalConfig) gatewayspec.Signal {
 	return &signal{
 		Canceled:     false,
 		SignalConfig: config,
 		Mutex:        sync.Mutex{},
-		Responder:    make(chan spec.Signal, 1000),
+		Responder:    make(chan gatewayspec.Signal, 1000),
 	}
 }
 
@@ -39,7 +38,7 @@ type signal struct {
 	SignalConfig
 
 	Error     error
-	Responder chan spec.Signal
+	Responder chan gatewayspec.Signal
 	Mutex     sync.Mutex
 }
 
@@ -73,7 +72,18 @@ func (s *signal) GetID() string {
 	return s.ID
 }
 
-func (s *signal) GetResponder() (chan spec.Signal, error) {
+func (s *signal) GetObject(key string) (interface{}, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if o, ok := s.Objects[key]; ok {
+		return o, nil
+	}
+
+	return nil, maskAny(objectNotFoundError)
+}
+
+func (s *signal) GetResponder() (chan gatewayspec.Signal, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
@@ -96,7 +106,13 @@ func (s *signal) SetError(err error) {
 	s.Error = err
 }
 
-func (s *signal) SetResponder(responder chan spec.Signal) {
+func (s *signal) SetObject(key string, object interface{}) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	s.Objects[key] = object
+}
+
+func (s *signal) SetResponder(responder chan gatewayspec.Signal) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	s.Responder = responder
