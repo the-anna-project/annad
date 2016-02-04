@@ -1,3 +1,5 @@
+// Package log implements spec.Log. This logger interface is to simply log
+// output to gather runtime information.
 package log
 
 import (
