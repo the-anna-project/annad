@@ -11,7 +11,7 @@ import (
 // Test_Factory_001 checks that the factory server always creates independent
 // objects.
 func Test_Factory_001(t *testing.T) {
-	newServer := factoryserver.NewServer(factoryserver.DefaultConfig())
+	newServer := factoryserver.NewFactory(factoryserver.DefaultConfig())
 
 	firstCore, err := newServer.NewCore()
 	if err != nil {
@@ -37,12 +37,12 @@ func Test_Factory_002(t *testing.T) {
 	// Create a new factory server and configure it with the test gateway.
 	newServerConfig := factoryserver.DefaultConfig()
 	newServerConfig.FactoryGateway = newFactoryGateway
-	newServer := factoryserver.NewServer(newServerConfig)
+	newServer := factoryserver.NewFactory(newServerConfig)
 
 	// Create a new factory client and configure it with the test gateway.
 	newClientConfig := factoryclient.DefaultConfig()
 	newClientConfig.FactoryGateway = newFactoryGateway
-	newClient := factoryclient.NewClient(newClientConfig)
+	newClient := factoryclient.NewFactory(newClientConfig)
 
 	firstCore, err := newServer.NewCore()
 	if err != nil {

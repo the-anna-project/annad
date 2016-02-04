@@ -8,6 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
+	"github.com/xh3b4sd/anna/file-system/real"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server"
@@ -39,6 +40,7 @@ func main() {
 	newLogConfig.Verbosity = verbosity
 	newLog := log.NewLog(newLogConfig)
 	newTextGateway := gateway.NewGateway()
+	newFileSystemReal := filesystemreal.NewFileSystem()
 
 	newLog.V(9).Infof("hello, I am Anna")
 
@@ -49,26 +51,22 @@ func main() {
 	newFactoryClientConfig := factoryclient.DefaultConfig()
 	newFactoryClientConfig.FactoryGateway = newFactoryGateway
 	newFactoryClientConfig.Log = newLog
-	newFactoryGatewayClient := factoryclient.NewClient(newFactoryClientConfig)
+	newFactoryGatewayClient := factoryclient.NewFactory(newFactoryClientConfig)
 	newFactoryServerConfig := factoryserver.DefaultConfig()
 	newFactoryServerConfig.FactoryClient = newFactoryGatewayClient
 	newFactoryServerConfig.FactoryGateway = newFactoryGateway
+	newFactoryServerConfig.FileSystem = newFileSystemReal
 	newFactoryServerConfig.Log = newLog
 	newFactoryServerConfig.StateReader = spec.StateType(stateReader)
 	newFactoryServerConfig.StateWriter = spec.StateType(stateWriter)
 	newFactoryServerConfig.TextGateway = newTextGateway
-	newFactoryServer := factoryserver.NewServer(newFactoryServerConfig)
+	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
 	//
 	// create core
 	//
 	newLog.V(9).Infof("creating core")
 	newCore, err := newFactoryServer.NewCore()
-	if err != nil {
-		newLog.V(3).Errorf("%#v", maskAny(err))
-		os.Exit(0)
-	}
-	err = newCore.GetState().Read()
 	if err != nil {
 		newLog.V(3).Errorf("%#v", maskAny(err))
 		os.Exit(0)

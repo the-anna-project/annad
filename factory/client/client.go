@@ -23,12 +23,12 @@ func DefaultConfig() Config {
 	return config
 }
 
-func NewClient(config Config) spec.Factory {
-	newClient := &client{
+func NewFactory(config Config) spec.Factory {
+	newFactory := &client{
 		Config: config,
 	}
 
-	return newClient
+	return newFactory
 }
 
 type objectValues map[spec.ObjectID]spec.Object

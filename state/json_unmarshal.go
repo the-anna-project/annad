@@ -1,6 +1,7 @@
 package state
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"time"
 
@@ -26,8 +27,16 @@ func (s *state) UnmarshalJSON(bytes []byte) error {
 	}
 
 	// State.Bytes
-	if bytesSpec, ok := generic["bytes"].(map[string][]byte); ok {
-		s.Bytes = bytesSpec
+	if genericBytes, ok := generic["bytes"].(map[string]interface{}); ok {
+		for key, genericByteSlice := range genericBytes {
+			if base64Encoded, ok := genericByteSlice.(string); ok {
+				base64Decoded, err := base64.StdEncoding.DecodeString(base64Encoded)
+				if err != nil {
+					return maskAny(err)
+				}
+				s.Bytes[key] = []byte(base64Decoded)
+			}
+		}
 	}
 
 	// State.Cores

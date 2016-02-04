@@ -6,6 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
+	"github.com/xh3b4sd/anna/file-system/fake"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/impulse"
@@ -19,6 +20,7 @@ import (
 type Config struct {
 	FactoryClient  spec.Factory
 	FactoryGateway gatewayspec.Gateway
+	FileSystem     spec.FileSystem
 	Log            spec.Log
 	StateReader    spec.StateType
 	StateWriter    spec.StateType
@@ -27,8 +29,9 @@ type Config struct {
 
 func DefaultConfig() Config {
 	newConfig := Config{
-		FactoryClient:  factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient:  factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		FactoryGateway: gateway.NewGateway(),
+		FileSystem:     filesystemfake.NewFileSystem(),
 		Log:            log.NewLog(log.DefaultConfig()),
 		StateReader:    common.StateType.FSReader,
 		StateWriter:    common.StateType.FSWriter,
@@ -38,7 +41,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-func NewServer(config Config) spec.Factory {
+func NewFactory(config Config) spec.Factory {
 	newFactory := &server{
 		Config: config,
 	}
@@ -233,6 +236,7 @@ func (s *server) NewState(objectType spec.ObjectType) (spec.State, error) {
 
 	newStateConfig := state.DefaultConfig()
 	newStateConfig.FactoryClient = s.FactoryClient
+	newStateConfig.FileSystem = s.FileSystem
 	newStateConfig.Log = s.Log
 	newStateConfig.ObjectType = objectType
 	newStateConfig.StateReader = s.StateReader

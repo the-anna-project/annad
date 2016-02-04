@@ -9,6 +9,7 @@ import (
 
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/factory/client"
+	"github.com/xh3b4sd/anna/file-system/fake"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -18,6 +19,7 @@ type Config struct {
 	Bytes         map[string][]byte              `json:"bytes,omitempty"`
 	Cores         map[spec.ObjectID]spec.Core    `json:"cores,omitempty"`
 	FactoryClient spec.Factory                   `json:"-"`
+	FileSystem    spec.FileSystem                `json:"-"`
 	Impulses      map[spec.ObjectID]spec.Impulse `json:"impulses,omitempty"`
 	Log           spec.Log                       `json:"-"`
 	Networks      map[spec.ObjectID]spec.Network `json:"networks,omitempty"`
@@ -35,13 +37,14 @@ func DefaultConfig() Config {
 			"response": []byte{},
 		},
 		Cores:         map[spec.ObjectID]spec.Core{},
-		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
+		FileSystem:    filesystemfake.NewFileSystem(),
 		Impulses:      map[spec.ObjectID]spec.Impulse{},
 		Log:           log.NewLog(log.DefaultConfig()),
 		Networks:      map[spec.ObjectID]spec.Network{},
 		Neurons:       map[spec.ObjectID]spec.Neuron{},
 		ObjectID:      id.NewObjectID(id.Hex128),
-		ObjectType:    spec.ObjectType(""),
+		ObjectType:    spec.ObjectType(common.ObjectType.None),
 		StateReader:   common.StateType.FSReader,
 		StateWriter:   common.StateType.FSWriter,
 	}
