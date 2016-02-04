@@ -1,3 +1,7 @@
+// Package impulse implementes spec.Impulse. An impulse can walk through any
+// spec.Core, spec.Network and spec.Neuron. Concrete implementations and their
+// dynamic state decide about the way an impulse is going, resulting in
+// behaviour.
 package impulse
 
 import (

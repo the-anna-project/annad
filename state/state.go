@@ -1,3 +1,6 @@
+// Package state implements spec.State. All information an object holds is
+// stored within its state. Business logic and state is fully decoupled. That
+// way Anna is able to completely backup and restore her whole state.
 package state
 
 import (

@@ -1,3 +1,5 @@
+// Package annactl implements a command line client for Anna. Cobra CLI is used
+// as framework. The commands are simple wrappers around the client package.
 package main
 
 import (

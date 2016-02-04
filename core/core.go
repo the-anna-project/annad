@@ -1,3 +1,8 @@
+// Package core implements spec.Core. Gateways sending signals to the core to
+// ask to do some work. The core translates a signal into an impulse. So the
+// core is the starting point for all impulses. Once an impulse finished its
+// walk through the core, the impulse's response is translated back to the
+// requesting signal and the signal is send back through the gateway.
 package core
 
 import (
