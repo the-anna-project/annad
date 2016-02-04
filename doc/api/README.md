@@ -3,23 +3,30 @@ The api documentation describes all interfaces.
 
 ### network
 
+###### interface
+This are the currently implemented interfaces to interact with Anna.
+
+- [text](text.md)
+
+---
+
 ###### http
 HTTP is a rather legacy tainted protocol. It does not fit all business
-requirements of API's. Deciding when to use what request method or
+requirements of APIs. Deciding when to use what request method or
 response status code is a pain we simply can prevent. For simplicity reasons we
 go with a very straight forward solution. See the details below.
 
 ---
 
 ###### versioning
-All network API's will provide one single version. This is because of
+All network APIs will provide one single version. This is because of
 simplicity. Versioning and API changes will be handled internally anyway.
-Clients don't need to struggle with that. API's are cleaner.
+Clients don't need to struggle with that. APIs are cleaner.
 
 ---
 
 ###### request method
-All network API's are only accepting `POST` requests. This is because of
+All network APIs are only accepting `POST` requests. This is because of
 simplicity. Clients don't need to struggle with that.
 
 ---
