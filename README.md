@@ -22,6 +22,7 @@ somebody else, or some group of people way smarter than me. Live will find a way
 - [development](doc/development)
 - [diary](doc/diary)
 - [godoc](https://godoc.org/github.com/xh3b4sd/anna)
+- [logo](doc/logo)
 - [philosophy](doc/philosophy)
 - [risk](doc/risk)
 - [roadmap](doc/roadmap)
