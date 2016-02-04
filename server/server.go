@@ -1,13 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/gateway"
-	gatewayspec "github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
@@ -18,7 +17,7 @@ type Config struct {
 	// net.URL and http.ListenAndServe.
 	Host string
 
-	Log spec.Log `json:"-"`
+	Log spec.Log
 
 	TextGateway gatewayspec.Gateway
 }
@@ -50,10 +49,13 @@ type server struct {
 }
 
 func (s server) Listen() {
+	s.Log.V(11).Debugf("call Server.Listen")
+
 	ctx := context.Background()
 
 	// text interface
-	newTextInterfaceConfig := textinterface.DefaultTextInterfaceConfig()
+	newTextInterfaceConfig := textinterface.DefaultConfig()
+	newTextInterfaceConfig.Log = s.Log
 	newTextInterfaceConfig.TextGateway = s.TextGateway
 	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
 	newTextInterfaceHandlers := textinterface.NewHandlers(ctx, newTextInterface)
@@ -63,8 +65,9 @@ func (s server) Listen() {
 		http.Handle(url, handler)
 	}
 
+	s.Log.V(11).Debugf("server starts to listen on '%s'", s.Host)
 	err := http.ListenAndServe(s.Host, nil)
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
+		s.Log.V(3).Errorf("%#v", maskAny(err))
 	}
 }

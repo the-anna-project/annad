@@ -1,12 +1,13 @@
 package spec
 
 import (
+	"encoding/json"
 	"time"
 )
 
-type State interface {
-	Copy() State
+type StateType string
 
+type State interface {
 	GetAge() time.Duration
 
 	GetBytes(key string) ([]byte, error)
@@ -31,6 +32,8 @@ type State interface {
 
 	GetObjectType() ObjectType
 
+	json.Unmarshaler
+
 	SetBytes(key string, bytes []byte)
 
 	SetCore(core Core)
@@ -40,4 +43,25 @@ type State interface {
 	SetNetwork(network Network)
 
 	SetNeuron(neu Neuron)
+
+	SetStateFromObjectBytes(bytes []byte) error
+
+	StateReader
+
+	StateWriter
+}
+
+type StateReader interface {
+	// Read loads state based on the given state reader configuration.
+	Read() error
+
+	ReadFile(filename string) error
+}
+
+type StateWriter interface {
+	// Write persists the current state based on the given state writer
+	// configuration.
+	Write() error
+
+	WriteFile(filename string) error
 }

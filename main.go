@@ -1,89 +1,87 @@
 package main
 
 import (
-	"github.com/juju/errgo"
+	"os"
+
+	"github.com/spf13/pflag"
 
 	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/factory/client"
+	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 var (
-	maskAny = errgo.MaskFunc(errgo.Any)
+	stateReader string
+	stateWriter string
+
+	verbosity int
 )
+
+func init() {
+	pflag.StringVar(&stateReader, "state-reader", string(common.StateType.FSReader), "where to read state from")
+	pflag.StringVar(&stateWriter, "state-writer", string(common.StateType.FSWriter), "where to write state to")
+
+	pflag.IntVarP(&verbosity, "verbosity", "v", 12, "verbosity of the logger: 0 - 12")
+
+	pflag.Parse()
+}
 
 func main() {
 	//
-	// configure dependencies
+	// create dependencies
 	//
-	newLog := log.NewLog(log.DefaultConfig())
-	newLog.V(9).Infof("hello, I am Anna")
+	newFactoryGateway := gateway.NewGateway()
+	newLogConfig := log.DefaultConfig()
+	newLogConfig.Verbosity = verbosity
+	newLog := log.NewLog(newLogConfig)
 	newTextGateway := gateway.NewGateway()
 
-	newInitPairConfig := initPairConfig{
-		TextGateway: newTextGateway,
-		Log:         newLog,
+	newLog.V(9).Infof("hello, I am Anna")
+
+	//
+	// create factory
+	//
+	newLog.V(9).Infof("creating factory")
+	newFactoryClientConfig := factoryclient.DefaultConfig()
+	newFactoryClientConfig.FactoryGateway = newFactoryGateway
+	newFactoryClientConfig.Log = newLog
+	newFactoryGatewayClient := factoryclient.NewClient(newFactoryClientConfig)
+	newFactoryServerConfig := factoryserver.DefaultConfig()
+	newFactoryServerConfig.FactoryClient = newFactoryGatewayClient
+	newFactoryServerConfig.FactoryGateway = newFactoryGateway
+	newFactoryServerConfig.Log = newLog
+	newFactoryServerConfig.StateReader = spec.StateType(stateReader)
+	newFactoryServerConfig.StateWriter = spec.StateType(stateWriter)
+	newFactoryServerConfig.TextGateway = newTextGateway
+	newFactoryServer := factoryserver.NewServer(newFactoryServerConfig)
+
+	//
+	// create core
+	//
+	newLog.V(9).Infof("creating core")
+	newCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		newLog.V(3).Errorf("%#v", maskAny(err))
+		os.Exit(0)
 	}
-
-	//
-	// initialize core
-	//
-	impulseInitPair := mustGetImpulseInitPair(newInitPairConfig)
-	firstNeuronInitPair := mustGetFirstNeuronInitPair(newInitPairConfig)
-	jobNeuronInitPair := mustGetJobNeuronInitPair(newInitPairConfig)
-	characterNeuronInitPair := mustGetCharacterNeuronInitPair(newInitPairConfig)
-	networkInitPair := mustGetNetworkInitPair(newInitPairConfig)
-	coreInitPair := mustGetCoreInitPair(newInitPairConfig)
-
-	initPairs := []initPair{
-		impulseInitPair,
-		firstNeuronInitPair,
-		jobNeuronInitPair,
-		characterNeuronInitPair,
-		networkInitPair,
-		coreInitPair,
+	err = newCore.GetState().Read()
+	if err != nil {
+		newLog.V(3).Errorf("%#v", maskAny(err))
+		os.Exit(0)
 	}
-
-	for _, ip := range initPairs {
-		ip.State.SetImpulse(common.MustObjectToImpulse(impulseInitPair.Object))
-		ip.State.SetBytes(common.ImpulseIDKey, []byte(impulseInitPair.Object.GetObjectID()))
-
-		ip.State.SetNeuron(common.MustObjectToNeuron(firstNeuronInitPair.Object))
-		ip.State.SetBytes(common.FirstNeuronIDKey, []byte(firstNeuronInitPair.Object.GetObjectID()))
-
-		ip.State.SetNeuron(common.MustObjectToNeuron(jobNeuronInitPair.Object))
-		ip.State.SetBytes(common.JobNeuronIDKey, []byte(jobNeuronInitPair.Object.GetObjectID()))
-
-		ip.State.SetNeuron(common.MustObjectToNeuron(characterNeuronInitPair.Object))
-		ip.State.SetBytes(common.CharacterNeuronIDKey, []byte(characterNeuronInitPair.Object.GetObjectID()))
-
-		ip.State.SetNetwork(common.MustObjectToNetwork(networkInitPair.Object))
-		ip.State.SetBytes(common.NetworkIDKey, []byte(networkInitPair.Object.GetObjectID()))
-
-		ip.State.SetCore(common.MustObjectToCore(coreInitPair.Object))
-		ip.State.SetBytes(common.CoreIDKey, []byte(coreInitPair.Object.GetObjectID()))
-
-		ip.Object.SetState(common.InitStateKey, ip.State)
-	}
-
-	newLog.V(9).Infof("booting core")
-	go common.MustObjectToCore(coreInitPair.Object).Boot()
+	go newCore.Boot()
 
 	//
-	// initialize server
+	// create server
 	//
+	newLog.V(9).Infof("creating server")
 	newServerConfig := server.DefaultConfig()
 	newServerConfig.Log = newLog
 	newServerConfig.TextGateway = newTextGateway
 	newServer := server.NewServer(newServerConfig)
-
-	newLog.V(9).Infof("starting server")
-	go newServer.Listen()
-
-	//
-	// initialization finished
-	//
-	for {
-	}
+	newServer.Listen()
 }

@@ -6,7 +6,9 @@ be discussed, wether they are implemented or not.
 ### table of contents
 - [anna](anna.md)
 - [core](core.md)
+- [factory](factory.md)
+- gateway: TBD (signals)
 - [network](network.md)
 - neuron: TBD (behavior)
-- state: TBD (backup, restore, dependency injection)
+- [state](state.md)
 - object: TBD (orderable, multiple states)

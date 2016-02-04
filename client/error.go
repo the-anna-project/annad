@@ -8,7 +8,7 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-func maskAnyWIthCause(underlying, cause error) error {
+func maskAnyWithCause(underlying, cause error) error {
 	err := maskAny(errgo.WithCausef(underlying, cause, ""))
 
 	if e, _ := err.(*errgo.Err); e != nil {

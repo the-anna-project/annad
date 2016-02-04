@@ -6,9 +6,9 @@ import (
 	"github.com/xh3b4sd/anna/gateway/spec"
 )
 
-func NewGateway() spec.Gateway {
+func NewGateway() gatewayspec.Gateway {
 	g := &gateway{
-		Link:   make(chan spec.Signal, 1000),
+		Link:   make(chan gatewayspec.Signal, 1000),
 		Closed: false,
 		Mutex:  sync.Mutex{},
 	}
@@ -17,9 +17,9 @@ func NewGateway() spec.Gateway {
 }
 
 type gateway struct {
-	Link   chan spec.Signal `json:"link"`
-	Closed bool             `json:"closed"`
-	Mutex  sync.Mutex       `json:"mutex"`
+	Link   chan gatewayspec.Signal
+	Closed bool
+	Mutex  sync.Mutex
 }
 
 func (g *gateway) Close() {
@@ -34,7 +34,7 @@ func (g *gateway) Open() {
 	g.Closed = false
 }
 
-func (g *gateway) ReceiveSignal() (spec.Signal, error) {
+func (g *gateway) ReceiveSignal() (gatewayspec.Signal, error) {
 	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
 	// Link channel at the end of this function. Link might block until a signal
 	// can be read again. In this case Mutex.Unlock is never called and the mutex
@@ -50,7 +50,7 @@ func (g *gateway) ReceiveSignal() (spec.Signal, error) {
 	return <-g.Link, nil
 }
 
-func (g *gateway) SendSignal(signal spec.Signal) error {
+func (g *gateway) SendSignal(signal gatewayspec.Signal) error {
 	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
 	// Link channel at the end of this function. Link might block until a signal
 	// can be sent again. In this case Mutex.Unlock is never called and the mutex
