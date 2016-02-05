@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/xh3b4sd/anna.svg?branch=master)](https://travis-ci.org/xh3b4sd/anna)
+
 # anna
 Artificial Neural Network Aspiration, in short: Anna. Aims to be self-learning
 and self-improving software.
