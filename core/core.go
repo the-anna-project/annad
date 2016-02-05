@@ -36,7 +36,7 @@ func DefaultConfig() Config {
 	newStateConfig.ObjectType = common.ObjectType.Core
 
 	newConfig := Config{
-		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 		TextGateway:   gateway.NewGateway(),
@@ -64,6 +64,12 @@ type core struct {
 
 func (c *core) Boot() {
 	c.Log.V(11).Debugf("call Core.Boot")
+
+	err := c.GetState().Read()
+	if err != nil {
+		c.Log.V(3).Errorf("%#v", maskAny(err))
+		os.Exit(0)
+	}
 
 	go c.listenToGateway()
 	go c.listenToSignal()

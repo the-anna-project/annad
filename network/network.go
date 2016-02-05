@@ -25,7 +25,7 @@ func DefaultConfig() Config {
 	newStateConfig.ObjectType = common.ObjectType.Network
 
 	newConfig := Config{
-		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 	}

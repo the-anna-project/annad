@@ -2,7 +2,6 @@ package state
 
 import (
 	"encoding/json"
-	"io/ioutil"
 
 	"github.com/xh3b4sd/anna/common"
 )
@@ -24,7 +23,7 @@ func (s *state) Read() error {
 }
 
 func (s *state) ReadFile(filename string) error {
-	bytes, err := ioutil.ReadFile(filename)
+	bytes, err := s.FileSystem.ReadFile(filename)
 	if err != nil {
 		return maskAny(err)
 	}

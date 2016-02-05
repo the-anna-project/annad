@@ -23,7 +23,7 @@ func DefaultFirstNeuronConfig() FirstNeuronConfig {
 	newStateConfig.ObjectType = common.ObjectType.FirstNeuron
 
 	newDefaultJobNeuronConfig := FirstNeuronConfig{
-		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 	}

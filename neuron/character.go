@@ -23,7 +23,7 @@ func DefaultCharacterNeuronConfig() CharacterNeuronConfig {
 	newStateConfig.ObjectType = common.ObjectType.CharacterNeuron
 
 	newDefaultCharacterNeuronConfig := CharacterNeuronConfig{
-		FactoryClient: factoryclient.NewClient(factoryclient.DefaultConfig()),
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 	}
