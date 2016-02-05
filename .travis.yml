@@ -6,3 +6,6 @@ go:
 install: make all
 
 script: make gotest
+
+notifications:
+  email: false

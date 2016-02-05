@@ -14,7 +14,7 @@ func fetchURLEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 
 		response, err := ti.FetchURL(req.URL)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithData(string(response)), nil
@@ -27,7 +27,7 @@ func readFileEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 
 		response, err := ti.ReadFile(req.File)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithData(string(response)), nil
@@ -40,7 +40,7 @@ func readStreamEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 
 		response, err := ti.ReadStream(req.Stream)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithData(string(response)), nil
@@ -57,14 +57,14 @@ func readPlainEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 
 		if req.ID == "" && req.Plain == "" {
 			// All empty means error.
-			return nil, maskAny(invalidRequestError)
+			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
 		if req.ID != "" && req.Plain == "" {
 			// Only ID given means there is something we want to fetch by ID.
 			response, err = ti.ReadPlainWithID(ctx, req.ID)
 			if err != nil {
-				return nil, maskAny(err)
+				return api.WithError(maskAny(err)), nil
 			}
 			return api.WithData(response), nil
 		}
@@ -74,16 +74,16 @@ func readPlainEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 			// in the first place.
 			ID, err = ti.ReadPlainWithPlain(ctx, req.Plain)
 			if err != nil {
-				return nil, maskAny(err)
+				return api.WithError(maskAny(err)), nil
 			}
 			return api.WithID(ID), nil
 		}
 
 		if req.ID != "" && req.Plain != "" {
 			// All NOT empty means error.
-			return nil, maskAny(invalidRequestError)
+			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		return nil, maskAny(invalidRequestError)
+		return api.WithError(maskAny(invalidRequestError)), nil
 	}
 }

@@ -5,14 +5,10 @@ import (
 )
 
 func (n *network) GetObjectID() spec.ObjectID {
-	n.Mutex.Lock()
-	defer n.Mutex.Unlock()
 	return n.State.GetObjectID()
 }
 
 func (n *network) GetObjectType() spec.ObjectType {
-	n.Mutex.Lock()
-	defer n.Mutex.Unlock()
 	return n.State.GetObjectType()
 }
 

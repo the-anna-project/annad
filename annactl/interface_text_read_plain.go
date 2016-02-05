@@ -10,15 +10,15 @@ import (
 )
 
 var (
-	readPlainCmd = &cobra.Command{
-		Use:   "readplain [text] ...",
-		Short: "Let Anna read plain text input",
-		Long:  "Let Anna read plain text input",
-		Run:   readPlainRun,
+	interfaceTextReadPlainCmd = &cobra.Command{
+		Use:   "plain [text] ...",
+		Short: "make Anna read plain text",
+		Long:  "make Anna read plain text",
+		Run:   interfaceTextReadPlainRun,
 	}
 )
 
-func readPlainRun(cmd *cobra.Command, args []string) {
+func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
 		cmd.Help()
 		os.Exit(1)

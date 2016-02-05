@@ -3,20 +3,16 @@
 package log
 
 import (
+	"fmt"
+	builtinLog "log"
 	"os"
+	"strings"
+	"sync"
 
-	"github.com/kdar/factorlog"
+	"github.com/mgutz/ansi"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
-)
-
-type Level string
-
-const (
-	Debug Level = "debug"
-	Info  Level = "info"
-	Warn  Level = "warn"
-	Error Level = "error"
 )
 
 type Config struct {
@@ -27,37 +23,49 @@ type Config struct {
 	// be simple and clean. In the first iteration the log format looks like
 	// this.
 	//
-	//   [short severity] [yyyy-mm-dd hh:mm:ss] message
+	//   [yyyy-mm-dd hh:mm:ss] [L: short level] [O: object type / object ID] [V: verbosity] message
 	//
-	// For example a log line then looks like this.
+	// For example a log line then looks like this. Nothe that there is a padding
+	// of 16 characters to align log lines.
 	//
-	//   [I] [2016-01-26 23:37:03] hello, I am Anna
+	//   [16/02/09 12:05:52.628] [L: I] [O: main             / 56139b39e2f979be] [V: 10] hello, I am Anna
 	//
 	Format string
 
-	// LevelRange defines the log level to output by a min and a max value. Note
-	// that the list MUST provide 2 options. The first is the min, the last is
-	// the max value. If you want to dedicate to one specific log level, just
-	// provide the same log level type twice. See also OnlyLevel. By convention
-	// this can be a range between the following options.
+	// Levels is used to only log messages emitted with a level matching one of
+	// the levels given here.
 	//
-	//   Debug
-	//   Info
-	//   Warn
-	//   Error
+	//   D
+	//   I
+	//   W
+	//   E
+	//   F
 	//
-	LevelRange []Level
+	Levels []string
 
-	// Verbosity describes the log verbosity. By convention this can be between 0
-	// and 12. Reason for that are the 4 conventional severity types. This should
-	// help identifying and using the proper log verbosity for each severity
-	// type. So you can use 3 log verbosities for each log level as follows.
+	// RootLogger is the underlying logger actually logging messages.
+	RootLogger spec.RootLogger
+
+	// Objects is used to only log messages emitted by objects matching this
+	// given object type.
+	Objects []spec.ObjectType
+
+	// TraceID is used to only log messages emitted by requests matching this
+	// given trace ID.
+	TraceID spec.TraceID
+
+	// Verbosity is used to only log messages emitted with this given verbosity.
+	// By convention this can be between 0 and 15. Reason for that are the 5
+	// conventional log levels. This should help identifying and using the proper
+	// log verbosity for each log level. So you can use 3 log verbosities for
+	// each log level as follows.
 	//
 	//         0  disable logging
-	//    1 -  3  log level Error
-	//    4 -  6  log level Warn
-	//    7 -  9  log level Info
-	//   10 - 12  log level Debug
+	//    1 -  3  log level F
+	//    4 -  6  log level E
+	//    7 -  9  log level W
+	//   10 - 12  log level I
+	//   13 - 15  log level D
 	//
 	Verbosity int
 }
@@ -65,9 +73,11 @@ type Config struct {
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
 		Color:      true,
-		Format:     "[%{S}] [%{Date} %{Time}] %{Message}",
-		LevelRange: []Level{Debug, Error},
-		Verbosity:  12,
+		Levels:     []string{},
+		RootLogger: builtinLog.New(os.Stdout, "", 0),
+		Objects:    []spec.ObjectType{},
+		TraceID:    spec.TraceID(""),
+		Verbosity:  10,
 	}
 
 	return newDefaultConfig
@@ -76,60 +86,131 @@ func DefaultConfig() Config {
 // NewLog creates a new basic logger. Logging is important to comprehensible
 // track runtime information.
 func NewLog(config Config) spec.Log {
-	newFormat := config.Format
-	if config.Color {
-		newFormat = wrapColorFormat(newFormat)
-	}
-
 	newLog := log{
 		Config: config,
-		Log:    factorlog.New(os.Stdout, factorlog.NewStdFormatter(newFormat)),
+		Mutex:  sync.Mutex{},
 	}
 
-	newLog.Log.SetMinMaxSeverity(levelToSeverity(config.LevelRange[0]), levelToSeverity(config.LevelRange[1]))
-	newLog.Log.SetVerbosity(factorlog.Level(config.Verbosity))
-
-	return newLog
+	return &newLog
 }
 
 type log struct {
 	Config
 
-	Log *factorlog.FactorLog
+	Mutex sync.Mutex
 }
 
-func (l log) V(verbosity int) spec.Severity {
-	return l.Log.V(factorlog.Level(verbosity))
+func (l *log) ResetLevels() error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Levels = DefaultConfig().Levels
+	return nil
 }
 
-func (l log) Debug(v ...interface{}) {
-	l.Log.Debug(v)
+func (l *log) ResetObjects() error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Objects = DefaultConfig().Objects
+	return nil
 }
 
-func (l log) Debugf(format string, v ...interface{}) {
-	l.Log.Debugf(format, v)
+func (l *log) ResetVerbosity() error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Verbosity = DefaultConfig().Verbosity
+	return nil
 }
 
-func (l log) Error(v ...interface{}) {
-	l.Log.Error(v)
+func (l *log) SetLevels(list string) error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	if list == "" {
+		return nil
+	}
+
+	newLevels := []string{}
+	for _, level := range strings.Split(list, ",") {
+		// We only use that here for level validation.
+		_, err := colorForLevel(level)
+		if err != nil {
+			return maskAnyf(err, level)
+		}
+
+		newLevels = append(newLevels, level)
+	}
+
+	l.Levels = newLevels
+	return nil
 }
 
-func (l log) Errorf(format string, v ...interface{}) {
-	l.Log.Errorf(format, v)
+func (l *log) SetObjects(list string) error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	if list == "" {
+		return nil
+	}
+
+	newObjects := []spec.ObjectType{}
+	for _, objectType := range strings.Split(list, ",") {
+		if !containsObjectType(common.ObjectTypes, spec.ObjectType(objectType)) {
+			return maskAnyf(invalidLogObjectError, objectType)
+		}
+
+		newObjects = append(newObjects, spec.ObjectType(objectType))
+	}
+
+	l.Objects = newObjects
+	return nil
 }
 
-func (l log) Info(v ...interface{}) {
-	l.Log.Info(v)
+func (l *log) SetVerbosity(verbosity int) error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Verbosity = verbosity
+	return nil
 }
 
-func (l log) Infof(format string, v ...interface{}) {
-	l.Log.Infof(format, v)
-}
+func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
+	if len(l.Levels) != 0 && !containsString(l.Levels, tags.L) {
+		return
+	}
 
-func (l log) Warn(v ...interface{}) {
-	l.Log.Warn(v)
-}
+	if tags.O != nil && len(l.Objects) != 0 {
+		if !containsObjectType(l.Objects, tags.O.GetObjectType()) {
+			return
+		}
+	}
 
-func (l log) Warnf(format string, v ...interface{}) {
-	l.Log.Warnf(format, v)
+	if tags.T != nil && l.TraceID != spec.TraceID("") {
+		if tags.T.GetTraceID() != l.TraceID {
+			return
+		}
+	}
+
+	if tags.V == 0 || tags.V > l.Verbosity {
+		return
+	}
+
+	msg := fmt.Sprintf(extendFormatWithTags(f, tags), v...)
+
+	if l.Color {
+		color, err := colorForLevel(tags.L)
+		if err != nil {
+			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "%#v", maskAnyf(err, tags.L))
+			return
+		}
+		msg = ansi.Color(msg, color)
+	}
+
+	l.RootLogger.Println(msg)
+
+	if tags.L == "F" {
+		os.Exit(1)
+	}
 }

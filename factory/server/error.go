@@ -1,6 +1,8 @@
 package factoryserver
 
 import (
+	"fmt"
+
 	"github.com/juju/errgo"
 )
 
@@ -8,11 +10,13 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-func maskAnyf(cause error, f string, v ...interface{}) error {
-	err := maskAny(errgo.WithCausef(nil, cause, f, v...))
+func maskAnyf(err error, f string, v ...interface{}) error {
+	f = fmt.Sprintf("%s: %s", err.Error(), f)
+	newErr := errgo.WithCausef(err, errgo.Cause(err), f, v...)
 
-	if e, _ := err.(*errgo.Err); e != nil {
+	if e, _ := newErr.(*errgo.Err); e != nil {
 		e.SetLocation(1)
+		return e
 	}
 
 	return err

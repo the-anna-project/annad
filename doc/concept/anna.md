@@ -1,4 +1,19 @@
 # anna
+Anna, artificial neural network aspiration, is a neural network implementation
+aiming to learn and improve by itself.
+
+### autocompletion
+For convenience there are [autocompletion scripts](autocompletion.md).
+
+### build
+Compile the server and check the help usage for more information.
+
+```yaml
+make server
+.workspace/bin/anna -h
+```
+
+### overview
 This is the ten thousand feet view of Anna. To understand how she looks like
 from the very top we consider the following 4 layers.
 

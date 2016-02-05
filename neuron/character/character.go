@@ -1,4 +1,4 @@
-package neuron
+package characterneuron
 
 import (
 	"sync"
@@ -10,7 +10,7 @@ import (
 	"github.com/xh3b4sd/anna/state"
 )
 
-type CharacterNeuronConfig struct {
+type Config struct {
 	FactoryClient spec.Factory `json:"-"`
 
 	Log spec.Log `json:"-"`
@@ -18,37 +18,37 @@ type CharacterNeuronConfig struct {
 	State spec.State `json:"state,omitempty"`
 }
 
-func DefaultCharacterNeuronConfig() CharacterNeuronConfig {
+func DefaultConfig() Config {
 	newStateConfig := state.DefaultConfig()
 	newStateConfig.ObjectType = common.ObjectType.CharacterNeuron
 
-	newDefaultCharacterNeuronConfig := CharacterNeuronConfig{
+	newNeuronConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 	}
 
-	return newDefaultCharacterNeuronConfig
+	return newNeuronConfig
 }
 
-func NewCharacterNeuron(config CharacterNeuronConfig) spec.Neuron {
-	newCharacterNeuron := &characterNeuron{
-		CharacterNeuronConfig: config,
-		Mutex: sync.Mutex{},
+func NewNeuron(config Config) spec.Neuron {
+	newNeuron := &neuron{
+		Config: config,
+		Mutex:  sync.Mutex{},
 	}
 
-	return newCharacterNeuron
+	return newNeuron
 }
 
-type characterNeuron struct {
-	CharacterNeuronConfig
+type neuron struct {
+	Config
 
 	Mutex sync.Mutex `json:"-"`
 }
 
 // TODO
-func (cn *characterNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
-	cn.Log.V(11).Debugf("call CharacterNeuron.Trigger")
+func (n *neuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
 	return imp, nil, nil
 }

@@ -1,4 +1,4 @@
-package client
+package textinterface
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 
 	"github.com/xh3b4sd/anna/server/interface/text"
 )
+
+// read plain
 
 func readPlainEncoder(r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
