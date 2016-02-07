@@ -38,7 +38,7 @@ type client struct {
 }
 
 func (c *client) NewCore() (spec.Core, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewCore")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewCore")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.Core),
@@ -52,7 +52,7 @@ func (c *client) NewCore() (spec.Core, error) {
 }
 
 func (c *client) NewImpulse() (spec.Impulse, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewImpulse")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewImpulse")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.Impulse),
@@ -66,7 +66,7 @@ func (c *client) NewImpulse() (spec.Impulse, error) {
 }
 
 func (c *client) NewCharacterNeuron() (spec.Neuron, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewCharacterNeuron")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewImpulse")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.CharacterNeuron),
@@ -80,7 +80,7 @@ func (c *client) NewCharacterNeuron() (spec.Neuron, error) {
 }
 
 func (c *client) NewFirstNeuron() (spec.Neuron, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewFirstNeuron")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewFirstNeuron")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.FirstNeuron),
@@ -94,7 +94,7 @@ func (c *client) NewFirstNeuron() (spec.Neuron, error) {
 }
 
 func (c *client) NewJobNeuron() (spec.Neuron, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewFirstNeuron")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewJobNeuron")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.JobNeuron),
@@ -108,7 +108,7 @@ func (c *client) NewJobNeuron() (spec.Neuron, error) {
 }
 
 func (c *client) NewNetwork() (spec.Network, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewNetwork")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewNetwork")
 
 	bytes := map[string][]byte{
 		"request": []byte(common.ObjectType.Network),
@@ -122,7 +122,7 @@ func (c *client) NewNetwork() (spec.Network, error) {
 }
 
 func (c *client) NewState(objectType spec.ObjectType) (spec.State, error) {
-	c.Log.V(11).Debugf("call FactoryClient.NewState")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call NewState")
 
 	bytes := map[string][]byte{
 		"state-object-type": []byte(objectType),

@@ -1,24 +1,24 @@
-package network
+package firstneuron
 
 import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (n *network) GetObjectID() spec.ObjectID {
+func (n *neuron) GetObjectID() spec.ObjectID {
 	return n.State.GetObjectID()
 }
 
-func (n *network) GetObjectType() spec.ObjectType {
+func (n *neuron) GetObjectType() spec.ObjectType {
 	return n.State.GetObjectType()
 }
 
-func (n *network) GetState() spec.State {
+func (n *neuron) GetState() spec.State {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
 	return n.State
 }
 
-func (n *network) SetState(state spec.State) {
+func (n *neuron) SetState(state spec.State) {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
 	n.State = state

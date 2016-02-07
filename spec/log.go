@@ -1,21 +1,17 @@
 package spec
 
-type Log interface {
-	Severity
+type Tags struct {
+	L string
 
-	V(verbosity int) Severity
+	// O represents the object emitting the log message.
+	O Object
+
+	T Tracer
+
+	// V is the verbosity used to log messages.
+	V int
 }
 
-type Severity interface {
-	Debug(v ...interface{})
-	Debugf(format string, v ...interface{})
-
-	Error(v ...interface{})
-	Errorf(format string, v ...interface{})
-
-	Info(v ...interface{})
-	Infof(format string, v ...interface{})
-
-	Warn(v ...interface{})
-	Warnf(format string, v ...interface{})
+type Log interface {
+	WithTags(tags Tags, f string, v ...interface{})
 }

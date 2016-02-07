@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/spf13/pflag"
 
 	"github.com/xh3b4sd/anna/common"
@@ -26,12 +24,17 @@ func init() {
 	pflag.StringVar(&stateReader, "state-reader", string(common.StateType.FSReader), "where to read state from")
 	pflag.StringVar(&stateWriter, "state-writer", string(common.StateType.FSWriter), "where to write state to")
 
-	pflag.IntVarP(&verbosity, "verbosity", "v", 12, "verbosity of the logger: 0 - 12")
+	pflag.IntVarP(&verbosity, "verbosity", "v", 15, "verbosity of the logger: 0 - 15")
 
 	pflag.Parse()
 }
 
 func main() {
+	//
+	// create main object
+	//
+	m := mainO{}
+
 	//
 	// create dependencies
 	//
@@ -42,12 +45,13 @@ func main() {
 	newTextGateway := gateway.NewGateway()
 	newFileSystemReal := filesystemreal.NewFileSystem()
 
-	newLog.V(9).Infof("hello, I am Anna")
+	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "hello, I am Anna")
 
 	//
 	// create factory
 	//
-	newLog.V(9).Infof("creating factory")
+	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating factory")
+
 	newFactoryClientConfig := factoryclient.DefaultConfig()
 	newFactoryClientConfig.FactoryGateway = newFactoryGateway
 	newFactoryClientConfig.Log = newLog
@@ -65,18 +69,19 @@ func main() {
 	//
 	// create core
 	//
-	newLog.V(9).Infof("creating core")
+	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating core")
+
 	newCore, err := newFactoryServer.NewCore()
 	if err != nil {
-		newLog.V(3).Errorf("%#v", maskAny(err))
-		os.Exit(0)
+		newLog.WithTags(spec.Tags{L: "F", O: m, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 	go newCore.Boot()
 
 	//
 	// create server
 	//
-	newLog.V(9).Infof("creating server")
+	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating server")
+
 	newServerConfig := server.DefaultConfig()
 	newServerConfig.Log = newLog
 	newServerConfig.TextGateway = newTextGateway

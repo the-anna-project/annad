@@ -51,7 +51,7 @@ type impulse struct {
 }
 
 func (i *impulse) WalkThrough(neu spec.Neuron) (spec.Impulse, spec.Neuron, error) {
-	i.Log.V(11).Debugf("call Impulse.WalkThrough")
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call WalkThrough")
 
 	var err error
 	var imp spec.Impulse = i

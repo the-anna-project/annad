@@ -52,7 +52,7 @@ func (ti textInterface) ReadStream(stream string) ([]byte, error) {
 
 // return response
 func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
-	ti.Log.V(11).Debugf("call TextInterface.ReadPlainWithID")
+	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithID")
 
 	newConfig := gateway.DefaultSignalConfig()
 	newConfig.Bytes["request"] = []byte{}
@@ -69,7 +69,7 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 
 // return ID
 func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
-	ti.Log.V(11).Debugf("call TextInterface.ReadPlainWithPlain")
+	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithPlain")
 
 	newConfig := gateway.DefaultSignalConfig()
 	newConfig.Bytes["request"] = []byte(plain)
@@ -84,7 +84,7 @@ func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (s
 }
 
 func (ti textInterface) waitForSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
-	ti.Log.V(11).Debugf("call TextInterface.waitForSignal")
+	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call waitForSignal")
 
 	for {
 		response, err := ti.forwardSignal(ctx, signal)
@@ -101,7 +101,7 @@ func (ti textInterface) waitForSignal(ctx context.Context, signal gatewayspec.Si
 }
 
 func (ti textInterface) forwardSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
-	ti.Log.V(11).Debugf("call TextInterface.forwardSignal")
+	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call forwardSignal")
 
 	var err error
 	var response []byte
@@ -115,7 +115,7 @@ func (ti textInterface) forwardSignal(ctx context.Context, signal gatewayspec.Si
 		err := ti.TextGateway.SendSignal(signal)
 		if gateway.IsGatewayClosed(err) {
 			i++
-			ti.Log.V(6).Warnf("gateway is closed")
+			ti.Log.WithTags(spec.Tags{L: "W", O: ti, T: nil, V: 7}, "gateway is closed")
 			time.Sleep(1 * time.Second)
 			continue
 		} else if err != nil {

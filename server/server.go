@@ -49,7 +49,7 @@ type server struct {
 }
 
 func (s server) Listen() {
-	s.Log.V(11).Debugf("call Server.Listen")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Listen")
 
 	ctx := context.Background()
 
@@ -65,9 +65,9 @@ func (s server) Listen() {
 		http.Handle(url, handler)
 	}
 
-	s.Log.V(11).Debugf("server starts to listen on '%s'", s.Host)
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Host)
 	err := http.ListenAndServe(s.Host, nil)
 	if err != nil {
-		s.Log.V(3).Errorf("%#v", maskAny(err))
+		s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
 	}
 }

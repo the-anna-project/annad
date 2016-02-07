@@ -1,7 +1,11 @@
 package core
 
+import (
+	"github.com/xh3b4sd/anna/spec"
+)
+
 func (c *core) UnmarshalJSON(bytes []byte) error {
-	c.Log.V(11).Debugf("call Core.UnmarshalJSON")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call UnmarshalJSON")
 
 	err := c.GetState().SetStateFromObjectBytes(bytes)
 	if err != nil {
