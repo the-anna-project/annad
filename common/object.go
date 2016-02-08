@@ -15,6 +15,7 @@ type objectType struct {
 	FirstNeuron     spec.ObjectType
 	JobNeuron       spec.ObjectType
 	Log             spec.ObjectType
+	LogControl      spec.ObjectType
 	Main            spec.ObjectType
 	Network         spec.ObjectType
 	None            spec.ObjectType
@@ -35,6 +36,7 @@ var (
 		FirstNeuron:     spec.ObjectType("first-neuron"),
 		JobNeuron:       spec.ObjectType("job-neuron"),
 		Log:             spec.ObjectType("log"),
+		LogControl:      spec.ObjectType("log-control"),
 		Main:            spec.ObjectType("main"),
 		Network:         spec.ObjectType("network"),
 		None:            spec.ObjectType("none"),
@@ -54,6 +56,7 @@ var (
 		ObjectType.FirstNeuron,
 		ObjectType.JobNeuron,
 		ObjectType.Log,
+		ObjectType.LogControl,
 		ObjectType.Main,
 		ObjectType.Network,
 		ObjectType.None,

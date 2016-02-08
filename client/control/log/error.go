@@ -1,4 +1,4 @@
-package client
+package logcontrol
 
 import (
 	"github.com/juju/errgo"

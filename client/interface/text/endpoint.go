@@ -1,4 +1,4 @@
-package client
+package textinterface
 
 import (
 	"net/url"

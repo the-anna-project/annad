@@ -72,7 +72,7 @@ func DefaultConfig() Config {
 		Levels:      []string{},
 		ObjectTypes: []spec.ObjectType{},
 		TraceID:     spec.TraceID(""),
-		Verbosity:   15,
+		Verbosity:   10,
 	}
 
 	return newDefaultConfig

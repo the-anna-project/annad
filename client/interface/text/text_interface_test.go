@@ -1,4 +1,4 @@
-package client_test
+package textinterface_test
 
 import (
 	"encoding/json"

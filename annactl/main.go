@@ -9,7 +9,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/client"
+	"github.com/xh3b4sd/anna/client/control/log"
+	"github.com/xh3b4sd/anna/client/interface/text"
 	serverspec "github.com/xh3b4sd/anna/server/spec"
 )
 
@@ -19,11 +20,12 @@ var (
 	}
 
 	textInterface serverspec.TextInterface
+	logControl    serverspec.LogControl
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",
-		Short: "Interact with Anna",
-		Long:  "Interact with Anna",
+		Short: "interact with Anna",
+		Long:  "interact with Anna",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			host, port, err := net.SplitHostPort(globalFlags.Host)
@@ -31,10 +33,15 @@ var (
 				fmt.Printf("%#v\n", maskAny(err))
 				os.Exit(1)
 			}
+			hostport := net.JoinHostPort(host, port)
 
-			newTextInterfaceConfig := client.DefaultTextInterfaceConfig()
-			newTextInterfaceConfig.URL.Host = net.JoinHostPort(host, port)
-			textInterface = client.NewTextInterface(newTextInterfaceConfig)
+			newTextInterfaceConfig := textinterface.DefaultConfig()
+			newTextInterfaceConfig.URL.Host = hostport
+			textInterface = textinterface.NewTextInterface(newTextInterfaceConfig)
+
+			newLogControlConfig := logcontrol.DefaultConfig()
+			newLogControlConfig.URL.Host = hostport
+			textInterface = logcontrol.NewLogControl(newLogControlConfig)
 		},
 	}
 )
@@ -48,6 +55,10 @@ func mainRun(cmd *cobra.Command, args []string) {
 }
 
 func main() {
+	logCmd.AddCommand(logSetRun)
+	logCmd.AddCommand(logResetRun)
+
+	mainCmd.AddCommand(logCmd)
 	mainCmd.AddCommand(readPlainCmd)
 
 	mainCmd.Execute()

@@ -1,4 +1,4 @@
-package client
+package textinterface
 
 import (
 	"net/url"
@@ -11,24 +11,24 @@ import (
 	serverspec "github.com/xh3b4sd/anna/server/spec"
 )
 
-type TextInterfaceConfig struct {
+type Config struct {
 	URL *url.URL
 }
 
-func DefaultTextInterfaceConfig() TextInterfaceConfig {
-	newTextInterfaceConfig := TextInterfaceConfig{
+func DefaultConfig() Config {
+	newConfig := Config{
 		URL: &url.URL{
 			Host:   "127.0.0.1:9119",
 			Scheme: "http",
 		},
 	}
 
-	return newTextInterfaceConfig
+	return newConfig
 }
 
-func NewTextInterface(config TextInterfaceConfig) serverspec.TextInterface {
+func NewTextInterface(config Config) serverspec.TextInterface {
 	newTextInterface := &textInterface{
-		TextInterfaceConfig: config,
+		Config: config,
 
 		readPlainWithID:    newReadPlainWithIDEndpoint(config.URL, "/interface/text/action/readplain"),
 		readPlainWithPlain: newReadPlainWithPlainEndpoint(config.URL, "/interface/text/action/readplain"),
@@ -38,7 +38,7 @@ func NewTextInterface(config TextInterfaceConfig) serverspec.TextInterface {
 }
 
 type textInterface struct {
-	TextInterfaceConfig
+	Config
 
 	readPlainWithID    endpoint.Endpoint
 	readPlainWithPlain endpoint.Endpoint
