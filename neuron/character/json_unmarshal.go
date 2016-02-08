@@ -5,7 +5,7 @@ import (
 )
 
 func (n *neuron) UnmarshalJSON(bytes []byte) error {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call UnmarshalJSON")
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 15}, "call UnmarshalJSON")
 
 	err := n.GetState().SetStateFromObjectBytes(bytes)
 	if err != nil {

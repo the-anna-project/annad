@@ -17,14 +17,20 @@ var (
 	stateReader string
 	stateWriter string
 
-	verbosity int
+	logTags struct {
+		L string
+		O string
+		V int
+	}
 )
 
 func init() {
 	pflag.StringVar(&stateReader, "state-reader", string(common.StateType.FSReader), "where to read state from")
 	pflag.StringVar(&stateWriter, "state-writer", string(common.StateType.FSWriter), "where to write state to")
 
-	pflag.IntVarP(&verbosity, "verbosity", "v", 15, "verbosity of the logger: 0 - 15")
+	pflag.StringVar(&logTags.L, "log-tag-l", "", "level tag of the logger: comma separated")
+	pflag.StringVar(&logTags.O, "log-tag-o", "", "object type tag of the logger: comma separated")
+	pflag.IntVar(&logTags.V, "log-tag-v", 15, "verbosity tag of the logger: 0 - 15")
 
 	pflag.Parse()
 }
@@ -39,9 +45,10 @@ func main() {
 	// create dependencies
 	//
 	newFactoryGateway := gateway.NewGateway()
-	newLogConfig := log.DefaultConfig()
-	newLogConfig.Verbosity = verbosity
-	newLog := log.NewLog(newLogConfig)
+	newLog := log.NewLog(log.DefaultConfig())
+	newLog.SetLevels(logTags.L)
+	newLog.SetObjectTypes(logTags.O)
+	newLog.SetVerbosity(logTags.V)
 	newTextGateway := gateway.NewGateway()
 	newFileSystemReal := filesystemreal.NewFileSystem()
 

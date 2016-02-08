@@ -9,11 +9,11 @@ import (
 )
 
 func (s *state) Write() error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Write")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "call Write")
 
 	switch s.StateWriter {
 	case common.StateType.FSWriter:
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "backing up state to file")
+		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "backing up state to file")
 
 		err := s.WriteFile(common.DefaultStateFile)
 		if err != nil {
@@ -21,7 +21,7 @@ func (s *state) Write() error {
 		}
 	case common.StateType.NoneWriter:
 		// Do nothing.
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "NOT backing up state")
+		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "NOT backing up state")
 	default:
 		return maskAny(invalidStateWriterError)
 	}
@@ -30,7 +30,7 @@ func (s *state) Write() error {
 }
 
 func (s *state) WriteFile(filename string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WriteFile")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "call WriteFile")
 
 	bytes, err := json.Marshal(s)
 	if err != nil {
@@ -41,6 +41,7 @@ func (s *state) WriteFile(filename string) error {
 	if err != nil {
 		return maskAny(err)
 	}
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "state backed up")
 
 	return nil
 }

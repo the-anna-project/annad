@@ -6,9 +6,12 @@ import (
 	"fmt"
 	builtinLog "log"
 	"os"
+	"strings"
+	"sync"
 
 	"github.com/mgutz/ansi"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -39,9 +42,9 @@ type Config struct {
 	//
 	Levels []string
 
-	// ObjectType is used to only log messages emitted by objects matching this
+	// ObjectTypes is used to only log messages emitted by objects matching this
 	// given object type.
-	ObjectType spec.ObjectType
+	ObjectTypes []spec.ObjectType
 
 	// TraceID is used to only log messages emitted by requests matching this
 	// given trace ID.
@@ -65,11 +68,11 @@ type Config struct {
 
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
-		Color:      true,
-		Levels:     []string{"D", "E", "F", "I", "W"},
-		ObjectType: spec.ObjectType(""),
-		TraceID:    spec.TraceID(""),
-		Verbosity:  15,
+		Color:       true,
+		Levels:      []string{},
+		ObjectTypes: []spec.ObjectType{},
+		TraceID:     spec.TraceID(""),
+		Verbosity:   15,
 	}
 
 	return newDefaultConfig
@@ -81,6 +84,7 @@ func NewLog(config Config) spec.Log {
 	newLog := log{
 		Config: config,
 		Logger: builtinLog.New(os.Stdout, "", 0),
+		Mutex:  sync.Mutex{},
 	}
 
 	return &newLog
@@ -90,15 +94,88 @@ type log struct {
 	Config
 
 	Logger spec.RootLogger
+	Mutex  sync.Mutex
 }
 
-func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
-	if !contains(l.Levels, tags.L) {
+func (l *log) ResetLevels() {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Levels = DefaultConfig().Levels
+}
+
+func (l *log) ResetObjectTypes() {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.ObjectTypes = DefaultConfig().ObjectTypes
+}
+
+func (l *log) ResetVerbosity() {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Verbosity = DefaultConfig().Verbosity
+}
+
+func (l *log) SetLevels(list string) {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	if list == "" {
 		return
 	}
 
-	if tags.O != nil && l.ObjectType != spec.ObjectType("") {
-		if tags.O.GetObjectType() != l.ObjectType {
+	newLevels := []string{}
+	for _, level := range strings.Split(list, ",") {
+		// We only use that here for level validation.
+		_, err := colorForLevel(level)
+		if err != nil {
+			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "%#v", maskAnyf(err, level))
+			continue
+		}
+
+		newLevels = append(newLevels, level)
+	}
+
+	l.Levels = newLevels
+}
+
+func (l *log) SetObjectTypes(list string) {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	if list == "" {
+		return
+	}
+
+	newObjectTypes := []spec.ObjectType{}
+	for _, objectType := range strings.Split(list, ",") {
+		if !containsObjectType(common.ObjectTypes, spec.ObjectType(objectType)) {
+			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "invalid objectType '%s'", objectType)
+			continue
+		}
+
+		newObjectTypes = append(newObjectTypes, spec.ObjectType(objectType))
+	}
+
+	l.ObjectTypes = newObjectTypes
+}
+
+func (l *log) SetVerbosity(verbosity int) {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.Verbosity = verbosity
+}
+
+func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
+	if len(l.Levels) != 0 && !containsString(l.Levels, tags.L) {
+		return
+	}
+
+	if tags.O != nil && len(l.ObjectTypes) != 0 {
+		if !containsObjectType(l.ObjectTypes, tags.O.GetObjectType()) {
 			return
 		}
 	}
@@ -113,22 +190,13 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 		return
 	}
 
-	color := "cyan"
-	switch tags.L {
-	case "D":
-		color = "cyan"
-	case "E":
-		color = "red"
-	case "F":
-		color = "magenta"
-	case "I":
-		color = "white"
-	case "W":
-		color = "yellow"
-	}
-
 	msg := fmt.Sprintf(extendFormatWithTags(f, tags), v...)
 	if l.Color {
+		color, err := colorForLevel(tags.L)
+		if err != nil {
+			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "%#v", maskAnyf(err, tags.L))
+			return
+		}
 		msg = ansi.Color(msg, color)
 	}
 

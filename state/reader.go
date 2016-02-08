@@ -8,11 +8,11 @@ import (
 )
 
 func (s *state) Read() error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Read")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "call Read")
 
 	switch s.StateReader {
 	case common.StateType.FSReader:
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "restoring state backup from file")
+		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "restoring state backup from file")
 
 		err := s.ReadFile(common.DefaultStateFile)
 		if err != nil {
@@ -20,7 +20,7 @@ func (s *state) Read() error {
 		}
 	case common.StateType.NoneReader:
 		// Do nothing.
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "NOT restoring state backup")
+		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "NOT restoring state backup")
 	default:
 		return maskAny(invalidStateReaderError)
 	}
@@ -29,7 +29,7 @@ func (s *state) Read() error {
 }
 
 func (s *state) ReadFile(filename string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call ReadFile")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "call ReadFile")
 
 	bytes, err := s.FileSystem.ReadFile(filename)
 	if err != nil {
@@ -41,7 +41,7 @@ func (s *state) ReadFile(filename string) error {
 		return maskAny(err)
 	}
 
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "state backup restored")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "state backup restored")
 
 	return nil
 }

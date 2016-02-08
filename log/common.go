@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -30,7 +31,7 @@ func extendFormatWithTags(f string, tags spec.Tags) string {
 	return newFormat
 }
 
-func contains(list []string, item string) bool {
+func containsString(list []string, item string) bool {
 	for _, member := range list {
 		if item == member {
 			return true
@@ -38,4 +39,22 @@ func contains(list []string, item string) bool {
 	}
 
 	return false
+}
+
+func containsObjectType(list []spec.ObjectType, item spec.ObjectType) bool {
+	for _, member := range list {
+		if item == member {
+			return true
+		}
+	}
+
+	return false
+}
+
+func colorForLevel(level string) (string, error) {
+	if c, ok := common.LevelColors[level]; ok {
+		return c, nil
+	}
+
+	return "", maskAny(invalidLogLevelError)
 }

@@ -58,7 +58,7 @@ type server struct {
 }
 
 func (s *server) listenToGateway() {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call listenToGateway")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call listenToGateway")
 
 	for {
 		newSignal, err := s.FactoryGateway.ReceiveSignal()
@@ -113,7 +113,7 @@ func (s *server) listenToGateway() {
 			}
 			response, err = s.NewState(spec.ObjectType(stateObjectType))
 		default:
-			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call listenToGateway")
+			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call listenToGateway")
 			newSignal.SetError(maskAny(invalidFactoryGatewayRequestError))
 			responder <- newSignal
 			continue
@@ -131,7 +131,7 @@ func (s *server) listenToGateway() {
 }
 
 func (s *server) NewCore() (spec.Core, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewCore")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewCore")
 
 	var err error
 
@@ -149,7 +149,7 @@ func (s *server) NewCore() (spec.Core, error) {
 }
 
 func (s *server) NewImpulse() (spec.Impulse, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewImpulse")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewImpulse")
 
 	var err error
 
@@ -166,7 +166,7 @@ func (s *server) NewImpulse() (spec.Impulse, error) {
 }
 
 func (s *server) NewCharacterNeuron() (spec.Neuron, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewCharacterNeuron")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewCharacterNeuron")
 
 	var err error
 
@@ -183,7 +183,7 @@ func (s *server) NewCharacterNeuron() (spec.Neuron, error) {
 }
 
 func (s *server) NewFirstNeuron() (spec.Neuron, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewFirstNeuron")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewFirstNeuron")
 
 	var err error
 
@@ -200,7 +200,7 @@ func (s *server) NewFirstNeuron() (spec.Neuron, error) {
 }
 
 func (s *server) NewJobNeuron() (spec.Neuron, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewJobNeuron")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewJobNeuron")
 
 	var err error
 
@@ -217,7 +217,7 @@ func (s *server) NewJobNeuron() (spec.Neuron, error) {
 }
 
 func (s *server) NewNetwork() (spec.Network, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewNetwork")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewNetwork")
 
 	var err error
 
@@ -234,7 +234,7 @@ func (s *server) NewNetwork() (spec.Network, error) {
 }
 
 func (s *server) NewState(objectType spec.ObjectType) (spec.State, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call NewState")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call NewState")
 
 	newStateConfig := state.DefaultConfig()
 	newStateConfig.FactoryClient = s.FactoryClient

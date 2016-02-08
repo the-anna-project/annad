@@ -21,6 +21,21 @@ type Tags struct {
 // Log is a logger used to filter logs based on tags before actually logging
 // them.
 type Log interface {
+	// SetLevels takes a comma separated list of provided log levels and causes
+	// the logger to only log messages tagged related to log levels of the given
+	// list.
+	SetLevels(list string)
+
+	// SetObjectTypes takes a comma separated list of provided object types and
+	// causes the logger to only log messages tagged related to object types of
+	// the given list.
+	SetObjectTypes(list string)
+
+	// SetVerbosity causes the logger to only log messages tagged related to the
+	// given verbosity.
+	SetVerbosity(verbosity int)
+
+	// WithTags logs a message based on the provided tags.
 	WithTags(tags Tags, f string, v ...interface{})
 }
 

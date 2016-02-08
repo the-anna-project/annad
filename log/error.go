@@ -1,4 +1,4 @@
-package factoryserver
+package log
 
 import (
 	"fmt"
@@ -21,8 +21,8 @@ func maskAnyf(cause error, f string, v ...interface{}) error {
 	return err
 }
 
-var invalidFactoryGatewayRequestError = errgo.New("invalid factory gateway request")
+var invalidLogLevelError = errgo.New("invalid log level")
 
-func IsInvalidFactoryGatewayRequest(err error) bool {
-	return errgo.Cause(err) == invalidFactoryGatewayRequestError
+func IsInvalidLogLevel(err error) bool {
+	return errgo.Cause(err) == invalidLogLevelError
 }

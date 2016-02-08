@@ -11,7 +11,7 @@ func (s server) GetObjectID() spec.ObjectID {
 }
 
 func (s server) GetObjectType() spec.ObjectType {
-	return common.ObjectType.TextInterface
+	return common.ObjectType.Server
 }
 
 // GetState is not implemented for this object.
