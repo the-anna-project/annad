@@ -41,5 +41,7 @@ func (s *state) ReadFile(filename string) error {
 		return maskAny(err)
 	}
 
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "state backup restored")
+
 	return nil
 }

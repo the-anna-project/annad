@@ -3,9 +3,11 @@
 package log
 
 import (
+	"fmt"
+	builtinLog "log"
 	"os"
 
-	"github.com/kdar/factorlog"
+	"github.com/mgutz/ansi"
 
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -26,11 +28,8 @@ type Config struct {
 	//
 	Format string
 
-	// LevelRange defines the log level to output by a min and a max value. Note
-	// that the list MUST provide 2 options. The first is the min, the last is
-	// the max value. If you want to dedicate to one specific log level, just
-	// provide the same log level type twice. See also OnlyLevel. By convention
-	// this can be a range between the following options.
+	// Levels is used to only log messages emitted with a level matching one of
+	// the levels given here.
 	//
 	//   D
 	//   I
@@ -38,12 +37,21 @@ type Config struct {
 	//   E
 	//   F
 	//
-	LevelRange []string
+	Levels []string
 
-	// Verbosity describes the log verbosity. By convention this can be between 0
-	// and 15. Reason for that are the 5 conventional log levels. This should
-	// help identifying and using the proper log verbosity for each log level. So
-	// you can use 3 log verbosities for each log level as follows.
+	// ObjectType is used to only log messages emitted by objects matching this
+	// given object type.
+	ObjectType spec.ObjectType
+
+	// TraceID is used to only log messages emitted by requests matching this
+	// given trace ID.
+	TraceID spec.TraceID
+
+	// Verbosity is used to only log messages emitted with this given verbosity.
+	// By convention this can be between 0 and 15. Reason for that are the 5
+	// conventional log levels. This should help identifying and using the proper
+	// log verbosity for each log level. So you can use 3 log verbosities for
+	// each log level as follows.
 	//
 	//         0  disable logging
 	//    1 -  3  log level F
@@ -58,8 +66,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
 		Color:      true,
-		Format:     "%{Message}",
-		LevelRange: []string{"D", "F"},
+		Levels:     []string{"D", "E", "F", "I", "W"},
+		ObjectType: spec.ObjectType(""),
+		TraceID:    spec.TraceID(""),
 		Verbosity:  15,
 	}
 
@@ -69,18 +78,10 @@ func DefaultConfig() Config {
 // NewLog creates a new basic logger. Logging is important to comprehensible
 // track runtime information.
 func NewLog(config Config) spec.Log {
-	newFormat := config.Format
-	if config.Color {
-		newFormat = wrapColorFormat(newFormat)
-	}
-
 	newLog := log{
 		Config: config,
-		Logger: factorlog.New(os.Stdout, factorlog.NewStdFormatter(newFormat)),
+		Logger: builtinLog.New(os.Stdout, "", 0),
 	}
-
-	newLog.Logger.SetMinMaxSeverity(levelToSeverity(config.LevelRange[0]), levelToSeverity(config.LevelRange[1]))
-	newLog.Logger.SetVerbosity(factorlog.Level(config.Verbosity))
 
 	return &newLog
 }
@@ -88,22 +89,48 @@ func NewLog(config Config) spec.Log {
 type log struct {
 	Config
 
-	Logger *factorlog.FactorLog
+	Logger spec.RootLogger
 }
 
 func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
+	if !contains(l.Levels, tags.L) {
+		return
+	}
+
+	if tags.O != nil && l.ObjectType != spec.ObjectType("") {
+		if tags.O.GetObjectType() != l.ObjectType {
+			return
+		}
+	}
+
+	if tags.T != nil && l.TraceID != spec.TraceID("") {
+		if tags.T.GetTraceID() != l.TraceID {
+			return
+		}
+	}
+
+	if tags.V == 0 || tags.V > l.Verbosity {
+		return
+	}
+
+	color := "cyan"
 	switch tags.L {
 	case "D":
-		l.Logger.V(factorlog.Level(tags.V)).Debugf(extendFormatWithTags(f, tags), v...)
+		color = "cyan"
 	case "E":
-		l.Logger.V(factorlog.Level(tags.V)).Errorf(extendFormatWithTags(f, tags), v...)
+		color = "red"
 	case "F":
-		l.Logger.V(factorlog.Level(tags.V)).Fatalf(extendFormatWithTags(f, tags), v...)
+		color = "magenta"
 	case "I":
-		l.Logger.V(factorlog.Level(tags.V)).Infof(extendFormatWithTags(f, tags), v...)
+		color = "white"
 	case "W":
-		l.Logger.V(factorlog.Level(tags.V)).Warnf(extendFormatWithTags(f, tags), v...)
-	default:
-		l.Logger.V(factorlog.Level(tags.V)).Debugf(extendFormatWithTags(f, tags), v...)
+		color = "yellow"
 	}
+
+	msg := fmt.Sprintf(extendFormatWithTags(f, tags), v...)
+	if l.Color {
+		msg = ansi.Color(msg, color)
+	}
+
+	l.Logger.Println(msg)
 }

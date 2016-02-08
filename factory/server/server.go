@@ -70,7 +70,7 @@ func (s *server) listenToGateway() {
 			s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
 			continue
 		}
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "factory received new signal '%s'", newSignal.GetID())
+		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "received new signal '%s'", newSignal.GetID())
 
 		responder, err := newSignal.GetResponder()
 		if gateway.IsSignalCanceled(err) {
