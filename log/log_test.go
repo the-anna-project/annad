@@ -179,7 +179,10 @@ func Test_Log_002(t *testing.T) {
 	// Reset the test logger to clean the log message of the previous logging.
 	newRootLogger.ResetArgs()
 	// Set levels so log messages should not be logged.
-	newLog.SetLevels("I,D")
+	err := newLog.SetLevels("I,D")
+	if err != nil {
+		t.Fatalf("Log.SetLevels returned error: %#v", err)
+	}
 
 	// Because the level we use is not allowed, the message should not be logged.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -190,7 +193,10 @@ func Test_Log_002(t *testing.T) {
 
 	// Resetting the levels should log the same log message.
 	newRootLogger.ResetArgs()
-	newLog.ResetLevels()
+	err = newLog.ResetLevels()
+	if err != nil {
+		t.Fatalf("Log.ResetLevels returned error: %#v", err)
+	}
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
 	result = newRootLogger.ArgsToString()
 	if !strings.Contains(result, "test message") {
@@ -198,7 +204,7 @@ func Test_Log_002(t *testing.T) {
 	}
 }
 
-// Test_Log_003 checks that setting and resetting objects works as expected.
+// Test_Log_003 checks that setting invalid levels throws an error.
 func Test_Log_003(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
@@ -215,8 +221,67 @@ func Test_Log_003(t *testing.T) {
 
 	// Reset the test logger to clean the log message of the previous logging.
 	newRootLogger.ResetArgs()
+	// Set levels so log messages should not be logged.
+	err := newLog.SetLevels("foo")
+	if !log.IsInvalidLogLevel(err) {
+		t.Fatalf("Log.SetLevels NOT returned proper error")
+	}
+}
+
+// Test_Log_004 checks that setting levels with empty string does not have any
+// effect.
+func Test_Log_004(t *testing.T) {
+	newRootLogger := &rootLogger{Args: []interface{}{}}
+
+	newLogConfig := log.DefaultConfig()
+	newLogConfig.RootLogger = newRootLogger
+	newLog := log.NewLog(newLogConfig)
+
+	// Logging a normal log message should work.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result := newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+
+	// Reset the test logger to clean the log message of the previous logging.
+	newRootLogger.ResetArgs()
+	// Try to set levels to empty string. This should have not effect.
+	err := newLog.SetLevels("")
+	if err != nil {
+		t.Fatalf("Log.SetLevels returned error: %#v", err)
+	}
+
+	// Because nothing should have changed, the same log still should be logged.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result = newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+}
+
+// Test_Log_005 checks that setting and resetting objects works as expected.
+func Test_Log_005(t *testing.T) {
+	newRootLogger := &rootLogger{Args: []interface{}{}}
+
+	newLogConfig := log.DefaultConfig()
+	newLogConfig.RootLogger = newRootLogger
+	newLog := log.NewLog(newLogConfig)
+
+	// Logging a normal log message should work.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result := newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+
+	// Reset the test logger to clean the log message of the previous logging.
+	newRootLogger.ResetArgs()
 	// Set objects so log messages should not be logged.
-	newLog.SetObjects("network,impulse")
+	err := newLog.SetObjects("network,impulse")
+	if err != nil {
+		t.Fatalf("Log.SetObjects returned error: %#v", err)
+	}
 
 	// Because the object we use is not allowed, the message should not be logged.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -227,7 +292,10 @@ func Test_Log_003(t *testing.T) {
 
 	// Resetting the objects should log the same log message.
 	newRootLogger.ResetArgs()
-	newLog.ResetObjects()
+	err = newLog.ResetObjects()
+	if err != nil {
+		t.Fatalf("Log.ResetObjects returned error: %#v", err)
+	}
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
 	result = newRootLogger.ArgsToString()
 	if !strings.Contains(result, "test message") {
@@ -235,8 +303,64 @@ func Test_Log_003(t *testing.T) {
 	}
 }
 
-// Test_Log_004 checks that setting and resetting verbosity works as expected.
-func Test_Log_004(t *testing.T) {
+// Test_Log_006 checks that setting invalid objects throws an error.
+func Test_Log_006(t *testing.T) {
+	newRootLogger := &rootLogger{Args: []interface{}{}}
+
+	newLogConfig := log.DefaultConfig()
+	newLogConfig.RootLogger = newRootLogger
+	newLog := log.NewLog(newLogConfig)
+
+	// Logging a normal log message should work.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result := newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+
+	// Reset the test logger to clean the log message of the previous logging.
+	newRootLogger.ResetArgs()
+	// Set objects so log messages should not be logged.
+	err := newLog.SetObjects("foo")
+	if !log.IsInvalidLogObject(err) {
+		t.Fatalf("Log.SetObjects NOT returned proper error")
+	}
+}
+
+// Test_Log_007 checks that setting objects with empty string does not have any
+// effect.
+func Test_Log_007(t *testing.T) {
+	newRootLogger := &rootLogger{Args: []interface{}{}}
+
+	newLogConfig := log.DefaultConfig()
+	newLogConfig.RootLogger = newRootLogger
+	newLog := log.NewLog(newLogConfig)
+
+	// Logging a normal log message should work.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result := newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+
+	// Reset the test logger to clean the log message of the previous logging.
+	newRootLogger.ResetArgs()
+	// Try to set objects to empty string. This should have not effect.
+	err := newLog.SetObjects("")
+	if err != nil {
+		t.Fatalf("Log.SetObjects returned error: %#v", err)
+	}
+
+	// Because nothing should have changed, the same log still should be logged.
+	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
+	result = newRootLogger.ArgsToString()
+	if !strings.Contains(result, "test message") {
+		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
+	}
+}
+
+// Test_Log_008 checks that setting and resetting verbosity works as expected.
+func Test_Log_008(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
 	newLogConfig := log.DefaultConfig()
@@ -253,7 +377,10 @@ func Test_Log_004(t *testing.T) {
 	// Reset the test logger to clean the log message of the previous logging.
 	newRootLogger.ResetArgs()
 	// Set verbosity lower than what we are going to use next.
-	newLog.SetVerbosity(newLogConfig.Verbosity - 1)
+	err := newLog.SetVerbosity(newLogConfig.Verbosity - 1)
+	if err != nil {
+		t.Fatalf("Log.SetVerbosity returned error: %#v", err)
+	}
 
 	// Because the verbosity is lower than what we use, the message should not be
 	// logged.
@@ -265,7 +392,10 @@ func Test_Log_004(t *testing.T) {
 
 	// Resetting the verbosity should log the same log message.
 	newRootLogger.ResetArgs()
-	newLog.ResetVerbosity()
+	err = newLog.ResetVerbosity()
+	if err != nil {
+		t.Fatalf("Log.ResetVerbosity returned error: %#v", err)
+	}
 	newLog.WithTags(spec.Tags{L: "I", O: core{}, V: newLogConfig.Verbosity}, "test message")
 	result = newRootLogger.ArgsToString()
 	if !strings.Contains(result, "test message") {

@@ -2,8 +2,8 @@
 The client implementation of Anna's network API is reprsented by the command
 line tool `annactl`. This is what you can do with it.
 
-- [log control](logging.md#log-control): configure Anna's logging behavior at runtime.
-- [text interface](gateway.md#text-interface): feed Anna with text input.
+- [log control](control.md#log): configure Anna's logging behavior at runtime.
+- [text interface](interface.md#text): feed Anna with text input.
 
 Compile the client and check the help usage for more information.
 

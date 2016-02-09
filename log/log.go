@@ -23,11 +23,12 @@ type Config struct {
 	// be simple and clean. In the first iteration the log format looks like
 	// this.
 	//
-	//   [short severity] [yyyy-mm-dd hh:mm:ss] message
+	//   [yyyy-mm-dd hh:mm:ss] [L: short level] [O: object type / object ID] [V: verbosity] message
 	//
-	// For example a log line then looks like this.
+	// For example a log line then looks like this. Nothe that there is a padding
+	// of 16 characters to align log lines.
 	//
-	//   [I] [2016-01-26 23:37:03] hello, I am Anna
+	//   [16/02/09 12:05:52.628] [L: I] [O: main             / 56139b39e2f979be] [V: 10] hello, I am Anna
 	//
 	Format string
 
@@ -157,7 +158,7 @@ func (l *log) SetObjects(list string) error {
 	newObjects := []spec.ObjectType{}
 	for _, objectType := range strings.Split(list, ",") {
 		if !containsObjectType(common.ObjectTypes, spec.ObjectType(objectType)) {
-			return maskAnyf(invalidObjectTypeError, objectType)
+			return maskAnyf(invalidLogObjectError, objectType)
 		}
 
 		newObjects = append(newObjects, spec.ObjectType(objectType))
@@ -208,4 +209,8 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 	}
 
 	l.RootLogger.Println(msg)
+
+	if tags.L == "F" {
+		os.Exit(1)
+	}
 }

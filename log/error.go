@@ -10,12 +10,13 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-func maskAnyf(cause error, f string, v ...interface{}) error {
-	f = fmt.Sprintf("%s: %s", cause.Error(), f)
-	err := maskAny(errgo.WithCausef(nil, cause, f, v...))
+func maskAnyf(err error, f string, v ...interface{}) error {
+	f = fmt.Sprintf("%s: %s", err.Error(), f)
+	newErr := errgo.WithCausef(err, errgo.Cause(err), f, v...)
 
-	if e, _ := err.(*errgo.Err); e != nil {
+	if e, _ := newErr.(*errgo.Err); e != nil {
 		e.SetLocation(1)
+		return e
 	}
 
 	return err
@@ -27,8 +28,8 @@ func IsInvalidLogLevel(err error) bool {
 	return errgo.Cause(err) == invalidLogLevelError
 }
 
-var invalidObjectTypeError = errgo.New("invalid object type")
+var invalidLogObjectError = errgo.New("invalid log object")
 
-func IsInvalidObjectType(err error) bool {
-	return errgo.Cause(err) == invalidObjectTypeError
+func IsInvalidLogObject(err error) bool {
+	return errgo.Cause(err) == invalidLogObjectError
 }

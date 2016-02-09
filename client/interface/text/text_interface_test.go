@@ -15,6 +15,8 @@ import (
 	serverspec "github.com/xh3b4sd/anna/server/spec"
 )
 
+// helper
+
 func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (serverspec.TextInterface, *httptest.Server) {
 	ts := httptest.NewServer(handler)
 
@@ -29,6 +31,8 @@ func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (serverspec.T
 
 	return newTextInterface, ts
 }
+
+// read plain with plain
 
 // Test_TextInterface_001 checks for TextInterface.ReadPlainWithPlain to work properly
 // under normal conditions using api.WithID.
@@ -110,6 +114,8 @@ func Test_TextInterface_004(t *testing.T) {
 		t.Fatalf("expected response ID to be empty, got '%s'", ID)
 	}
 }
+
+// read plain with ID
 
 // Test_TextInterface_005 checks for TextInterface.ReadPlainWithID to work properly
 // under normal conditions.
