@@ -12,8 +12,8 @@ import (
 var (
 	readPlainCmd = &cobra.Command{
 		Use:   "readplain [text] ...",
-		Short: "Let Anna read plain text input",
-		Long:  "Let Anna read plain text input",
+		Short: "let Anna read plain text input",
+		Long:  "let Anna read plain text input",
 		Run:   readPlainRun,
 	}
 )

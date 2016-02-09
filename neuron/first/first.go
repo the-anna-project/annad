@@ -1,4 +1,4 @@
-package neuron
+package firstneuron
 
 import (
 	"sync"
@@ -10,7 +10,7 @@ import (
 	"github.com/xh3b4sd/anna/state"
 )
 
-type FirstNeuronConfig struct {
+type Config struct {
 	FactoryClient spec.Factory `json:"-"`
 
 	Log spec.Log `json:"-"`
@@ -18,43 +18,43 @@ type FirstNeuronConfig struct {
 	State spec.State `json:"state,omitempty"`
 }
 
-func DefaultFirstNeuronConfig() FirstNeuronConfig {
+func DefaultConfig() Config {
 	newStateConfig := state.DefaultConfig()
 	newStateConfig.ObjectType = common.ObjectType.FirstNeuron
 
-	newDefaultJobNeuronConfig := FirstNeuronConfig{
+	newDefaultConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		State:         state.NewState(newStateConfig),
 	}
 
-	return newDefaultJobNeuronConfig
+	return newDefaultConfig
 }
 
-func NewFirstNeuron(config FirstNeuronConfig) spec.Neuron {
-	newFirstNeuron := &firstNeuron{
-		FirstNeuronConfig: config,
-		Mutex:             sync.Mutex{},
+func NewNeuron(config Config) spec.Neuron {
+	newNeuron := &neuron{
+		Config: config,
+		Mutex:  sync.Mutex{},
 	}
 
-	return newFirstNeuron
+	return newNeuron
 }
 
-type firstNeuron struct {
-	FirstNeuronConfig
+type neuron struct {
+	Config
 
 	Mutex sync.Mutex `json:"-"`
 }
 
-func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
-	fn.Log.V(11).Debugf("call FirstNeuron.Trigger")
+func (n *neuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
-	neu, err := fn.GetState().GetNeuronByID(imp.GetObjectID())
+	neu, err := n.GetState().GetNeuronByID(imp.GetObjectID())
 	if state.IsNeuronNotFound(err) {
-		fn.Log.V(12).Debugf("create job neuron")
+		n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 14}, "create job neuron")
 
 		// Create new job neuron with the impulse ID.
-		neu, err = fn.FactoryClient.NewJobNeuron()
+		neu, err = n.FactoryClient.NewJobNeuron()
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
@@ -67,7 +67,7 @@ func (fn *firstNeuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, err
 		neu.SetState(state.NewState(newStateConfig))
 
 		// Track new neuron.
-		fn.GetState().SetNeuron(neu)
+		n.GetState().SetNeuron(neu)
 	} else if err != nil {
 		return nil, nil, maskAny(err)
 	}

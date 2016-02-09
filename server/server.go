@@ -8,6 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -49,7 +50,7 @@ type server struct {
 }
 
 func (s server) Listen() {
-	s.Log.V(11).Debugf("call Server.Listen")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Listen")
 
 	ctx := context.Background()
 
@@ -59,15 +60,22 @@ func (s server) Listen() {
 	newTextInterfaceConfig.TextGateway = s.TextGateway
 	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
 	newTextInterfaceHandlers := textinterface.NewHandlers(ctx, newTextInterface)
-
-	// http
 	for url, handler := range newTextInterfaceHandlers {
 		http.Handle(url, handler)
 	}
 
-	s.Log.V(11).Debugf("server starts to listen on '%s'", s.Host)
+	// log control
+	newLogControlConfig := logcontrol.DefaultConfig()
+	newLogControlConfig.Log = s.Log
+	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+	newLogControlHandlers := logcontrol.NewHandlers(ctx, newLogControl)
+	for url, handler := range newLogControlHandlers {
+		http.Handle(url, handler)
+	}
+
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Host)
 	err := http.ListenAndServe(s.Host, nil)
 	if err != nil {
-		s.Log.V(3).Errorf("%#v", maskAny(err))
+		s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
 	}
 }

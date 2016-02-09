@@ -10,12 +10,12 @@ import (
 )
 
 //func (s *state) MarshalJSON() ([]byte, error) {
-//	s.Log.V(11).Debugf("call State.MarshalJSON")
+//	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call UnmarshalJSON")
 //	return nil, nil
 //}
 
 func (s *state) UnmarshalJSON(bytes []byte) error {
-	s.Log.V(11).Debugf("call State.UnmarshalJSON")
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 15}, "call UnmarshalJSON")
 
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()

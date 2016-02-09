@@ -101,12 +101,6 @@ func (s *state) GetCores() map[spec.ObjectID]spec.Core {
 	return s.Cores
 }
 
-func (s *state) GetObjectID() spec.ObjectID {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-	return s.ObjectID
-}
-
 func (s *state) GetImpulseByID(objectID spec.ObjectID) (spec.Impulse, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
@@ -156,12 +150,6 @@ func (s *state) GetNeurons() map[spec.ObjectID]spec.Neuron {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 	return s.Neurons
-}
-
-func (s *state) GetObjectType() spec.ObjectType {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-	return s.ObjectType
 }
 
 func (s *state) SetBytes(key string, bytes []byte) {

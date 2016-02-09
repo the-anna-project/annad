@@ -49,14 +49,14 @@ type network struct {
 }
 
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	n.Log.V(11).Debugf("call Network.Trigger")
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
 	// Get first neuron.
 	var err error
 	var neu spec.Neuron
 	neurons := n.GetState().GetNeurons()
 	if len(neurons) == 0 {
-		n.Log.V(12).Debugf("create first neuron")
+		n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 14}, "create first neuron")
 
 		neu, err = n.FactoryClient.NewFirstNeuron()
 		if err != nil {
@@ -66,7 +66,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		n.GetState().SetNeuron(neu)
 		n.GetState().SetBytes(string(common.ObjectType.FirstNeuron), []byte(neu.GetObjectID()))
 	} else {
-		n.Log.V(12).Debugf("forwarding impulse to first neuron")
+		n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 14}, "forwarding impulse to first neuron")
 
 		neuronID, err := n.GetState().GetBytes(string(common.ObjectType.FirstNeuron))
 		if err != nil {

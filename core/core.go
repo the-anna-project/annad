@@ -63,12 +63,11 @@ type core struct {
 }
 
 func (c *core) Boot() {
-	c.Log.V(11).Debugf("call Core.Boot")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Boot")
 
 	err := c.GetState().Read()
 	if err != nil {
-		c.Log.V(3).Errorf("%#v", maskAny(err))
-		os.Exit(0)
+		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	go c.listenToGateway()
@@ -76,33 +75,33 @@ func (c *core) Boot() {
 }
 
 func (c *core) listenToGateway() {
-	c.Log.V(11).Debugf("call Core.listenToGateway")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call listenToGateway")
 
 	for {
 		newSignal, err := c.TextGateway.ReceiveSignal()
 		if gateway.IsGatewayClosed(err) {
-			c.Log.V(6).Warnf("gateway is closed")
+			c.Log.WithTags(spec.Tags{L: "W", O: c, T: nil, V: 7}, "gateway is closed")
 			time.Sleep(1 * time.Second)
 			continue
 		} else if err != nil {
-			c.Log.V(3).Errorf("%#v", maskAny(err))
+			c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 			continue
 		}
-		c.Log.V(12).Debugf("core received new signal '%s'", newSignal.GetID())
+		c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 14}, "core received new signal '%s'", newSignal.GetID())
 
 		responder, err := newSignal.GetResponder()
 		if gateway.IsSignalCanceled(err) {
-			c.Log.V(6).Warnf("signal is canceled")
+			c.Log.WithTags(spec.Tags{L: "W", O: c, T: nil, V: 7}, "gateway is canceled")
 			continue
 		} else if err != nil {
-			c.Log.V(3).Errorf("%#v", maskAny(err))
+			c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 			continue
 		}
 
 		go func(newSignal gatewayspec.Signal) {
 			request, err := newSignal.GetBytes("request")
 			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
+				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -110,7 +109,7 @@ func (c *core) listenToGateway() {
 
 			newImpulse, err := c.FactoryClient.NewImpulse()
 			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
+				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -133,7 +132,7 @@ func (c *core) listenToGateway() {
 			c.ImpulsesInProgress = atomic.AddInt64(&c.ImpulsesInProgress, -1)
 
 			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
+				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -141,7 +140,7 @@ func (c *core) listenToGateway() {
 
 			response, err := resImpulse.GetState().GetBytes("response")
 			if err != nil {
-				c.Log.V(3).Errorf("%#v", maskAny(err))
+				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
 				newSignal.SetError(maskAny(err))
 				responder <- newSignal
 				return
@@ -154,7 +153,7 @@ func (c *core) listenToGateway() {
 }
 
 func (c *core) listenToSignal() {
-	c.Log.V(11).Debugf("call Core.listenToSignal")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call listenToSignal")
 
 	listener := make(chan os.Signal, 1)
 	signal.Notify(listener, os.Interrupt, os.Kill)
@@ -165,7 +164,7 @@ func (c *core) listenToSignal() {
 }
 
 func (c *core) Shutdown() {
-	c.Log.V(12).Debugf("call Core.Shutdown")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Shutdown")
 
 	c.TextGateway.Close()
 
@@ -182,19 +181,20 @@ func (c *core) Shutdown() {
 
 	err := c.GetState().Write()
 	if err != nil {
-		c.Log.V(3).Errorf("%#v", maskAny(err))
+		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
+	c.Log.WithTags(spec.Tags{L: "I", O: c, T: nil, V: 10}, "shutting down")
 	os.Exit(0)
 }
 
 func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	c.Log.V(11).Debugf("call Core.Trigger")
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Trigger")
 
 	// Initialize network within core state if not already done.
 	networks := c.GetState().GetNetworks()
 	if len(networks) == 0 {
-		c.Log.V(12).Debugf("create new network")
+		c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 14}, "create new network")
 
 		newNetwork, err := c.FactoryClient.NewNetwork()
 		if err != nil {
