@@ -21,10 +21,13 @@ type Tags struct {
 // Log is a logger used to filter logs based on tags before actually logging
 // them.
 type Log interface {
+	// ResetLevels sets Config.Levels back to its default value.
 	ResetLevels() error
 
+	// ResetObjects sets Config.Objects back to its default value.
 	ResetObjects() error
 
+	// ResetVerbosity sets Config.Verbosity back to its default value.
 	ResetVerbosity() error
 
 	// SetLevels takes a comma separated list of provided log levels and causes
@@ -47,5 +50,7 @@ type Log interface {
 
 // RootLogger is the underlying logger used to actually log messages.
 type RootLogger interface {
+	// Println just takes an arbitrary list of arguments and prints a line to the
+	// configured output.
 	Println(v ...interface{})
 }

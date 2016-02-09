@@ -5,9 +5,11 @@ be discussed, wether they are implemented or not.
 
 ### table of contents
 - [anna](anna.md)
+- [annactl](annactl.md)
 - [core](core.md)
 - [factory](factory.md)
-- gateway: TBD (signals)
+- [gateway](gateway.md)
+- [logging](logging.md)
 - [network](network.md)
 - neuron: TBD (behavior)
 - [state](state.md)

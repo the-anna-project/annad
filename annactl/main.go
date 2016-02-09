@@ -24,8 +24,8 @@ var (
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",
-		Short: "interact with Anna",
-		Long:  "interact with Anna",
+		Short: "interact with Anna's network API",
+		Long:  "interact with Anna's network API",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			host, port, err := net.SplitHostPort(globalFlags.Host)
