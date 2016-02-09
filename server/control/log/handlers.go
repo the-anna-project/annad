@@ -17,11 +17,11 @@ func NewHandlers(ctx context.Context, lc serverspec.LogControl) map[string]*http
 		resetLevelsEncoder,
 	)
 
-	handlers["/control/log/reset/objecttypes"] = httptransport.NewServer(
+	handlers["/control/log/reset/objects"] = httptransport.NewServer(
 		ctx,
-		resetObjectTypesEndpoint(lc),
-		resetObjectTypesDecoder,
-		resetObjectTypesEncoder,
+		resetObjectsEndpoint(lc),
+		resetObjectsDecoder,
+		resetObjectsEncoder,
 	)
 
 	handlers["/control/log/reset/verbosity"] = httptransport.NewServer(
@@ -38,11 +38,11 @@ func NewHandlers(ctx context.Context, lc serverspec.LogControl) map[string]*http
 		setLevelsEncoder,
 	)
 
-	handlers["/control/log/set/objecttypes"] = httptransport.NewServer(
+	handlers["/control/log/set/objects"] = httptransport.NewServer(
 		ctx,
-		setObjectTypesEndpoint(lc),
-		setObjectTypesDecoder,
-		setObjectTypesEncoder,
+		setObjectsEndpoint(lc),
+		setObjectsDecoder,
+		setObjectsEncoder,
 	)
 
 	handlers["/control/log/set/verbosity"] = httptransport.NewServer(

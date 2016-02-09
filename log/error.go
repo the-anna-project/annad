@@ -26,3 +26,9 @@ var invalidLogLevelError = errgo.New("invalid log level")
 func IsInvalidLogLevel(err error) bool {
 	return errgo.Cause(err) == invalidLogLevelError
 }
+
+var invalidObjectTypeError = errgo.New("invalid object type")
+
+func IsInvalidObjectType(err error) bool {
+	return errgo.Cause(err) == invalidObjectTypeError
+}

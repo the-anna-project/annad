@@ -7,13 +7,13 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-func newResetLevelsEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newResetLevelsEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
+		&URL,
 		resetLevelsEncoder,
 		resetLevelsDecoder,
 	).Endpoint()
@@ -21,27 +21,27 @@ func newResetLevelsEndpoint(URL *url.URL, path string) endpoint.Endpoint {
 	return newEndpoint
 }
 
-func newResetObjectTypesEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newResetObjectsEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
-		resetObjectTypesEncoder,
-		resetObjectTypesDecoder,
+		&URL,
+		resetObjectsEncoder,
+		resetObjectsDecoder,
 	).Endpoint()
 
 	return newEndpoint
 }
 
-func newResetVerbosityEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newResetVerbosityEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
+		&URL,
 		resetVerbosityEncoder,
 		resetVerbosityDecoder,
 	).Endpoint()
@@ -49,13 +49,13 @@ func newResetVerbosityEndpoint(URL *url.URL, path string) endpoint.Endpoint {
 	return newEndpoint
 }
 
-func newSetLevelsEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newSetLevelsEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
+		&URL,
 		setLevelsEncoder,
 		setLevelsDecoder,
 	).Endpoint()
@@ -63,27 +63,27 @@ func newSetLevelsEndpoint(URL *url.URL, path string) endpoint.Endpoint {
 	return newEndpoint
 }
 
-func newSetObjectTypesEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newSetObjectsEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
-		setObjectTypesEncoder,
-		setObjectTypesDecoder,
+		&URL,
+		setObjectsEncoder,
+		setObjectsDecoder,
 	).Endpoint()
 
 	return newEndpoint
 }
 
-func newSetVerbosityEndpoint(URL *url.URL, path string) endpoint.Endpoint {
+func newSetVerbosityEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
-		URL,
+		&URL,
 		setVerbosityEncoder,
 		setVerbosityDecoder,
 	).Endpoint()

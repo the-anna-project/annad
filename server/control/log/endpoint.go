@@ -12,18 +12,18 @@ func resetLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		err := lc.ResetLevels(ctx)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil
 	}
 }
 
-func resetObjectTypesEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func resetObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		err := lc.ResetObjectTypes(ctx)
+		err := lc.ResetObjects(ctx)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil
@@ -34,7 +34,7 @@ func resetVerbosityEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		err := lc.ResetVerbosity(ctx)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil
@@ -47,20 +47,20 @@ func setLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 
 		err := lc.SetLevels(ctx, req.Levels)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil
 	}
 }
 
-func setObjectTypesEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func setObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(SetObjectTypesRequest)
+		req := request.(SetObjectsRequest)
 
-		err := lc.SetObjectTypes(ctx, req.ObjectTypes)
+		err := lc.SetObjects(ctx, req.Objects)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil
@@ -73,7 +73,7 @@ func setVerbosityEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 
 		err := lc.SetVerbosity(ctx, req.Verbosity)
 		if err != nil {
-			return nil, maskAny(err)
+			return api.WithError(maskAny(err)), nil
 		}
 
 		return api.WithSuccess(), nil

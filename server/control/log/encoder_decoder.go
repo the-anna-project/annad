@@ -20,11 +20,11 @@ func resetLevelsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // reset object types
 
-func resetObjectTypesDecoder(r *http.Request) (interface{}, error) {
+func resetObjectsDecoder(r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func resetObjectTypesEncoder(w http.ResponseWriter, response interface{}) error {
+func resetObjectsEncoder(w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -63,15 +63,15 @@ func setLevelsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // set object types
 
-func setObjectTypesDecoder(r *http.Request) (interface{}, error) {
-	var request SetObjectTypesRequest
+func setObjectsDecoder(r *http.Request) (interface{}, error) {
+	var request SetObjectsRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
 	return request, nil
 }
 
-func setObjectTypesEncoder(w http.ResponseWriter, response interface{}) error {
+func setObjectsEncoder(w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}

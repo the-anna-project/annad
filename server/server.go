@@ -65,9 +65,9 @@ func (s server) Listen() {
 	}
 
 	// log control
-	newLogControlConfig := textinterface.DefaultConfig()
+	newLogControlConfig := logcontrol.DefaultConfig()
 	newLogControlConfig.Log = s.Log
-	newLogControl := textinterface.NewLogControl(newLogControlConfig)
+	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
 	newLogControlHandlers := logcontrol.NewHandlers(ctx, newLogControl)
 	for url, handler := range newLogControlHandlers {
 		http.Handle(url, handler)

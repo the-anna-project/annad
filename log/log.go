@@ -42,9 +42,9 @@ type Config struct {
 	//
 	Levels []string
 
-	// ObjectTypes is used to only log messages emitted by objects matching this
+	// Objects is used to only log messages emitted by objects matching this
 	// given object type.
-	ObjectTypes []spec.ObjectType
+	Objects []spec.ObjectType
 
 	// TraceID is used to only log messages emitted by requests matching this
 	// given trace ID.
@@ -68,11 +68,11 @@ type Config struct {
 
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
-		Color:       true,
-		Levels:      []string{},
-		ObjectTypes: []spec.ObjectType{},
-		TraceID:     spec.TraceID(""),
-		Verbosity:   10,
+		Color:     true,
+		Levels:    []string{},
+		Objects:   []spec.ObjectType{},
+		TraceID:   spec.TraceID(""),
+		Verbosity: 10,
 	}
 
 	return newDefaultConfig
@@ -97,33 +97,36 @@ type log struct {
 	Mutex  sync.Mutex
 }
 
-func (l *log) ResetLevels() {
+func (l *log) ResetLevels() error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
 	l.Levels = DefaultConfig().Levels
+	return nil
 }
 
-func (l *log) ResetObjectTypes() {
+func (l *log) ResetObjects() error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
-	l.ObjectTypes = DefaultConfig().ObjectTypes
+	l.Objects = DefaultConfig().Objects
+	return nil
 }
 
-func (l *log) ResetVerbosity() {
+func (l *log) ResetVerbosity() error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
 	l.Verbosity = DefaultConfig().Verbosity
+	return nil
 }
 
-func (l *log) SetLevels(list string) {
+func (l *log) SetLevels(list string) error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
 	if list == "" {
-		return
+		return nil
 	}
 
 	newLevels := []string{}
@@ -131,42 +134,43 @@ func (l *log) SetLevels(list string) {
 		// We only use that here for level validation.
 		_, err := colorForLevel(level)
 		if err != nil {
-			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "%#v", maskAnyf(err, level))
-			continue
+			return maskAnyf(err, level)
 		}
 
 		newLevels = append(newLevels, level)
 	}
 
 	l.Levels = newLevels
+	return nil
 }
 
-func (l *log) SetObjectTypes(list string) {
+func (l *log) SetObjects(list string) error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
 	if list == "" {
-		return
+		return nil
 	}
 
-	newObjectTypes := []spec.ObjectType{}
+	newObjects := []spec.ObjectType{}
 	for _, objectType := range strings.Split(list, ",") {
 		if !containsObjectType(common.ObjectTypes, spec.ObjectType(objectType)) {
-			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "invalid objectType '%s'", objectType)
-			continue
+			return maskAnyf(invalidObjectTypeError, objectType)
 		}
 
-		newObjectTypes = append(newObjectTypes, spec.ObjectType(objectType))
+		newObjects = append(newObjects, spec.ObjectType(objectType))
 	}
 
-	l.ObjectTypes = newObjectTypes
+	l.Objects = newObjects
+	return nil
 }
 
-func (l *log) SetVerbosity(verbosity int) {
+func (l *log) SetVerbosity(verbosity int) error {
 	l.Mutex.Lock()
 	defer l.Mutex.Unlock()
 
 	l.Verbosity = verbosity
+	return nil
 }
 
 func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
@@ -174,8 +178,8 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 		return
 	}
 
-	if tags.O != nil && len(l.ObjectTypes) != 0 {
-		if !containsObjectType(l.ObjectTypes, tags.O.GetObjectType()) {
+	if tags.O != nil && len(l.Objects) != 0 {
+		if !containsObjectType(l.Objects, tags.O.GetObjectType()) {
 			return
 		}
 	}

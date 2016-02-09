@@ -30,8 +30,8 @@ func NewTextInterface(config Config) serverspec.TextInterface {
 	newTextInterface := &textInterface{
 		Config: config,
 
-		readPlainWithID:    newReadPlainWithIDEndpoint(config.URL, "/interface/text/action/readplain"),
-		readPlainWithPlain: newReadPlainWithPlainEndpoint(config.URL, "/interface/text/action/readplain"),
+		readPlainWithID:    newReadPlainWithIDEndpoint(*config.URL, "/interface/text/action/readplain"),
+		readPlainWithPlain: newReadPlainWithPlainEndpoint(*config.URL, "/interface/text/action/readplain"),
 	}
 
 	return newTextInterface
@@ -62,16 +62,23 @@ func (ti textInterface) ReadStream(stream string) ([]byte, error) {
 func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
 	response, err := ti.readPlainWithID(ctx, textinterface.ReadPlainRequest{ID: ID})
 	if err != nil {
-		return "", maskAnyWithCause(err, invalidAPIResponseError)
+		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
 	apiResponse := response.(textinterface.ReadPlainResponse)
+
+	if api.WithError(nil).Code == apiResponse.Code {
+		if s, ok := apiResponse.Data.(string); ok {
+			return "", maskAnyf(invalidAPIResponseError, s)
+		}
+	}
+
 	if api.WithData("").Code != apiResponse.Code {
 		return "", maskAny(invalidAPIResponseError)
 	}
 
-	if data, ok := apiResponse.Data.(string); ok {
-		return data, nil
+	if s, ok := apiResponse.Data.(string); ok {
+		return s, nil
 	} else {
 		return "", maskAny(invalidAPIResponseError)
 	}
@@ -80,10 +87,17 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
 	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Plain: plain})
 	if err != nil {
-		return "", maskAnyWithCause(err, invalidAPIResponseError)
+		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
 	apiResponse := response.(textinterface.ReadPlainResponse)
+
+	if api.WithError(nil).Code == apiResponse.Code {
+		if s, ok := apiResponse.Data.(string); ok {
+			return "", maskAnyf(invalidAPIResponseError, s)
+		}
+	}
+
 	if api.WithID("").Code != apiResponse.Code {
 		return "", maskAny(invalidAPIResponseError)
 	}

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/client"
+	"github.com/xh3b4sd/anna/client/interface/text"
 	serverspec "github.com/xh3b4sd/anna/server/spec"
 )
 
@@ -23,16 +23,16 @@ func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (serverspec.T
 		t.Fatalf("url.Parse returned error: %#v", err)
 	}
 
-	newTextInterfaceConfig := client.DefaultTextInterfaceConfig()
+	newTextInterfaceConfig := textinterface.DefaultConfig()
 	newTextInterfaceConfig.URL = URL
-	newTextInterface := client.NewTextInterface(newTextInterfaceConfig)
+	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
 
 	return newTextInterface, ts
 }
 
-// Test_Client_001 checks for TextInterface.ReadPlainWithPlain to work properly
-// under normal conditions.
-func Test_Client_001(t *testing.T) {
+// Test_TextInterface_001 checks for TextInterface.ReadPlainWithPlain to work properly
+// under normal conditions using api.WithID.
+func Test_TextInterface_001(t *testing.T) {
 	responseID := "test-id"
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithID(responseID)
@@ -53,9 +53,31 @@ func Test_Client_001(t *testing.T) {
 	}
 }
 
-// Test_Client_002 checks for TextInterface.ReadPlainWithPlain to handle errors
+// Test_TextInterface_002 checks for TextInterface.ReadPlainWithPlain to handle errors
+// properly on valid error responses using api.WithError.
+func Test_TextInterface_002(t *testing.T) {
+	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		response := api.WithError(fmt.Errorf("test error"))
+
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			t.Fatalf("json.NewEncoder returned error: %#v", err)
+		}
+	}))
+	defer ts.Close()
+
+	ctx := context.Background()
+	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
+	if !textinterface.IsInvalidAPIResponse(err) {
+		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
+	}
+	if ID != "" {
+		t.Fatalf("expected response ID to be empty, got '%s'", ID)
+	}
+}
+
+// Test_TextInterface_003 checks for TextInterface.ReadPlainWithPlain to handle errors
 // properly on plain text responses.
-func Test_Client_002(t *testing.T) {
+func Test_TextInterface_003(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "error")
 	}))
@@ -63,7 +85,7 @@ func Test_Client_002(t *testing.T) {
 
 	ctx := context.Background()
 	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
-	if !client.IsInvalidAPIResponse(err) {
+	if !textinterface.IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
 	}
 	if ID != "" {
@@ -71,9 +93,9 @@ func Test_Client_002(t *testing.T) {
 	}
 }
 
-// Test_Client_003 checks for TextInterface.ReadPlainWithPlain to handle errors
+// Test_TextInterface_004 checks for TextInterface.ReadPlainWithPlain to handle errors
 // properly on invalid JSON responses.
-func Test_Client_003(t *testing.T) {
+func Test_TextInterface_004(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, `{"error": true}`)
 	}))
@@ -81,7 +103,7 @@ func Test_Client_003(t *testing.T) {
 
 	ctx := context.Background()
 	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
-	if !client.IsInvalidAPIResponse(err) {
+	if !textinterface.IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
 	}
 	if ID != "" {
@@ -89,9 +111,9 @@ func Test_Client_003(t *testing.T) {
 	}
 }
 
-// Test_Client_004 checks for TextInterface.ReadPlainWithID to work properly
+// Test_TextInterface_005 checks for TextInterface.ReadPlainWithID to work properly
 // under normal conditions.
-func Test_Client_004(t *testing.T) {
+func Test_TextInterface_005(t *testing.T) {
 	responseData := "hello world"
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithData(responseData)
@@ -112,17 +134,21 @@ func Test_Client_004(t *testing.T) {
 	}
 }
 
-// Test_Client_005 checks for TextInterface.ReadPlainWithID to handle errors
-// properly on plain text responses.
-func Test_Client_005(t *testing.T) {
+// Test_TextInterface_006 checks for TextInterface.ReadPlainWithPlain to handle errors
+// properly on valid error responses using api.WithError.
+func Test_TextInterface_006(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "error")
+		response := api.WithError(fmt.Errorf("test error"))
+
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			t.Fatalf("json.NewEncoder returned error: %#v", err)
+		}
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
 	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
-	if !client.IsInvalidAPIResponse(err) {
+	if !textinterface.IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
 	}
 	if data != "" {
@@ -130,9 +156,27 @@ func Test_Client_005(t *testing.T) {
 	}
 }
 
-// Test_Client_006 checks for TextInterface.ReadPlainWithID to handle errors
+// Test_TextInterface_007 checks for TextInterface.ReadPlainWithID to handle errors
+// properly on plain text responses.
+func Test_TextInterface_007(t *testing.T) {
+	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "error")
+	}))
+	defer ts.Close()
+
+	ctx := context.Background()
+	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	if !textinterface.IsInvalidAPIResponse(err) {
+		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
+	}
+	if data != "" {
+		t.Fatalf("expected response data to be empty, got '%s'", data)
+	}
+}
+
+// Test_TextInterface_008 checks for TextInterface.ReadPlainWithID to handle errors
 // properly on invalid JSON responses.
-func Test_Client_006(t *testing.T) {
+func Test_TextInterface_008(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, `{"error": true}`)
 	}))
@@ -140,7 +184,7 @@ func Test_Client_006(t *testing.T) {
 
 	ctx := context.Background()
 	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
-	if !client.IsInvalidAPIResponse(err) {
+	if !textinterface.IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
 	}
 	if data != "" {

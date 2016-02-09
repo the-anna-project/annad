@@ -28,7 +28,7 @@ func resetLevelsDecoder(resp *http.Response) (interface{}, error) {
 
 // reset object types
 
-func resetObjectTypesEncoder(r *http.Request, request interface{}) error {
+func resetObjectsEncoder(r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(request); err != nil {
 		return maskAny(err)
@@ -37,8 +37,8 @@ func resetObjectTypesEncoder(r *http.Request, request interface{}) error {
 	return nil
 }
 
-func resetObjectTypesDecoder(resp *http.Response) (interface{}, error) {
-	var response logcontrol.ResetObjectTypesResponse
+func resetObjectsDecoder(resp *http.Response) (interface{}, error) {
+	var response logcontrol.ResetObjectsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -79,7 +79,7 @@ func setLevelsDecoder(resp *http.Response) (interface{}, error) {
 
 // set object types
 
-func setObjectTypesEncoder(r *http.Request, request interface{}) error {
+func setObjectsEncoder(r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(request); err != nil {
 		return maskAny(err)
@@ -88,8 +88,8 @@ func setObjectTypesEncoder(r *http.Request, request interface{}) error {
 	return nil
 }
 
-func setObjectTypesDecoder(resp *http.Response) (interface{}, error) {
-	var response logcontrol.SetObjectTypesResponse
+func setObjectsDecoder(resp *http.Response) (interface{}, error) {
+	var response logcontrol.SetObjectsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }

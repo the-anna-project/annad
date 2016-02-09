@@ -10,7 +10,7 @@ type ResetLevelsResponse api.Response
 
 // reset object types
 
-type ResetObjectTypesResponse api.Response
+type ResetObjectsResponse api.Response
 
 // reset verbosity
 
@@ -26,11 +26,11 @@ type SetLevelsResponse api.Response
 
 // set object types
 
-type SetObjectTypesRequest struct {
-	ObjectTypes string `json:"object_types,omitempty"`
+type SetObjectsRequest struct {
+	Objects string `json:"objects,omitempty"`
 }
 
-type SetObjectTypesResponse api.Response
+type SetObjectsResponse api.Response
 
 // set verbosity types
 

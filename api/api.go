@@ -39,3 +39,13 @@ func WithSuccess() Response {
 		Text: "success",
 	}
 }
+
+// WithError returns a response indicating an error of the requested action.
+// Text 'error' translates to the Code 10004.
+func WithError(err error) Response {
+	return Response{
+		Code: 10004,
+		Data: err,
+		Text: "error",
+	}
+}

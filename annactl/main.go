@@ -41,7 +41,7 @@ var (
 
 			newLogControlConfig := logcontrol.DefaultConfig()
 			newLogControlConfig.URL.Host = hostport
-			textInterface = logcontrol.NewLogControl(newLogControlConfig)
+			logControl = logcontrol.NewLogControl(newLogControlConfig)
 		},
 	}
 )
@@ -55,10 +55,17 @@ func mainRun(cmd *cobra.Command, args []string) {
 }
 
 func main() {
-	logCmd.AddCommand(logSetRun)
-	logCmd.AddCommand(logResetRun)
+	controlLogResetCmd.AddCommand(controlLogResetLevelsCmd)
+	controlLogResetCmd.AddCommand(controlLogResetObjectsCmd)
+	controlLogResetCmd.AddCommand(controlLogResetVerbosityCmd)
+	controlLogSetCmd.AddCommand(controlLogSetLevelsCmd)
+	controlLogSetCmd.AddCommand(controlLogSetObjectsCmd)
+	controlLogSetCmd.AddCommand(controlLogSetVerbosityCmd)
+	controlLogCmd.AddCommand(controlLogResetCmd)
+	controlLogCmd.AddCommand(controlLogSetCmd)
+	controlCmd.AddCommand(controlLogCmd)
+	mainCmd.AddCommand(controlCmd)
 
-	mainCmd.AddCommand(logCmd)
 	mainCmd.AddCommand(readPlainCmd)
 
 	mainCmd.Execute()

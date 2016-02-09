@@ -39,10 +39,10 @@ func (lc logControl) ResetLevels(ctx context.Context) error {
 	return nil
 }
 
-func (lc logControl) ResetObjectTypes(ctx context.Context) error {
-	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call ResetObjectTypes")
+func (lc logControl) ResetObjects(ctx context.Context) error {
+	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call ResetObjects")
 
-	err := lc.Log.ResetObjectTypes()
+	err := lc.Log.ResetObjects()
 	if err != nil {
 		return maskAny(err)
 	}
@@ -72,10 +72,10 @@ func (lc logControl) SetLevels(ctx context.Context, levels string) error {
 	return nil
 }
 
-func (lc logControl) SetObjectTypes(ctx context.Context, objectTypes string) error {
-	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call SetObjectTypes")
+func (lc logControl) SetObjects(ctx context.Context, objectTypes string) error {
+	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call SetObjects")
 
-	err := lc.Log.SetObjectTypes(objectTypes)
+	err := lc.Log.SetObjects(objectTypes)
 	if err != nil {
 		return maskAny(err)
 	}
