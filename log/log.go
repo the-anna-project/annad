@@ -42,6 +42,9 @@ type Config struct {
 	//
 	Levels []string
 
+	// RootLogger is the underlying logger actually logging messages.
+	RootLogger spec.RootLogger
+
 	// Objects is used to only log messages emitted by objects matching this
 	// given object type.
 	Objects []spec.ObjectType
@@ -68,11 +71,12 @@ type Config struct {
 
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
-		Color:     true,
-		Levels:    []string{},
-		Objects:   []spec.ObjectType{},
-		TraceID:   spec.TraceID(""),
-		Verbosity: 10,
+		Color:      true,
+		Levels:     []string{},
+		RootLogger: builtinLog.New(os.Stdout, "", 0),
+		Objects:    []spec.ObjectType{},
+		TraceID:    spec.TraceID(""),
+		Verbosity:  10,
 	}
 
 	return newDefaultConfig
@@ -83,7 +87,6 @@ func DefaultConfig() Config {
 func NewLog(config Config) spec.Log {
 	newLog := log{
 		Config: config,
-		Logger: builtinLog.New(os.Stdout, "", 0),
 		Mutex:  sync.Mutex{},
 	}
 
@@ -93,8 +96,7 @@ func NewLog(config Config) spec.Log {
 type log struct {
 	Config
 
-	Logger spec.RootLogger
-	Mutex  sync.Mutex
+	Mutex sync.Mutex
 }
 
 func (l *log) ResetLevels() error {
@@ -195,6 +197,7 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 	}
 
 	msg := fmt.Sprintf(extendFormatWithTags(f, tags), v...)
+
 	if l.Color {
 		color, err := colorForLevel(tags.L)
 		if err != nil {
@@ -204,5 +207,5 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 		msg = ansi.Color(msg, color)
 	}
 
-	l.Logger.Println(msg)
+	l.RootLogger.Println(msg)
 }
