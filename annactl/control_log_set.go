@@ -7,8 +7,8 @@ import (
 var (
 	controlLogSetCmd = &cobra.Command{
 		Use:   "set",
-		Short: "set log configuration",
-		Long:  "set log configuration",
+		Short: "make Anna set log configuration",
+		Long:  "make Anna set log configuration",
 		Run:   controlLogSetRun,
 	}
 )

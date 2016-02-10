@@ -2,20 +2,15 @@
 The client implementation of Anna's network API is reprsented by the command
 line tool `annactl`.
 
+### autocompletion
+For convenience there are [autocompletion scripts](autocompletion.md).
+
 ### build
 Compile the client and check the help usage for more information.
 
 ```yaml
 make client
 .workspace/bin/annactl -h
-```
-
-### text interface
-The [text interface](interface.md#text) is used to feed Anna with text input.
-
-```yaml
-# feed Anna with the text "some text input"
-.workspace/bin/annactl interface text read plain some text input
 ```
 
 ### log control
@@ -51,4 +46,12 @@ at runtime.
 ```yaml
 # log messages emitted with default log verbosities
 .workspace/bin/annactl control log reset verbosity
+```
+
+### text interface
+The [text interface](interface.md#text) is used to feed Anna with text input.
+
+```yaml
+# feed Anna with the text "some text input"
+.workspace/bin/annactl interface text read plain some text input
 ```

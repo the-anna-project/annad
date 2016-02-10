@@ -47,7 +47,7 @@ var (
 )
 
 func init() {
-	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to connect to Anna server")
+	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to connect to Anna's server")
 }
 
 func mainRun(cmd *cobra.Command, args []string) {
@@ -66,7 +66,10 @@ func main() {
 	controlCmd.AddCommand(controlLogCmd)
 	mainCmd.AddCommand(controlCmd)
 
-	mainCmd.AddCommand(readPlainCmd)
+	interfaceTextReadCmd.AddCommand(interfaceTextReadPlainCmd)
+	interfaceTextCmd.AddCommand(interfaceTextReadCmd)
+	interfaceCmd.AddCommand(interfaceTextCmd)
+	mainCmd.AddCommand(interfaceCmd)
 
 	mainCmd.Execute()
 }

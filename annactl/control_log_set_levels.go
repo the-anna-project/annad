@@ -12,8 +12,8 @@ import (
 var (
 	controlLogSetLevelsCmd = &cobra.Command{
 		Use:   "levels [level] ...",
-		Short: "set log levels",
-		Long:  "set log levels",
+		Short: "make Anna set log levels",
+		Long:  "make Anna set log levels",
 		Run:   controlLogSetLevelsRun,
 	}
 )

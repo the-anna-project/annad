@@ -12,8 +12,8 @@ import (
 var (
 	controlLogSetObjectsCmd = &cobra.Command{
 		Use:   "objects [object] ...",
-		Short: "set log objects",
-		Long:  "set log objects",
+		Short: "make Anna set log objects",
+		Long:  "make Anna set log objects",
 		Run:   controlLogSetObjectsRun,
 	}
 )

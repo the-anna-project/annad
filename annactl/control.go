@@ -7,8 +7,8 @@ import (
 var (
 	controlCmd = &cobra.Command{
 		Use:   "control",
-		Short: "control Anna's behavior",
-		Long:  "control Anna's behavior",
+		Short: "control for Anna's behavior",
+		Long:  "control for Anna's behavior",
 		Run:   controlRun,
 	}
 )

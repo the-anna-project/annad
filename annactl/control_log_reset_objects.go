@@ -11,8 +11,8 @@ import (
 var (
 	controlLogResetObjectsCmd = &cobra.Command{
 		Use:   "objects",
-		Short: "reset log objects",
-		Long:  "reset log objects",
+		Short: "make Anna reset log objects",
+		Long:  "make Anna reset log objects",
 		Run:   controlLogResetObjectsRun,
 	}
 )

@@ -7,8 +7,8 @@ import (
 var (
 	controlLogCmd = &cobra.Command{
 		Use:   "log",
-		Short: "control Anna's log behavior",
-		Long:  "control Anna's log behavior",
+		Short: "log control for Anna",
+		Long:  "log control for Anna",
 		Run:   controlLogRun,
 	}
 )
