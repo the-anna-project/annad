@@ -4,12 +4,45 @@ This plan has the potential to change quickly.
 
 ### next 4 weeks
 
-###### annactl
-Because of the task system it is necessary to have a client that understands
-Annas API's. This is for convenience and for other cool stuff that needs to be
-controled remotely.
+###### implement CLGs
+[CLGs](/doc/concept/clg.md) are supposed to be the minimal and fundamental
+inborn logic units that can be used out of the box. This builtin functionality
+should be the only hard coded logic. All other behavior must result out of the
+combination of learned data and CLGs.
+
+---
+
+###### implement guidance
+See [guidance](/doc/challenge/guidance.md).
 
 ### next 4 months
+
+###### identifying bytes
+For machines, bytes are just bytes without any meaning. It is necessary to turn
+mystery bytes into identified bytes. This is probably only possible by teaching
+Anna what byte e.g. a 5 or a G is.
+
+---
+
+###### pattern recognition
+An essential step to learn and to act is recognizing patterns. This goes into
+the direction of problem analysis and solving. If there would be an identified
+pattern for pattern recognition, this would result in infinite creativity.
+
+
+### next 4 years
+
+###### learn math
+Learning and practicing math is an essential step towards intelligence. You
+might think computers are already way better at doing math than humans. You are
+right. The key here is to implement fundamental logic that leads to dynamic
+behavior. There are already logical gates for binary operations implemented in
+the CPU of each computer, but I neither have direct access to the logic gates,
+nor are they sufficient enough to replicate human understanding and creativity.
+So once this is accomplished, a lot of prerequisites for autonomous intelligence
+are given.
+
+---
 
 ###### store data
 Consumed input needs to be stored somehow. We can expect huge data amounts of
@@ -17,23 +50,6 @@ neural networks that need to be available as fast as possible. Before
 implementing something I would like to get an idea of different approaches to
 compare needs against technical details. Further backing up and restoring data
 also needs to be considered.
-
----
-
-###### backup data
-For failure recovery and testing purposes it is necessary to backup data
-automatically. Fast. Easy. Painless.
-
----
-
-###### restore data
-For failure recovery and testing purposes it is necessary to restore backed up
-data automatically. Fast. Easy. Painless.
-
----
-
-### next 4 years
-
 ###### have neural networks
 Data needs to be processed. There are probably infinite ways of doing that,
 depending on the goal that needs to be achieved. The first smart thing we want

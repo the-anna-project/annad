@@ -11,6 +11,7 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [anna](anna.md)
 - [annactl](annactl.md)
 - [autocompletion](autocompletion.md)
+- [CLG](clg.md)
 - [control](control.md)
 - [core](core.md)
 - [factory](factory.md)
