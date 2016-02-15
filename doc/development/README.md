@@ -22,14 +22,14 @@ This takes care that the workspace is properly set up for the dependencies that
 `go get` fetches and that `GOPATH` itself is properly set. So the result after
 the setup will be similar to this.
 ```
-~/projects/private/anna                     # This is the second path within GOPATH and used for the anna project
+~/projects/private/anna                   # this is the second GOPATH used for the project
 ├── ...
 └── src
     └── github.com
         └── xh3b4sd
             └── anna
                 ├── ...
-                └── .workspace              # This is the first path within GOPATH and used for dependencies
+                └── .workspace            # this is the first GOPATH used for the dependencies
                     └── ...
 ```
 
@@ -74,16 +74,16 @@ make goget
 ```
 
 Now what happened? Because of our directory structure and `Makefile` magic the
-project structure looks like this.
+`.workspace` directory was extended with the dependencies.
 ```
-~/projects/private/anna                     # This is the second path within GOPATH and used for the anna project
+~/projects/private/anna                   # this is the second GOPATH used for the project
 ├── ...
 └── src
     └── github.com
         └── xh3b4sd
             └── anna
                 ├── ...
-                └── .workspace              # This is the first path within GOPATH and used for dependencies
+                └── .workspace            # this is the first GOPATH used for the dependencies
                     ├── ...
                     └── src
                         ├── github.com
@@ -96,18 +96,18 @@ project structure looks like this.
 
 ---
 
-###### remove dependencies
-Cleanup the workspace can be done with this.
-```
-make goclean
-```
-
----
-
 ###### run tests
 Running all tests works that way.
 ```
 make gotest
+```
+
+---
+
+###### remove dependencies
+Cleanup the workspace can be done with this.
+```
+make goclean
 ```
 
 ### pull requests
