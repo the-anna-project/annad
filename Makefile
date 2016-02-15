@@ -10,7 +10,7 @@ client:
 	@go build -o .workspace/bin/annactl github.com/xh3b4sd/anna/annactl
 
 goclean:
-	@rm -rf .workspace/
+	@rm -rf .workspace/ coverage.txt
 
 gofmt:
 	@go fmt ./...
@@ -20,7 +20,7 @@ goget:
 	@go get -v github.com/xh3b4sd/anna/annactl
 
 gotest:
-	@go test ./... -cover
+	@./go.test.sh
 
 server:
 	@go build -o .workspace/bin/anna github.com/xh3b4sd/anna
