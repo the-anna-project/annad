@@ -9,3 +9,9 @@ script: make gotest
 
 notifications:
   email: false
+
+# codecov
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov
