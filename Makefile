@@ -1,13 +1,22 @@
-.PHONY: all client gobuild goclean gofmt goget gorun gotest server
+.PHONY: all anna annactl gobuild goclean gofmt goget gorun gotest
 
 $(mkdir -p .workspace/)
 GOPATH := ${PWD}/.workspace/:${PWD}/../../../..:${GOPATH}
 export GOPATH
 
-all: goget client server
+all: goget annactl anna
 
-client:
-	@go build -o .workspace/bin/annactl github.com/xh3b4sd/anna/annactl
+anna:
+	@go build \
+		-o .workspace/bin/anna \
+		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
+		github.com/xh3b4sd/anna
+
+annactl:
+	@go build \
+		-o .workspace/bin/annactl \
+		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
+		github.com/xh3b4sd/anna/annactl
 
 goclean:
 	@rm -rf .workspace/ coverage.txt
@@ -21,6 +30,3 @@ goget:
 
 gotest:
 	@./go.test.sh
-
-server:
-	@go build -o .workspace/bin/anna github.com/xh3b4sd/anna

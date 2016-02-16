@@ -9,66 +9,66 @@ options=(
 _describe 'values' options
 
 _arguments \
-    '1: :->business-logic' \
-    '2: :->implementation'\
-    '3: :->action' \
-    '4: :->type' \
-    '5: :->value'
+  '1: :->business-logic' \
+  '2: :->implementation'\
+  '3: :->action' \
+  '4: :->type' \
+  '5: :->value'
 
 case $state in
-    business-logic)
-        _arguments '1:business logic:(control interface)'
-    ;;
-    implementation)
-        case $words[2] in
-        control)
-            _arguments '2:implementation:(log)'
+  business-logic)
+    _arguments '1:business logic:(control interface version)'
+  ;;
+  implementation)
+    case $words[2] in
+      control)
+        _arguments '2:implementation:(log)'
+      ;;
+      interface)
+        _arguments '2:implementation:(text)'
+      ;;
+    esac
+  ;;
+  action)
+    case $words[3] in
+      log)
+        _arguments '3:action:(reset set)'
+      ;;
+      text)
+        _arguments '3:action:(read)'
+      ;;
+    esac
+  ;;
+  type)
+    case $words[4] in
+      reset)
+        _arguments '4:type:(levels objects verbosity)'
+      ;;
+      set)
+        _arguments '4:type:(levels objects verbosity)'
+      ;;
+      read)
+        _arguments '4:type:(plain)'
+      ;;
+    esac
+  ;;
+  value)
+    case $words[4] in
+      reset)
+        ret=0
+      ;;
+      *)
+      case $words[5] in
+        levels)
+          _values -s , 'levels' D E F I W
         ;;
-        interface)
-            _arguments '2:implementation:(text)'
+        objects)
+          _values -s , 'objects' core impulse factory-client factory-server character-neuron first-neuron job-neuron log log-control main network none server state text-interface
         ;;
-        esac
-    ;;
-    action)
-        case $words[3] in
-        log)
-            _arguments '3:action:(reset set)'
+        verbosity)
+          _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
         ;;
-        text)
-            _arguments '3:action:(read)'
-        ;;
-        esac
-    ;;
-    type)
-        case $words[4] in
-        reset)
-            _arguments '4:type:(levels objects verbosity)'
-        ;;
-        set)
-            _arguments '4:type:(levels objects verbosity)'
-        ;;
-        read)
-            _arguments '4:type:(plain)'
-        ;;
-        esac
-    ;;
-    value)
-        case $words[4] in
-            reset)
-                ret=0
-            ;;
-            *)
-            case $words[5] in
-            levels)
-                _values -s , 'levels' D E F I W
-            ;;
-            objects)
-                _values -s , 'objects' core impulse factory-client factory-server character-neuron first-neuron job-neuron log log-control main network none server state text-interface
-            ;;
-            verbosity)
-                _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-            ;;
-            esac
-        esac
-    ;;
+      esac
+    esac
+  ;;
 esac

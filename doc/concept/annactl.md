@@ -9,7 +9,7 @@ For convenience there are [autocompletion scripts](autocompletion.md).
 Compile the client and check the help usage for more information.
 
 ```yaml
-make client
+make annactl
 .workspace/bin/annactl -h
 ```
 

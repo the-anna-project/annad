@@ -44,6 +44,10 @@ var (
 			logControl = logcontrol.NewLogControl(newLogControlConfig)
 		},
 	}
+
+	// Version is the project version. It is given via buildflags that inject the
+	// commit hash.
+	version string
 )
 
 func init() {
@@ -70,6 +74,8 @@ func main() {
 	interfaceTextCmd.AddCommand(interfaceTextReadCmd)
 	interfaceCmd.AddCommand(interfaceTextCmd)
 	mainCmd.AddCommand(interfaceCmd)
+
+	mainCmd.AddCommand(versionCmd)
 
 	mainCmd.Execute()
 }

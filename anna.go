@@ -33,6 +33,10 @@ var (
 		Long:  "artificial neural network aspiration",
 		Run:   mainRun,
 	}
+
+	// Version is the project version. It is given via buildflags that inject the
+	// commit hash.
+	version string
 )
 
 func init() {
@@ -98,6 +102,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	if err != nil {
 		newLog.WithTags(spec.Tags{L: "F", O: m, T: nil, V: 1}, "%#v", maskAny(err))
 	}
+	newCore.GetState().SetVersion(version)
 	go newCore.Boot()
 
 	//
@@ -114,5 +119,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 }
 
 func main() {
+	mainCmd.AddCommand(versionCmd)
+
 	mainCmd.Execute()
 }

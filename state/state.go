@@ -28,6 +28,7 @@ type Config struct {
 	ObjectType    spec.ObjectType                `json:"object_type,omitempty"`
 	StateReader   spec.StateType                 `json:"state_reader,omitempty"`
 	StateWriter   spec.StateType                 `json:"state_writer,omitempty"`
+	Version       string                         `json:"version,omitempty"`
 }
 
 func DefaultConfig() Config {
@@ -152,6 +153,12 @@ func (s *state) GetNeurons() map[spec.ObjectID]spec.Neuron {
 	return s.Neurons
 }
 
+func (s *state) GetVersion() string {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	return s.Version
+}
+
 func (s *state) SetBytes(key string, bytes []byte) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
@@ -185,4 +192,11 @@ func (s *state) SetNeuron(neuron spec.Neuron) {
 	defer s.Mutex.Unlock()
 
 	s.Neurons[neuron.GetObjectID()] = neuron
+}
+
+func (s *state) SetVersion(version string) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	s.Version = version
 }
