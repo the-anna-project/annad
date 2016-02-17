@@ -32,6 +32,8 @@ type State interface {
 
 	GetObjectType() ObjectType
 
+	GetVersion() string
+
 	json.Unmarshaler
 
 	SetBytes(key string, bytes []byte)
