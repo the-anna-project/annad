@@ -141,6 +141,14 @@ Pull requests are only accepted and merged when there are proper tests. Make
 sure there are tests where it makes sense and all tests pass reliably. No pull
 request is going to be merged as long as there are tests failing or flapping.
 
+---
+
+###### branches
+When colaborating and creating branches within the core repository
+https://github.com/xh3b4sd/anna branches should be deleted ones they are
+merged. This prevents loosing the overview and keeps the repository in a clean
+state branch wise.
+
 ### guidelines
 
 ###### tracability
