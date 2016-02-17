@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/xh3b4sd/anna.svg?branch=master)](https://travis-ci.org/xh3b4sd/anna) [![codecov.io](https://codecov.io/github/xh3b4sd/anna/coverage.svg?branch=master)](https://codecov.io/github/xh3b4sd/anna?branch=master)
 
 # anna
-Artificial Neural Network Aspiration, in short: Anna. Aims to be self-learning
-and self-improving software.
+Anna, Artificial Neural Network Aspiration, aims to be self-learning and
+self-improving software.
 
 # overview
 
@@ -20,6 +20,7 @@ somebody else, or some group of people way smarter than me. Live will find a way
 
 # documentation
 - [api](doc/api)
+- [challenge](doc/challenge)
 - [concept](doc/concept)
 - [development](doc/development)
 - [diary](doc/diary)
