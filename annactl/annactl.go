@@ -24,8 +24,8 @@ var (
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",
-		Short: "interact with Anna's network API",
-		Long:  "interact with Anna's network API",
+		Short: "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			host, port, err := net.SplitHostPort(globalFlags.Host)
@@ -44,6 +44,10 @@ var (
 			logControl = logcontrol.NewLogControl(newLogControlConfig)
 		},
 	}
+
+	// Version is the project version. It is given via buildflags that inject the
+	// commit hash.
+	version string
 )
 
 func init() {
@@ -70,6 +74,8 @@ func main() {
 	interfaceTextCmd.AddCommand(interfaceTextReadCmd)
 	interfaceCmd.AddCommand(interfaceTextCmd)
 	mainCmd.AddCommand(interfaceCmd)
+
+	mainCmd.AddCommand(versionCmd)
 
 	mainCmd.Execute()
 }

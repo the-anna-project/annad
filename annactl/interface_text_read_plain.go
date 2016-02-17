@@ -12,8 +12,8 @@ import (
 var (
 	interfaceTextReadPlainCmd = &cobra.Command{
 		Use:   "plain [text] ...",
-		Short: "make Anna read plain text",
-		Long:  "make Anna read plain text",
+		Short: "Make Anna read plain text.",
+		Long:  "Make Anna read plain text.",
 		Run:   interfaceTextReadPlainRun,
 	}
 )

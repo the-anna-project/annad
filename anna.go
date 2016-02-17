@@ -29,10 +29,14 @@ var (
 
 	mainCmd = &cobra.Command{
 		Use:   "anna",
-		Short: "artificial neural network aspiration",
-		Long:  "artificial neural network aspiration",
+		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 	}
+
+	// Version is the project version. It is given via buildflags that inject the
+	// commit hash.
+	version string
 )
 
 func init() {
@@ -98,6 +102,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	if err != nil {
 		newLog.WithTags(spec.Tags{L: "F", O: m, T: nil, V: 1}, "%#v", maskAny(err))
 	}
+	newCore.GetState().SetVersion(version)
 	go newCore.Boot()
 
 	//
@@ -114,5 +119,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 }
 
 func main() {
+	mainCmd.AddCommand(versionCmd)
+
 	mainCmd.Execute()
 }

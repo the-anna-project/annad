@@ -11,8 +11,8 @@ import (
 var (
 	controlLogResetLevelsCmd = &cobra.Command{
 		Use:   "levels",
-		Short: "make Anna reset log levels",
-		Long:  "make Anna reset log levels",
+		Short: "Make Anna reset log levels.",
+		Long:  "Make Anna reset log levels.",
 		Run:   controlLogResetLevelsRun,
 	}
 )

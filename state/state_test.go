@@ -1,6 +1,8 @@
 package state_test
 
 import (
+	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/xh3b4sd/anna/common"
@@ -11,6 +13,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/state"
 )
+
+func newFactoryAndFileSystem() (spec.Factory, spec.FileSystem) {
+	// Create new factory server with a fake file system. This is used to create
+	// new objects.
+	fileSystemFake := filesystemfake.NewFileSystem()
+	newFactoryServerConfig := factoryserver.DefaultConfig()
+	newFactoryServerConfig.FileSystem = fileSystemFake
+	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
+
+	return newFactoryServer, fileSystemFake
+}
 
 // Test_State_001 checks that reading and writing bytes to a state works as
 // expected.
@@ -172,5 +185,158 @@ func Test_State_004(t *testing.T) {
 	}
 	if string(neuronBytes) != "character" {
 		t.Fatalf("network bytes not properly restored")
+	}
+}
+
+// Test_State_005 checks that the version is proper set within the state.
+func Test_State_005(t *testing.T) {
+	newFactoryServer, fileSystemFake := newFactoryAndFileSystem()
+
+	// Create new state.
+	newCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+
+	// Check that state version is not set.
+	if newCore.GetState().GetVersion() != "" {
+		t.Fatalf("new state should not contain any version")
+	}
+
+	// Set version to verify at the end.
+	newCore.GetState().SetVersion("test-version")
+
+	// Write state to file system.
+	bytes, err := json.Marshal(newCore.GetState())
+	if err != nil {
+		t.Fatalf("json.Marshal returned err: %#v", err)
+	}
+	err = fileSystemFake.WriteFile(common.DefaultStateFile, bytes, os.FileMode(0660))
+	if err != nil {
+		t.Fatalf("FileSystem.WriteFile returned err: %#v", err)
+	}
+
+	// Read state from file system.
+	err = newCore.GetState().Read()
+	if err != nil {
+		t.Fatalf("State.Read returned err: %#v", err)
+	}
+
+	// Check for proper version.
+	if newCore.GetState().GetVersion() != "test-version" {
+		t.Fatalf("read state does not contain proper version")
+	}
+}
+
+// Test_State_006 checks if getting the state's age works as expected.
+func Test_State_006(t *testing.T) {
+	newFactoryServer, _ := newFactoryAndFileSystem()
+
+	// Create new state.
+	newCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+
+	// Check if a non-nil duration is returned as age.
+	age := newCore.GetState().GetAge()
+	if age.Nanoseconds() == 0 {
+		t.Fatalf("State.GetAge returned invalid duration")
+	}
+}
+
+// Test_State_007 checks that setting and getting bytes works as expected.
+func Test_State_007(t *testing.T) {
+	newFactoryServer, _ := newFactoryAndFileSystem()
+
+	// Create new state.
+	newCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+
+	_, err = newCore.GetState().GetBytes("foo")
+	if !state.IsBytesNotFound(err) {
+		t.Fatalf("State.GetBytes did NOT return err")
+	}
+	newCore.GetState().SetBytes("foo", []byte("bar"))
+	bytes, err := newCore.GetState().GetBytes("foo")
+	if err != nil {
+		t.Fatalf("State.GetBytes returned err: %#v", err)
+	}
+	if string(bytes) != "bar" {
+		t.Fatalf("State.GetBytes returned invalid bytes")
+	}
+}
+
+// Test_State_008 checks that setting and getting core works as expected.
+func Test_State_008(t *testing.T) {
+	newFactoryServer, _ := newFactoryAndFileSystem()
+
+	// Create new state.
+	newCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+
+	testCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+	_, err = newCore.GetState().GetCoreByID(testCore.GetObjectID())
+	if !state.IsCoreNotFound(err) {
+		t.Fatalf("State.GetCoreByID did NOT return err")
+	}
+	cores := newCore.GetState().GetCores()
+	if len(cores) != 0 {
+		t.Fatalf("State.GetCores should not return any core")
+	}
+	newCore.GetState().SetCore(testCore)
+	core, err := newCore.GetState().GetCoreByID(testCore.GetObjectID())
+	if err != nil {
+		t.Fatalf("State.GetBytes returned err: %#v", err)
+	}
+	if core.GetObjectID() != testCore.GetObjectID() {
+		t.Fatalf("State.GetCoreByID returned invalid core")
+	}
+	cores = newCore.GetState().GetCores()
+	if len(cores) != 1 {
+		t.Fatalf("State.GetCores should return one core")
+	}
+}
+
+// Test_State_009 checks that setting and getting impulse works as expected.
+func Test_State_009(t *testing.T) {
+	newFactoryServer, _ := newFactoryAndFileSystem()
+
+	// Create new state.
+	newImpulse, err := newFactoryServer.NewImpulse()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewImpulse returned err: %#v", err)
+	}
+
+	testImpulse, err := newFactoryServer.NewImpulse()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewImpulse returned err: %#v", err)
+	}
+	_, err = newImpulse.GetState().GetImpulseByID(testImpulse.GetObjectID())
+	if !state.IsImpulseNotFound(err) {
+		t.Fatalf("State.GetImpulseByID did NOT return err")
+	}
+	impulses := newImpulse.GetState().GetImpulses()
+	if len(impulses) != 0 {
+		t.Fatalf("State.GetImpulses should not return any impulse")
+	}
+	newImpulse.GetState().SetImpulse(testImpulse)
+	impulse, err := newImpulse.GetState().GetImpulseByID(testImpulse.GetObjectID())
+	if err != nil {
+		t.Fatalf("State.GetBytes returned err: %#v", err)
+	}
+	if impulse.GetObjectID() != testImpulse.GetObjectID() {
+		t.Fatalf("State.GetImpulseByID returned invalid impulse")
+	}
+	impulses = newImpulse.GetState().GetImpulses()
+	if len(impulses) != 1 {
+		t.Fatalf("State.GetImpulses should return one impulse")
 	}
 }

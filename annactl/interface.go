@@ -7,8 +7,8 @@ import (
 var (
 	interfaceCmd = &cobra.Command{
 		Use:   "interface",
-		Short: "interface for Anna's behavior",
-		Long:  "interface for Anna's behavior",
+		Short: "Interface for Anna's behaviors.",
+		Long:  "Interface for Anna's behaviors.",
 		Run:   interfaceRun,
 	}
 )

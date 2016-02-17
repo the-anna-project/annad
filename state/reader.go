@@ -10,6 +10,8 @@ import (
 func (s *state) Read() error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "call Read")
 
+	version := s.GetVersion()
+
 	switch s.StateReader {
 	case common.StateType.FSReader:
 		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "restoring state backup from file")
@@ -24,6 +26,8 @@ func (s *state) Read() error {
 	default:
 		return maskAny(invalidStateReaderError)
 	}
+
+	s.SetVersion(version)
 
 	return nil
 }

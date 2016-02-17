@@ -9,7 +9,7 @@ For convenience there are [autocompletion scripts](autocompletion.md).
 Compile the server and check the help usage for more information.
 
 ```yaml
-make server
+make anna
 .workspace/bin/anna -h
 ```
 

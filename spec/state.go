@@ -32,6 +32,8 @@ type State interface {
 
 	GetObjectType() ObjectType
 
+	GetVersion() string
+
 	json.Unmarshaler
 
 	SetBytes(key string, bytes []byte)
@@ -44,11 +46,17 @@ type State interface {
 
 	SetNeuron(neu Neuron)
 
+	// SetStateFromObjectBytes takes the byte slice provided by an object. The
+	// raw state structure is pulled out of the object structure and set as the
+	// current state. So when restoring a backup any object state can be restored
+	// by extracting the raw state structure and applying it as new object state.
 	SetStateFromObjectBytes(bytes []byte) error
 
 	StateReader
 
 	StateWriter
+
+	SetVersion(version string)
 }
 
 type StateReader interface {

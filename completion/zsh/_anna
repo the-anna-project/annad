@@ -9,6 +9,7 @@ options=(
 _describe 'values' options
 
 _arguments \
+  '1: :->business-logic' \
   '--control-log-levels[set log levels for log control]:level:->levels' \
   '--control-log-objects[set log objects for log control]:object:->objects' \
   '--control-log-verbosity[set log verbosity for log control]:verbosity:->verbosity' \
@@ -17,22 +18,25 @@ _arguments \
   '--state-writer[where to write state to]:state-writer:->state-writer' \
 
 case "$state" in
-    levels)
-        _values -s , 'levels' D E F I W
-    ;;
-    objects)
-        _values -s , 'objects' core impulse factory-client factory-server character-neuron first-neuron job-neuron log log-control main network none server state text-interface
-    ;;
-    verbosity)
-        _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-    ;;
-    host)
-        _values 'host' '127.0.0.1\:9119'
-    ;;
-    state-reader)
-        _values 'state-reader' fs none
-    ;;
-    state-writer)
-        _values 'state-writer' fs none
-    ;;
+  business-logic)
+    _arguments '1:business logic:(version)'
+  ;;
+  levels)
+    _values -s , 'levels' D E F I W
+  ;;
+  objects)
+    _values -s , 'objects' core impulse factory-client factory-server character-neuron first-neuron job-neuron log log-control main network none server state text-interface
+  ;;
+  verbosity)
+    _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+  ;;
+  host)
+    _values 'host' '127.0.0.1\:9119'
+  ;;
+  state-reader)
+    _values 'state-reader' fs none
+  ;;
+  state-writer)
+    _values 'state-writer' fs none
+  ;;
 esac

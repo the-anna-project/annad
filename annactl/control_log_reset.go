@@ -7,8 +7,8 @@ import (
 var (
 	controlLogResetCmd = &cobra.Command{
 		Use:   "reset",
-		Short: "make Anna reset log configuration",
-		Long:  "make Anna reset log configuration",
+		Short: "Make Anna reset log configuration.",
+		Long:  "Make Anna reset log configuration.",
 		Run:   controlLogResetRun,
 	}
 )
