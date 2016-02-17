@@ -20,12 +20,13 @@ somebody else, or some group of people way smarter than me. Live will find a way
 
 # documentation
 - [api](doc/api)
-- [challenge](doc/challenge)
 - [concept](doc/concept)
 - [development](doc/development)
 - [diary](doc/diary)
+- [evaluation](doc/evaluation)
 - [godoc](https://godoc.org/github.com/xh3b4sd/anna)
 - [logo](doc/logo)
+- [name](doc/name)
 - [philosophy](doc/philosophy)
 - [risk](doc/risk)
 - [roadmap](doc/roadmap)
