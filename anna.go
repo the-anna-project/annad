@@ -29,8 +29,8 @@ var (
 
 	mainCmd = &cobra.Command{
 		Use:   "anna",
-		Short: "artificial neural network aspiration",
-		Long:  "artificial neural network aspiration",
+		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 	}
 

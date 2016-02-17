@@ -11,8 +11,8 @@ import (
 var (
 	controlLogResetVerbosityCmd = &cobra.Command{
 		Use:   "verbosity",
-		Short: "make Anna reset log verbosity",
-		Long:  "make Anna reset log verbosity",
+		Short: "Make Anna reset log verbosity.",
+		Long:  "Make Anna reset log verbosity.",
 		Run:   controlLogResetVerbosityRun,
 	}
 )

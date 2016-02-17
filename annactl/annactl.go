@@ -24,8 +24,8 @@ var (
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",
-		Short: "interact with Anna's network API",
-		Long:  "interact with Anna's network API",
+		Short: "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			host, port, err := net.SplitHostPort(globalFlags.Host)

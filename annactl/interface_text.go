@@ -7,8 +7,8 @@ import (
 var (
 	interfaceTextCmd = &cobra.Command{
 		Use:   "text",
-		Short: "text interface for Anna",
-		Long:  "text interface for Anna",
+		Short: "Text interface for Anna.",
+		Long:  "Text interface for Anna.",
 		Run:   interfaceTextRun,
 	}
 )

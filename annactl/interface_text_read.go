@@ -7,8 +7,8 @@ import (
 var (
 	interfaceTextReadCmd = &cobra.Command{
 		Use:   "read",
-		Short: "make Anna read text",
-		Long:  "make Anna read text",
+		Short: "Make Anna read text.",
+		Long:  "Make Anna read text.",
 		Run:   interfaceTextReadRun,
 	}
 )

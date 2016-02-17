@@ -9,8 +9,8 @@ import (
 var (
 	versionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "show current version",
-		Long:  "show current version",
+		Short: "Show current version of the binary.",
+		Long:  "Show current version of the binary.",
 		Run:   versionRun,
 	}
 )
