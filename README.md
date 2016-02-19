@@ -32,10 +32,10 @@ somebody else, or some group of people way smarter than me. Live will find a way
 - [roadmap](doc/roadmap)
 
 # contribution
-This project is very ambitious, thus help is always appreciated. Contribution
-guidelines will evolve in time.
+This project is very ambitious, thus help is always appreciated. See the
+[CONTRIBUTING.md](/.github.com/CONTRIBUTING.md) and go for it.
 
 # license
-The anna project is open source and license free software. This means I am
+The Anna project is open source and license free software. This means I am
 holding the copyright in the first place to be defensive. Further I am open to
 change that, as long as the project serves humanity. See [LICENSE](LICENSE).

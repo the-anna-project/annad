@@ -33,9 +33,9 @@ the setup will be similar to this.
                     └── ...
 ```
 
-This approach ensures that there is a dedicated workspace for the anna project.
+This approach ensures that there is a dedicated workspace for the Anna project.
 That is, `~/projects/private/anna/src/github.com/xh3b4sd/anna/.workspace/`.
-This approach also ensures that the directiory structure for the anna project
+This approach also ensures that the directiory structure for the Anna project
 itself is fulfilled, so the go tools can operate properly on it. Just following
 the standard go project layout leads to the fact that all project dependencies
 are lying around outside the project itself. So when I would like to clean all
@@ -55,7 +55,7 @@ mkdir -p ~/projects/private/anna/src/github.com/xh3b4sd/anna/
 
 ###### clone repository
 Now I am going into the working directory that holds the source code of the
-anna project.
+Anna project.
 ```
 cd ~/projects/private/anna/src/github.com/xh3b4sd/anna/
 ```
@@ -109,45 +109,6 @@ Cleanup the workspace can be done with this.
 ```
 make goclean
 ```
-
-### pull requests
-All changes affecting the project MUST be provided in form of a proper PR. What
-exactly "proper" means evolves over time and is not written in stone. Some
-important points are listed as follows.
-
-###### commits
-Pull requests are only accepted and merged when there is only one commit to be
-merged. This means contributers need to squash their commits before. This can
-be done with the following command.
-```
-git rebase -i master
-```
-
----
-
-###### docs
-Pull requests are only accepted and merged when there is proper documentation.
-
-Conceptual documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/concept
-
-Process documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/diary
-
-Code documentation needs to be provided within the code: http://blog.golang.org/godoc-documenting-go-code
-
----
-
-###### tests
-Pull requests are only accepted and merged when there are proper tests. Make
-sure there are tests where it makes sense and all tests pass reliably. No pull
-request is going to be merged as long as there are tests failing or flapping.
-
----
-
-###### branches
-When colaborating and creating branches within the core repository
-https://github.com/xh3b4sd/anna branches should be deleted ones they are
-merged. This prevents loosing the overview and keeps the repository in a clean
-state branch wise.
 
 ### guidelines
 
