@@ -94,3 +94,41 @@ func Test_Factory_004(t *testing.T) {
 		t.Fatalf("invalid object tyoe of factory server")
 	}
 }
+
+// Test_Factory_005 checks that the factory server returns a proper error in
+// case it cannot identify the gateway request.
+func Test_Factory_005(t *testing.T) {
+	// Create new test gateway that all participants can use.
+	newFactoryGateway := gateway.NewGateway()
+
+	// Create a new factory server and configure it with the test gateway.
+	newServerConfig := factoryserver.DefaultConfig()
+	newServerConfig.FactoryGateway = newFactoryGateway
+	factoryserver.NewFactory(newServerConfig)
+
+	bytes := map[string][]byte{
+		"request": []byte("invalid"),
+	}
+	_, err := common.ForwardSignal(newFactoryGateway, bytes)
+	if !factoryserver.IsInvalidFactoryGatewayRequest(err) {
+		t.Fatalf("FactoryServer did NOT return proper err")
+	}
+}
+
+// Test_Factory_006 checks that the factory server returns a proper error in
+// case there is no gateway request.
+func Test_Factory_006(t *testing.T) {
+	// Create new test gateway that all participants can use.
+	newFactoryGateway := gateway.NewGateway()
+
+	// Create a new factory server and configure it with the test gateway.
+	newServerConfig := factoryserver.DefaultConfig()
+	newServerConfig.FactoryGateway = newFactoryGateway
+	factoryserver.NewFactory(newServerConfig)
+
+	bytes := map[string][]byte{}
+	_, err := common.ForwardSignal(newFactoryGateway, bytes)
+	if !gateway.IsBytesNotFound(err) {
+		t.Fatalf("FactoryServer did NOT return proper err")
+	}
+}

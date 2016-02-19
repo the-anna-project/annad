@@ -5,13 +5,13 @@ Here is described how to contribute to the Anna project.
 All changes affecting the Anna project MUST be provided in form of a proper PR.
 What exactly "proper" means evolves over time and is not written in stone. Some
 important points are listed below. To help setting up a PR the pull request
-template [PULL_REQUEST_TEMPLATE.md](/.github.com/PULL_REQUEST_TEMPLATE.md) will
+template [PULL_REQUEST_TEMPLATE.md](PULL_REQUEST_TEMPLATE.md) will
 automatically be provided within the pull request's description.
 
-### labels and assignees
-Please make sure sufficient labels are applied and you have assigned yourself
-to your pull request. If there is no sufficient label for your PR, please file
-an issue.
+### labels, milestones and assignees
+Please make sure sufficient labels and milestones are applied and you have
+assigned yourself to your pull request. If there is no sufficient label for
+your PR, please file an issue.
 
 ### commits
 Pull requests are only accepted and merged when there is only one commit to be

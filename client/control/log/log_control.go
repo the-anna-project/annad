@@ -62,8 +62,8 @@ func (l logControl) ResetLevels(ctx context.Context) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -89,8 +89,8 @@ func (l logControl) ResetObjects(ctx context.Context) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -116,8 +116,8 @@ func (l logControl) ResetVerbosity(ctx context.Context) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -143,8 +143,8 @@ func (l logControl) SetLevels(ctx context.Context, levels string) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -170,8 +170,8 @@ func (l logControl) SetObjects(ctx context.Context, objects string) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -197,8 +197,8 @@ func (l logControl) SetVerbosity(ctx context.Context, verbosity int) error {
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/juju/errgo"
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
@@ -57,7 +58,7 @@ func Test_LogControl_ResetLevels_001(t *testing.T) {
 // errors properly on valid error responses using api.WithError.
 func Test_LogControl_ResetLevels_002(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -127,7 +128,7 @@ func Test_LogControl_ResetObjects_005(t *testing.T) {
 // handle errors properly on valid error responses using api.WithError.
 func Test_LogControl_ResetObjects_006(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -197,7 +198,7 @@ func Test_LogControl_ResetVerbosity_009(t *testing.T) {
 // handle errors properly on valid error responses using api.WithError.
 func Test_LogControl_ResetVerbosity_010(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -267,7 +268,7 @@ func Test_LogControl_SetLevels_013(t *testing.T) {
 // errors properly on valid error responses using api.WithError.
 func Test_LogControl_SetLevels_014(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -337,7 +338,7 @@ func Test_LogControl_SetObjects_017(t *testing.T) {
 // errors properly on valid error responses using api.WithError.
 func Test_LogControl_SetObjects_018(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -407,7 +408,7 @@ func Test_LogControl_SetVerbosity_021(t *testing.T) {
 // handle errors properly on valid error responses using api.WithError.
 func Test_LogControl_SetVerbosity_022(t *testing.T) {
 	newLogControl, ts := newLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)

@@ -70,12 +70,25 @@ func Test_State_003(t *testing.T) {
 	}
 }
 
-// Test_State_004 checks that backing up state and restoring it works as
+// Test_State_003 checks that the predefined object type of a state is properly
+// set.
+func Test_State_004(t *testing.T) {
+	objectType := spec.ObjectType("test-type")
+	newConfig := state.DefaultConfig()
+	newConfig.ObjectType = objectType
+	newState := state.NewState(newConfig)
+
+	if objectType != newState.GetObjectType() {
+		t.Fatalf("predefined object type not properly set")
+	}
+}
+
+// Test_State_005 checks that backing up state and restoring it works as
 // expected. This test case is quite big, because the setup itself needs some
 // code to be done. The test creates a object tree that is written to the fake
 // file system implementation. Reading the state from the file system should
 // result in the exactly same state we dumped before.
-func Test_State_004(t *testing.T) {
+func Test_State_005(t *testing.T) {
 	// Create new test gateway that all participants can use.
 	newFactoryGateway := gateway.NewGateway()
 
@@ -104,12 +117,23 @@ func Test_State_004(t *testing.T) {
 		return newState
 	}
 
-	// Create a bunch of new objects.
+	// Create a bunch of new objects. The first core here is the root of the
+	// object tree.
 	newCore, err := newFactoryServer.NewCore()
 	if err != nil {
 		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
 	}
 	newCore.SetState(newTestState(spec.ObjectID("core-id"), common.ObjectType.Core))
+	anotherCore, err := newFactoryServer.NewCore()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewCore returned err: %#v", err)
+	}
+	anotherCore.SetState(newTestState(spec.ObjectID("another-core-id"), common.ObjectType.Core))
+	newImpulse, err := newFactoryServer.NewImpulse()
+	if err != nil {
+		t.Fatalf("FactoryServer.NewImpulse returned err: %#v", err)
+	}
+	newImpulse.SetState(newTestState(spec.ObjectID("impulse-id"), common.ObjectType.Impulse))
 	newNetwork, err := newFactoryServer.NewNetwork()
 	if err != nil {
 		t.Fatalf("FactoryServer.NewNetwork returned err: %#v", err)
@@ -132,7 +156,9 @@ func Test_State_004(t *testing.T) {
 	jobNeuron.SetState(newTestState(spec.ObjectID("job-id"), common.ObjectType.JobNeuron))
 
 	// Create a object tree by binding objects together.
+	newCore.GetState().SetCore(anotherCore)
 	newCore.GetState().SetNetwork(newNetwork)
+	anotherCore.GetState().SetImpulse(newImpulse)
 	newNetwork.GetState().SetNeuron(firstNeuron)
 	firstNeuron.GetState().SetNeuron(jobNeuron)
 	jobNeuron.GetState().SetNeuron(characterNeuron)
@@ -164,6 +190,14 @@ func Test_State_004(t *testing.T) {
 	if string(coreBytes) != "core" {
 		t.Fatalf("core bytes not properly restored")
 	}
+	restoredCore, err := newState.GetCoreByID(spec.ObjectID("another-core-id"))
+	if err != nil {
+		t.Fatalf("State.GetCoreByID returned err: %#v", err)
+	}
+	_, err = restoredCore.GetState().GetImpulseByID(spec.ObjectID("impulse-id"))
+	if err != nil {
+		t.Fatalf("State.GetImpulseByID returned err: %#v", err)
+	}
 	restoredNetwork, err := newState.GetNetworkByID(spec.ObjectID("network-id"))
 	if err != nil {
 		t.Fatalf("State.GetNetworkByID returned err: %#v", err)
@@ -188,8 +222,8 @@ func Test_State_004(t *testing.T) {
 	}
 }
 
-// Test_State_005 checks that the version is proper set within the state.
-func Test_State_005(t *testing.T) {
+// Test_State_006 checks that the version is proper set within the state.
+func Test_State_006(t *testing.T) {
 	newFactoryServer, fileSystemFake := newFactoryAndFileSystem()
 
 	// Create new state.
@@ -228,8 +262,8 @@ func Test_State_005(t *testing.T) {
 	}
 }
 
-// Test_State_006 checks if getting the state's age works as expected.
-func Test_State_006(t *testing.T) {
+// Test_State_007 checks if getting the state's age works as expected.
+func Test_State_007(t *testing.T) {
 	newFactoryServer, _ := newFactoryAndFileSystem()
 
 	// Create new state.
@@ -245,8 +279,8 @@ func Test_State_006(t *testing.T) {
 	}
 }
 
-// Test_State_007 checks that setting and getting bytes works as expected.
-func Test_State_007(t *testing.T) {
+// Test_State_008 checks that setting and getting bytes works as expected.
+func Test_State_008(t *testing.T) {
 	newFactoryServer, _ := newFactoryAndFileSystem()
 
 	// Create new state.
@@ -269,8 +303,8 @@ func Test_State_007(t *testing.T) {
 	}
 }
 
-// Test_State_008 checks that setting and getting core works as expected.
-func Test_State_008(t *testing.T) {
+// Test_State_009 checks that setting and getting core works as expected.
+func Test_State_009(t *testing.T) {
 	newFactoryServer, _ := newFactoryAndFileSystem()
 
 	// Create new state.
@@ -305,8 +339,8 @@ func Test_State_008(t *testing.T) {
 	}
 }
 
-// Test_State_009 checks that setting and getting impulse works as expected.
-func Test_State_009(t *testing.T) {
+// Test_State_010 checks that setting and getting impulse works as expected.
+func Test_State_010(t *testing.T) {
 	newFactoryServer, _ := newFactoryAndFileSystem()
 
 	// Create new state.
@@ -338,5 +372,103 @@ func Test_State_009(t *testing.T) {
 	impulses = newImpulse.GetState().GetImpulses()
 	if len(impulses) != 1 {
 		t.Fatalf("State.GetImpulses should return one impulse")
+	}
+}
+
+// Test_State_011 checks that a fresh state does not contain any network.
+func Test_State_011(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newState := state.NewState(newConfig)
+
+	networks := newState.GetNetworks()
+	if len(networks) != 0 {
+		t.Fatalf("expected fresh state to not contain any network")
+	}
+}
+
+// Test_State_012 checks that a fresh state returns a proper not found error
+// when fetching some network.
+func Test_State_012(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newState := state.NewState(newConfig)
+
+	_, err := newState.GetNetworkByID(spec.ObjectID("network-id"))
+	if !state.IsNetworkNotFound(err) {
+		t.Fatalf("State.GetNetworks did NOT return proper err")
+	}
+}
+
+// Test_State_013 checks that a fresh state does not contain any neuron.
+func Test_State_013(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newState := state.NewState(newConfig)
+
+	neurons := newState.GetNeurons()
+	if len(neurons) != 0 {
+		t.Fatalf("expected fresh state to not contain any neuron")
+	}
+}
+
+// Test_State_014 checks that a fresh state returns a proper not found error
+// when fetching some neuron.
+func Test_State_014(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newState := state.NewState(newConfig)
+
+	_, err := newState.GetNeuronByID(spec.ObjectID("neuron-id"))
+	if !state.IsNeuronNotFound(err) {
+		t.Fatalf("State.GetNeurons did NOT return proper err")
+	}
+}
+
+// Test_State_015 checks that restoring state using an invalid state reader
+// type throws a proper error.
+func Test_State_015(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newConfig.StateReader = spec.StateType("invalid")
+	newState := state.NewState(newConfig)
+
+	err := newState.Read()
+	if !state.IsInvalidStateReader(err) {
+		t.Fatalf("State.Read did NOT return proper err")
+	}
+}
+
+// Test_State_016 checks that restoring state using "none" state reader does
+// nothing.
+func Test_State_016(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newConfig.StateReader = common.StateType.NoneReader
+	newState := state.NewState(newConfig)
+
+	err := newState.Read()
+	if err != nil {
+		t.Fatalf("State.Read did return err %#v", err)
+	}
+}
+
+// Test_State_017 checks that restoring state using an invalid state writer
+// type throws a proper error.
+func Test_State_017(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newConfig.StateWriter = spec.StateType("invalid")
+	newState := state.NewState(newConfig)
+
+	err := newState.Write()
+	if !state.IsInvalidStateWriter(err) {
+		t.Fatalf("State.Read did NOT return proper err")
+	}
+}
+
+// Test_State_020 checks that restoring state using "none" state writer does
+// nothing.
+func Test_State_020(t *testing.T) {
+	newConfig := state.DefaultConfig()
+	newConfig.StateWriter = common.StateType.NoneWriter
+	newState := state.NewState(newConfig)
+
+	err := newState.Write()
+	if err != nil {
+		t.Fatalf("State.Read did return err %#v", err)
 	}
 }

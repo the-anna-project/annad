@@ -9,7 +9,7 @@ information.
 
 ### checklist
 - [ ] Make sure you read and understood the [CONTRIBUTING.md](/.github.com/CONTRIBUTING.md).
-- [ ] Make sure you applied sufficient labels and assigned yourself before subitting.
+- [ ] Make sure you applied sufficient labels, milestone and assignee.
 - [ ] Make sure all commits are squashed before merging.
 - [ ] Make sure there is sufficient documentation.
 - [ ] Make sure there are sufficient tests.
