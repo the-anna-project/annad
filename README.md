@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/xh3b4sd/anna.svg?branch=master)](https://travis-ci.org/xh3b4sd/anna) [![codecov.io](https://codecov.io/github/xh3b4sd/anna/coverage.svg?branch=master)](https://codecov.io/github/xh3b4sd/anna?branch=master)
+[![build status](https://travis-ci.org/xh3b4sd/anna.svg?branch=master)](https://travis-ci.org/xh3b4sd/anna) [![code coverage](https://img.shields.io/codecov/c/github/xh3b4sd/anna/master.svg?label=codecov)](https://codecov.io/github/xh3b4sd/anna?branch=master) [![build status](https://img.shields.io/badge/made%20with-%E2%99%A1-ff69b4.svg)](https://github.com/xh3b4sd/anna)
 
 # anna
 Anna, Artificial Neural Network Aspiration, aims to be self-learning and
