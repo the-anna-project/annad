@@ -11,6 +11,10 @@ var (
 )
 
 func maskAnyf(err error, f string, v ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+
 	f = fmt.Sprintf("%s: %s", err.Error(), f)
 	newErr := errgo.WithCausef(nil, errgo.Cause(err), f, v...)
 
