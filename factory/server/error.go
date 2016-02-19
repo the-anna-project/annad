@@ -17,13 +17,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 
 	f = fmt.Sprintf("%s: %s", err.Error(), f)
 	newErr := errgo.WithCausef(nil, errgo.Cause(err), f, v...)
+	newErr.(*errgo.Err).SetLocation(1)
 
-	if e, _ := newErr.(*errgo.Err); e != nil {
-		e.SetLocation(1)
-		return e
-	}
-
-	return err
+	return newErr
 }
 
 var invalidFactoryGatewayRequestError = errgo.New("invalid factory gateway request")
