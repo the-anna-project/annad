@@ -68,20 +68,22 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 	apiResponse := response.(textinterface.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return "", maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return "", maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithData("").Code != apiResponse.Code {
-		return "", maskAny(invalidAPIResponseError)
+	if api.WithData("").Code == apiResponse.Code {
+		switch t := apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return t, nil
+		}
 	}
 
-	if s, ok := apiResponse.Data.(string); ok {
-		return s, nil
-	} else {
-		return "", maskAny(invalidAPIResponseError)
-	}
+	// TODO proper logging
+	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
@@ -93,18 +95,20 @@ func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (s
 	apiResponse := response.(textinterface.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return "", maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return "", maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithID("").Code != apiResponse.Code {
-		return "", maskAny(invalidAPIResponseError)
+	if api.WithID("").Code == apiResponse.Code {
+		switch t := apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return t, nil
+		}
 	}
 
-	if s, ok := apiResponse.Data.(string); ok {
-		return s, nil
-	} else {
-		return "", maskAny(invalidAPIResponseError)
-	}
+	// TODO proper logging
+	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
