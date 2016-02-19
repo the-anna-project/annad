@@ -61,16 +61,22 @@ func (l logControl) ResetLevels(ctx context.Context) error {
 	apiResponse := response.(logcontrol.ResetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (l logControl) ResetObjects(ctx context.Context) error {
@@ -82,16 +88,22 @@ func (l logControl) ResetObjects(ctx context.Context) error {
 	apiResponse := response.(logcontrol.ResetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (l logControl) ResetVerbosity(ctx context.Context) error {
@@ -103,16 +115,22 @@ func (l logControl) ResetVerbosity(ctx context.Context) error {
 	apiResponse := response.(logcontrol.ResetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (l logControl) SetLevels(ctx context.Context, levels string) error {
@@ -124,16 +142,22 @@ func (l logControl) SetLevels(ctx context.Context, levels string) error {
 	apiResponse := response.(logcontrol.SetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (l logControl) SetObjects(ctx context.Context, objects string) error {
@@ -145,16 +169,22 @@ func (l logControl) SetObjects(ctx context.Context, objects string) error {
 	apiResponse := response.(logcontrol.SetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (l logControl) SetVerbosity(ctx context.Context, verbosity int) error {
@@ -166,14 +196,20 @@ func (l logControl) SetVerbosity(ctx context.Context, verbosity int) error {
 	apiResponse := response.(logcontrol.SetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
-		if s, ok := apiResponse.Data.(string); ok {
-			return maskAnyf(invalidAPIResponseError, s)
+		switch t := apiResponse.Data.(type) {
+		case error:
+			return maskAnyf(invalidAPIResponseError, t.Error())
 		}
 	}
 
-	if api.WithSuccess().Code != apiResponse.Code {
-		return maskAny(invalidAPIResponseError)
+	if api.WithSuccess().Code == apiResponse.Code {
+		switch apiResponse.Data.(type) {
+		case string:
+			// We received the expected response.
+			return nil
+		}
 	}
 
-	return nil
+	// TODO proper logging
+	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
