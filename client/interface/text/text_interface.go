@@ -69,8 +69,8 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return "", maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return "", maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
@@ -96,8 +96,8 @@ func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (s
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
-		case error:
-			return "", maskAnyf(invalidAPIResponseError, t.Error())
+		case string:
+			return "", maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 

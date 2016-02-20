@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/juju/errgo"
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
@@ -63,7 +64,7 @@ func Test_TextInterface_ReadPlainWithPlain_001(t *testing.T) {
 // responses using api.WithError.
 func Test_TextInterface_ReadPlainWithPlain_002(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -149,7 +150,7 @@ func Test_TextInterface_ReadPlainWithID_005(t *testing.T) {
 // responses using api.WithError.
 func Test_TextInterface_ReadPlainWithID_006(t *testing.T) {
 	newTextInterface, ts := newTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(fmt.Errorf("test error"))
+		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)

@@ -43,9 +43,13 @@ func WithSuccess() Response {
 // WithError returns a response indicating an error of the requested action.
 // Text 'error' translates to the Code 10004.
 func WithError(err error) Response {
+	msg := ""
+	if err != nil {
+		msg = err.Error()
+	}
 	return Response{
 		Code: 10004,
-		Data: err,
+		Data: msg,
 		Text: "error",
 	}
 }

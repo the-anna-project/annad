@@ -8,16 +8,6 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-var invalidCoreRelationError = errgo.New("invalid core relation")
-
-// IsInvalidCoreRelation checks for the given error to be
-// invalidCoreRelationError. This error is returned in case there is not
-// exactly one core. By design there can only be one core. If there is none, or
-// too many, this error is returned.
-func IsInvalidCoreRelation(err error) bool {
-	return errgo.Cause(err) == invalidCoreRelationError
-}
-
 var networkNotFoundError = errgo.New("network not found")
 
 // IsNetworkNotFound checks for the given error to be networkNotFoundError.

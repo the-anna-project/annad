@@ -6,14 +6,6 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func mustSpecStateToLocalState(specState spec.State) *state {
-	if ls, ok := specState.(*state); ok {
-		return ls
-	}
-
-	panic("spec state is not local state")
-}
-
 func (s *state) SetStateFromObjectBytes(bytes []byte) error {
 	var generic map[string]interface{}
 	err := json.Unmarshal(bytes, &generic)

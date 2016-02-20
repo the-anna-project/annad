@@ -52,6 +52,15 @@ func (c core) GetState() spec.State {
 func (c core) SetState(state spec.State) {
 }
 
+// tracer implementes spec.Tracer and is used to provide a tracer for the
+// log tags.
+
+type tracer struct{}
+
+func (t tracer) GetTraceID() spec.TraceID {
+	return spec.TraceID("test-trace-id")
+}
+
 // Test_Log_001 checks that different combinations of logger configuration and
 // log tags result in logged messages as expected.
 func Test_Log_001(t *testing.T) {
@@ -91,7 +100,7 @@ func Test_Log_001(t *testing.T) {
 			Tags:         spec.Tags{L: "I", V: 9},
 			F:            "test %s %s message",
 			V:            []interface{}{"message", "test"},
-			Expected:     "test message",
+			Expected:     "test message test message",
 			LogObjects:   []spec.ObjectType{},
 			LogLevels:    []string{},
 			LogVerbosity: 10,
@@ -138,6 +147,28 @@ func Test_Log_001(t *testing.T) {
 			Expected:     "",
 			LogObjects:   []spec.ObjectType{},
 			LogLevels:    []string{"I"},
+			LogVerbosity: 10,
+		},
+
+		// Debug logs should be logged when only debug logs are allowed.
+		{
+			Tags:         spec.Tags{O: core{}, L: "D", V: 9},
+			F:            "test message",
+			V:            []interface{}{},
+			Expected:     "test message",
+			LogObjects:   []spec.ObjectType{},
+			LogLevels:    []string{"D"},
+			LogVerbosity: 10,
+		},
+
+		// Trace ID should be logged when tracer
+		{
+			Tags:         spec.Tags{O: core{}, T: tracer{}, L: "D", V: 9},
+			F:            "test message",
+			V:            []interface{}{},
+			Expected:     "test-trace-id",
+			LogObjects:   []spec.ObjectType{},
+			LogLevels:    []string{},
 			LogVerbosity: 10,
 		},
 	}

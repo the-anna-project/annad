@@ -23,6 +23,10 @@ func ForwardSignal(gw gatewayspec.Gateway, bytes map[string][]byte) (interface{}
 	}
 
 	resSignal := <-responder
+	if resSignal.GetError() != nil {
+		return nil, maskAny(resSignal.GetError())
+	}
+
 	response, err := resSignal.GetObject("response")
 	if err != nil {
 		return nil, maskAny(err)
