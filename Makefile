@@ -1,7 +1,6 @@
-.PHONY: all anna annactl gobuild goclean gofmt goget gorun gotest
+.PHONY: all anna annactl goclean gofmt goget gotest
 
-$(mkdir -p .workspace/)
-GOPATH := ${PWD}/.workspace/:${PWD}/../../../..:${GOPATH}
+GOPATH := ${PWD}/.workspace/
 export GOPATH
 
 all: goget annactl anna
@@ -25,8 +24,9 @@ gofmt:
 	@go fmt ./...
 
 goget:
-	@go get -v github.com/xh3b4sd/anna
-	@go get -v github.com/xh3b4sd/anna/annactl
+	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@go get -d -v
 
 gotest:
 	@./go.test.sh

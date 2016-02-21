@@ -1,4 +1,4 @@
-package textinterface_test
+package textinterface
 
 import (
 	"encoding/json"
@@ -12,13 +12,12 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/client/interface/text"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // helper
 
-func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (serverspec.TextInterface, *httptest.Server) {
+func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (spec.TextInterface, *httptest.Server) {
 	ts := httptest.NewServer(handler)
 
 	URL, err := url.Parse(ts.URL)
@@ -26,9 +25,9 @@ func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (serverspec.T
 		t.Fatalf("url.Parse returned error: %#v", err)
 	}
 
-	newTextInterfaceConfig := textinterface.DefaultConfig()
+	newTextInterfaceConfig := DefaultConfig()
 	newTextInterfaceConfig.URL = URL
-	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
+	newTextInterface := NewTextInterface(newTextInterfaceConfig)
 
 	return newTextInterface, ts
 }
@@ -74,7 +73,7 @@ func Test_TextInterface_ReadPlainWithPlain_002(t *testing.T) {
 
 	ctx := context.Background()
 	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
 	}
 	if ID != "" {
@@ -93,7 +92,7 @@ func Test_TextInterface_ReadPlainWithPlain_003(t *testing.T) {
 
 	ctx := context.Background()
 	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
 	}
 	if ID != "" {
@@ -112,7 +111,7 @@ func Test_TextInterface_ReadPlainWithPlain_004(t *testing.T) {
 
 	ctx := context.Background()
 	ID, err := newTextInterface.ReadPlainWithPlain(ctx, "hello world")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithPlain NOT returned proper error")
 	}
 	if ID != "" {
@@ -160,7 +159,7 @@ func Test_TextInterface_ReadPlainWithID_006(t *testing.T) {
 
 	ctx := context.Background()
 	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
 	}
 	if data != "" {
@@ -179,7 +178,7 @@ func Test_TextInterface_ReadPlainWithID_007(t *testing.T) {
 
 	ctx := context.Background()
 	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
 	}
 	if data != "" {
@@ -198,7 +197,7 @@ func Test_TextInterface_ReadPlainWithID_008(t *testing.T) {
 
 	ctx := context.Background()
 	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
-	if !textinterface.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
 	}
 	if data != "" {

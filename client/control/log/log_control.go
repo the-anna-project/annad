@@ -8,7 +8,7 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/server/control/log"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 type Config struct {
@@ -26,7 +26,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-func NewLogControl(config Config) serverspec.LogControl {
+func NewLogControl(config Config) spec.LogControl {
 	newLogControl := &logControl{
 		Config: config,
 

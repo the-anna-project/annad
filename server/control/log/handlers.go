@@ -4,10 +4,10 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 	"golang.org/x/net/context"
 
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func NewHandlers(ctx context.Context, lc serverspec.LogControl) map[string]*httptransport.Server {
+func NewHandlers(ctx context.Context, lc spec.LogControl) map[string]*httptransport.Server {
 	handlers := map[string]*httptransport.Server{}
 
 	handlers["/control/log/reset/levels"] = httptransport.NewServer(

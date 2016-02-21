@@ -4,9 +4,8 @@ type ObjectID string
 
 type ObjectType string
 
+// Object represents the interface for identification and persistence.
 type Object interface {
-	GetObjectID() ObjectID
-	GetObjectType() ObjectType
-	GetState() State
-	SetState(state State)
+	GetID() ObjectID
+	GetType() ObjectType
 }

@@ -1,12 +1,15 @@
+// Package server implements a HTTP server to provide Anna's API over network.
 package server
 
 import (
 	"net/http"
+	"sync"
 
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
@@ -20,37 +23,40 @@ type Config struct {
 
 	Log spec.Log
 
-	TextGateway gatewayspec.Gateway
+	TextGateway spec.Gateway
 }
 
 func DefaultConfig() Config {
 	newConfig := Config{
 		Host:        "127.0.0.1:9119",
 		Log:         log.NewLog(log.DefaultConfig()),
-		TextGateway: gateway.NewGateway(),
+		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
 
 	return newConfig
 }
 
-type Server interface {
-	// Listen starts a server based on the given configuration. The call to Boot
-	// is blocking, so you might want to call it in a separate goroutine.
-	Listen()
-}
-
-func NewServer(config Config) Server {
-	return server{
+func NewServer(config Config) spec.Server {
+	return &server{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   spec.ObjectType(common.ObjectType.Log),
 	}
 }
 
 type server struct {
 	Config
+
+	ID spec.ObjectID
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType
 }
 
-func (s server) Listen() {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Listen")
+func (s *server) Boot() {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Boot")
 
 	ctx := context.Background()
 

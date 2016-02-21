@@ -1,6 +1,8 @@
 package impulse
 
 import (
+	"fmt"
+
 	"github.com/juju/errgo"
 )
 
@@ -8,8 +10,20 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-var stateNotFoundError = errgo.New("state not found")
+func maskAnyf(err error, f string, v ...interface{}) error {
+	if err == nil {
+		return nil
+	}
 
-func IsStateNotFound(err error) bool {
-	return errgo.Cause(err) == stateNotFoundError
+	f = fmt.Sprintf("%s: %s", err.Error(), f)
+	newErr := errgo.WithCausef(nil, errgo.Cause(err), f, v...)
+	newErr.(*errgo.Err).SetLocation(1)
+
+	return newErr
+}
+
+var invalidNetworkTypeError = errgo.New("invalid network type")
+
+func IsInvalidNetworkType(err error) bool {
+	return errgo.Cause(err) == invalidNetworkTypeError
 }

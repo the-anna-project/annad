@@ -5,10 +5,10 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func fetchURLEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
+func fetchURLEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(FetchURLRequest)
 
@@ -21,7 +21,7 @@ func fetchURLEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	}
 }
 
-func readFileEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
+func readFileEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ReadFileRequest)
 
@@ -34,7 +34,7 @@ func readFileEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	}
 }
 
-func readStreamEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
+func readStreamEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ReadStreamRequest)
 
@@ -47,7 +47,7 @@ func readStreamEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
 	}
 }
 
-func readPlainEndpoint(ti serverspec.TextInterface) endpoint.Endpoint {
+func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ReadPlainRequest)
 

@@ -1,63 +1,74 @@
+// TODO
 package textinterface
 
 import (
+	"sync"
+
 	"time"
 
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/server/spec"
 	"github.com/xh3b4sd/anna/spec"
 )
 
 type Config struct {
 	Log spec.Log
 
-	TextGateway gatewayspec.Gateway
+	TextGateway spec.Gateway
 }
 
 func DefaultConfig() Config {
 	return Config{
 		Log:         log.NewLog(log.DefaultConfig()),
-		TextGateway: gateway.NewGateway(),
+		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
 }
 
-func NewTextInterface(config Config) serverspec.TextInterface {
-	return textInterface{
+func NewTextInterface(config Config) spec.TextInterface {
+	return &textInterface{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   spec.ObjectType(common.ObjectType.Log),
 	}
 }
 
 type textInterface struct {
 	Config
+
+	ID spec.ObjectID
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType
 }
 
 // TODO this should actually fetch a url from the web
-func (ti textInterface) FetchURL(url string) ([]byte, error) {
+func (ti *textInterface) FetchURL(url string) ([]byte, error) {
 	return nil, nil
 }
 
 // TODO this should actually read a file from file system
-func (ti textInterface) ReadFile(file string) ([]byte, error) {
+func (ti *textInterface) ReadFile(file string) ([]byte, error) {
 	return nil, nil
 }
 
 // TODO this should actually be streamed
-func (ti textInterface) ReadStream(stream string) ([]byte, error) {
+func (ti *textInterface) ReadStream(stream string) ([]byte, error) {
 	return nil, nil
 }
 
 // return response
-func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
+func (ti *textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
 	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithID")
 
 	newConfig := gateway.DefaultSignalConfig()
-	newConfig.Bytes["request"] = []byte{}
-	newConfig.ID = ID
 	newSignal := gateway.NewSignal(newConfig)
+	newSignal.SetID(ID)
 
 	response, err := ti.waitForSignal(ctx, newSignal)
 	if err != nil {
@@ -68,12 +79,12 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 }
 
 // return ID
-func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
+func (ti *textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
 	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithPlain")
 
 	newConfig := gateway.DefaultSignalConfig()
-	newConfig.Bytes["request"] = []byte(plain)
 	newSignal := gateway.NewSignal(newConfig)
+	newSignal.SetInput(plain)
 
 	response, err := ti.waitForSignal(ctx, newSignal)
 	if err != nil {
@@ -83,69 +94,24 @@ func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (s
 	return response, nil
 }
 
-func (ti textInterface) waitForSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
+func (ti *textInterface) waitForSignal(ctx context.Context, newSignal spec.Signal) (string, error) {
 	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call waitForSignal")
 
+	var err error
+
 	for {
-		response, err := ti.forwardSignal(ctx, signal)
+		newSignal, err = ti.TextGateway.Send(newSignal, ctx.Done())
 		if err != nil {
 			return "", maskAny(err)
 		}
 
-		if len(response) == 0 {
+		output := newSignal.GetOutput()
+		o := output.(string)
+
+		if o == "" {
 			time.Sleep(1 * time.Second)
 		} else {
-			return response, nil
+			return o, nil
 		}
 	}
-}
-
-func (ti textInterface) forwardSignal(ctx context.Context, signal gatewayspec.Signal) (string, error) {
-	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call forwardSignal")
-
-	var err error
-	var response []byte
-
-	i := 0
-	for {
-		if i >= 5 {
-			return "", maskAny(gatewayClosedError)
-		}
-
-		err := ti.TextGateway.SendSignal(signal)
-		if gateway.IsGatewayClosed(err) {
-			i++
-			ti.Log.WithTags(spec.Tags{L: "W", O: ti, T: nil, V: 7}, "gateway is closed")
-			time.Sleep(1 * time.Second)
-			continue
-		} else if err != nil {
-			return "", maskAny(err)
-		}
-
-		// Once we send the signal through the gateway, we stop here, to prevent
-		// resubmition.
-		break
-	}
-
-	responder, err := signal.GetResponder()
-	if err != nil {
-		return "", maskAny(err)
-	}
-
-	select {
-	case <-ctx.Done():
-		signal.Cancel()
-		return "", nil
-	case resSignal := <-responder:
-		if err := resSignal.GetError(); err != nil {
-			return "", maskAny(err)
-		}
-
-		response, err = resSignal.GetBytes("response")
-		if err != nil {
-			return "", maskAny(err)
-		}
-	}
-
-	return string(response), nil
 }

@@ -11,7 +11,7 @@ import (
 
 	"github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 var (
@@ -19,8 +19,8 @@ var (
 		Host string
 	}
 
-	textInterface serverspec.TextInterface
-	logControl    serverspec.LogControl
+	textInterface spec.TextInterface
+	logControl    spec.LogControl
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",

@@ -1,22 +1,26 @@
+// FactoryClient implements spec.Factory and provides a decentralized service for
+// general object creation.
 package factoryclient
 
 import (
+	"sync"
+
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
 type Config struct {
-	FactoryGateway gatewayspec.Gateway
+	FactoryGateway spec.Gateway
 
 	Log spec.Log
 }
 
 func DefaultConfig() Config {
 	config := Config{
-		FactoryGateway: gateway.NewGateway(),
+		FactoryGateway: gateway.NewGateway(gateway.DefaultConfig()),
 		Log:            log.NewLog(log.DefaultConfig()),
 	}
 
@@ -24,114 +28,89 @@ func DefaultConfig() Config {
 }
 
 func NewFactory(config Config) spec.Factory {
-	newFactory := &client{
+	newFactory := &factoryClient{
+		Closed: false,
+		Closer: make(chan struct{}, 1),
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   common.ObjectType.FactoryClient,
 	}
 
 	return newFactory
 }
 
-type objectValues map[spec.ObjectID]spec.Object
+type factoryClient struct {
+	Closed bool
+	Closer chan struct{}
 
-type client struct {
 	Config
+
+	ID spec.ObjectID `json:"id"`
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType `json:"type"`
 }
 
-func (c *client) NewCore() (spec.Core, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewCore")
+func (fc *factoryClient) Boot() {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Boot")
+}
 
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.Core),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
+func (fc *factoryClient) NewCore() (spec.Core, error) {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewCore")
+
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.Core, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return response.(spec.Core), nil
+	return output.(spec.Core), nil
 }
 
-func (c *client) NewImpulse() (spec.Impulse, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewImpulse")
+func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewImpulse")
 
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.Impulse),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.Impulse, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return response.(spec.Impulse), nil
+	return output.(spec.Impulse), nil
 }
 
-func (c *client) NewCharacterNeuron() (spec.Neuron, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewImpulse")
+func (fc *factoryClient) NewRedisStorage() (spec.Storage, error) {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewRedisStorage")
 
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.CharacterNeuron),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.RedisStorage, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return response.(spec.Neuron), nil
+	return output.(spec.Storage), nil
 }
 
-func (c *client) NewFirstNeuron() (spec.Neuron, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewFirstNeuron")
+func (fc *factoryClient) NewStrategyNetwork() (spec.Network, error) {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewNetwork")
 
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.FirstNeuron),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.StrategyNetwork, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return response.(spec.Neuron), nil
+	return output.(spec.Network), nil
 }
 
-func (c *client) NewJobNeuron() (spec.Neuron, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewJobNeuron")
+func (fc *factoryClient) Shutdown() {
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Shutdown")
 
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.JobNeuron),
+	fc.Mutex.Lock()
+	defer fc.Mutex.Unlock()
+
+	fc.FactoryGateway.Close()
+
+	if !fc.Closed {
+		fc.Closer <- struct{}{}
+		fc.Closed = true
 	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return response.(spec.Neuron), nil
-}
-
-func (c *client) NewNetwork() (spec.Network, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewNetwork")
-
-	bytes := map[string][]byte{
-		"request": []byte(common.ObjectType.Network),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return response.(spec.Network), nil
-}
-
-func (c *client) NewState(objectType spec.ObjectType) (spec.State, error) {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 15}, "call NewState")
-
-	bytes := map[string][]byte{
-		"state-object-type": []byte(objectType),
-		"request":           []byte(common.ObjectType.State),
-	}
-	response, err := common.ForwardSignal(c.FactoryGateway, bytes)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return response.(spec.State), nil
 }

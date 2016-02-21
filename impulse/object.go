@@ -4,22 +4,14 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (i *impulse) GetObjectID() spec.ObjectID {
-	return i.State.GetObjectID()
-}
-
-func (i *impulse) GetObjectType() spec.ObjectType {
-	return i.State.GetObjectType()
-}
-
-func (i *impulse) GetState() spec.State {
+func (i *impulse) GetID() spec.ObjectID {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
-	return i.State
+	return i.ID
 }
 
-func (i *impulse) SetState(state spec.State) {
+func (i *impulse) GetType() spec.ObjectType {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
-	i.State = state
+	return i.Type
 }

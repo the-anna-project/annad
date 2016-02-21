@@ -1,3 +1,5 @@
+// Package id provides simple ID generation using pseudo randomly generated
+// strings.
 package id
 
 import (

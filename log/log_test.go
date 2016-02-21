@@ -1,11 +1,10 @@
-package log_test
+package log
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/xh3b4sd/anna/common"
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -37,19 +36,19 @@ func (rl *rootLogger) ResetArgs() {
 
 type core struct{}
 
-func (c core) GetObjectID() spec.ObjectID {
+func (c core) GetID() spec.ObjectID {
 	return spec.ObjectID("")
 }
 
-func (c core) GetObjectType() spec.ObjectType {
+func (c core) GetType() spec.ObjectType {
 	return common.ObjectType.Core
 }
 
-func (c core) GetState() spec.State {
-	return nil
+func (c core) MarshalJSON() ([]byte, error) {
+	return nil, nil
 }
-
-func (c core) SetState(state spec.State) {
+func (c core) UnmarshalJSON(bytes []byte) error {
+	return nil
 }
 
 // tracer implementes spec.Tracer and is used to provide a tracer for the
@@ -71,6 +70,7 @@ func Test_Log_001(t *testing.T) {
 		Expected     string
 		LogObjects   []spec.ObjectType
 		LogLevels    []string
+		LogTraceID   spec.TraceID
 		LogVerbosity int
 	}{
 		// Logs should not be logged when no tags are given.
@@ -123,7 +123,7 @@ func Test_Log_001(t *testing.T) {
 			F:            "test message",
 			V:            []interface{}{},
 			Expected:     "",
-			LogObjects:   []spec.ObjectType{common.ObjectType.Network},
+			LogObjects:   []spec.ObjectType{common.ObjectType.StrategyNetwork},
 			LogLevels:    []string{},
 			LogVerbosity: 10,
 		},
@@ -161,7 +161,8 @@ func Test_Log_001(t *testing.T) {
 			LogVerbosity: 10,
 		},
 
-		// Trace ID should be logged when tracer
+		// Log message using trace ID should be logged when tracer is given in log
+		// tags and log config's trace ID is empty by default.
 		{
 			Tags:         spec.Tags{O: core{}, T: tracer{}, L: "D", V: 9},
 			F:            "test message",
@@ -169,6 +170,20 @@ func Test_Log_001(t *testing.T) {
 			Expected:     "test-trace-id",
 			LogObjects:   []spec.ObjectType{},
 			LogLevels:    []string{},
+			LogTraceID:   spec.TraceID(""),
+			LogVerbosity: 10,
+		},
+
+		// Log message using trace ID should NOT be logged when tracer is given in
+		// log tags and log config's trace ID is different.
+		{
+			Tags:         spec.Tags{O: core{}, T: tracer{}, L: "D", V: 9},
+			F:            "test message",
+			V:            []interface{}{},
+			Expected:     "",
+			LogObjects:   []spec.ObjectType{},
+			LogLevels:    []string{},
+			LogTraceID:   spec.TraceID("other"),
 			LogVerbosity: 10,
 		},
 	}
@@ -176,16 +191,18 @@ func Test_Log_001(t *testing.T) {
 	for i, testCase := range testCases {
 		newRootLogger := &rootLogger{Args: []interface{}{}}
 
-		newLogConfig := log.DefaultConfig()
-		newLogConfig.Levels = testCase.LogLevels
+		newLogConfig := DefaultConfig()
 		newLogConfig.Objects = testCase.LogObjects
+		newLogConfig.Levels = testCase.LogLevels
+		newLogConfig.TraceID = testCase.LogTraceID
 		newLogConfig.RootLogger = newRootLogger
 		newLogConfig.Verbosity = testCase.LogVerbosity
-		newLog := log.NewLog(newLogConfig)
+		newLog := NewLog(newLogConfig)
 
 		newLog.WithTags(testCase.Tags, testCase.F, testCase.V...)
 
 		result := newRootLogger.ArgsToString()
+
 		if (testCase.Expected == "" && result != "") || (!strings.Contains(result, testCase.Expected)) {
 			t.Fatalf("%d. test case failed: logged message '%s' does not match expected result '%s'", i+1, result, testCase.Expected)
 		}
@@ -196,9 +213,9 @@ func Test_Log_001(t *testing.T) {
 func Test_Log_002(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -239,9 +256,9 @@ func Test_Log_002(t *testing.T) {
 func Test_Log_003(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -254,7 +271,7 @@ func Test_Log_003(t *testing.T) {
 	newRootLogger.ResetArgs()
 	// Set levels so log messages should not be logged.
 	err := newLog.SetLevels("foo")
-	if !log.IsInvalidLogLevel(err) {
+	if !IsInvalidLogLevel(err) {
 		t.Fatalf("Log.SetLevels NOT returned proper error")
 	}
 }
@@ -264,9 +281,9 @@ func Test_Log_003(t *testing.T) {
 func Test_Log_004(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -295,9 +312,9 @@ func Test_Log_004(t *testing.T) {
 func Test_Log_005(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -309,7 +326,7 @@ func Test_Log_005(t *testing.T) {
 	// Reset the test logger to clean the log message of the previous logging.
 	newRootLogger.ResetArgs()
 	// Set objects so log messages should not be logged.
-	err := newLog.SetObjects("network,impulse")
+	err := newLog.SetObjects("strategy-network,impulse")
 	if err != nil {
 		t.Fatalf("Log.SetObjects returned error: %#v", err)
 	}
@@ -338,9 +355,9 @@ func Test_Log_005(t *testing.T) {
 func Test_Log_006(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -353,7 +370,7 @@ func Test_Log_006(t *testing.T) {
 	newRootLogger.ResetArgs()
 	// Set objects so log messages should not be logged.
 	err := newLog.SetObjects("foo")
-	if !log.IsInvalidLogObject(err) {
+	if !IsInvalidLogObject(err) {
 		t.Fatalf("Log.SetObjects NOT returned proper error")
 	}
 }
@@ -363,9 +380,9 @@ func Test_Log_006(t *testing.T) {
 func Test_Log_007(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "W", O: core{}, V: newLogConfig.Verbosity}, "test message")
@@ -394,9 +411,9 @@ func Test_Log_007(t *testing.T) {
 func Test_Log_008(t *testing.T) {
 	newRootLogger := &rootLogger{Args: []interface{}{}}
 
-	newLogConfig := log.DefaultConfig()
+	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := NewLog(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{L: "I", O: core{}, V: newLogConfig.Verbosity}, "test message")

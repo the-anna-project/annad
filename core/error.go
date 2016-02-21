@@ -8,14 +8,8 @@ var (
 	maskAny = errgo.MaskFunc(errgo.Any)
 )
 
-var connectionNotFoundError = errgo.New("connection not found")
+var networkNotFoundError = errgo.New("network not found")
 
-func IsConnectionNotFound(err error) bool {
-	return errgo.Cause(err) == connectionNotFoundError
-}
-
-var stateNotFoundError = errgo.New("state not found")
-
-func IsStateNotFound(err error) bool {
-	return errgo.Cause(err) == stateNotFoundError
+func IsNetworkNotFound(err error) bool {
+	return errgo.Cause(err) == networkNotFoundError
 }

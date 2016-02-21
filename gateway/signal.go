@@ -3,61 +3,42 @@ package gateway
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/gateway/spec"
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 type SignalConfig struct {
-	Bytes   map[string][]byte
-	ID      string
-	Objects map[string]interface{}
+	ID     string
+	Input  interface{}
+	Output interface{}
 }
 
 func DefaultSignalConfig() SignalConfig {
-	newSignalConfig := SignalConfig{
-		Bytes:   map[string][]byte{},
-		ID:      string(id.NewObjectID(id.Hex128)),
-		Objects: map[string]interface{}{},
+	newConfig := SignalConfig{
+		ID:     string(id.NewObjectID(id.Hex128)),
+		Input:  nil,
+		Output: nil,
 	}
 
-	return newSignalConfig
+	return newConfig
 }
 
-func NewSignal(config SignalConfig) gatewayspec.Signal {
+func NewSignal(config SignalConfig) spec.Signal {
 	return &signal{
-		Canceled:     false,
 		SignalConfig: config,
 		Mutex:        sync.Mutex{},
-		Responder:    make(chan gatewayspec.Signal, 1000),
+		Responder:    make(chan spec.Signal, 1000),
 	}
 }
 
 type signal struct {
-	Canceled bool
+	Error error
+
+	Mutex sync.Mutex
 
 	SignalConfig
 
-	Error     error
-	Responder chan gatewayspec.Signal
-	Mutex     sync.Mutex
-}
-
-func (s *signal) Cancel() {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-	s.Canceled = true
-	close(s.Responder)
-}
-
-func (s *signal) GetBytes(key string) ([]byte, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-
-	if b, ok := s.Bytes[key]; ok {
-		return b, nil
-	}
-
-	return nil, maskAny(bytesNotFoundError)
+	Responder chan spec.Signal
 }
 
 func (s *signal) GetError() error {
@@ -72,32 +53,25 @@ func (s *signal) GetID() string {
 	return s.ID
 }
 
-func (s *signal) GetObject(key string) (interface{}, error) {
+func (s *signal) GetInput() interface{} {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	if o, ok := s.Objects[key]; ok {
-		return o, nil
-	}
-
-	return nil, maskAny(objectNotFoundError)
+	return s.Input
 }
 
-func (s *signal) GetResponder() (chan gatewayspec.Signal, error) {
+func (s *signal) GetOutput() interface{} {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	if s.Canceled {
-		return nil, maskAny(signalCanceledError)
-	}
-
-	return s.Responder, nil
+	return s.Output
 }
 
-func (s *signal) SetBytes(key string, bytes []byte) {
+func (s *signal) GetResponder() chan spec.Signal {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-	s.Bytes[key] = bytes
+
+	return s.Responder
 }
 
 func (s *signal) SetError(err error) {
@@ -106,14 +80,20 @@ func (s *signal) SetError(err error) {
 	s.Error = err
 }
 
-func (s *signal) SetObject(key string, object interface{}) {
+func (s *signal) SetID(ID string) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-	s.Objects[key] = object
+	s.ID = ID
 }
 
-func (s *signal) SetResponder(responder chan gatewayspec.Signal) {
+func (s *signal) SetInput(input interface{}) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-	s.Responder = responder
+	s.Input = input
+}
+
+func (s *signal) SetOutput(output interface{}) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+	s.Output = output
 }

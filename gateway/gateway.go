@@ -1,68 +1,110 @@
+// TODO
 package gateway
 
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func NewGateway() gatewayspec.Gateway {
-	g := &gateway{
-		Link:   make(chan gatewayspec.Signal, 1000),
-		Closed: false,
-		Mutex:  sync.Mutex{},
+type Config struct {
+	Log spec.Log `json:"-"`
+}
+
+func DefaultConfig() Config {
+	newConfig := Config{
+		Log: log.NewLog(log.DefaultConfig()),
 	}
 
-	return g
+	return newConfig
+}
+
+func NewGateway(config Config) spec.Gateway {
+	newGateway := &gateway{
+		Closed: false,
+		Closer: make(chan struct{}, 1),
+		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Link:   make(chan spec.Signal, 1000),
+		Mutex:  sync.Mutex{},
+		Type:   spec.ObjectType(common.ObjectType.Gateway),
+	}
+
+	return newGateway
 }
 
 type gateway struct {
-	Link   chan gatewayspec.Signal
 	Closed bool
-	Mutex  sync.Mutex
+	Closer chan struct{}
+
+	Config
+
+	ID spec.ObjectID
+
+	Link chan spec.Signal
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType
 }
 
 func (g *gateway) Close() {
 	g.Mutex.Lock()
 	defer g.Mutex.Unlock()
-	g.Closed = true
+
+	if !g.Closed {
+		g.Closer <- struct{}{}
+		g.Closed = true
+	}
 }
 
-func (g *gateway) Open() {
+func (g *gateway) Listen(listener spec.Listener, closer <-chan struct{}) {
+	for {
+		select {
+		case <-closer:
+			return
+		case <-g.Closer:
+			return
+		case receivedSignal := <-g.Link:
+			newResponder := receivedSignal.GetResponder()
+
+			respondingSignal, err := listener(receivedSignal)
+			if err != nil {
+				receivedSignal.SetError(maskAny(err))
+				newResponder <- receivedSignal
+				continue
+			}
+
+			newResponder <- respondingSignal
+		}
+	}
+}
+
+func (g *gateway) Send(newSignal spec.Signal, closer <-chan struct{}) (spec.Signal, error) {
 	g.Mutex.Lock()
 	defer g.Mutex.Unlock()
-	g.Closed = false
-}
 
-func (g *gateway) ReceiveSignal() (gatewayspec.Signal, error) {
-	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
-	// Link channel at the end of this function. Link might block until a signal
-	// can be read again. In this case Mutex.Unlock is never called and the mutex
-	// causes blocking of Gateway.Close, Gateway.Open and Gateway.SendSignal. So
-	// we need to explicitly unlock here.
-	g.Mutex.Lock()
 	if g.Closed {
-		g.Mutex.Unlock()
 		return nil, maskAny(gatewayClosedError)
 	}
-	g.Mutex.Unlock()
 
-	return <-g.Link, nil
-}
+	go func() {
+		g.Link <- newSignal
+	}()
 
-func (g *gateway) SendSignal(signal gatewayspec.Signal) error {
-	// Note that we can NOT simply defer the call to Mutex.Unlock, because of the
-	// Link channel at the end of this function. Link might block until a signal
-	// can be sent again. In this case Mutex.Unlock is never called and the mutex
-	// causes blocking of Gateway.Close, Gateway.Open and Gateway.ReceiveSignal.
-	// So we need to explicitly unlock here.
-	g.Mutex.Lock()
-	if g.Closed {
-		g.Mutex.Unlock()
-		return maskAny(gatewayClosedError)
+	newResponder := newSignal.GetResponder()
+
+	select {
+	case <-closer:
+		return nil, maskAny(signalCanceledError)
+	case newSignal = <-newResponder:
+		if newSignal.GetError() != nil {
+			return nil, maskAny(newSignal.GetError())
+		}
+
+		return newSignal, nil
 	}
-	g.Mutex.Unlock()
-
-	g.Link <- signal
-	return nil
 }
