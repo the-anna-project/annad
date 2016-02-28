@@ -107,8 +107,13 @@ func (a *anna) Boot() {
 }
 
 func (a *anna) Shutdown() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+
 	go a.Core.Shutdown()
 	go a.FactoryServer.Shutdown()
+
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down")
+	os.Exit(0)
 }
 
 func mainRun(cmd *cobra.Command, args []string) {
