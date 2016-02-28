@@ -1,7 +1,3 @@
-// Note, this test hijacks the factoryserver's package scope. This is
-// considered bad practise. We do it anyway to test error handling and to not
-// expose it, since error handling is supposed to be package related and
-// irrelevant for the public interface.
 package factoryserver
 
 import (

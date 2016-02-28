@@ -1,10 +1,9 @@
-package id_test
+package id
 
 import (
 	"sync"
 	"testing"
 
-	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -19,12 +18,12 @@ func Test_ID_001(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			newObjectID := id.NewObjectID(id.Hex128)
+			newObjectID := NewObjectID(Hex128)
 
+			mutex.Lock()
 			if _, ok := alreadySeen[newObjectID]; ok {
 				t.Fatal("id.NewObjectID returned the same ID twice")
 			}
-			mutex.Lock()
 			alreadySeen[newObjectID] = struct{}{}
 			mutex.Unlock()
 		}()

@@ -1,17 +1,15 @@
-package gateway_test
+package gateway
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/xh3b4sd/anna/gateway"
 )
 
 // Test_Signal_001 checks that setting and getting errors on signals works as
 // expected.
 func Test_Signal_001(t *testing.T) {
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignal := gateway.NewSignal(newSignalConfig)
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
 
 	err := newSignal.GetError()
 	if err != nil {
@@ -30,52 +28,57 @@ func Test_Signal_001(t *testing.T) {
 // Test_Signal_002 checks that setting and getting IDs on signals works as
 // expected.
 func Test_Signal_002(t *testing.T) {
-	newSignalConfig := gateway.DefaultSignalConfig()
+	newSignalConfig := DefaultSignalConfig()
 	newSignalConfig.ID = "testID"
-	newSignal := gateway.NewSignal(newSignalConfig)
+	newSignal := NewSignal(newSignalConfig)
 
 	ID := newSignal.GetID()
 	if ID != "testID" {
 		t.Fatalf("Signal.GetID returned wrong ID")
 	}
+
+	// Now using the setter.
+	newSignal.SetID("other")
+	ID = newSignal.GetID()
+	if ID != "other" {
+		t.Fatalf("Signal.GetID returned wrong ID")
+	}
 }
 
-// Test_Signal_003 checks that setting and getting errors on signals works as
+// Test_Signal_003 checks that setting and getting input on signals works as
 // expected.
 func Test_Signal_003(t *testing.T) {
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignal := gateway.NewSignal(newSignalConfig)
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
 
-	_, err := newSignal.GetObject("foo")
-	if !gateway.IsObjectNotFound(err) {
-		t.Fatalf("Signal.GetObject did NOT return proper err")
+	originalInput := "foo"
+
+	input := newSignal.GetInput()
+	if input != nil {
+		t.Fatalf("input of new signal is not nil")
 	}
-	newSignal.SetObject("foo", true)
-	object, err := newSignal.GetObject("foo")
-	if err != nil {
-		t.Fatalf("Signal.GetObject returned err: %#v", err)
-	}
-	if object.(bool) != true {
-		t.Fatalf("Signal.GetObject returned invalid object")
+	newSignal.SetInput(originalInput)
+	receivedInput := newSignal.GetInput()
+	if receivedInput.(string) != "foo" {
+		t.Fatalf("received input '%s' of signal differs from original input %s'", receivedInput, originalInput)
 	}
 }
 
-// Test_Signal_004 checks that setting and getting errors on signals works as
+// Test_Signal_004 checks that setting and getting ouput on signals works as
 // expected.
 func Test_Signal_004(t *testing.T) {
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignal := gateway.NewSignal(newSignalConfig)
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
 
-	_, err := newSignal.GetBytes("foo")
-	if !gateway.IsBytesNotFound(err) {
-		t.Fatalf("Signal.GetObject did NOT return proper err")
+	originalOutput := "foo"
+
+	output := newSignal.GetOutput()
+	if output != nil {
+		t.Fatalf("output of new signal is not nil")
 	}
-	newSignal.SetBytes("foo", []byte("bar"))
-	bytes, err := newSignal.GetBytes("foo")
-	if err != nil {
-		t.Fatalf("Signal.GetBytes returned err: %#v", err)
-	}
-	if string(bytes) != "bar" {
-		t.Fatalf("Signal.GetBytes returned wrong bytes")
+	newSignal.SetOutput(originalOutput)
+	receivedOutput := newSignal.GetOutput()
+	if receivedOutput.(string) != "foo" {
+		t.Fatalf("received output '%s' of signal differs from original output %s'", receivedOutput, originalOutput)
 	}
 }

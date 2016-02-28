@@ -1,17 +1,21 @@
 package spec
 
 type Factory interface {
+	// Boot initializes and starts the whole factory like booting a machine. The
+	// call to Boot blocks until the factory is completely initialized, so you
+	// might want to call it in a separate goroutine.
+	Boot()
+
 	NewCore() (Core, error)
 
 	NewImpulse() (Impulse, error)
 
-	NewCharacterNeuron() (Neuron, error)
+	NewRedisStorage() (Storage, error)
 
-	NewFirstNeuron() (Neuron, error)
+	NewStrategyNetwork() (Network, error)
 
-	NewJobNeuron() (Neuron, error)
-
-	NewNetwork() (Network, error)
-
-	NewState(objectType ObjectType) (State, error)
+	// Shutdown ends all processes of the factory like shutting down a machine.
+	// The call to Shutdown blocks until the factory is completely shut down, so
+	// you might want to call it in a separate goroutine.
+	Shutdown()
 }

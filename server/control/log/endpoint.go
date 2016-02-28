@@ -5,10 +5,10 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func resetLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func resetLevelsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		err := lc.ResetLevels(ctx)
 		if err != nil {
@@ -19,7 +19,7 @@ func resetLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	}
 }
 
-func resetObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func resetObjectsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		err := lc.ResetObjects(ctx)
 		if err != nil {
@@ -30,7 +30,7 @@ func resetObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	}
 }
 
-func resetVerbosityEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func resetVerbosityEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		err := lc.ResetVerbosity(ctx)
 		if err != nil {
@@ -41,7 +41,7 @@ func resetVerbosityEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	}
 }
 
-func setLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func setLevelsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetLevelsRequest)
 
@@ -54,7 +54,7 @@ func setLevelsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	}
 }
 
-func setObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func setObjectsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetObjectsRequest)
 
@@ -67,7 +67,7 @@ func setObjectsEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
 	}
 }
 
-func setVerbosityEndpoint(lc serverspec.LogControl) endpoint.Endpoint {
+func setVerbosityEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(SetVerbosityRequest)
 

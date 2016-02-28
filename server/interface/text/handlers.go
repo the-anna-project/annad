@@ -4,10 +4,10 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 	"golang.org/x/net/context"
 
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func NewHandlers(ctx context.Context, ti serverspec.TextInterface) map[string]*httptransport.Server {
+func NewHandlers(ctx context.Context, ti spec.TextInterface) map[string]*httptransport.Server {
 	handlers := map[string]*httptransport.Server{}
 
 	handlers["/interface/text/action/fetchurl"] = httptransport.NewServer(

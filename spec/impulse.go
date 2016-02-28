@@ -1,13 +1,19 @@
 package spec
 
-import (
-	"encoding/json"
-)
-
 type Impulse interface {
-	json.Unmarshaler
+	AddObjectType(objectType ObjectType) error
+
+	GetInput() (string, error)
+
+	GetOutput() (string, error)
+
+	GetObjectType() (ObjectType, error)
 
 	Object
 
-	WalkThrough(neu Neuron) (Impulse, Neuron, error)
+	SetID(ID ObjectID) error
+
+	SetInput(input string) error
+
+	SetOutput(output string) error
 }

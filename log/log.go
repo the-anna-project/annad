@@ -12,6 +12,7 @@ import (
 	"github.com/mgutz/ansi"
 
 	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -88,7 +89,9 @@ func DefaultConfig() Config {
 func NewLog(config Config) spec.Log {
 	newLog := log{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
+		Type:   spec.ObjectType(common.ObjectType.Log),
 	}
 
 	return &newLog
@@ -97,7 +100,11 @@ func NewLog(config Config) spec.Log {
 type log struct {
 	Config
 
+	ID spec.ObjectID
+
 	Mutex sync.Mutex
+
+	Type spec.ObjectType
 }
 
 func (l *log) ResetLevels() error {
@@ -182,7 +189,7 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 	}
 
 	if tags.O != nil && len(l.Objects) != 0 {
-		if !containsObjectType(l.Objects, tags.O.GetObjectType()) {
+		if !containsObjectType(l.Objects, tags.O.GetType()) {
 			return
 		}
 	}

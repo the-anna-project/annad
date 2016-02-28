@@ -7,7 +7,6 @@ package core
 
 import (
 	"os"
-	"os/signal"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -15,10 +14,9 @@ import (
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/gateway/spec"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/state"
 )
 
 type Config struct {
@@ -26,20 +24,17 @@ type Config struct {
 
 	Log spec.Log `json:"-"`
 
-	State spec.State `json:"state,omitempty"`
+	Networks map[spec.ObjectType]spec.Network `json:"networks"`
 
-	TextGateway gatewayspec.Gateway `json:"-"`
+	TextGateway spec.Gateway `json:"-"`
 }
 
 func DefaultConfig() Config {
-	newStateConfig := state.DefaultConfig()
-	newStateConfig.ObjectType = common.ObjectType.Core
-
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
-		State:         state.NewState(newStateConfig),
-		TextGateway:   gateway.NewGateway(),
+		Networks:      map[spec.ObjectType]spec.Network{},
+		TextGateway:   gateway.NewGateway(gateway.DefaultConfig()),
 	}
 
 	return newConfig
@@ -47,126 +42,89 @@ func DefaultConfig() Config {
 
 func NewCore(config Config) spec.Core {
 	newCore := &core{
+		Closer:             make(chan struct{}, 1),
 		Config:             config,
-		Mutex:              sync.Mutex{},
+		ID:                 id.NewObjectID(id.Hex128),
 		ImpulsesInProgress: 0,
+		Mutex:              sync.Mutex{},
+		Type:               common.ObjectType.Core,
 	}
 
 	return newCore
 }
 
 type core struct {
+	Closer chan struct{}
+
 	Config
 
-	Mutex              sync.Mutex `json:"-"`
-	ImpulsesInProgress int64      `json:"-"`
+	ID spec.ObjectID `json:"id"`
+
+	Mutex sync.Mutex `json:"-"`
+
+	ImpulsesInProgress int64 `json:"-"`
+
+	Type spec.ObjectType `json:"type"`
 }
 
 func (c *core) Boot() {
 	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Boot")
 
-	err := c.GetState().Read()
-	if err != nil {
-		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
-	}
-
-	go c.listenToGateway()
-	go c.listenToSignal()
+	go c.bootObjectTree()
+	go c.TextGateway.Listen(c.gatewayListener, c.Closer)
 }
 
-func (c *core) listenToGateway() {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call listenToGateway")
+func (c *core) GetNetworks() (map[spec.ObjectType]spec.Network, error) {
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call GetNetworkByType")
 
-	for {
-		newSignal, err := c.TextGateway.ReceiveSignal()
-		if gateway.IsGatewayClosed(err) {
-			c.Log.WithTags(spec.Tags{L: "W", O: c, T: nil, V: 7}, "gateway is closed")
-			time.Sleep(1 * time.Second)
-			continue
-		} else if err != nil {
-			c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-			continue
-		}
-		c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 14}, "core received new signal '%s'", newSignal.GetID())
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 
-		responder, err := newSignal.GetResponder()
-		if gateway.IsSignalCanceled(err) {
-			c.Log.WithTags(spec.Tags{L: "W", O: c, T: nil, V: 7}, "gateway is canceled")
-			continue
-		} else if err != nil {
-			c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-			continue
-		}
-
-		go func(newSignal gatewayspec.Signal) {
-			request, err := newSignal.GetBytes("request")
-			if err != nil {
-				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-
-			newImpulse, err := c.FactoryClient.NewImpulse()
-			if err != nil {
-				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-
-			newStateConfig := state.DefaultConfig()
-			newStateConfig.Bytes["request"] = request
-			newStateConfig.ObjectID = spec.ObjectID(newSignal.GetID())
-			newStateConfig.ObjectType = common.ObjectType.Impulse
-
-			newImpulse.SetState(state.NewState(newStateConfig))
-
-			// Increment the impulse count to track how many impulses are processed
-			// inside the core.
-			c.ImpulsesInProgress = atomic.AddInt64(&c.ImpulsesInProgress, 1)
-
-			resImpulse, err := c.Trigger(newImpulse)
-
-			// Decrement the impulse count once all hard work is done.
-			c.ImpulsesInProgress = atomic.AddInt64(&c.ImpulsesInProgress, -1)
-
-			if err != nil {
-				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-
-			response, err := resImpulse.GetState().GetBytes("response")
-			if err != nil {
-				c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
-				newSignal.SetError(maskAny(err))
-				responder <- newSignal
-				return
-			}
-			newSignal.SetBytes("response", response)
-
-			responder <- newSignal
-		}(newSignal)
-	}
+	return c.Networks, nil
 }
 
-func (c *core) listenToSignal() {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call listenToSignal")
+func (c *core) GetNetworkByType(objectType spec.ObjectType) (spec.Network, error) {
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call GetNetworkByType")
 
-	listener := make(chan os.Signal, 1)
-	signal.Notify(listener, os.Interrupt, os.Kill)
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
 
-	<-listener
+	if network, ok := c.Networks[objectType]; ok {
+		return network, nil
+	}
 
-	c.Shutdown()
+	return nil, maskAny(networkNotFoundError)
+}
+
+func (c *core) SetNetworkByType(objectType spec.ObjectType, network spec.Network) error {
+	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call SetNetworkByType")
+
+	c.Mutex.Lock()
+	defer c.Mutex.Unlock()
+
+	c.Networks[objectType] = network
+
+	return nil
 }
 
 func (c *core) Shutdown() {
 	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Shutdown")
 
+	errorHandler := func(err error) {
+		c.Log.WithTags(spec.Tags{L: "W", O: c, T: nil, V: 7}, "%#v", maskAny(err))
+	}
+
 	c.TextGateway.Close()
+
+	c.Closer <- struct{}{}
+
+	networks, err := c.GetNetworks()
+	if err != nil {
+		errorHandler(err)
+	}
+	for _, network := range networks {
+		network.Shutdown()
+	}
 
 	for {
 		impulsesInProgress := atomic.LoadInt64(&c.ImpulsesInProgress)
@@ -179,44 +137,70 @@ func (c *core) Shutdown() {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	err := c.GetState().Write()
-	if err != nil {
-		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
-	}
-
 	c.Log.WithTags(spec.Tags{L: "I", O: c, T: nil, V: 10}, "shutting down")
 	os.Exit(0)
 }
 
+// Trigger walks the impulse through the deeps of the neural networks. The
+// structure of the networks basically look like this.
+//
+//   1.    CoreNet
+//           StratNet
+//           RiskNet
+//           EvalNet
+//           ExecNet
+//
+//   2.        JobNet                                 -|
+//               StratNet    -|                        |
+//               RiskNet      |                        |
+//               EvalNet      |- job net scope         |
+//               ExecNet     -|                        |
+//                                                     |
+//   3.        CharNet                                -|
+//               StratNet    -|                        |
+//               RiskNet      |                        |
+//               EvalNet      |- char net scope        |
+//               ExecNet     -|                        |
+//                                                     |
+//   4.        CtxNet                                 -|- core net scope
+//               StratNet    -|                        |
+//               RiskNet      |                        |
+//               EvalNet      |- ctx net scope         |
+//               ExecNet     -|                        |
+//                                                     |
+//   5.        IdeaNet                                -|
+//               StratNet    -|                        |
+//               RiskNet      |                        |
+//               EvalNet      |- idea net scope        |
+//               ExecNet     -|                        |
+//                                                     |
+//   6.        RespNet                                -|
+//               StratNet    -|
+//               RiskNet      |
+//               EvalNet      |- resp net scope
+//               ExecNet     -|
 func (c *core) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call Trigger")
 
-	// Initialize network within core state if not already done.
-	networks := c.GetState().GetNetworks()
-	if len(networks) == 0 {
-		c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 14}, "create new network")
-
-		newNetwork, err := c.FactoryClient.NewNetwork()
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		c.GetState().SetNetwork(newNetwork)
-	}
-
-	// Get network. Note that there is potential for multiple networks. For now
-	// we just have one.
-	for _, n := range c.GetState().GetNetworks() {
-		// Initialize the impulses walk through the core via the scheduler network.
-		// The scheduler network implements the very first entry for impulses into
-		// the cores networks.
-		var err error
-		imp, err = n.Trigger(imp)
+	// Dynamically walk impulse through the other networks.
+	for {
+		networkType, err := imp.GetObjectType()
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		break
+		network, err := c.GetNetworkByType(networkType)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		imp, err = network.Trigger(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
 	}
 
+	// Note that the impulse returned here is not actually the same as received
+	// at the beginning of the call, but was manipulated during its walk through
+	// the networks.
 	return imp, nil
 }

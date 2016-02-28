@@ -2,14 +2,17 @@ package main
 
 import (
 	"os"
+	"sync"
 
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/file-system/real"
 	"github.com/xh3b4sd/anna/gateway"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
@@ -22,12 +25,9 @@ var (
 		ControlLogVerbosity int
 
 		Host string
-
-		StateReader string
-		StateWriter string
 	}
 
-	mainCmd = &cobra.Command{
+	annaCmd = &cobra.Command{
 		Use:   "anna",
 		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
 		Long:  "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
@@ -40,14 +40,75 @@ var (
 )
 
 func init() {
-	mainCmd.PersistentFlags().StringVar(&globalFlags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
-	mainCmd.PersistentFlags().StringVar(&globalFlags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. core,network)")
-	mainCmd.PersistentFlags().IntVar(&globalFlags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. core,network)")
+	annaCmd.PersistentFlags().IntVar(&globalFlags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 
-	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to bind Anna's server to")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to bind Anna's server to")
+}
 
-	mainCmd.PersistentFlags().StringVar(&globalFlags.StateReader, "state-reader", string(common.StateType.FSReader), "where to read state from")
-	mainCmd.PersistentFlags().StringVar(&globalFlags.StateWriter, "state-writer", string(common.StateType.FSWriter), "where to write state to")
+type annaConfig struct {
+	Core spec.Core
+
+	FactoryServer spec.Factory
+
+	Log spec.Log
+
+	Server spec.Server
+}
+
+func defaultAnnaConfig() annaConfig {
+	newConfig := annaConfig{
+		Core:          core.NewCore(core.DefaultConfig()),
+		FactoryServer: factoryserver.NewFactory(factoryserver.DefaultConfig()),
+		Log:           log.NewLog(log.DefaultConfig()),
+		Server:        server.NewServer(server.DefaultConfig()),
+	}
+
+	return newConfig
+}
+
+func newAnna(config annaConfig) spec.Anna {
+	newAnna := &anna{
+		annaConfig: config,
+		ID:         id.NewObjectID(id.Hex128),
+		Mutex:      sync.Mutex{},
+		Type:       spec.ObjectType(common.ObjectType.Anna),
+	}
+
+	return newAnna
+}
+
+// mainObject is basically only to have an object that provides proper
+// identifyable logging.
+type anna struct {
+	annaConfig
+
+	ID spec.ObjectID
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType
+}
+
+func (a *anna) Boot() {
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "hello, I am Anna")
+
+	go a.listenToSignal()
+
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
+	go a.FactoryServer.Boot()
+
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting core")
+	go a.Core.Boot()
+
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting server")
+	a.Server.Boot()
+}
+
+func (a *anna) Shutdown() {
+	go a.Core.Shutdown()
+	go a.FactoryServer.Shutdown()
 }
 
 func mainRun(cmd *cobra.Command, args []string) {
@@ -57,28 +118,26 @@ func mainRun(cmd *cobra.Command, args []string) {
 	}
 
 	//
-	// create main object
-	//
-	m := mainO{}
-
-	//
 	// create dependencies
 	//
-	newFactoryGateway := gateway.NewGateway()
 	newLog := log.NewLog(log.DefaultConfig())
 	newLog.SetLevels(globalFlags.ControlLogLevels)
 	newLog.SetObjects(globalFlags.ControlLogObejcts)
 	newLog.SetVerbosity(globalFlags.ControlLogVerbosity)
-	newTextGateway := gateway.NewGateway()
-	newFileSystemReal := filesystemreal.NewFileSystem()
 
-	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "hello, I am Anna")
+	newFactoryGatewayConfig := gateway.DefaultConfig()
+	newFactoryGatewayConfig.Log = newLog
+	newFactoryGateway := gateway.NewGateway(newFactoryGatewayConfig)
+
+	newTextGatewayConfig := gateway.DefaultConfig()
+	newTextGatewayConfig.Log = newLog
+	newTextGateway := gateway.NewGateway(newTextGatewayConfig)
+
+	newFileSystemReal := filesystemreal.NewFileSystem()
 
 	//
 	// create factory
 	//
-	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating factory")
-
 	newFactoryClientConfig := factoryclient.DefaultConfig()
 	newFactoryClientConfig.FactoryGateway = newFactoryGateway
 	newFactoryClientConfig.Log = newLog
@@ -88,38 +147,41 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryServerConfig.FactoryGateway = newFactoryGateway
 	newFactoryServerConfig.FileSystem = newFileSystemReal
 	newFactoryServerConfig.Log = newLog
-	newFactoryServerConfig.StateReader = spec.StateType(globalFlags.StateReader)
-	newFactoryServerConfig.StateWriter = spec.StateType(globalFlags.StateWriter)
 	newFactoryServerConfig.TextGateway = newTextGateway
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
 	//
 	// create core
 	//
-	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating core")
-
 	newCore, err := newFactoryServer.NewCore()
 	if err != nil {
-		newLog.WithTags(spec.Tags{L: "F", O: m, T: nil, V: 1}, "%#v", maskAny(err))
+		panic(err)
 	}
-	newCore.GetState().SetVersion(version)
-	go newCore.Boot()
 
 	//
 	// create server
 	//
-	newLog.WithTags(spec.Tags{L: "I", O: m, T: nil, V: 10}, "creating server")
-
 	newServerConfig := server.DefaultConfig()
 	newServerConfig.Host = globalFlags.Host
 	newServerConfig.Log = newLog
 	newServerConfig.TextGateway = newTextGateway
 	newServer := server.NewServer(newServerConfig)
-	newServer.Listen()
+
+	//
+	// create anna
+	//
+	newAnnaConfig := defaultAnnaConfig()
+	newAnnaConfig.Core = newCore
+	newAnnaConfig.FactoryServer = newFactoryServer
+	newAnnaConfig.Log = newLog
+	newAnnaConfig.Server = newServer
+	a := newAnna(newAnnaConfig)
+
+	a.Boot()
 }
 
 func main() {
-	mainCmd.AddCommand(versionCmd)
+	annaCmd.AddCommand(versionCmd)
 
-	mainCmd.Execute()
+	annaCmd.Execute()
 }

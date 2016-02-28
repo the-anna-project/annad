@@ -1,4 +1,4 @@
-package logcontrol_test
+package logcontrol
 
 import (
 	"encoding/json"
@@ -12,13 +12,12 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/client/control/log"
-	serverspec "github.com/xh3b4sd/anna/server/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // helper
 
-func newLogControlAndServer(t *testing.T, handler http.Handler) (serverspec.LogControl, *httptest.Server) {
+func newLogControlAndServer(t *testing.T, handler http.Handler) (spec.LogControl, *httptest.Server) {
 	ts := httptest.NewServer(handler)
 
 	URL, err := url.Parse(ts.URL)
@@ -26,9 +25,9 @@ func newLogControlAndServer(t *testing.T, handler http.Handler) (serverspec.LogC
 		t.Fatalf("url.Parse returned error: %#v", err)
 	}
 
-	newLogControlConfig := logcontrol.DefaultConfig()
+	newLogControlConfig := DefaultConfig()
 	newLogControlConfig.URL = URL
-	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+	newLogControl := NewLogControl(newLogControlConfig)
 
 	return newLogControl, ts
 }
@@ -68,7 +67,7 @@ func Test_LogControl_ResetLevels_002(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetLevels(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetLevels NOT returned proper error")
 	}
 }
@@ -83,7 +82,7 @@ func Test_LogControl_ResetLevels_003(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetLevels(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetLevels NOT returned proper error")
 	}
 }
@@ -98,7 +97,7 @@ func Test_LogControl_ResetLevels_004(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetLevels(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetLevels NOT returned proper error")
 	}
 }
@@ -138,7 +137,7 @@ func Test_LogControl_ResetObjects_006(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetObjects(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetObjects NOT returned proper error")
 	}
 }
@@ -153,7 +152,7 @@ func Test_LogControl_ResetObjects_007(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetObjects(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetObjects NOT returned proper error")
 	}
 }
@@ -168,7 +167,7 @@ func Test_LogControl_ResetObjects_008(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetObjects(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetObjects NOT returned proper error")
 	}
 }
@@ -208,7 +207,7 @@ func Test_LogControl_ResetVerbosity_010(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetVerbosity(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetVerbosity NOT returned proper error")
 	}
 }
@@ -223,7 +222,7 @@ func Test_LogControl_ResetVerbosity_011(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetVerbosity(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetVerbosity NOT returned proper error")
 	}
 }
@@ -238,7 +237,7 @@ func Test_LogControl_ResetVerbosity_012(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.ResetVerbosity(ctx)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.ResetVerbosity NOT returned proper error")
 	}
 }
@@ -278,7 +277,7 @@ func Test_LogControl_SetLevels_014(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetLevels(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetLevels NOT returned proper error")
 	}
 }
@@ -293,7 +292,7 @@ func Test_LogControl_SetLevels_015(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetLevels(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetLevels NOT returned proper error")
 	}
 }
@@ -308,7 +307,7 @@ func Test_LogControl_SetLevels_016(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetLevels(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetLevels NOT returned proper error")
 	}
 }
@@ -348,7 +347,7 @@ func Test_LogControl_SetObjects_018(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetObjects(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetObjects NOT returned proper error")
 	}
 }
@@ -363,7 +362,7 @@ func Test_LogControl_SetObjects_019(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetObjects(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetObjects NOT returned proper error")
 	}
 }
@@ -378,7 +377,7 @@ func Test_LogControl_SetObjects_020(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetObjects(ctx, "foo,bar")
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetObjects NOT returned proper error")
 	}
 }
@@ -418,7 +417,7 @@ func Test_LogControl_SetVerbosity_022(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetVerbosity(ctx, 66)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetVerbosity NOT returned proper error")
 	}
 }
@@ -433,7 +432,7 @@ func Test_LogControl_SetVerbosity_023(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetVerbosity(ctx, 66)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetVerbosity NOT returned proper error")
 	}
 }
@@ -448,7 +447,7 @@ func Test_LogControl_SetVerbosity_024(t *testing.T) {
 
 	ctx := context.Background()
 	err := newLogControl.SetVerbosity(ctx, 66)
-	if !logcontrol.IsInvalidAPIResponse(err) {
+	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("LogControl.SetVerbosity NOT returned proper error")
 	}
 }

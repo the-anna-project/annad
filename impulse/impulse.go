@@ -8,69 +8,111 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/common"
-	"github.com/xh3b4sd/anna/factory/client"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/state"
 )
 
 type Config struct {
-	FactoryClient spec.Factory `json:"-"`
+	Input string `json:"input"`
 
 	Log spec.Log `json:"-"`
 
-	State spec.State `json:"state,omitempty"`
+	ObjectTypes []spec.ObjectType `json:"object_types"`
+
+	Output string `json:"output"`
 }
 
 func DefaultConfig() Config {
-	newStateConfig := state.DefaultConfig()
-	newStateConfig.ObjectType = common.ObjectType.Impulse
-
 	newConfig := Config{
-		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
-		Log:           log.NewLog(log.DefaultConfig()),
-		State:         state.NewState(newStateConfig),
+		Input: "",
+		Log:   log.NewLog(log.DefaultConfig()),
+		ObjectTypes: []spec.ObjectType{
+			common.ObjectType.StrategyNetwork,
+		},
+		Output: "",
 	}
 
 	return newConfig
 }
 
-func NewImpulse(config Config) spec.Impulse {
+func NewImpulse(config Config) (spec.Impulse, error) {
 	newImpulse := &impulse{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
+		Type:   common.ObjectType.Impulse,
 	}
 
-	return newImpulse
+	if len(newImpulse.ObjectTypes) == 0 || newImpulse.ObjectTypes[0] != common.ObjectType.StrategyNetwork {
+		// The first network type an impulse needs to use is the strategy network
+		// type. This ensures to provide strategies which guide the impulse thorugh
+		// networks by best effort. In case a caller configures an impulse without
+		// that knowledge, we just prevent accidents and return an error.
+		return nil, maskAnyf(invalidNetworkTypeError, "")
+	}
+
+	return newImpulse, nil
 }
 
 type impulse struct {
 	Config
 
+	ID spec.ObjectID `json:"id"`
+
 	Mutex sync.Mutex `json:"-"`
+
+	Type spec.ObjectType `json:"type"`
 }
 
-func (i *impulse) WalkThrough(neu spec.Neuron) (spec.Impulse, spec.Neuron, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call WalkThrough")
+func (i *impulse) AddObjectType(objectType spec.ObjectType) error {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
 
-	var err error
-	var imp spec.Impulse = i
+	i.ObjectTypes = append(i.ObjectTypes, objectType)
 
-	// Process the further walk through of the impulse dynamically. The loop is a
-	// good alternative for real recursion.
-	for {
-		imp, neu, err = neu.Trigger(imp)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
+	return nil
+}
 
-		if neu == nil {
-			// As soon as a neuron has decided to not forward an impulse to any
-			// further neuron, the impulse went its way all through the whole
-			// network. So we break here to return the impulse.
-			break
-		}
-	}
+func (i *impulse) GetInput() (string, error) {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+	return i.Input, nil
+}
 
-	return imp, neu, nil
+func (i *impulse) GetOutput() (string, error) {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+	return i.Output, nil
+}
+
+func (i *impulse) GetObjectType() (spec.ObjectType, error) {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+
+	objectType := i.ObjectTypes[0]
+
+	i.ObjectTypes = i.ObjectTypes[1:]
+
+	return objectType, nil
+}
+
+func (i *impulse) SetID(ID spec.ObjectID) error {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+	i.ID = ID
+	return nil
+}
+
+func (i *impulse) SetInput(input string) error {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+	i.Input = input
+	return nil
+}
+
+func (i *impulse) SetOutput(output string) error {
+	i.Mutex.Lock()
+	i.Output = output
+	return nil
 }

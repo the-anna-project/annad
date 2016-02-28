@@ -1,10 +1,13 @@
 package logcontrol
 
 import (
+	"sync"
+
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/server/spec"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -18,17 +21,26 @@ func DefaultConfig() Config {
 	}
 }
 
-func NewLogControl(config Config) serverspec.LogControl {
-	return logControl{
+func NewLogControl(config Config) spec.LogControl {
+	return &logControl{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   spec.ObjectType(common.ObjectType.Log),
 	}
 }
 
 type logControl struct {
 	Config
+
+	ID spec.ObjectID
+
+	Mutex sync.Mutex
+
+	Type spec.ObjectType
 }
 
-func (lc logControl) ResetLevels(ctx context.Context) error {
+func (lc *logControl) ResetLevels(ctx context.Context) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call ResetLevels")
 
 	err := lc.Log.ResetLevels()
@@ -39,7 +51,7 @@ func (lc logControl) ResetLevels(ctx context.Context) error {
 	return nil
 }
 
-func (lc logControl) ResetObjects(ctx context.Context) error {
+func (lc *logControl) ResetObjects(ctx context.Context) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call ResetObjects")
 
 	err := lc.Log.ResetObjects()
@@ -50,7 +62,7 @@ func (lc logControl) ResetObjects(ctx context.Context) error {
 	return nil
 }
 
-func (lc logControl) ResetVerbosity(ctx context.Context) error {
+func (lc *logControl) ResetVerbosity(ctx context.Context) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call ResetVerbosity")
 
 	err := lc.Log.ResetVerbosity()
@@ -61,7 +73,7 @@ func (lc logControl) ResetVerbosity(ctx context.Context) error {
 	return nil
 }
 
-func (lc logControl) SetLevels(ctx context.Context, levels string) error {
+func (lc *logControl) SetLevels(ctx context.Context, levels string) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call SetLevels")
 
 	err := lc.Log.SetLevels(levels)
@@ -72,7 +84,7 @@ func (lc logControl) SetLevels(ctx context.Context, levels string) error {
 	return nil
 }
 
-func (lc logControl) SetObjects(ctx context.Context, objectTypes string) error {
+func (lc *logControl) SetObjects(ctx context.Context, objectTypes string) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call SetObjects")
 
 	err := lc.Log.SetObjects(objectTypes)
@@ -83,7 +95,7 @@ func (lc logControl) SetObjects(ctx context.Context, objectTypes string) error {
 	return nil
 }
 
-func (lc logControl) SetVerbosity(ctx context.Context, verbosity int) error {
+func (lc *logControl) SetVerbosity(ctx context.Context, verbosity int) error {
 	lc.Log.WithTags(spec.Tags{L: "D", O: lc, T: nil, V: 13}, "call SetVerbosity")
 
 	err := lc.Log.SetVerbosity(verbosity)

@@ -1,203 +1,189 @@
-package gateway_test
+package gateway
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/xh3b4sd/anna/gateway"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // Test_Gateway_001 checks that a signal can be dispatched back and forth over
 // a normal gateway.
 func Test_Gateway_001(t *testing.T) {
 	// Prepate test environment.
-	newGateway := gateway.NewGateway()
+	newGateway := NewGateway(DefaultConfig())
 
-	input := []byte("hello")
-	output := []byte("world")
+	input := "hello"
+	output := "world"
+	var err error
 
 	// Create new signal for the request.
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = input
-	newSignal := gateway.NewSignal(newSignalConfig)
-	err := newGateway.SendSignal(newSignal)
-	if err != nil {
-		t.Fatalf("sending signal returned error: %#v", err)
-	}
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
+	newSignal.SetInput(input)
 
-	// Receive signal of the request.
-	receivedSignal, err := newGateway.ReceiveSignal()
-	if err != nil {
-		t.Fatalf("receiving signal returned error: %#v", err)
-	}
-	request, err := receivedSignal.GetBytes("request")
-	if err != nil {
-		t.Fatalf("getting bytes returned error: %#v", err)
-	}
-	if string(request) != string(input) {
-		t.Fatalf("received signal bytes '%s' differ from input '%s'", request, input)
-	}
-
-	// Fetch the responder and send a response over it.
-	responder, err := receivedSignal.GetResponder()
-	if err != nil {
-		t.Fatalf("getting responder returned error: %#v", err)
-	}
-	receivedSignal.SetBytes("response", output)
-	responder <- receivedSignal
-
-	// Receive the response.
-	responder, err = receivedSignal.GetResponder()
-	if err != nil {
-		t.Fatalf("getting responder returned error: %#v", err)
-	}
-	receivedSignal = <-responder
-	response, err := receivedSignal.GetBytes("response")
-	if err != nil {
-		t.Fatalf("getting bytes returned error: %#v", err)
-	}
-	if string(response) != string(output) {
-		t.Fatalf("received signal bytes '%s' differ from output '%s'", response, output)
-	}
-}
-
-// Test_Gateway_002 checks that a signal can NOT be dispatched over a closed
-// gateway.
-func Test_Gateway_002(t *testing.T) {
-	newGateway := gateway.NewGateway()
-	// Here we close the gateway. Signals should NOT be able to be dispatched.
-	newGateway.Close()
-
-	input := []byte("hello world")
-
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = input
-	newSignal := gateway.NewSignal(newSignalConfig)
-	err := newGateway.SendSignal(newSignal)
-	if err == nil {
-		t.Fatalf("sending signal NOT returned error")
-	}
-	if !gateway.IsGatewayClosed(err) {
-		t.Fatalf("sending signal NOT returned proper error")
-	}
-
-	receivedSignal, err := newGateway.ReceiveSignal()
-	if err == nil {
-		t.Fatalf("receiving signal NOT returned error")
-	}
-	if !gateway.IsGatewayClosed(err) {
-		t.Fatalf("sending signal NOT returned proper error")
-	}
-	if receivedSignal != nil {
-		t.Fatalf("receiving signal is NOT nil")
-	}
-}
-
-// Test_Gateway_003 checks that a signal can be dispatched over a closed
-// gateway that was opened again.
-func Test_Gateway_003(t *testing.T) {
-	newGateway := gateway.NewGateway()
-	// Here we close the gateway and open it again. Signals should be able to be
-	// dispatched.
-	newGateway.Close()
-	newGateway.Open()
-
-	input := []byte("hello world")
-
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = input
-	newSignal := gateway.NewSignal(newSignalConfig)
-	err := newGateway.SendSignal(newSignal)
-	if err != nil {
-		t.Fatalf("sending signal returned error: %#v", err)
-	}
-
-	receivedSignal, err := newGateway.ReceiveSignal()
-	if err != nil {
-		t.Fatalf("receiving signal returned error: %#v", err)
-	}
-	request, err := receivedSignal.GetBytes("request")
-	if err != nil {
-		t.Fatalf("getting bytes returned error: %#v", err)
-	}
-	if string(request) != string(input) {
-		t.Fatalf("received signal bytes '%s' differ from input '%s'", request, input)
-	}
-}
-
-// Test_Gateway_004 checks that a signal can be dispatched over a normal
-// gateway, even when Gateway.ReceiveSignal is called first. This ensures the
-// locking mutex works as expected without creating a deadlock for
-// Gateway.SendSignal.
-func Test_Gateway_004(t *testing.T) {
-	newGateway := gateway.NewGateway()
-
-	input := []byte("hello world")
-
-	ready := make(chan struct{})
+	// Receive the signal.
 	go func() {
-		ready <- struct{}{}
-		receivedSignal, err := newGateway.ReceiveSignal()
-		if err != nil {
-			t.Fatalf("receiving signal returned error: %#v", err)
+		listener := func(newSignal spec.Signal) (spec.Signal, error) {
+			receivedInput := newSignal.GetInput()
+			if input != receivedInput.(string) {
+				t.Fatalf("received input '%s' differs from original input '%s'", receivedInput, input)
+			}
+
+			newSignal.SetOutput(output)
+
+			return newSignal, nil
 		}
-		request, err := receivedSignal.GetBytes("request")
-		if err != nil {
-			t.Fatalf("getting bytes returned error: %#v", err)
-		}
-		if string(request) != string(input) {
-			t.Fatalf("received signal bytes '%s' differ from input '%s'", request, input)
-		}
+
+		newGateway.Listen(listener, nil)
 	}()
 
-	<-ready
-
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = input
-	newSignal := gateway.NewSignal(newSignalConfig)
-	err := newGateway.SendSignal(newSignal)
+	// Send the signal.
+	newSignal, err = newGateway.Send(newSignal, nil)
 	if err != nil {
-		t.Fatalf("sending signal returned error: %#v", err)
+		t.Fatalf("Gateway.Send did return error: %#v", err)
+	}
+
+	// Check received output.
+	receivedOutput := newSignal.GetOutput()
+	if output != receivedOutput.(string) {
+		t.Fatalf("received output '%s' differs from original output '%s'", receivedOutput, output)
+	}
+}
+
+// Test_Gateway_002 checks that a signal can be dispatched back and forth over
+// a normal gateway.
+func Test_Gateway_002(t *testing.T) {
+	// Prepate test environment.
+	newGateway := NewGateway(DefaultConfig())
+
+	input := "hello"
+	output := "world"
+	var err error
+
+	// Create new signal for the request.
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
+	newSignal.SetInput(input)
+
+	// Close the gateway.
+	newGateway.Close()
+
+	// Receive the signal.
+	go func() {
+		listener := func(newSignal spec.Signal) (spec.Signal, error) {
+			receivedInput := newSignal.GetInput()
+			if input != receivedInput.(string) {
+				t.Fatalf("received input '%s' differs from original input '%s'", receivedInput, input)
+			}
+
+			newSignal.SetOutput(output)
+
+			return newSignal, nil
+		}
+
+		newGateway.Listen(listener, nil)
+	}()
+
+	// Send the signal.
+	receivedSignal, err := newGateway.Send(newSignal, nil)
+	if !IsGatewayClosed(err) {
+		t.Fatalf("Gateway.Send did NOT return proper error")
+	}
+
+	// Check received signal.
+	if receivedSignal != nil {
+		t.Fatalf("received signal is not nil")
+	}
+
+	// Check output of original signal has not changed. The gateway is closed.
+	// Applied changes from remote are not allowed to get back to us.
+	receivedOutput := newSignal.GetOutput()
+	if receivedOutput != nil {
+		t.Fatalf("received output is not nil")
+	}
+}
+
+// Test_Gateway_003 checks that error handling during signal dispatching works
+// as expected.
+func Test_Gateway_003(t *testing.T) {
+	// Prepate test environment.
+	newGateway := NewGateway(DefaultConfig())
+
+	// Create new signal for the request.
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
+
+	// Receive the signal.
+	go func() {
+		listener := func(newSignal spec.Signal) (spec.Signal, error) {
+			return nil, fmt.Errorf("test error")
+		}
+
+		newGateway.Listen(listener, nil)
+	}()
+
+	// Send the signal.
+	newSignal, err := newGateway.Send(newSignal, nil)
+	if err == nil && err.Error() != "test error" {
+		t.Fatalf("Gateway.Send did NOT return proper error")
+	}
+
+	// Check received signal.
+	if newSignal != nil {
+		t.Fatalf("received signal is not nil")
+	}
+}
+
+// Test_Gateway_004 checks that a signal can NOT be dispatched over a closed
+// gateway.
+func Test_Gateway_004(t *testing.T) {
+	// Prepate test environment.
+	newGateway := NewGateway(DefaultConfig())
+
+	input := "hello"
+	var err error
+
+	// Create new signal for the request.
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
+	newSignal.SetInput(input)
+
+	// Close the gateway.
+	newGateway.Close()
+
+	// Send the signal.
+	newSignal, err = newGateway.Send(newSignal, nil)
+	if !IsGatewayClosed(err) {
+		t.Fatalf("Gateway.Send did NOT return proper error")
+	}
+
+	// Check received signal.
+	if newSignal != nil {
+		t.Fatalf("received signal is not nil")
 	}
 }
 
 // Test_Gateway_005 checks that a signal can be canceled.
 func Test_Gateway_005(t *testing.T) {
 	// Prepate test environment.
-	newGateway := gateway.NewGateway()
+	newGateway := NewGateway(DefaultConfig())
 
-	input := []byte("hello")
+	input := "hello"
+	var err error
 
 	// Create new signal for the request.
-	newSignalConfig := gateway.DefaultSignalConfig()
-	newSignalConfig.Bytes["request"] = input
-	newSignal := gateway.NewSignal(newSignalConfig)
-	err := newGateway.SendSignal(newSignal)
-	if err != nil {
-		t.Fatalf("sending signal returned error: %#v", err)
-	}
+	newSignalConfig := DefaultSignalConfig()
+	newSignal := NewSignal(newSignalConfig)
+	newSignal.SetInput(input)
 
-	// Receive signal of the request.
-	receivedSignal, err := newGateway.ReceiveSignal()
-	if err != nil {
-		t.Fatalf("receiving signal returned error: %#v", err)
-	}
-	request, err := receivedSignal.GetBytes("request")
-	if err != nil {
-		t.Fatalf("getting bytes returned error: %#v", err)
-	}
-	if string(request) != string(input) {
-		t.Fatalf("received signal bytes '%s' differ from input '%s'", request, input)
-	}
+	// Cancel the signal.
+	closer := make(chan struct{}, 1)
+	closer <- struct{}{}
 
-	// Actually cancel the signal.
-	newSignal.Cancel()
-
-	// Try to fetch the responder. This should not be possible.
-	responder, err := receivedSignal.GetResponder()
-	if !gateway.IsSignalCanceled(err) {
-		t.Fatalf("signal NOT canceled")
-	}
-	if responder != nil {
-		t.Fatalf("responder is NOT nil")
+	// Send the signal.
+	newSignal, err = newGateway.Send(newSignal, closer)
+	if !IsSignalCanceled(err) {
+		t.Fatalf("Gateway.Send did NOT return proper error")
 	}
 }
