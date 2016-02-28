@@ -1,15 +1,21 @@
 package strategynetwork
 
 import (
+	"math/rand"
+
 	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// StrategyConfig represents the configuration used to create new strategies.
 type StrategyConfig struct {
 	// Actions represents a list of ordered action items, that are object types.
 	Actions []spec.ObjectType
 }
 
+// DefaultStrategyConfig provides a default configuration to create new
+// strategies on best effort. Note that the list of actions is empty and needs
+// to be properly set before the strategy creation.
 func DefaultStrategyConfig() StrategyConfig {
 	newConfig := StrategyConfig{
 		Actions: []spec.ObjectType{},
@@ -18,12 +24,8 @@ func DefaultStrategyConfig() StrategyConfig {
 	return newConfig
 }
 
-type Strategy interface {
-	String() string
-	GetActions() []spec.ObjectType
-}
-
-func NewStrategy(config StrategyConfig) Strategy {
+// NewStrategy creates a new configured strategy.
+func NewStrategy(config StrategyConfig) spec.Strategy {
 	newStrategy := &strategy{
 		StrategyConfig: config,
 	}
@@ -82,18 +84,26 @@ func randomizeActions(actions []spec.ObjectType) []spec.ObjectType {
 	// item that can be chosen and then ignored.
 	options := append([]spec.ObjectType{common.ObjectType.None}, actions...)
 
-	for i := 0; i < len(actions); i++ {
-		r := randomMinMax(0, len(options)-1)
-		newOption := options[r]
+	for {
+		for range actions {
+			i := rand.Intn(len(actions) + 1)
+			newOption := options[i]
 
-		if newOption == common.ObjectType.None {
-			// There was a random index that chose the item we want to ignore. Thus
-			// we do so. This results in combinations not necessarily having the same
-			// length as the original given list of actions.
+			if newOption == common.ObjectType.None {
+				// There was a random index that chose the item we want to ignore. Thus
+				// we do so. This results in combinations not necessarily having the same
+				// length as the original given list of actions.
+				continue
+			}
+
+			newActions = append(newActions, newOption)
+		}
+
+		if len(newActions) == 0 {
 			continue
 		}
 
-		newActions = append(newActions, newOption)
+		break
 	}
 
 	return newActions

@@ -5,6 +5,7 @@ package strategynetwork
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"sync"
 
 	"github.com/xh3b4sd/anna/common"
@@ -183,8 +184,8 @@ func (n *network) GetNeuronByScore(score float32) (Neuron, error) {
 		return nil, maskAny(err)
 	}
 
-	r := randomMinMax(0, len(elements)-1)
-	ID := elements[r]
+	i := rand.Intn(len(elements))
+	ID := elements[i]
 
 	newNeuron, err := n.GetNeuronByID(ID)
 	if err != nil {
@@ -215,12 +216,12 @@ func (n *network) NewNeuron() (Neuron, error) {
 	return neu, nil
 }
 
-func (n *network) NewStrategy() (Strategy, error) {
+func (n *network) NewStrategy() (spec.Strategy, error) {
 	newConfig := StrategyConfig{
 		Actions: n.Actions,
 	}
 
-	var newStrategy Strategy
+	var newStrategy spec.Strategy
 	for i := 0; i < 3; i++ {
 		newStrategy = NewStrategy(newConfig)
 

@@ -16,7 +16,7 @@ type NeuronConfig struct {
 	// Settings.
 
 	// Strategy is the neuron's associated strategy.
-	Strategy Strategy
+	Strategy spec.Strategy
 
 	// Score represents the value by witch a strategy is evaluated.
 	Score int
@@ -48,7 +48,7 @@ type Neuron interface {
 	DelAction(objectType spec.ObjectType, i int) error
 
 	// GetStrategy returns the neuron's action sequence.
-	GetStrategy() (Strategy, error)
+	GetStrategy() (spec.Strategy, error)
 
 	// IncrScore increments the score of the strategy by delta.
 	IncrScore(objectType spec.ObjectType, delta int) error
@@ -100,7 +100,7 @@ func (n *neuron) DelAction(objectType spec.ObjectType, i int) error {
 	return nil
 }
 
-func (n *neuron) GetStrategy() (Strategy, error) {
+func (n *neuron) GetStrategy() (spec.Strategy, error) {
 	n.Mutex.Lock()
 	defer n.Mutex.Unlock()
 

@@ -14,7 +14,7 @@ func Test_ID_001(t *testing.T) {
 
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

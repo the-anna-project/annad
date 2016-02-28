@@ -3,12 +3,12 @@
 package id
 
 import (
-	"crypto/rand"
-	"math/big"
+	"math/rand"
 
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// IDType represents some kind of configuration for ID creation.
 type IDType int
 
 const (
@@ -32,15 +32,17 @@ var (
 	hashChars = "abcdef0123456789"
 )
 
+// NewObjectID creates a new object ID for the given type.
 func NewObjectID(idType IDType) spec.ObjectID {
 	b := make([]byte, int(idType))
+	ns := []int{}
+
 	for i := range b {
-		max := big.NewInt(int64(len(hashChars)))
-		j, err := rand.Int(rand.Reader, max)
-		if err != nil {
-			panic(err)
+		if i%len(hashChars) == 0 {
+			ns = rand.Perm(len(hashChars))
 		}
-		b[i] = hashChars[j.Int64()]
+
+		b[i] = hashChars[ns[i]]
 	}
 
 	return spec.ObjectID(b)
