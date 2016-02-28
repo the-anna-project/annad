@@ -6,7 +6,6 @@
 package core
 
 import (
-	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -115,6 +114,7 @@ func (c *core) Shutdown() {
 	}
 
 	c.TextGateway.Close()
+	c.FactoryClient.Shutdown()
 
 	c.Closer <- struct{}{}
 
@@ -136,9 +136,6 @@ func (c *core) Shutdown() {
 
 		time.Sleep(100 * time.Millisecond)
 	}
-
-	c.Log.WithTags(spec.Tags{L: "I", O: c, T: nil, V: 10}, "shutting down")
-	os.Exit(0)
 }
 
 // Trigger walks the impulse through the deeps of the neural networks. The
