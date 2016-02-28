@@ -17,9 +17,9 @@ import (
 )
 
 type Config struct {
-	// Host is the host:port representation based on the golang convention for
+	// Addr is the host:port representation based on the golang convention for
 	// net.URL and http.ListenAndServe.
-	Host string
+	Addr string
 
 	Log spec.Log
 
@@ -28,7 +28,7 @@ type Config struct {
 
 func DefaultConfig() Config {
 	newConfig := Config{
-		Host:        "127.0.0.1:9119",
+		Addr:        "127.0.0.1:9119",
 		Log:         log.NewLog(log.DefaultConfig()),
 		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
@@ -79,8 +79,8 @@ func (s *server) Boot() {
 		http.Handle(url, handler)
 	}
 
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Host)
-	err := http.ListenAndServe(s.Host, nil)
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Addr)
+	err := http.ListenAndServe(s.Addr, nil)
 	if err != nil {
 		s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
 	}

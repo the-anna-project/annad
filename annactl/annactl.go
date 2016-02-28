@@ -16,7 +16,7 @@ import (
 
 var (
 	globalFlags struct {
-		Host string
+		Addr string
 	}
 
 	textInterface spec.TextInterface
@@ -28,7 +28,7 @@ var (
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			host, port, err := net.SplitHostPort(globalFlags.Host)
+			host, port, err := net.SplitHostPort(globalFlags.Addr)
 			if err != nil {
 				fmt.Printf("%#v\n", maskAny(err))
 				os.Exit(1)
@@ -51,7 +51,7 @@ var (
 )
 
 func init() {
-	mainCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to connect to Anna's server")
+	mainCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
 }
 
 func mainRun(cmd *cobra.Command, args []string) {

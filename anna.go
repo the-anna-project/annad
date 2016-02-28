@@ -24,7 +24,7 @@ var (
 		ControlLogObejcts   string
 		ControlLogVerbosity int
 
-		Host string
+		Addr string
 	}
 
 	annaCmd = &cobra.Command{
@@ -44,7 +44,7 @@ func init() {
 	annaCmd.PersistentFlags().StringVar(&globalFlags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. core,network)")
 	annaCmd.PersistentFlags().IntVar(&globalFlags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 
-	annaCmd.PersistentFlags().StringVar(&globalFlags.Host, "host", "127.0.0.1:9119", "host:port to bind Anna's server to")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to bind Anna's server to")
 }
 
 type annaConfig struct {
@@ -162,7 +162,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	// create server
 	//
 	newServerConfig := server.DefaultConfig()
-	newServerConfig.Host = globalFlags.Host
+	newServerConfig.Addr = globalFlags.Addr
 	newServerConfig.Log = newLog
 	newServerConfig.TextGateway = newTextGateway
 	newServer := server.NewServer(newServerConfig)
