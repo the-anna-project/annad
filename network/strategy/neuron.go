@@ -3,10 +3,13 @@ package strategynetwork
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeStrategyNeuron spec.ObjectType = "strategy-neuron"
 )
 
 type NeuronConfig struct {
@@ -61,8 +64,10 @@ func NewNeuron(config NeuronConfig) Neuron {
 		NeuronConfig: config,
 		ID:           id.NewObjectID(id.Hex128),
 		Mutex:        sync.Mutex{},
-		Type:         common.ObjectType.Impulse,
+		Type:         ObjectTypeStrategyNeuron,
 	}
+
+	newNeuron.Log.Register(newNeuron.GetType())
 
 	return newNeuron
 }

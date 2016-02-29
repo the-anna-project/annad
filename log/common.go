@@ -4,12 +4,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	DateTimeMilli = "06/01/02 15:04:05.000"
+)
+
+var (
+	// LevelColors represent the log levels and their related colors the logger
+	// implementations should use.
+	LevelColors = map[string]string{
+		"D": "cyan",
+		"E": "red",
+		"F": "magenta",
+		"I": "white",
+		"W": "yellow",
+	}
 )
 
 func extendFormatWithTags(f string, tags spec.Tags) string {
@@ -52,7 +63,7 @@ func containsObjectType(list []spec.ObjectType, item spec.ObjectType) bool {
 }
 
 func colorForLevel(level string) (string, error) {
-	if c, ok := common.LevelColors[level]; ok {
+	if c, ok := LevelColors[level]; ok {
 		return c, nil
 	}
 

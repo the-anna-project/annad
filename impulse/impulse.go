@@ -7,10 +7,14 @@ package impulse
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeImpulse         spec.ObjectType = "impulse"
+	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
 )
 
 type Config struct {
@@ -28,7 +32,7 @@ func DefaultConfig() Config {
 		Input: "",
 		Log:   log.NewLog(log.DefaultConfig()),
 		ObjectTypes: []spec.ObjectType{
-			common.ObjectType.StrategyNetwork,
+			ObjectTypeStrategyNetwork,
 		},
 		Output: "",
 	}
@@ -41,16 +45,18 @@ func NewImpulse(config Config) (spec.Impulse, error) {
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   common.ObjectType.Impulse,
+		Type:   ObjectTypeImpulse,
 	}
 
-	if len(newImpulse.ObjectTypes) == 0 || newImpulse.ObjectTypes[0] != common.ObjectType.StrategyNetwork {
+	if len(newImpulse.ObjectTypes) == 0 || newImpulse.ObjectTypes[0] != ObjectTypeStrategyNetwork {
 		// The first network type an impulse needs to use is the strategy network
 		// type. This ensures to provide strategies which guide the impulse thorugh
 		// networks by best effort. In case a caller configures an impulse without
 		// that knowledge, we just prevent accidents and return an error.
 		return nil, maskAnyf(invalidNetworkTypeError, "")
 	}
+
+	newImpulse.Log.Register(newImpulse.GetType())
 
 	return newImpulse, nil
 }

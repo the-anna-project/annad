@@ -3,12 +3,17 @@ package storage
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	ObjectTypeMemoryStorage spec.ObjectType = "memory-storage"
+)
+
 type MemoryStorageConfig struct {
+	Log     spec.Log
 	Storage spec.Storage
 }
 
@@ -21,6 +26,7 @@ func DefaultMemoryStorageConfig() MemoryStorageConfig {
 	newStorageConfig.Pool = newPool
 
 	newConfig := MemoryStorageConfig{
+		Log:     log.NewLog(log.DefaultConfig()),
 		Storage: NewRedisStorage(newStorageConfig),
 	}
 
@@ -32,8 +38,10 @@ func NewMemoryStorage(config MemoryStorageConfig) spec.Storage {
 		ID:                  id.NewObjectID(id.Hex128),
 		MemoryStorageConfig: config,
 		Mutex:               sync.Mutex{},
-		Type:                common.ObjectType.MemoryStorage,
+		Type:                ObjectTypeMemoryStorage,
 	}
+
+	newStorage.Log.Register(newStorage.GetType())
 
 	return newStorage
 }

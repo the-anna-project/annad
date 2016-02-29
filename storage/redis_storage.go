@@ -5,10 +5,13 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeRedisStorage spec.ObjectType = "redis-storage"
 )
 
 type RedisStorageConfig struct {
@@ -30,8 +33,10 @@ func NewRedisStorage(config RedisStorageConfig) spec.Storage {
 		ID:                 id.NewObjectID(id.Hex128),
 		Mutex:              sync.Mutex{},
 		RedisStorageConfig: config,
-		Type:               common.ObjectType.RedisStorage,
+		Type:               ObjectTypeRedisStorage,
 	}
+
+	newStorage.Log.Register(newStorage.GetType())
 
 	return newStorage
 }

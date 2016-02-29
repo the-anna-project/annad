@@ -3,7 +3,6 @@ package factoryserver
 import (
 	"testing"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/spec"
@@ -198,7 +197,7 @@ func Test_FactoryServer_007(t *testing.T) {
 	if !ok {
 		t.Fatalf("factory server does not implement spec.Object")
 	}
-	if object.GetType() != common.ObjectType.FactoryServer {
+	if object.GetType() != ObjectTypeFactoryServer {
 		t.Fatalf("invalid object tyoe of factory server")
 	}
 }

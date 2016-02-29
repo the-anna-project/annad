@@ -3,7 +3,6 @@ package factoryclient
 import (
 	"testing"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/impulse"
@@ -169,7 +168,7 @@ func Test_FactoryClient_005(t *testing.T) {
 	if !ok {
 		t.Fatalf("factory client does not implement spec.Object")
 	}
-	if object.GetType() != common.ObjectType.FactoryClient {
+	if object.GetType() != ObjectTypeFactoryClient {
 		t.Fatalf("invalid object tyoe of factory client")
 	}
 }

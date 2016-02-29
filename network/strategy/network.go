@@ -8,11 +8,14 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+)
+
+const (
+	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
 )
 
 type NetworkConfig struct {
@@ -103,7 +106,7 @@ func NewNetwork(config NetworkConfig) (Network, error) {
 		NetworkConfig: config,
 		ID:            id.NewObjectID(id.Hex128),
 		Mutex:         sync.Mutex{},
-		Type:          common.ObjectType.Core,
+		Type:          ObjectTypeStrategyNetwork,
 	}
 
 	if newNetwork.Context == "" {
@@ -113,6 +116,8 @@ func NewNetwork(config NetworkConfig) (Network, error) {
 	if newNetwork.Scope == "" {
 		return nil, maskAnyf(invalidScopeError, "empty scope")
 	}
+
+	newNetwork.Log.Register(newNetwork.GetType())
 
 	return newNetwork, nil
 }

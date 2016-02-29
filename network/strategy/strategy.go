@@ -3,7 +3,6 @@ package strategynetwork
 import (
 	"math/rand"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -61,6 +60,12 @@ func (s *strategy) String() string {
 	return str
 }
 
+const (
+	// objectTypeNone is simply a dummy object type injected during randomization
+	// of the action list.
+	objectTypeNone spec.ObjectType = "none"
+)
+
 // randomizeActions generates a random sequence using the given action items.
 // Note that randomizing a strategy's action items MUST only be done when
 // creating a new strategy. Further randomizations of existing strategies will
@@ -82,14 +87,14 @@ func randomizeActions(actions []spec.ObjectType) []spec.ObjectType {
 	newActions := []spec.ObjectType{}
 	// The trick to randomize the given set of actions is to inject a well known
 	// item that can be chosen and then ignored.
-	options := append([]spec.ObjectType{common.ObjectType.None}, actions...)
+	options := append([]spec.ObjectType{objectTypeNone}, actions...)
 
 	for {
 		for range actions {
 			i := rand.Intn(len(actions) + 1)
 			newOption := options[i]
 
-			if newOption == common.ObjectType.None {
+			if newOption == objectTypeNone {
 				// There was a random index that chose the item we want to ignore. Thus
 				// we do so. This results in combinations not necessarily having the same
 				// length as the original given list of actions.

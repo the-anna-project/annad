@@ -1,13 +1,19 @@
-// TODO
+// Package gateway implements spec.Gateway and provides a in memory
+// communication channel between objects. It decouples objects by design using
+// signals being send through the gateway. A signal can transport raw bytes or
+// arbitrary structures.
 package gateway
 
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeGateway spec.ObjectType = "gateway"
 )
 
 type Config struct {
@@ -30,8 +36,10 @@ func NewGateway(config Config) spec.Gateway {
 		ID:     id.NewObjectID(id.Hex128),
 		Link:   make(chan spec.Signal, 1000),
 		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(common.ObjectType.Gateway),
+		Type:   spec.ObjectType(ObjectTypeGateway),
 	}
+
+	newGateway.Log.Register(newGateway.GetType())
 
 	return newGateway
 }

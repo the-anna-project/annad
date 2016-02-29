@@ -1,7 +1,7 @@
 package factoryserver
 
 import (
-	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/factory/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -16,14 +16,19 @@ func (fs *factoryServer) gatewayListener(newSignal spec.Signal) (spec.Signal, er
 	}
 
 	switch input.(spec.ObjectType) {
-	case common.ObjectType.Core:
+
+	case common.ObjectTypeCore:
 		output, err = fs.NewCore()
-	case common.ObjectType.Impulse:
+
+	case common.ObjectTypeImpulse:
 		output, err = fs.NewImpulse()
-	case common.ObjectType.RedisStorage:
+
+	case common.ObjectTypeRedisStorage:
 		output, err = fs.NewRedisStorage()
-	case common.ObjectType.StrategyNetwork:
+
+	case common.ObjectTypeStrategyNetwork:
 		output, err = fs.NewStrategyNetwork()
+
 	default:
 		return nil, maskAny(invalidFactoryGatewayRequestError)
 	}
