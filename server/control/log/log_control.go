@@ -1,3 +1,5 @@
+// Package logcontrol implements spec.LogControl to interactively configure
+// what is beeing logged through the network API.
 package logcontrol
 
 import (

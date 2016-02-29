@@ -7,7 +7,7 @@ import (
 
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
-	"github.com/xh3b4sd/anna/file-system/fake"
+	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/impulse"
@@ -38,7 +38,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 		FactoryClient:  factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		FactoryGateway: gateway.NewGateway(gateway.DefaultConfig()),
-		FileSystem:     filesystemfake.NewFileSystem(),
+		FileSystem:     memoryfilesystem.NewFileSystem(),
 		Log:            log.NewLog(log.DefaultConfig()),
 		TextGateway:    gateway.NewGateway(gateway.DefaultConfig()),
 

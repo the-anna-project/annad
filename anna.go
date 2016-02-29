@@ -9,7 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
-	"github.com/xh3b4sd/anna/file-system/real"
+	"github.com/xh3b4sd/anna/file-system/os"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
@@ -143,7 +143,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newTextGatewayConfig.Log = newLog
 	newTextGateway := gateway.NewGateway(newTextGatewayConfig)
 
-	newFileSystemReal := filesystemreal.NewFileSystem()
+	newOSFileSystem := osfilesystem.NewFileSystem()
 
 	//
 	// create factory
@@ -155,7 +155,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryServerConfig := factoryserver.DefaultConfig()
 	newFactoryServerConfig.FactoryClient = newFactoryGatewayClient
 	newFactoryServerConfig.FactoryGateway = newFactoryGateway
-	newFactoryServerConfig.FileSystem = newFileSystemReal
+	newFactoryServerConfig.FileSystem = newOSFileSystem
 	newFactoryServerConfig.Log = newLog
 	newFactoryServerConfig.TextGateway = newTextGateway
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)

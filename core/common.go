@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
+	objectTypeStrategyNetwork spec.ObjectType = "strategy-network"
 )
 
 func (c *core) bootObjectTree() {
@@ -17,13 +17,13 @@ func (c *core) bootObjectTree() {
 		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	_, err := c.GetNetworkByType(ObjectTypeStrategyNetwork)
+	_, err := c.GetNetworkByType(objectTypeStrategyNetwork)
 	if IsNetworkNotFound(err) {
 		strategyNetwork, err := c.FactoryClient.NewStrategyNetwork()
 		if err != nil {
 			errorHandler(maskAny(err))
 		}
-		err = c.SetNetworkByType(ObjectTypeStrategyNetwork, strategyNetwork)
+		err = c.SetNetworkByType(objectTypeStrategyNetwork, strategyNetwork)
 		if err != nil {
 			errorHandler(maskAny(err))
 		}

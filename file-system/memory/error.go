@@ -1,4 +1,4 @@
-package filesystemfake
+package memoryfilesystem
 
 import (
 	"github.com/juju/errgo"

@@ -1,22 +1,23 @@
-// TODO
-package filesystemreal
+// Package osfilesystem implementes spec.FileSystem and provides a real OS
+// bound implementation.
+package osfilesystem
 
 import (
 	"io/ioutil"
-	"os"
+	builtinos "os"
 
 	"github.com/xh3b4sd/anna/spec"
 )
 
 func NewFileSystem() spec.FileSystem {
-	newFileSystem := &real{}
+	newFileSystem := &os{}
 
 	return newFileSystem
 }
 
-type real struct{}
+type os struct{}
 
-func (r *real) ReadFile(filename string) ([]byte, error) {
+func (o *os) ReadFile(filename string) ([]byte, error) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, maskAny(err)
@@ -25,7 +26,7 @@ func (r *real) ReadFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-func (r *real) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
+func (o *os) WriteFile(filename string, bytes []byte, perm builtinos.FileMode) error {
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {
 		return maskAny(err)
