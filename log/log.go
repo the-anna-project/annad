@@ -4,7 +4,7 @@ package log
 
 import (
 	"fmt"
-	builtinLog "log"
+	builtnlog "log"
 	"os"
 	"strings"
 	"sync"
@@ -78,7 +78,7 @@ func DefaultConfig() Config {
 	newDefaultConfig := Config{
 		Color:      true,
 		Levels:     []string{},
-		RootLogger: builtinLog.New(os.Stdout, "", 0),
+		RootLogger: builtnlog.New(os.Stdout, "", 0),
 		Objects:    []spec.ObjectType{},
 		TraceID:    spec.TraceID(""),
 		Verbosity:  10,

@@ -1,5 +1,7 @@
 package spec
 
+// Anna represents the main object, the programm root. It contains all further
+// objects and manages the whole control flow around Anna's implementations.
 type Anna interface {
 	// Boot initializes and starts Anna like booting a machine. The call to Boot
 	// blocks until Anna is completely initialized, so you might want to call it

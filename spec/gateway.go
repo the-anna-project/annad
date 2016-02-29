@@ -1,8 +1,15 @@
 package spec
 
+// Listener must be provided to Gateway.Listen and is called once a signal is
+// received.
 type Listener func(newSignal Signal) (Signal, error)
 
+// Gateway provides an in-memor channel to send information back and forth in a
+// decoupled manner.
 type Gateway interface {
+	// Close closes the gateway and thus prevents further usage of it. No
+	// listening and sending is possible anymore after closing. Signals send but
+	// not yet received while closing get lost.
 	Close()
 
 	Object

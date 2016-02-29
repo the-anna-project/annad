@@ -1,4 +1,4 @@
-package filesystemreal
+package osfilesystem
 
 import (
 	"github.com/juju/errgo"
