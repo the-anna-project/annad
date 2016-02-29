@@ -11,9 +11,12 @@ import (
 
 	"github.com/mgutz/ansi"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeLog spec.ObjectType = "log"
 )
 
 type Config struct {
@@ -88,11 +91,14 @@ func DefaultConfig() Config {
 // track runtime information.
 func NewLog(config Config) spec.Log {
 	newLog := log{
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(common.ObjectType.Log),
+		Config:            config,
+		ID:                id.NewObjectID(id.Hex128),
+		Mutex:             sync.Mutex{},
+		RegisteredObjects: []spec.ObjectType{},
+		Type:              spec.ObjectType(ObjectTypeLog),
 	}
+
+	newLog.Register(newLog.GetType())
 
 	return &newLog
 }
@@ -104,7 +110,17 @@ type log struct {
 
 	Mutex sync.Mutex
 
+	RegisteredObjects []spec.ObjectType
+
 	Type spec.ObjectType
+}
+
+func (l *log) Register(objectType spec.ObjectType) error {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
+	l.RegisteredObjects = append(l.RegisteredObjects, objectType)
+	return nil
 }
 
 func (l *log) ResetLevels() error {
@@ -164,7 +180,7 @@ func (l *log) SetObjects(list string) error {
 
 	newObjects := []spec.ObjectType{}
 	for _, objectType := range strings.Split(list, ",") {
-		if !containsObjectType(common.ObjectTypes, spec.ObjectType(objectType)) {
+		if !containsObjectType(l.RegisteredObjects, spec.ObjectType(objectType)) {
 			return maskAnyf(invalidLogObjectError, objectType)
 		}
 

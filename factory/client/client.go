@@ -5,11 +5,15 @@ package factoryclient
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
+	"github.com/xh3b4sd/anna/factory/common"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeFactoryClient spec.ObjectType = "factory-client"
 )
 
 type Config struct {
@@ -34,8 +38,10 @@ func NewFactory(config Config) spec.Factory {
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   common.ObjectType.FactoryClient,
+		Type:   ObjectTypeFactoryClient,
 	}
+
+	newFactory.Log.Register(newFactory.GetType())
 
 	return newFactory
 }
@@ -60,7 +66,7 @@ func (fc *factoryClient) Boot() {
 func (fc *factoryClient) NewCore() (spec.Core, error) {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewCore")
 
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.Core, fc.Closer)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeCore, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -71,7 +77,7 @@ func (fc *factoryClient) NewCore() (spec.Core, error) {
 func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewImpulse")
 
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.Impulse, fc.Closer)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeImpulse, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -82,7 +88,7 @@ func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
 func (fc *factoryClient) NewRedisStorage() (spec.Storage, error) {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewRedisStorage")
 
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.RedisStorage, fc.Closer)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeRedisStorage, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -93,7 +99,7 @@ func (fc *factoryClient) NewRedisStorage() (spec.Storage, error) {
 func (fc *factoryClient) NewStrategyNetwork() (spec.Network, error) {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewNetwork")
 
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectType.StrategyNetwork, fc.Closer)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeStrategyNetwork, fc.Closer)
 	if err != nil {
 		return nil, maskAny(err)
 	}

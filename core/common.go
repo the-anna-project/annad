@@ -3,8 +3,11 @@ package core
 import (
 	"sync/atomic"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
 )
 
 func (c *core) bootObjectTree() {
@@ -14,13 +17,13 @@ func (c *core) bootObjectTree() {
 		c.Log.WithTags(spec.Tags{L: "F", O: c, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	_, err := c.GetNetworkByType(common.ObjectType.StrategyNetwork)
+	_, err := c.GetNetworkByType(ObjectTypeStrategyNetwork)
 	if IsNetworkNotFound(err) {
 		strategyNetwork, err := c.FactoryClient.NewStrategyNetwork()
 		if err != nil {
 			errorHandler(maskAny(err))
 		}
-		err = c.SetNetworkByType(common.ObjectType.StrategyNetwork, strategyNetwork)
+		err = c.SetNetworkByType(ObjectTypeStrategyNetwork, strategyNetwork)
 		if err != nil {
 			errorHandler(maskAny(err))
 		}

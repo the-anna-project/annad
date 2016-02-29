@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
@@ -16,6 +15,10 @@ import (
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	objectTypeAnna spec.ObjectType = "anna"
 )
 
 var (
@@ -73,8 +76,10 @@ func newAnna(config annaConfig) spec.Anna {
 		annaConfig: config,
 		ID:         id.NewObjectID(id.Hex128),
 		Mutex:      sync.Mutex{},
-		Type:       spec.ObjectType(common.ObjectType.Anna),
+		Type:       spec.ObjectType(objectTypeAnna),
 	}
+
+	newAnna.Log.Register(newAnna.GetType())
 
 	return newAnna
 }

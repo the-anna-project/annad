@@ -5,7 +5,6 @@ package factoryserver
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/file-system/fake"
@@ -16,6 +15,10 @@ import (
 	"github.com/xh3b4sd/anna/network/strategy"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+)
+
+const (
+	ObjectTypeFactoryServer spec.ObjectType = "factory-server"
 )
 
 type Config struct {
@@ -53,8 +56,10 @@ func NewFactory(config Config) spec.Factory {
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   common.ObjectType.FactoryServer,
+		Type:   ObjectTypeFactoryServer,
 	}
+
+	newFactory.Log.Register(newFactory.GetType())
 
 	return newFactory
 }

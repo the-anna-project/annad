@@ -21,13 +21,18 @@ type Tags struct {
 // Log is a logger used to filter logs based on tags before actually logging
 // them.
 type Log interface {
-	// ResetLevels sets Config.Levels back to its default value.
+	// Register adds the given object type to the list of known objects allowed
+	// to emit log messages. This information is used to make filtering via
+	// object types possible.
+	Register(objectType ObjectType) error
+
+	// ResetLevels sets the list of log levels back to its default value.
 	ResetLevels() error
 
-	// ResetObjects sets Config.Objects back to its default value.
+	// ResetObjects sets the list of log objects back to its default value.
 	ResetObjects() error
 
-	// ResetVerbosity sets Config.Verbosity back to its default value.
+	// ResetVerbosity sets the log verbosity back to its default value.
 	ResetVerbosity() error
 
 	// SetLevels takes a comma separated list of provided log levels and causes

@@ -7,13 +7,16 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeServer spec.ObjectType = "server"
 )
 
 type Config struct {
@@ -37,12 +40,16 @@ func DefaultConfig() Config {
 }
 
 func NewServer(config Config) spec.Server {
-	return &server{
+	newServer := &server{
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(common.ObjectType.Log),
+		Type:   spec.ObjectType(ObjectTypeServer),
 	}
+
+	newServer.Log.Register(newServer.GetType())
+
+	return newServer
 }
 
 type server struct {

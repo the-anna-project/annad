@@ -1,4 +1,6 @@
-// TODO
+// Package textinterface implements spec.TextInterface and provides a way to
+// feed neural networks with text input. To make Anna consume text, there is
+// the text interface implemented through the network API.
 package textinterface
 
 import (
@@ -8,11 +10,14 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeTextInterface spec.ObjectType = "text-interface"
 )
 
 type Config struct {
@@ -29,12 +34,16 @@ func DefaultConfig() Config {
 }
 
 func NewTextInterface(config Config) spec.TextInterface {
-	return &textInterface{
+	newInterface := &textInterface{
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(common.ObjectType.Log),
+		Type:   spec.ObjectType(ObjectTypeTextInterface),
 	}
+
+	newInterface.Log.Register(newInterface.GetType())
+
+	return newInterface
 }
 
 type textInterface struct {

@@ -10,12 +10,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeCore spec.ObjectType = "core"
 )
 
 type Config struct {
@@ -46,8 +49,10 @@ func NewCore(config Config) spec.Core {
 		ID:                 id.NewObjectID(id.Hex128),
 		ImpulsesInProgress: 0,
 		Mutex:              sync.Mutex{},
-		Type:               common.ObjectType.Core,
+		Type:               ObjectTypeCore,
 	}
+
+	newCore.Log.Register(newCore.GetType())
 
 	return newCore
 }

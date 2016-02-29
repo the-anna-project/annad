@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -41,7 +40,7 @@ func (c core) GetID() spec.ObjectID {
 }
 
 func (c core) GetType() spec.ObjectType {
-	return common.ObjectType.Core
+	return spec.ObjectType("core")
 }
 
 func (c core) MarshalJSON() ([]byte, error) {
@@ -117,13 +116,13 @@ func Test_Log_001(t *testing.T) {
 			LogVerbosity: 10,
 		},
 
-		// Object core logs should not be logged when only object network logs are allowed.
+		// Object core logs should not be logged when only object impulse logs are allowed.
 		{
 			Tags:         spec.Tags{O: core{}, L: "I", V: 9},
 			F:            "test message",
 			V:            []interface{}{},
 			Expected:     "",
-			LogObjects:   []spec.ObjectType{common.ObjectType.StrategyNetwork},
+			LogObjects:   []spec.ObjectType{spec.ObjectType("impulse")},
 			LogLevels:    []string{},
 			LogVerbosity: 10,
 		},
@@ -322,6 +321,9 @@ func Test_Log_005(t *testing.T) {
 	if !strings.Contains(result, "test message") {
 		t.Fatalf("logged message '%s' does not match expected result '%s'", result, "test message")
 	}
+
+	newLog.Register(spec.ObjectType("strategy-network"))
+	newLog.Register(spec.ObjectType("impulse"))
 
 	// Reset the test logger to clean the log message of the previous logging.
 	newRootLogger.ResetArgs()

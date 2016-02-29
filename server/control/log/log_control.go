@@ -5,10 +5,13 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/common"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+)
+
+const (
+	ObjectTypeLogControl spec.ObjectType = "log-control"
 )
 
 type Config struct {
@@ -22,12 +25,16 @@ func DefaultConfig() Config {
 }
 
 func NewLogControl(config Config) spec.LogControl {
-	return &logControl{
+	newControl := &logControl{
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(common.ObjectType.Log),
+		Type:   spec.ObjectType(ObjectTypeLogControl),
 	}
+
+	newControl.Log.Register(newControl.GetType())
+
+	return newControl
 }
 
 type logControl struct {
