@@ -1,3 +1,4 @@
 .workspace
 state.json
 coverage.txt
+profile.out

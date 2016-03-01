@@ -33,6 +33,7 @@ func DefaultConfig() Config {
 
 func NewFactory(config Config) spec.Factory {
 	newFactory := &factoryClient{
+		Booted: false,
 		Closed: false,
 		Closer: make(chan struct{}, 1),
 		Config: config,
@@ -47,31 +48,26 @@ func NewFactory(config Config) spec.Factory {
 }
 
 type factoryClient struct {
-	Closed bool
-	Closer chan struct{}
-
 	Config
 
-	ID spec.ObjectID `json:"id"`
-
-	Mutex sync.Mutex
-
-	Type spec.ObjectType `json:"type"`
+	Booted bool
+	Closed bool
+	Closer chan struct{}
+	ID     spec.ObjectID
+	Mutex  sync.Mutex
+	Type   spec.ObjectType
 }
 
 func (fc *factoryClient) Boot() {
-	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Boot")
-}
+	fc.Mutex.Lock()
+	defer fc.Mutex.Unlock()
 
-func (fc *factoryClient) NewCore() (spec.Core, error) {
-	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewCore")
-
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeCore, fc.Closer)
-	if err != nil {
-		return nil, maskAny(err)
+	if fc.Booted {
+		return
 	}
+	fc.Booted = true
 
-	return output.(spec.Core), nil
+	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Boot")
 }
 
 func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
@@ -83,28 +79,6 @@ func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
 	}
 
 	return output.(spec.Impulse), nil
-}
-
-func (fc *factoryClient) NewRedisStorage() (spec.Storage, error) {
-	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewRedisStorage")
-
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeRedisStorage, fc.Closer)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return output.(spec.Storage), nil
-}
-
-func (fc *factoryClient) NewStrategyNetwork() (spec.Network, error) {
-	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewNetwork")
-
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeStrategyNetwork, fc.Closer)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return output.(spec.Network), nil
 }
 
 func (fc *factoryClient) Shutdown() {

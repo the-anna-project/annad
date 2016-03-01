@@ -16,19 +16,8 @@ func (fs *factoryServer) gatewayListener(newSignal spec.Signal) (spec.Signal, er
 	}
 
 	switch input.(spec.ObjectType) {
-
-	case common.ObjectTypeCore:
-		output, err = fs.NewCore()
-
 	case common.ObjectTypeImpulse:
 		output, err = fs.NewImpulse()
-
-	case common.ObjectTypeRedisStorage:
-		output, err = fs.NewRedisStorage()
-
-	case common.ObjectTypeStrategyNetwork:
-		output, err = fs.NewStrategyNetwork()
-
 	default:
 		return nil, maskAny(invalidFactoryGatewayRequestError)
 	}

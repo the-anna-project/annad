@@ -5,16 +5,13 @@ package factoryserver
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/core"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/impulse"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/network/strategy"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
@@ -51,6 +48,7 @@ func DefaultConfig() Config {
 
 func NewFactory(config Config) spec.Factory {
 	newFactory := &factoryServer{
+		Booted: false,
 		Closed: false,
 		Closer: make(chan struct{}, 1),
 		Config: config,
@@ -65,34 +63,28 @@ func NewFactory(config Config) spec.Factory {
 }
 
 type factoryServer struct {
-	Closed bool
-	Closer chan struct{}
-
 	Config
 
-	ID spec.ObjectID
-
-	Mutex sync.Mutex
-
-	Type spec.ObjectType
+	Booted bool
+	Closed bool
+	Closer chan struct{}
+	ID     spec.ObjectID
+	Mutex  sync.Mutex
+	Type   spec.ObjectType
 }
 
 func (fs *factoryServer) Boot() {
+	fs.Mutex.Lock()
+	defer fs.Mutex.Unlock()
+
+	if fs.Booted {
+		return
+	}
+	fs.Booted = true
+
 	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call Boot")
 
 	go fs.FactoryGateway.Listen(fs.gatewayListener, fs.Closer)
-}
-
-func (fs *factoryServer) NewCore() (spec.Core, error) {
-	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call NewCore")
-
-	newConfig := core.DefaultConfig()
-	newConfig.FactoryClient = fs.FactoryClient
-	newConfig.Log = fs.Log
-	newConfig.TextGateway = fs.TextGateway
-	newCore := core.NewCore(newConfig)
-
-	return newCore, nil
 }
 
 func (fs *factoryServer) NewImpulse() (spec.Impulse, error) {
@@ -106,38 +98,6 @@ func (fs *factoryServer) NewImpulse() (spec.Impulse, error) {
 	}
 
 	return newImpulse, nil
-}
-
-func (fs *factoryServer) NewRedisStorage() (spec.Storage, error) {
-	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call NewRedisStorage")
-
-	newDialConfig := storage.DefaultRedisDialConfig()
-	newDialConfig.Addr = fs.RedisAddr
-
-	newPoolConfig := storage.DefaultRedisPoolConfig()
-	newPoolConfig.Dial = storage.NewRedisDial(newDialConfig)
-	newPool := storage.NewRedisPool(newPoolConfig)
-
-	newStorageConfig := storage.DefaultRedisStorageConfig()
-	newStorageConfig.Log = fs.Log
-	newStorageConfig.Pool = newPool
-
-	newStorage := storage.NewRedisStorage(newStorageConfig)
-
-	return newStorage, nil
-}
-
-func (fs *factoryServer) NewStrategyNetwork() (spec.Network, error) {
-	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call NewStrategyNetwork")
-
-	newConfig := strategynetwork.DefaultNetworkConfig()
-	newConfig.Log = fs.Log
-	newNetwork, err := strategynetwork.NewNetwork(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newNetwork, nil
 }
 
 func (fs *factoryServer) Shutdown() {

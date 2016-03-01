@@ -7,6 +7,7 @@ package impulse
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/ctx"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -43,6 +44,7 @@ func DefaultConfig() Config {
 func NewImpulse(config Config) (spec.Impulse, error) {
 	newImpulse := &impulse{
 		Config: config,
+		Ctxs:   map[spec.ObjectID]spec.Ctx{},
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeImpulse,
@@ -63,6 +65,8 @@ func NewImpulse(config Config) (spec.Impulse, error) {
 
 type impulse struct {
 	Config
+
+	Ctxs map[spec.ObjectID]spec.Ctx
 
 	ID spec.ObjectID `json:"id"`
 
@@ -101,6 +105,22 @@ func (i *impulse) GetObjectType() (spec.ObjectType, error) {
 	i.ObjectTypes = i.ObjectTypes[1:]
 
 	return objectType, nil
+}
+
+func (i *impulse) GetCtx(object spec.Object) spec.Ctx {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+
+	if ctx, ok := i.Ctxs[object.GetID()]; ok {
+		return ctx
+	}
+
+	newCtxConfig := ctx.DefaultConfig()
+	newCtxConfig.Object = object
+	newCtx := ctx.NewCtx(newCtxConfig)
+	i.Ctxs[object.GetID()] = newCtx
+
+	return newCtx
 }
 
 func (i *impulse) SetID(ID spec.ObjectID) error {

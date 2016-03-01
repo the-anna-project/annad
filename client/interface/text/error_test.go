@@ -32,7 +32,7 @@ func Test_TextInterface_maskAnyf_001(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for i, testCase := range testCases {
 		var output error
 		if len(testCase.InputArgs) == 0 {
 			output = maskAnyf(testCase.InputError, testCase.InputFormat)
@@ -41,7 +41,7 @@ func Test_TextInterface_maskAnyf_001(t *testing.T) {
 		}
 
 		if testCase.Expected != nil && output.Error() != testCase.Expected.Error() {
-			t.Fatalf("test case %d: output '%s' != expected '%s'", output, testCase.Expected)
+			t.Fatalf("test case %d: output '%s' != expected '%s'", i, output, testCase.Expected)
 		}
 	}
 }

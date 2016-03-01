@@ -30,3 +30,4 @@ goget:
 
 gotest:
 	@./go.test.sh
+	@go vet ./...

@@ -7,8 +7,5 @@ import (
 )
 
 const (
-	ObjectTypeCore            spec.ObjectType = "core"
-	ObjectTypeImpulse         spec.ObjectType = "impulse"
-	ObjectTypeRedisStorage    spec.ObjectType = "redis-storage"
-	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
+	ObjectTypeImpulse spec.ObjectType = "impulse"
 )
