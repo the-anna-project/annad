@@ -9,4 +9,6 @@ type Strategy interface {
 
 	// GetActions returns the ordered list of the strategy's action items.
 	GetActions() []ObjectType
+
+	Object
 }

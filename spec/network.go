@@ -7,6 +7,11 @@ package spec
 // done. Anyway, networks need to provide critical business logic though. At
 // the end the question is what makes sense and what works out.
 type Network interface {
+	// Boot initializes and starts the whole network like booting a machine. The
+	// call to Boot blocks until the network is completely initialized, so you
+	// might want to call it in a separate goroutine.
+	Boot()
+
 	Object
 
 	// Shutdown ends all processes of the network like shutting down a machine.

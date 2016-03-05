@@ -61,8 +61,8 @@ func (ms *memoryStorage) GetElementsByScore(key string, score float32, maxElemen
 	return ms.Storage.GetElementsByScore(key, score, maxElements)
 }
 
-func (ms *memoryStorage) GetHighestElementScore(key string) (string, float32, error) {
-	return ms.Storage.GetHighestElementScore(key)
+func (ms *memoryStorage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
+	return ms.Storage.GetHighestScoredElements(key, maxElements)
 }
 
 func (ms *memoryStorage) Set(key, value string) error {

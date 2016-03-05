@@ -7,6 +7,12 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+func panicOnError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (a *anna) listenToSignal() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call listenToSignal")
 

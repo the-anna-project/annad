@@ -1,0 +1,117 @@
+// Package outnet implements spec.Network to provide functionality to create
+// valuable output with respect to the given input.
+package outnet
+
+import (
+	"sync"
+
+	"github.com/xh3b4sd/anna/factory/client"
+	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage"
+)
+
+const (
+	ObjectTypeOutNet spec.ObjectType = "out-net"
+)
+
+type Config struct {
+	FactoryClient spec.Factory
+	Log           spec.Log
+	Storage       spec.Storage
+
+	EvalNet  spec.Network
+	ExecNet  spec.Network
+	PatNet   spec.Network
+	PredNet  spec.Network
+	StratNet spec.Network
+}
+
+func DefaultConfig() Config {
+	newConfig := Config{
+		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
+		Log:           log.NewLog(log.DefaultConfig()),
+		Storage:       storage.NewMemoryStorage(storage.DefaultMemoryStorageConfig()),
+
+		EvalNet:  nil,
+		ExecNet:  nil,
+		PatNet:   nil,
+		PredNet:  nil,
+		StratNet: nil,
+	}
+
+	return newConfig
+}
+
+// NewOutNet returns a new configured output network.
+func NewOutNet(config Config) (spec.Network, error) {
+	newNet := &outNet{
+		Booted: false,
+		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   ObjectTypeOutNet,
+	}
+
+	newNet.Log.Register(newNet.GetType())
+
+	return newNet, nil
+}
+
+type outNet struct {
+	Config
+
+	Booted bool
+	ID     spec.ObjectID
+	Mutex  sync.Mutex
+	Type   spec.ObjectType
+}
+
+func (on *outNet) Boot() {
+	on.Mutex.Lock()
+	defer on.Mutex.Unlock()
+
+	if on.Booted {
+		return
+	}
+	on.Booted = true
+
+	on.Log.WithTags(spec.Tags{L: "D", O: on, T: nil, V: 13}, "call Boot")
+}
+
+func (on *outNet) Shutdown() {
+	on.Log.WithTags(spec.Tags{L: "D", O: on, T: nil, V: 13}, "call Shutdown")
+}
+
+func (on *outNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
+	on.Log.WithTags(spec.Tags{L: "D", O: on, T: nil, V: 13}, "call Trigger")
+
+	// Dynamically walk impulse through the other networks.
+	var err error
+	for {
+		imp, err = on.StratNet.Trigger(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		imp, err = on.PredNet.Trigger(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		imp, err = on.ExecNet.Trigger(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		imp, err = on.EvalNet.Trigger(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+
+		break
+	}
+
+	// Note that the impulse returned here is not actually the same as received
+	// at the beginning of the call, but was manipulated during its walk through
+	// the networks.
+	return imp, nil
+}

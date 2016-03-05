@@ -77,20 +77,16 @@ func (rs *redisStorage) GetElementsByScore(key string, score float32, maxElement
 	return newList, nil
 }
 
-func (rs *redisStorage) GetHighestElementScore(key string) (string, float32, error) {
+func (rs *redisStorage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	conn := rs.Pool.Get()
 	defer conn.Close()
 
-	values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, 0, "WITHSCORES"))
+	values, err := redis.Strings(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
 	if err != nil {
-		return "", 0, maskAny(err)
+		return nil, maskAny(err)
 	}
 
-	if len(values) != 1 {
-		return "", 0, maskAny(err)
-	}
-
-	return values[0].(string), values[1].(float32), nil
+	return values, nil
 }
 
 func (rs *redisStorage) Set(key, value string) error {

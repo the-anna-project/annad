@@ -41,6 +41,7 @@ func DefaultConfig() Config {
 
 func NewServer(config Config) spec.Server {
 	newServer := &server{
+		Booted: false,
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
@@ -55,14 +56,21 @@ func NewServer(config Config) spec.Server {
 type server struct {
 	Config
 
-	ID spec.ObjectID
-
-	Mutex sync.Mutex
-
-	Type spec.ObjectType
+	Booted bool
+	ID     spec.ObjectID
+	Mutex  sync.Mutex
+	Type   spec.ObjectType
 }
 
 func (s *server) Boot() {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if s.Booted {
+		return
+	}
+	s.Booted = true
+
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Boot")
 
 	ctx := context.Background()

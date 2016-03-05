@@ -18,6 +18,12 @@ type Impulse interface {
 	// object types. Usually these object types come from Strategies.
 	GetObjectType() (ObjectType, error)
 
+	// GetCtx always returns a context associated with the given object. In case
+	// there is no context associated with the given object, a new context is
+	// created, stored and returned. In case there is already a context known for
+	// the given object, this one is simply returned.
+	GetCtx(object Object) Ctx
+
 	Object
 
 	// SetID sets the object ID of the impulse. This is the only exception across
