@@ -51,11 +51,7 @@ func Test_FactoryClient_NewImpulse(t *testing.T) {
 func Test_FactoryClient_GetType(t *testing.T) {
 	newClient := NewFactory(DefaultConfig())
 
-	object, ok := newClient.(spec.Object)
-	if !ok {
-		t.Fatalf("factory client does not implement spec.Object")
-	}
-	if object.GetType() != ObjectTypeFactoryClient {
+	if newClient.GetType() != ObjectTypeFactoryClient {
 		t.Fatalf("invalid object tyoe of factory client")
 	}
 }
@@ -64,11 +60,9 @@ func Test_FactoryClient_GetType(t *testing.T) {
 // created.
 func Test_FactoryClient_GetID(t *testing.T) {
 	firstClient := NewFactory(DefaultConfig())
-	firstObject, _ := firstClient.(spec.Object)
 	secondClient := NewFactory(DefaultConfig())
-	secondObject, _ := secondClient.(spec.Object)
 
-	if firstObject.GetID() == secondObject.GetID() {
+	if firstClient.GetID() == secondClient.GetID() {
 		t.Fatalf("IDs of factory clients are equal")
 	}
 }

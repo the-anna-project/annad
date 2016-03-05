@@ -41,7 +41,7 @@ func Test_StrategyNetwork_maskAnyf_001(t *testing.T) {
 		}
 
 		if testCase.Expected != nil && output.Error() != testCase.Expected.Error() {
-			t.Fatalf("test case %d: output '%s' != expected '%s'", i, output, testCase.Expected)
+			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
 		}
 	}
 }

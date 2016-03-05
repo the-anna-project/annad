@@ -6,7 +6,6 @@ import (
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/strategy"
 )
 
 const (
@@ -32,7 +31,7 @@ func DefaultNeuronConfig() NeuronConfig {
 		Log: log.NewLog(log.DefaultConfig()),
 
 		// Settings.
-		Strategy: strategy.NewStrategy(strategy.DefaultConfig()),
+		Strategy: nil,
 		Score:    0,
 	}
 
@@ -128,15 +127,5 @@ func (n *neuron) IncrScore(objectType spec.ObjectType, delta int) error {
 
 func (n *neuron) Trigger(imp spec.Impulse) (spec.Impulse, spec.Neuron, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
-
-	strategy, err := n.GetStrategy()
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-
-	for _, action := range strategy.GetActions() {
-		imp.AddObjectType(action)
-	}
-
 	return imp, nil, nil
 }

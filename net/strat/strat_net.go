@@ -3,6 +3,7 @@
 package stratnet
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/anna/storage/memory"
 	"github.com/xh3b4sd/anna/strategy"
 )
 
@@ -46,7 +47,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Log:     log.NewLog(log.DefaultConfig()),
-		Storage: storage.NewMemoryStorage(storage.DefaultMemoryStorageConfig()),
+		Storage: memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		PatNet: nil,
 
@@ -166,7 +167,10 @@ func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.St
 	newConfig := strategy.DefaultConfig()
 	newConfig.Actions = newActions
 	newConfig.ID = ID
-	newStrategy := strategy.NewStrategy(newConfig)
+	newStrategy, err := strategy.NewStrategy(newConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
 
 	return newStrategy, nil
 }
@@ -220,9 +224,13 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		Actions: sn.Actions,
 	}
 
+	var err error
 	var newStrategy spec.Strategy
 	for i := 0; i < 3; i++ {
-		newStrategy = strategy.NewStrategy(newConfig)
+		newStrategy, err = strategy.NewStrategy(newConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
 
 		// Check if strategy already exists.
 		//
@@ -249,7 +257,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		return nil, maskAnyf(combinationLimitError, "no more strategies left")
 	}
 
-	err := sn.StoreStrategy(imp, newStrategy)
+	err = sn.StoreStrategy(imp, newStrategy)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -290,9 +298,8 @@ func (sn *stratNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		return nil, maskAny(err)
 	}
 
-	for _, action := range newStrategy.GetActions() {
-		imp.AddObjectType(action)
-	}
+	// TODO add strategy to impulse
+	fmt.Printf("%#v\n", newStrategy)
 
 	return imp, nil
 }

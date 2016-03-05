@@ -9,7 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/anna/storage/memory"
 )
 
 const (
@@ -32,7 +32,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
-		Storage:       storage.NewMemoryStorage(storage.DefaultMemoryStorageConfig()),
+		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		EvalNet:  nil,
 		ExecNet:  nil,

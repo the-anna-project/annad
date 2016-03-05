@@ -4,19 +4,11 @@ package spec
 // through neural networks and is modified on its way to finally creating some
 // output based on some input.
 type Impulse interface {
-	// AddObjectType pushes the given object type at the end of the impulse's
-	// list of object types. Usually these object types come from Strategies.
-	AddObjectType(objectType ObjectType) error
-
 	// GetInput returns the impulse's input.
 	GetInput() (string, error)
 
 	// GetOutput returns the impulse's output.
 	GetOutput() (string, error)
-
-	// GetObjectType pops the next object type out of the impulse's list of
-	// object types. Usually these object types come from Strategies.
-	GetObjectType() (ObjectType, error)
 
 	// GetCtx always returns a context associated with the given object. In case
 	// there is no context associated with the given object, a new context is

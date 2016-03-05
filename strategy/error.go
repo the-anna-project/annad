@@ -1,4 +1,4 @@
-package storage
+package strategy
 
 import (
 	"fmt"
@@ -22,8 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var queryExecutionFailedError = errgo.New("query execution failed")
+var invalidActionsError = errgo.New("invalid actions")
 
-func IsQueryExecutionFailed(err error) bool {
-	return errgo.Cause(err) == queryExecutionFailedError
+// IsInvalidActions asserts invalidActionsError.
+func IsInvalidActions(err error) bool {
+	return errgo.Cause(err) == invalidActionsError
 }

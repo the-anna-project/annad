@@ -7,8 +7,12 @@ type Storage interface {
 	Get(key string) (string, error)
 
 	// GetElementsByScore looks up all elements associated with the given score.
-	// To limit the number of returned elements, maxElements ca be used.
-	GetElementsByScore(key string, score float32, maxElements int) ([]string, error)
+	// To limit the number of returned elements, maxElements ca be used. Note
+	// that the list has this scheme.
+	//
+	//     element1,element2,...
+	//
+	GetElementsByScore(key string, score float64, maxElements int) ([]string, error)
 
 	// GetHighestScoredElements searches a list that is ordered by their
 	// element's score, and returns the elements and their corresponding scores,
@@ -24,4 +28,8 @@ type Storage interface {
 	// Set stores the given key value pair. Once persisted, value can be
 	// retrieved using Get.
 	Set(key string, value string) error
+
+	// SetElementByScore persists the given element in the weighted list
+	// identified by key with respect to the given score.
+	SetElementByScore(key, element string, score float64) error
 }
