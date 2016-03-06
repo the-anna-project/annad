@@ -1,11 +1,11 @@
-package textinterface
+package redisstorage
 
 import (
 	"fmt"
 	"testing"
 )
 
-func Test_TextInterface_maskAnyf_001(t *testing.T) {
+func Test_RedisStorage_maskAnyf(t *testing.T) {
 	testCases := []struct {
 		InputError  error
 		InputFormat string

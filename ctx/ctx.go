@@ -15,14 +15,7 @@ const (
 
 // Config represents the configuration used to create new context.
 type Config struct {
-	// ID represents the context's ID. This is configurable because the context
-	// object is a container for contextual information. So even the ID needs to
-	// be configured when e.g. storing and fetching contextual information from a
-	// database.
-	//
-	// Note that this needs to be well known. The configured context makes sure
-	// that storage keys are consistently created. Customize this carefully and
-	// make sure you know what you are doing.
+	// ID represents the context's ID.
 	ID spec.ObjectID
 
 	// Object represents the object configuring and using this context.

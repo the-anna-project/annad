@@ -14,27 +14,20 @@ import (
 )
 
 const (
-	ObjectTypeImpulse         spec.ObjectType = "impulse"
-	ObjectTypeStrategyNetwork spec.ObjectType = "strategy-network"
+	ObjectTypeImpulse spec.ObjectType = "impulse"
 )
 
 type Config struct {
-	Input string `json:"input"`
+	Log spec.Log
 
-	Log spec.Log `json:"-"`
-
-	ObjectTypes []spec.ObjectType `json:"object_types"`
-
-	Output string `json:"output"`
+	Input  string
+	Output string
 }
 
 func DefaultConfig() Config {
 	newConfig := Config{
-		Input: "",
-		Log:   log.NewLog(log.DefaultConfig()),
-		ObjectTypes: []spec.ObjectType{
-			ObjectTypeStrategyNetwork,
-		},
+		Input:  "",
+		Log:    log.NewLog(log.DefaultConfig()),
 		Output: "",
 	}
 
@@ -48,14 +41,6 @@ func NewImpulse(config Config) (spec.Impulse, error) {
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeImpulse,
-	}
-
-	if len(newImpulse.ObjectTypes) == 0 || newImpulse.ObjectTypes[0] != ObjectTypeStrategyNetwork {
-		// The first network type an impulse needs to use is the strategy network
-		// type. This ensures to provide strategies which guide the impulse thorugh
-		// networks by best effort. In case a caller configures an impulse without
-		// that knowledge, we just prevent accidents and return an error.
-		return nil, maskAnyf(invalidNetworkTypeError, "")
 	}
 
 	newImpulse.Log.Register(newImpulse.GetType())
@@ -75,15 +60,6 @@ type impulse struct {
 	Type spec.ObjectType `json:"type"`
 }
 
-func (i *impulse) AddObjectType(objectType spec.ObjectType) error {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	i.ObjectTypes = append(i.ObjectTypes, objectType)
-
-	return nil
-}
-
 func (i *impulse) GetInput() (string, error) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
@@ -94,17 +70,6 @@ func (i *impulse) GetOutput() (string, error) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 	return i.Output, nil
-}
-
-func (i *impulse) GetObjectType() (spec.ObjectType, error) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	objectType := i.ObjectTypes[0]
-
-	i.ObjectTypes = i.ObjectTypes[1:]
-
-	return objectType, nil
 }
 
 func (i *impulse) GetCtx(object spec.Object) spec.Ctx {

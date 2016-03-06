@@ -10,6 +10,8 @@ type Factory interface {
 	// NewImpulse creates a new configured Impulse object.
 	NewImpulse() (Impulse, error)
 
+	Object
+
 	// Shutdown ends all processes of the factory like shutting down a machine.
 	// The call to Shutdown blocks until the factory is completely shut down, so
 	// you might want to call it in a separate goroutine.

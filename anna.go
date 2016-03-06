@@ -32,7 +32,7 @@ import (
 	"github.com/xh3b4sd/anna/net/strat"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/anna/storage/redis"
 )
 
 const (
@@ -191,14 +191,14 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
 	// Storage
-	newRedisDialConfig := storage.DefaultRedisDialConfig()
+	newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
 	newRedisDialConfig.Addr = "127.0.0.1:6379"
-	newPoolConfig := storage.DefaultRedisPoolConfig()
-	newPoolConfig.Dial = storage.NewRedisDial(newRedisDialConfig)
-	newStorageConfig := storage.DefaultRedisStorageConfig()
+	newPoolConfig := redisstorage.DefaultRedisPoolConfig()
+	newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
+	newStorageConfig := redisstorage.DefaultConfig()
 	newStorageConfig.Log = newLog
-	newStorageConfig.Pool = storage.NewRedisPool(newPoolConfig)
-	newStorage := storage.NewRedisStorage(newStorageConfig)
+	newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
+	newStorage := redisstorage.NewRedisStorage(newStorageConfig)
 
 	// Pattern network
 	newPatNetConfig := patnet.DefaultConfig()

@@ -3,7 +3,8 @@
 package strategy
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -39,16 +40,20 @@ func DefaultConfig() Config {
 }
 
 // NewStrategy creates a new configured strategy.
-func NewStrategy(config Config) spec.Strategy {
+func NewStrategy(config Config) (spec.Strategy, error) {
 	newStrategy := &strategy{
 		Config: config,
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeStrategy,
 	}
 
+	if len(newStrategy.Actions) == 0 {
+		return nil, maskAnyf(invalidActionsError, "must not be empty")
+	}
+
 	newStrategy.Actions = randomizeActions(newStrategy.Actions)
 
-	return newStrategy
+	return newStrategy, nil
 }
 
 type strategy struct {
@@ -110,8 +115,12 @@ func randomizeActions(actions []spec.ObjectType) []spec.ObjectType {
 
 	for {
 		for range actions {
-			i := rand.Intn(len(actions) + 1)
-			newOption := options[i]
+			max := big.NewInt(int64(len(options)))
+			i, err := rand.Int(rand.Reader, max)
+			if err != nil {
+				panic(err)
+			}
+			newOption := options[i.Int64()]
 
 			if newOption == objectTypeNone {
 				// There was a random index that chose the item we want to ignore. Thus
