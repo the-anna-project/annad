@@ -13,9 +13,13 @@ import (
 )
 
 const (
+	// ObjectTypeInNet represents the object type of the input network object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeInNet spec.ObjectType = "in-net"
 )
 
+// Config represents the configuration used to create a new input network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -28,6 +32,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new input network
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -44,7 +50,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewInNet returns a new configured input network.
+// NewInNet creates a new configured input network object.
 func NewInNet(config Config) (spec.Network, error) {
 	newNet := &inNet{
 		Booted: false,

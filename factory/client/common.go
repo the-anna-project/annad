@@ -7,8 +7,8 @@ import (
 
 func forwardSignal(g spec.Gateway, input interface{}, closer <-chan struct{}) (interface{}, error) {
 	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Input = input
 	newSignal := gateway.NewSignal(newConfig)
-	newSignal.SetInput(input)
 
 	var err error
 

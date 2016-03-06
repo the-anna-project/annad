@@ -21,7 +21,7 @@ func Test_RedisStorage_Get_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("GET", "foo").Expect("bar")
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	value, err := newStorage.Get("foo")
@@ -37,7 +37,7 @@ func Test_RedisStorage_Get_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("GET", "foo").ExpectError(queryExecutionFailedError)
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	_, err := newStorage.Get("foo")
@@ -52,7 +52,7 @@ func Test_RedisStorage_GetElementsByScore_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGEBYSCORE", "foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{"bar"})
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	values, err := newStorage.GetElementsByScore("foo", 0.8, 3)
@@ -71,7 +71,7 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGEBYSCORE", "foo", 0.8, 0.8, "LIMIT", 0, 3).ExpectError(queryExecutionFailedError)
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	_, err := newStorage.GetElementsByScore("foo", 0.8, 3)
@@ -86,7 +86,7 @@ func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGE", "foo", 0, 2, "WITHSCORES").Expect([]interface{}{"one", "0.8", "two", "0.5"})
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	values, err := newStorage.GetHighestScoredElements("foo", 3)
@@ -114,7 +114,7 @@ func Test_RedisStorage_GetHighestScoredElements_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGE", "foo", 0, 2, "WITHSCORES").ExpectError(queryExecutionFailedError)
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	_, err := newStorage.GetHighestScoredElements("foo", 3)
@@ -129,7 +129,7 @@ func Test_RedisStorage_Set_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").Expect("OK")
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.Set("foo", "bar")
@@ -142,7 +142,7 @@ func Test_RedisStorage_Set_NoSuccess(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").Expect("invalid")
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.Set("foo", "bar")
@@ -155,7 +155,7 @@ func Test_RedisStorage_Set_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").ExpectError(queryExecutionFailedError)
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.Set("foo", "bar")
@@ -170,7 +170,7 @@ func Test_RedisStorage_SetElementByScore_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZADD", "key", 0.8, "element").Expect(int64(1))
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.SetElementByScore("key", "element", 0.8)
@@ -183,7 +183,7 @@ func Test_RedisStorage_SetElementByScore_NoSuccess(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZADD", "key", 0.8, "element").Expect(int64(3))
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.SetElementByScore("key", "element", 0.8)
@@ -196,7 +196,7 @@ func Test_RedisStorage_SetElementByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZADD", "key", 0.8, "element").ExpectError(queryExecutionFailedError)
 
-	newConfig := defaultConfigWithConn(c)
+	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
 	err := newStorage.SetElementByScore("key", "element", 0.8)

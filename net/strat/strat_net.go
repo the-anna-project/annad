@@ -17,9 +17,13 @@ import (
 )
 
 const (
+	// ObjectTypeStratNet represents the object type of the strategy network
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeStratNet spec.ObjectType = "strat-net"
 )
 
+// Config represents the configuration used to create a new strategy network
+// object.
 type Config struct {
 	// Dependencies.
 	Log     spec.Log
@@ -42,7 +46,7 @@ type Config struct {
 }
 
 // DefaultConfig provides a default configuration to create a new strategy
-// network by best effort.
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
@@ -59,7 +63,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewStratNet returns a new configured strategy network.
+// NewStratNet creates a new configured strategy network object.
 //
 // The network makes use of different key namespaces, that can be anything of
 // the following. Note that these key namespaces might be reused in other
@@ -290,6 +294,11 @@ func (sn *stratNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 
 	newStrategy, err := sn.GetBestStrategy(imp)
 	if IsNoStrategy(err) {
+		// No strategy could be found. Lets create a new one.
+		//
+		// TODO this creates ony the first strategy. We need to create more new
+		// strategies in case the ones we already used turned out to be not
+		// sufficient.
 		newStrategy, err = sn.NewStrategy(imp)
 		if err != nil {
 			return nil, maskAny(err)

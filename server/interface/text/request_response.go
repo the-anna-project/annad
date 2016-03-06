@@ -33,10 +33,10 @@ type ReadStreamResponse api.Response
 
 // read plain
 
-// TODO this should probably be split up to represent the two different actions also by different request types
 type ReadPlainRequest struct {
-	ID    string `json:"id,omitempty"`
-	Plain string `json:"plain,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Input    string `json:"input,omitempty"`
+	Expected string `json:"expected,omitempty"`
 }
 
 type ReadPlainResponse api.Response

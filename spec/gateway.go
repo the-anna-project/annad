@@ -14,7 +14,7 @@ type Gateway interface {
 
 	Object
 
-	// Listen is waiting for signals comming in. Received signals are provided to
+	// Listen is waiting for signals coming in. Received signals are provided to
 	// the Listener. The given closer can be used to end the listening.
 	Listen(listener Listener, closer <-chan struct{})
 

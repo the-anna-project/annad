@@ -14,9 +14,12 @@ import (
 )
 
 const (
+	// ObjectTypeImpulse represents the object type of the impulse object. This
+	// is used e.g. to register itself to the logger.
 	ObjectTypeImpulse spec.ObjectType = "impulse"
 )
 
+// Config represents the configuration used to create a new impulse object.
 type Config struct {
 	Log spec.Log
 
@@ -24,6 +27,8 @@ type Config struct {
 	Output string
 }
 
+// DefaultConfig provides a default configuration to create a new impulse
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Input:  "",
@@ -34,6 +39,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewImpulse creates a new configured impulse object.
 func NewImpulse(config Config) (spec.Impulse, error) {
 	newImpulse := &impulse{
 		Config: config,
@@ -50,14 +56,10 @@ func NewImpulse(config Config) (spec.Impulse, error) {
 
 type impulse struct {
 	Config
-
-	Ctxs map[spec.ObjectID]spec.Ctx
-
-	ID spec.ObjectID `json:"id"`
-
-	Mutex sync.Mutex `json:"-"`
-
-	Type spec.ObjectType `json:"type"`
+	Ctxs  map[spec.ObjectID]spec.Ctx
+	ID    spec.ObjectID
+	Mutex sync.Mutex
+	Type  spec.ObjectType
 }
 
 func (i *impulse) GetInput() (string, error) {
@@ -86,13 +88,6 @@ func (i *impulse) GetCtx(object spec.Object) spec.Ctx {
 	i.Ctxs[object.GetID()] = newCtx
 
 	return newCtx
-}
-
-func (i *impulse) SetID(ID spec.ObjectID) error {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-	i.ID = ID
-	return nil
 }
 
 func (i *impulse) SetInput(input string) error {

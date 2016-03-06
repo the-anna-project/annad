@@ -13,13 +13,18 @@ import (
 )
 
 const (
+	// ObjectTypeGateway represents the object type of the gateway object. This
+	// is used e.g. to register itself to the logger.
 	ObjectTypeGateway spec.ObjectType = "gateway"
 )
 
+// Config represents the configuration used to create a new gateway object.
 type Config struct {
-	Log spec.Log `json:"-"`
+	Log spec.Log
 }
 
+// DefaultConfig provides a default configuration to create a new gateway
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log: log.NewLog(log.DefaultConfig()),
@@ -28,6 +33,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewGateway creates a new configured gateway object.
 func NewGateway(config Config) spec.Gateway {
 	newGateway := &gateway{
 		Closed: false,
@@ -73,6 +79,7 @@ func (g *gateway) Listen(listener spec.Listener, closer <-chan struct{}) {
 	for {
 		select {
 		case <-closer:
+			g.Close()
 			return
 		case <-g.Closer:
 			return

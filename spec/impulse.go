@@ -18,14 +18,6 @@ type Impulse interface {
 
 	Object
 
-	// SetID sets the object ID of the impulse. This is the only exception across
-	// all other objects. Only the impulse is allowed to modify its ID to make
-	// the job network work.
-	//
-	// TODO having that said, it feels wrong. There should just be some job ID if
-	// necessary.
-	SetID(ID ObjectID) error
-
 	// SetInput sets the impulse's input.
 	SetInput(input string) error
 

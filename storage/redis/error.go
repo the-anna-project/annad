@@ -24,6 +24,7 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 
 var queryExecutionFailedError = errgo.New("query execution failed")
 
+// IsQueryExecutionFailed asserts queryExecutionFailedError.
 func IsQueryExecutionFailed(err error) bool {
 	return errgo.Cause(err) == queryExecutionFailedError
 }

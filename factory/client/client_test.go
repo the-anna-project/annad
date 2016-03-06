@@ -56,26 +56,17 @@ func Test_FactoryClient_GetType(t *testing.T) {
 	}
 }
 
-// Test_FactoryClient_GetID checks that always independent factory clients are
-// created.
-func Test_FactoryClient_GetID(t *testing.T) {
-	firstClient := NewFactory(DefaultConfig())
-	secondClient := NewFactory(DefaultConfig())
-
-	if firstClient.GetID() == secondClient.GetID() {
-		t.Fatalf("IDs of factory clients are equal")
-	}
-}
-
 // Test_FactoryClient_Shutdown_Single checks that the factory client properly
 // shuts down.
-func Test_FactoryClient_Shutdown_Single(t *testing.T) {
+func Test_FactoryClient_BootShutdown_Single(t *testing.T) {
 	// Create new test gateway that all participants can use.
 	newFactoryGateway := gateway.NewGateway(gateway.DefaultConfig())
 
 	newClientConfig := DefaultConfig()
 	newClientConfig.FactoryGateway = newFactoryGateway
 	newClient := NewFactory(newClientConfig)
+
+	newClient.Boot()
 
 	var objectID spec.ObjectID
 	go func() {
@@ -109,13 +100,17 @@ func Test_FactoryClient_Shutdown_Single(t *testing.T) {
 
 // Test_FactoryClient_Shutdown_Multiple checks that shutting down multiple
 // times causes no problems.
-func Test_FactoryClient_Shutdown_Multiple(t *testing.T) {
+func Test_FactoryClient_BootShutdown_Multiple(t *testing.T) {
 	// Create new test gateway that all participants can use.
 	newFactoryGateway := gateway.NewGateway(gateway.DefaultConfig())
 
 	newClientConfig := DefaultConfig()
 	newClientConfig.FactoryGateway = newFactoryGateway
 	newClient := NewFactory(newClientConfig)
+
+	newClient.Boot()
+	newClient.Boot()
+	newClient.Boot()
 
 	var objectID spec.ObjectID
 	go func() {

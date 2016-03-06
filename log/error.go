@@ -24,12 +24,14 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 
 var invalidLogLevelError = errgo.New("invalid log level")
 
+// IsInvalidLogLevel asserts invalidLogLevelError.
 func IsInvalidLogLevel(err error) bool {
 	return errgo.Cause(err) == invalidLogLevelError
 }
 
 var invalidLogObjectError = errgo.New("invalid log object")
 
+// IsInvalidLogObject asserts invalidLogObjectError.
 func IsInvalidLogObject(err error) bool {
 	return errgo.Cause(err) == invalidLogObjectError
 }

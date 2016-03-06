@@ -16,9 +16,12 @@ func Test_MemoryStorage_GetID(t *testing.T) {
 func Test_MemoryStorage_KeyValue(t *testing.T) {
 	newStorage := NewMemoryStorage(DefaultConfig())
 
-	_, err := newStorage.Get("foo")
-	if !IsKeyNotFound(err) {
-		t.Fatal("expected", true, "got", false)
+	value, err := newStorage.Get("foo")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if value != "" {
+		t.Fatal("expected", "empty string", "got", value)
 	}
 
 	err = newStorage.Set("foo", "bar")
@@ -26,7 +29,7 @@ func Test_MemoryStorage_KeyValue(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	value, err := newStorage.Get("foo")
+	value, err = newStorage.Get("foo")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

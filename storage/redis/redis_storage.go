@@ -11,15 +11,19 @@ import (
 )
 
 const (
+	// ObjectTypeRedisStorage represents the object type of the redis storage
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeRedisStorage spec.ObjectType = "redis-storage"
 )
 
+// Config represents the configuration used to create a new redis storage
+// object.
 type Config struct {
 	Log  spec.Log
 	Pool *redis.Pool
 }
 
-func defaultConfigWithConn(redisConn redis.Conn) Config {
+func DefaultConfigWithConn(redisConn redis.Conn) Config {
 	newPoolConfig := DefaultRedisPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
 	newMockDialConfig.RedisConn = redisConn
@@ -32,6 +36,8 @@ func defaultConfigWithConn(redisConn redis.Conn) Config {
 	return newStorageConfig
 }
 
+// DefaultConfig provides a default configuration to create a new redis storage
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log:  log.NewLog(log.DefaultConfig()),
@@ -41,6 +47,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewRedisStorage creates a new configured redis storage object.
 func NewRedisStorage(config Config) spec.Storage {
 	newStorage := &storage{
 		ID:     id.NewObjectID(id.Hex128),

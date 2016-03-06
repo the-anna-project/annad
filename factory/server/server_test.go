@@ -30,6 +30,9 @@ func Test_FactoryServer_NewImpulse(t *testing.T) {
 
 // Test_FactoryServer_NewImpulse_WithClient checks that the factory client
 // always creates independent impulses.
+//
+// Further checks that booting works.
+// Further checks that shutting down works.
 func Test_FactoryServer_NewImpulse_WithClient(t *testing.T) {
 	// Create new test gateway that all participants can use.
 	newFactoryGateway := gateway.NewGateway(gateway.DefaultConfig())
@@ -38,6 +41,9 @@ func Test_FactoryServer_NewImpulse_WithClient(t *testing.T) {
 	newServerConfig := DefaultConfig()
 	newServerConfig.FactoryGateway = newFactoryGateway
 	newServer := NewFactory(newServerConfig)
+
+	// Check multiple boots works.
+	newServer.Boot()
 	newServer.Boot()
 
 	// Create a new factory client and configure it with the test gateway.
@@ -59,6 +65,7 @@ func Test_FactoryServer_NewImpulse_WithClient(t *testing.T) {
 		t.Fatalf("object ID of first core and second core is equal")
 	}
 
+	// Check multiple shutdowns works.
 	newServer.Shutdown()
 	newClient.Shutdown()
 }
@@ -99,8 +106,8 @@ func Test_FactoryServer_NoObjectType(t *testing.T) {
 	fs := newServer.(*factoryServer)
 
 	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Input = nil
 	newSignal := gateway.NewSignal(newConfig)
-	newSignal.SetInput(nil)
 
 	_, err := fs.gatewayListener(newSignal)
 	if !IsInvalidFactoryGatewayRequest(err) {
@@ -117,8 +124,8 @@ func Test_FactoryServer_InvalidObjectType(t *testing.T) {
 	fs := newServer.(*factoryServer)
 
 	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Input = spec.ObjectType("invalid")
 	newSignal := gateway.NewSignal(newConfig)
-	newSignal.SetInput(spec.ObjectType("invalid"))
 
 	_, err := fs.gatewayListener(newSignal)
 	if !IsInvalidFactoryGatewayRequest(err) {

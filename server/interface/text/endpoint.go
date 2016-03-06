@@ -55,12 +55,12 @@ func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 		var ID string
 		var response string
 
-		if req.ID == "" && req.Plain == "" {
+		if req.ID == "" && req.Input == "" {
 			// All empty means error.
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		if req.ID != "" && req.Plain == "" {
+		if req.ID != "" && req.Input == "" {
 			// Only ID given means there is something we want to fetch by ID.
 			response, err = ti.ReadPlainWithID(ctx, req.ID)
 			if err != nil {
@@ -69,17 +69,17 @@ func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 			return api.WithData(response), nil
 		}
 
-		if req.ID == "" && req.Plain != "" {
-			// Only Plain given means we want to do something, but only return an ID
+		if req.ID == "" && req.Input != "" {
+			// Only Input given means we want to do something, but only return an ID
 			// in the first place.
-			ID, err = ti.ReadPlainWithPlain(ctx, req.Plain)
+			ID, err = ti.ReadPlainWithInput(ctx, req.Input, req.Expected)
 			if err != nil {
 				return api.WithError(maskAny(err)), nil
 			}
 			return api.WithID(ID), nil
 		}
 
-		if req.ID != "" && req.Plain != "" {
+		if req.ID != "" && req.Input != "" {
 			// All NOT empty means error.
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}

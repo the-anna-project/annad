@@ -1,5 +1,5 @@
 // Package respnet implements spec.Network to provide functionality to create
-// valuable responses with respect to all gathered information in preceeding
+// valuable responses with respect to all gathered information in preceding
 // networks.
 package respnet
 
@@ -14,9 +14,13 @@ import (
 )
 
 const (
+	// ObjectTypeRespNet represents the object type of the response network
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeRespNet spec.ObjectType = "resp-net"
 )
 
+// Config represents the configuration used to create a new response network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -29,6 +33,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new response
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -45,7 +51,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewRespNet returns a new configured resp network.
+// NewRespNet creates a new configured response network object.
 func NewRespNet(config Config) (spec.Network, error) {
 	newNet := &respNet{
 		Booted: false,

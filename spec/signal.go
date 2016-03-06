@@ -24,16 +24,6 @@ type Signal interface {
 	// SetError associates an error to the signal. See GetError.
 	SetError(err error)
 
-	// SetID sets the signal's ID. This can be used to make the signal
-	// identifiable. When thinking about job execution the signal's ID can be set
-	// to the job ID so upcoming layers know what this signal is about.
-	//
-	// TODO should there simply be a job ID getter/setter?
-	SetID(ID string)
-
-	// SetInput sets the signal's input.
-	SetInput(input interface{})
-
 	// SetOutput sets the signal's output.
 	SetOutput(output interface{})
 }

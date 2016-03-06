@@ -30,7 +30,10 @@ import (
 	"github.com/xh3b4sd/anna/net/resp"
 	respexecnet "github.com/xh3b4sd/anna/net/resp/net/exec"
 	"github.com/xh3b4sd/anna/net/strat"
+	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
+	"github.com/xh3b4sd/anna/server/control/log"
+	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
@@ -83,13 +86,13 @@ func defaultAnnaConfig() annaConfig {
 		CoreNet:       nil,
 		FactoryServer: factoryserver.NewFactory(factoryserver.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
-		Server:        server.NewServer(server.DefaultConfig()),
+		Server:        nil,
 	}
 
 	return newConfig
 }
 
-func newAnna(config annaConfig) spec.Anna {
+func newAnna(config annaConfig) (spec.Anna, error) {
 	newAnna := &anna{
 		annaConfig: config,
 		Booted:     false,
@@ -100,7 +103,15 @@ func newAnna(config annaConfig) spec.Anna {
 
 	newAnna.Log.Register(newAnna.GetType())
 
-	return newAnna
+	if newAnna.CoreNet == nil {
+		return nil, maskAnyf(invalidConfigError, "core network must not be empty")
+	}
+
+	if newAnna.Server == nil {
+		return nil, maskAnyf(invalidConfigError, "server must not be empty")
+	}
+
+	return newAnna, nil
 }
 
 // mainObject is basically only to have an object that provides proper
@@ -155,10 +166,10 @@ func mainRun(cmd *cobra.Command, args []string) {
 
 	var err error
 
-	// File system
+	// file system
 	newOSFileSystem := osfilesystem.NewFileSystem()
 
-	// Log
+	// log
 	newLog := log.NewLog(log.DefaultConfig())
 	err = newLog.SetLevels(globalFlags.ControlLogLevels)
 	panicOnError(err)
@@ -167,17 +178,17 @@ func mainRun(cmd *cobra.Command, args []string) {
 	err = newLog.SetVerbosity(globalFlags.ControlLogVerbosity)
 	panicOnError(err)
 
-	// Factory gateway
+	// factory gateway
 	newFactoryGatewayConfig := gateway.DefaultConfig()
 	newFactoryGatewayConfig.Log = newLog
 	newFactoryGateway := gateway.NewGateway(newFactoryGatewayConfig)
 
-	// Text gateway
+	// text gateway
 	newTextGatewayConfig := gateway.DefaultConfig()
 	newTextGatewayConfig.Log = newLog
 	newTextGateway := gateway.NewGateway(newTextGatewayConfig)
 
-	// Factory
+	// factory
 	newFactoryClientConfig := factoryclient.DefaultConfig()
 	newFactoryClientConfig.FactoryGateway = newFactoryGateway
 	newFactoryClientConfig.Log = newLog
@@ -190,7 +201,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryServerConfig.TextGateway = newTextGateway
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
-	// Storage
+	// storage
 	newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
 	newRedisDialConfig.Addr = "127.0.0.1:6379"
 	newPoolConfig := redisstorage.DefaultRedisPoolConfig()
@@ -200,14 +211,21 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
 	newStorage := redisstorage.NewRedisStorage(newStorageConfig)
 
-	// Pattern network
+	// scheduler
+	newSchedulerConfig := scheduler.DefaultConfig()
+	newSchedulerConfig.Log = newLog
+	newSchedulerConfig.Storage = newStorage
+	newScheduler, err := scheduler.NewScheduler(newSchedulerConfig)
+	panicOnError(err)
+
+	// pattern network
 	newPatNetConfig := patnet.DefaultConfig()
 	newPatNetConfig.Log = newLog
 	newPatNetConfig.Storage = newStorage
 	newPatNet, err := patnet.NewPatNet(newPatNetConfig)
 	panicOnError(err)
 
-	// Strategy network
+	// strategy network
 	newStratNetConfig := stratnet.DefaultConfig()
 	newStratNetConfig.Log = newLog
 	newStratNetConfig.PatNet = newPatNet
@@ -215,7 +233,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newStratNet, err := stratnet.NewStratNet(newStratNetConfig)
 	panicOnError(err)
 
-	// Prediction network
+	// prediction network
 	newPredNetConfig := prednet.DefaultConfig()
 	newPredNetConfig.Log = newLog
 	newStratNetConfig.PatNet = newPatNet
@@ -223,7 +241,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newPredNet, err := prednet.NewPredNet(newPredNetConfig)
 	panicOnError(err)
 
-	// Evaluation network
+	// evaluation network
 	newEvalNetConfig := evalnet.DefaultConfig()
 	newEvalNetConfig.Log = newLog
 	newStratNetConfig.PatNet = newPatNet
@@ -231,7 +249,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newEvalNet, err := evalnet.NewEvalNet(newEvalNetConfig)
 	panicOnError(err)
 
-	// Character network
+	// character network
 	newCharExecNetConfig := charexecnet.DefaultConfig()
 	newCharExecNetConfig.Log = newLog
 	newCharExecNet, err := charexecnet.NewExecNet(newCharExecNetConfig)
@@ -247,7 +265,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCharNet, err := charnet.NewCharNet(newCharNetConfig)
 	panicOnError(err)
 
-	// Context network
+	// context network
 	newCtxExecNetConfig := ctxexecnet.DefaultConfig()
 	newCtxExecNetConfig.Log = newLog
 	newCtxExecNet, err := ctxexecnet.NewExecNet(newCtxExecNetConfig)
@@ -263,7 +281,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCtxNet, err := ctxnet.NewCtxNet(newCtxNetConfig)
 	panicOnError(err)
 
-	// Idea network
+	// idea network
 	newIdeaExecNetConfig := ideaexecnet.DefaultConfig()
 	newIdeaExecNetConfig.Log = newLog
 	newIdeaExecNet, err := ideaexecnet.NewExecNet(newIdeaExecNetConfig)
@@ -279,7 +297,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newIdeaNet, err := ideanet.NewIdeaNet(newIdeaNetConfig)
 	panicOnError(err)
 
-	// Response network
+	// response network
 	newRespExecNetConfig := respexecnet.DefaultConfig()
 	newRespExecNetConfig.Log = newLog
 	newRespExecNet, err := respexecnet.NewExecNet(newRespExecNetConfig)
@@ -295,7 +313,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newRespNet, err := respnet.NewRespNet(newRespNetConfig)
 	panicOnError(err)
 
-	// Input network
+	// input network
 	newInExecNetConfig := inexecnet.DefaultConfig()
 	newInExecNetConfig.CharNet = newCharNet
 	newInExecNetConfig.CtxNet = newCtxNet
@@ -313,7 +331,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newInNet, err := innet.NewInNet(newInNetConfig)
 	panicOnError(err)
 
-	// Output network
+	// output network
 	newOutExecNetConfig := outexecnet.DefaultConfig()
 	newOutExecNetConfig.IdeaNet = newIdeaNet
 	newOutExecNetConfig.Log = newLog
@@ -331,9 +349,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newOutNet, err := outnet.NewOutNet(newOutNetConfig)
 	panicOnError(err)
 
-	//
-	// Core network
-	//
+	// core network
 	newCoreExecNetConfig := coreexecnet.DefaultConfig()
 	newCoreExecNetConfig.InNet = newInNet
 	newCoreExecNetConfig.Log = newLog
@@ -347,29 +363,43 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCoreNetConfig.ExecNet = newCoreExecNet
 	newCoreNetConfig.PatNet = newPatNet
 	newCoreNetConfig.PredNet = newPredNet
+	newCoreNetConfig.Scheduler = newScheduler
 	newCoreNetConfig.StratNet = newStratNet
 	newCoreNetConfig.TextGateway = newTextGateway
 	newCoreNet, err := corenet.NewCoreNet(newCoreNetConfig)
 	panicOnError(err)
 
-	//
-	// create server
-	//
+	// text interface
+	newTextInterfaceConfig := textinterface.DefaultConfig()
+	newTextInterfaceConfig.Log = newLog
+	newTextInterfaceConfig.Scheduler = newScheduler
+	newTextInterfaceConfig.TextGateway = newTextGateway
+	newTextInterface, err := textinterface.NewTextInterface(newTextInterfaceConfig)
+	panicOnError(err)
+
+	// log control
+	newLogControlConfig := logcontrol.DefaultConfig()
+	newLogControlConfig.Log = newLog
+	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+
+	// server
 	newServerConfig := server.DefaultConfig()
 	newServerConfig.Addr = globalFlags.Addr
 	newServerConfig.Log = newLog
+	newServerConfig.LogControl = newLogControl
 	newServerConfig.TextGateway = newTextGateway
-	newServer := server.NewServer(newServerConfig)
+	newServerConfig.TextInterface = newTextInterface
+	newServer, err := server.NewServer(newServerConfig)
+	panicOnError(err)
 
-	//
-	// create anna
-	//
+	// anna
 	newAnnaConfig := defaultAnnaConfig()
 	newAnnaConfig.CoreNet = newCoreNet
 	newAnnaConfig.FactoryServer = newFactoryServer
 	newAnnaConfig.Log = newLog
 	newAnnaConfig.Server = newServer
-	a := newAnna(newAnnaConfig)
+	a, err := newAnna(newAnnaConfig)
+	panicOnError(err)
 
 	a.Boot()
 }

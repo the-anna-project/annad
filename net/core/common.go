@@ -17,14 +17,9 @@ func (cn *coreNet) bootObjectTree() {
 }
 
 func (cn *coreNet) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
-	ID := newSignal.GetID()
 	input := newSignal.GetInput()
 
 	newImpulse, err := cn.FactoryClient.NewImpulse()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err = newImpulse.SetID(spec.ObjectID(ID))
 	if err != nil {
 		return nil, maskAny(err)
 	}

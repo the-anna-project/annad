@@ -1,3 +1,5 @@
+// Package textinterface provides functionality to interact with Anna's text
+// interface network API.
 package textinterface
 
 import (
@@ -11,10 +13,15 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// Config represents the configuration used to create a new text interface
+// object.
 type Config struct {
+	// URL represents the API route to call.
 	URL *url.URL
 }
 
+// DefaultConfig provides a default configuration to create a new text
+// interface object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		URL: &url.URL{
@@ -26,6 +33,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewTextInterface creates a new configured text interface object.
 func NewTextInterface(config Config) spec.TextInterface {
 	newTextInterface := &textInterface{
 		Config: config,
@@ -86,8 +94,8 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (ti textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
-	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Plain: plain})
+func (ti textInterface) ReadPlainWithInput(ctx context.Context, input, expected string) (string, error) {
+	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Input: input, Expected: expected})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}

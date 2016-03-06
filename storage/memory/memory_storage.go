@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	// ObjectTypeMemoryStorage represents the object type of the memory storage
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeMemoryStorage spec.ObjectType = "memory-storage"
 )
 
@@ -33,11 +35,15 @@ type Storage struct {
 	Weighted map[string]ScoredElements
 }
 
+// Config represents the configuration used to create a new memory storage
+// object.
 type Config struct {
 	Log     spec.Log
 	Storage Storage
 }
 
+// DefaultConfig provides a default configuration to create a new memory
+// storage object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log: log.NewLog(log.DefaultConfig()),
@@ -50,6 +56,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewMemoryStorage creates a new configured memory storage object.
 func NewMemoryStorage(config Config) spec.Storage {
 	newStorage := &storage{
 		Config: config,
@@ -80,7 +87,7 @@ func (s *storage) Get(key string) (string, error) {
 		return value, nil
 	}
 
-	return "", maskAny(keyNotFoundError)
+	return "", nil
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {

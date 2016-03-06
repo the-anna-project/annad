@@ -24,6 +24,7 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 
 var invalidFactoryGatewayRequestError = errgo.New("invalid factory gateway request")
 
+// IsInvalidFactoryGatewayRequest asserts invalidFactoryGatewayRequestError.
 func IsInvalidFactoryGatewayRequest(err error) bool {
 	return errgo.Cause(err) == invalidFactoryGatewayRequestError
 }

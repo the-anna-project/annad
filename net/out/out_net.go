@@ -13,9 +13,13 @@ import (
 )
 
 const (
+	// ObjectTypeOutNet represents the object type of the output network object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeOutNet spec.ObjectType = "out-net"
 )
 
+// Config represents the configuration used to create a new output network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -28,6 +32,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new output
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -44,7 +50,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewOutNet returns a new configured output network.
+// NewOutNet creates a new configured output network object.
 func NewOutNet(config Config) (spec.Network, error) {
 	newNet := &outNet{
 		Booted: false,
