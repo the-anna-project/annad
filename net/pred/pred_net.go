@@ -12,9 +12,13 @@ import (
 )
 
 const (
+	// ObjectTypsPredNet represents the object type of the prediction network
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypePredNet spec.ObjectType = "pred-net"
 )
 
+// Config represents the configuration used to create a new prediction network
+// object.
 type Config struct {
 	Log     spec.Log
 	Storage spec.Storage
@@ -22,6 +26,8 @@ type Config struct {
 	PatNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new prediction
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log:     log.NewLog(log.DefaultConfig()),
@@ -33,7 +39,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewPredNet returns a new configured pred network.
+// NewPredNet creates a new configured prediction network object.
 func NewPredNet(config Config) (spec.Network, error) {
 	newNet := &predNet{
 		Booted: false,

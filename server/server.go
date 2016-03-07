@@ -16,30 +16,45 @@ import (
 )
 
 const (
+	// ObjectTypeServer represents the object type of the server object. This is
+	// used e.g. to register itself to the logger.
 	ObjectTypeServer spec.ObjectType = "server"
 )
 
+// Config represents the configuration used to create a new server object.
 type Config struct {
+	// dependencies
+	Log           spec.Log
+	LogControl    spec.LogControl
+	TextGateway   spec.Gateway
+	TextInterface spec.TextInterface
+
+	// settings
+
 	// Addr is the host:port representation based on the golang convention for
 	// net.URL and http.ListenAndServe.
 	Addr string
-
-	Log spec.Log
-
-	TextGateway spec.Gateway
 }
 
+// DefaultConfig provides a default configuration to create a new server object
+// by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		Addr:        "127.0.0.1:9119",
-		Log:         log.NewLog(log.DefaultConfig()),
-		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
+		// dependencies
+		Log:           log.NewLog(log.DefaultConfig()),
+		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
+		TextGateway:   gateway.NewGateway(gateway.DefaultConfig()),
+		TextInterface: nil,
+
+		// settings
+		Addr: "127.0.0.1:9119",
 	}
 
 	return newConfig
 }
 
-func NewServer(config Config) spec.Server {
+// NewServer creates a new configured server object.
+func NewServer(config Config) (spec.Server, error) {
 	newServer := &server{
 		Booted: false,
 		Config: config,
@@ -50,7 +65,11 @@ func NewServer(config Config) spec.Server {
 
 	newServer.Log.Register(newServer.GetType())
 
-	return newServer
+	if newServer.TextInterface == nil {
+		return nil, maskAnyf(invalidConfigError, "text interface must not be empty")
+	}
+
+	return newServer, nil
 }
 
 type server struct {
@@ -76,20 +95,13 @@ func (s *server) Boot() {
 	ctx := context.Background()
 
 	// text interface
-	newTextInterfaceConfig := textinterface.DefaultConfig()
-	newTextInterfaceConfig.Log = s.Log
-	newTextInterfaceConfig.TextGateway = s.TextGateway
-	newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
-	newTextInterfaceHandlers := textinterface.NewHandlers(ctx, newTextInterface)
+	newTextInterfaceHandlers := textinterface.NewHandlers(ctx, s.TextInterface)
 	for url, handler := range newTextInterfaceHandlers {
 		http.Handle(url, handler)
 	}
 
 	// log control
-	newLogControlConfig := logcontrol.DefaultConfig()
-	newLogControlConfig.Log = s.Log
-	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
-	newLogControlHandlers := logcontrol.NewHandlers(ctx, newLogControl)
+	newLogControlHandlers := logcontrol.NewHandlers(ctx, s.LogControl)
 	for url, handler := range newLogControlHandlers {
 		http.Handle(url, handler)
 	}

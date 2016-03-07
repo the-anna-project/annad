@@ -1,4 +1,4 @@
-// Package strategy implements spec.Strategy to provide managable action
+// Package strategy implements spec.Strategy to provide manageable action
 // sequences.
 package strategy
 
@@ -12,10 +12,12 @@ import (
 )
 
 const (
+	// ObjectTypeStrategy represents the object type of the strategy object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeStrategy = "strategy"
 )
 
-// Config represents the configuration used to create new strategies.
+// Config represents the configuration used to create a new strategy object.
 type Config struct {
 	// Actions represents a list of ordered action items, that are object types.
 	Actions []spec.ObjectType
@@ -27,9 +29,9 @@ type Config struct {
 	ID spec.ObjectID
 }
 
-// DefaultConfig provides a default configuration to create new strategies by
-// best effort. Note that the list of actions is empty and needs to be properly
-// set before the strategy creation.
+// DefaultConfig provides a default configuration to create a new strategy
+// object by best effort. Note that the list of actions is empty and needs to
+// be properly set before the strategy creation.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Actions: []spec.ObjectType{},
@@ -39,7 +41,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewStrategy creates a new configured strategy.
+// NewStrategy creates a new configured strategy object.
 func NewStrategy(config Config) (spec.Strategy, error) {
 	newStrategy := &strategy{
 		Config: config,
@@ -93,9 +95,9 @@ const (
 // randomizeActions generates a random sequence using the given action items.
 // Note that randomizing a strategy's action items MUST only be done when
 // creating a new strategy. Further randomizations of existing strategies will
-// cause the algorythms the strategy network implements to fail.
+// cause the algorhythms the strategy network implements to fail.
 //
-// The following algorythm is implemented as follows. Consider this given list
+// The following algorhythm is implemented as follows. Consider this given list
 // of available action items.
 //
 //   a,b,c,d,e

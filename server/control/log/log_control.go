@@ -1,5 +1,5 @@
 // Package logcontrol implements spec.LogControl to interactively configure
-// what is beeing logged through the network API.
+// what is being logged through the network API.
 package logcontrol
 
 import (
@@ -13,19 +13,25 @@ import (
 )
 
 const (
+	// ObjectTypeLogControl represents the object type of the log control object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeLogControl spec.ObjectType = "log-control"
 )
 
+// Config represents the configuration used to create a new log control object.
 type Config struct {
 	Log spec.Log
 }
 
+// DefaultConfig provides a default configuration to create a new log control
+// object by best effort.
 func DefaultConfig() Config {
 	return Config{
 		Log: log.NewLog(log.DefaultConfig()),
 	}
 }
 
+// NewLogControl creates a new configured log control object.
 func NewLogControl(config Config) spec.LogControl {
 	newControl := &logControl{
 		Config: config,

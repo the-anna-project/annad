@@ -16,9 +16,12 @@ import (
 )
 
 const (
+	// ObjectTypeLog represents the object type of the log object. This is used
+	// e.g. to register itself to the logger.
 	ObjectTypeLog spec.ObjectType = "log"
 )
 
+// Config represents the configuration used to create a new log object.
 type Config struct {
 	// Color decides to whether color log output or not.
 	Color bool
@@ -74,6 +77,8 @@ type Config struct {
 	Verbosity int
 }
 
+// DefaultConfig provides a default configuration to create a new log object by
+// best effort.
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
 		Color:      true,
@@ -87,8 +92,7 @@ func DefaultConfig() Config {
 	return newDefaultConfig
 }
 
-// NewLog creates a new basic logger. Logging is important to comprehensible
-// track runtime information.
+// NewLog creates a new configured log object.
 func NewLog(config Config) spec.Log {
 	newLog := log{
 		Config:            config,

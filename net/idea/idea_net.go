@@ -13,9 +13,13 @@ import (
 )
 
 const (
+	// ObjectTypeIdeaNet represents the object type of the idea network object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeIdeaNet spec.ObjectType = "idea-net"
 )
 
+// Config represents the configuration used to create a new idea network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -28,6 +32,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new idea network
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -44,7 +50,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewIdeaNet returns a new configured idea network.
+// NewIdeaNet creates a new configured idea network object.
 func NewIdeaNet(config Config) (spec.Network, error) {
 	newNet := &ideaNet{
 		Booted: false,

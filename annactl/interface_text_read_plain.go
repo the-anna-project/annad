@@ -10,6 +10,10 @@ import (
 )
 
 var (
+	readPlainFlags struct {
+		Expected string
+	}
+
 	interfaceTextReadPlainCmd = &cobra.Command{
 		Use:   "plain [text] ...",
 		Short: "Make Anna read plain text.",
@@ -17,6 +21,10 @@ var (
 		Run:   interfaceTextReadPlainRun,
 	}
 )
+
+func init() {
+	interfaceTextReadPlainCmd.PersistentFlags().StringVar(&readPlainFlags.Expected, "expected", "", "output expected to receive with respect to the given input")
+}
 
 func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
@@ -26,7 +34,7 @@ func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
 
 	ctx := context.Background()
 
-	ID, err := textInterface.ReadPlainWithPlain(ctx, strings.Join(args, " "))
+	ID, err := textInterface.ReadPlainWithInput(ctx, strings.Join(args, " "), readPlainFlags.Expected)
 	if err != nil {
 		fmt.Printf("%#v\n", maskAny(err))
 		os.Exit(1)

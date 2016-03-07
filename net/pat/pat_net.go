@@ -12,9 +12,13 @@ import (
 )
 
 const (
+	// ObjectTypePatNet represents the object type of the pattern network object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypePatNet spec.ObjectType = "pat-net"
 )
 
+// Config represents the configuration used to create a new pattern network
+// object.
 type Config struct {
 	Log     spec.Log
 	Storage spec.Storage
@@ -22,6 +26,8 @@ type Config struct {
 	PatNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new pattern
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log:     log.NewLog(log.DefaultConfig()),
@@ -33,7 +39,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewPatNet returns a new configured pattern network.
+// NewPatNet creates a new configured pattern network object.
 func NewPatNet(config Config) (spec.Network, error) {
 	newNet := &patNet{
 		Booted: false,

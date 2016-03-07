@@ -10,9 +10,7 @@ var (
 
 var noSuchFileOrDirectoryError = errgo.New("no such file or directory")
 
-// IsNoSuchFileOrDirectoryError checks for the given error to be
-// noSuchFileOrDirectoryError. This error is returned in case there cannot
-// any file be found as requested.
+// IsNoSuchFileOrDirectoryError asserts noSuchFileOrDirectoryError.
 func IsNoSuchFileOrDirectoryError(err error) bool {
 	return errgo.Cause(err) == noSuchFileOrDirectoryError
 }

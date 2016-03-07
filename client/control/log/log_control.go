@@ -1,3 +1,5 @@
+// Package logcontrol provides functionality to interact with Anna's log
+// control network API.
 package logcontrol
 
 import (
@@ -11,10 +13,14 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// Config represents the configuration used to create a new log control object.
 type Config struct {
+	// URL represents the API route to call.
 	URL *url.URL
 }
 
+// DefaultConfig provides a default configuration to create a new log control
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		URL: &url.URL{
@@ -26,6 +32,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewLogControl creates a new configured log control object.
 func NewLogControl(config Config) spec.LogControl {
 	newLogControl := &logControl{
 		Config: config,

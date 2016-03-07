@@ -11,13 +11,20 @@ import (
 )
 
 const (
+	// ObjectTypeCharExecNet represents the object type of the character
+	// network's execution network object. This is used e.g. to register itself
+	// to the logger.
 	ObjectTypeCharExecNet spec.ObjectType = "char-exec-net"
 )
 
+// Config represents the configuration used to create a new character execution
+// network object.
 type Config struct {
 	Log spec.Log
 }
 
+// DefaultConfig provides a default configuration to create a new character
+// execution network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log: log.NewLog(log.DefaultConfig()),
@@ -26,7 +33,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewExecNet returns a new configured exec network.
+// NewExecNet creates a new configured character execution network object.
 func NewExecNet(config Config) (spec.Network, error) {
 	newNet := &execNet{
 		Booted: false,

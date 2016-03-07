@@ -13,9 +13,13 @@ import (
 )
 
 const (
+	// ObjectTypeCharNet represents the object type of the character network
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeCharNet spec.ObjectType = "char-net"
 )
 
+// Config represents the configuration used to create a new character network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -28,6 +32,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new character
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -44,7 +50,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewCharNet returns a new configured character network.
+// NewCharNet creates a new configured character network object.
 func NewCharNet(config Config) (spec.Network, error) {
 	newNet := &charNet{
 		Booted: false,

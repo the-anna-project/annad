@@ -14,9 +14,13 @@ import (
 )
 
 const (
+	// ObjectTypeCtxNet represents the object type of the context network object.
+	// This is used e.g. to register itself to the logger.
 	ObjectTypeCtxNet spec.ObjectType = "ctx-net"
 )
 
+// Config represents the configuration used to create a new context network
+// object.
 type Config struct {
 	FactoryClient spec.Factory
 	Log           spec.Log
@@ -29,6 +33,8 @@ type Config struct {
 	StratNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new context
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
@@ -45,7 +51,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewCtxNet returns a new configured context network.
+// NewCtxNet creates a new configured context network object.
 func NewCtxNet(config Config) (spec.Network, error) {
 	newNet := &ctxNet{
 		Booted: false,

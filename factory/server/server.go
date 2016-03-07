@@ -1,5 +1,5 @@
 // FactoryServer implements spec.Factory and provides a centralized service for
-// general object creation accessable via a gateway.
+// general object creation accessible via a gateway.
 package factoryserver
 
 import (
@@ -15,9 +15,13 @@ import (
 )
 
 const (
+	// ObjectTypeFactoryServer represents the object type of the factory server
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeFactoryServer spec.ObjectType = "factory-server"
 )
 
+// Config represents the configuration used to create a new factory server
+// object.
 type Config struct {
 	// Dependencies.
 	FactoryClient  spec.Factory
@@ -30,6 +34,8 @@ type Config struct {
 	RedisAddr string
 }
 
+// DefaultConfig provides a default configuration to create a new factory
+// server object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
@@ -46,6 +52,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// NewFactory creates a new configured factory server object.
 func NewFactory(config Config) spec.Factory {
 	newFactory := &factoryServer{
 		Booted: false,

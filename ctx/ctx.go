@@ -10,10 +10,12 @@ import (
 )
 
 const (
+	// ObjectTypeCtx represents the object type of the context object. This is
+	// used e.g. to register itself to the logger.
 	ObjectTypeCtx = "ctx"
 )
 
-// Config represents the configuration used to create new context.
+// Config represents the configuration used to create a new context object.
 type Config struct {
 	// ID represents the context's ID.
 	ID spec.ObjectID
@@ -22,8 +24,8 @@ type Config struct {
 	Object spec.Object
 }
 
-// DefaultConfig provides a default configuration to create new contexts by
-// best effort.
+// DefaultConfig provides a default configuration to create a new context
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		ID:     spec.ObjectID("default"),
@@ -33,7 +35,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewCtx creates a new configured context.
+// NewCtx creates a new configured context object.
 func NewCtx(config Config) spec.Ctx {
 	newCtx := &ctx{
 		Config: config,

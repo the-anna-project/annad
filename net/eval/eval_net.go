@@ -12,9 +12,13 @@ import (
 )
 
 const (
+	// ObjectTypeEvalNet represents the object type of the evaluation network
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeEvalNet spec.ObjectType = "eval-net"
 )
 
+// Config represents the configuration used to create a new evaluation network
+// object.
 type Config struct {
 	Log     spec.Log
 	Storage spec.Storage
@@ -22,6 +26,8 @@ type Config struct {
 	PatNet spec.Network
 }
 
+// DefaultConfig provides a default configuration to create a new evaluation
+// network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		Log:     log.NewLog(log.DefaultConfig()),
@@ -33,7 +39,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewEvalNet returns a new configured evaluation network.
+// NewEvalNet creates a new configured evaluation network object.
 func NewEvalNet(config Config) (spec.Network, error) {
 	newNet := &evalNet{
 		Booted: false,

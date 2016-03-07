@@ -80,18 +80,6 @@ func (s *signal) SetError(err error) {
 	s.Error = err
 }
 
-func (s *signal) SetID(ID string) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-	s.ID = ID
-}
-
-func (s *signal) SetInput(input interface{}) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-	s.Input = input
-}
-
 func (s *signal) SetOutput(output interface{}) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()

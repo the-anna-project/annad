@@ -17,23 +17,31 @@ import (
 )
 
 const (
+	// ObjectTypeTextInterface represents the object type of the text interface
+	// object. This is used e.g. to register itself to the logger.
 	ObjectTypeTextInterface spec.ObjectType = "text-interface"
 )
 
+// Config represents the configuration used to create a new text interface
+// object.
 type Config struct {
-	Log spec.Log
-
+	Log         spec.Log
+	Scheduler   spec.Scheduler
 	TextGateway spec.Gateway
 }
 
+// DefaultConfig provides a default configuration to create a new text
+// interface object by best effort.
 func DefaultConfig() Config {
 	return Config{
 		Log:         log.NewLog(log.DefaultConfig()),
+		Scheduler:   nil,
 		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
 }
 
-func NewTextInterface(config Config) spec.TextInterface {
+// NewTextInterface creates a new configured text interface object.
+func NewTextInterface(config Config) (spec.TextInterface, error) {
 	newInterface := &textInterface{
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
@@ -43,17 +51,19 @@ func NewTextInterface(config Config) spec.TextInterface {
 
 	newInterface.Log.Register(newInterface.GetType())
 
-	return newInterface
+	if newInterface.Scheduler == nil {
+		return nil, maskAnyf(invalidConfigError, "scheduler must not be empty")
+	}
+
+	return newInterface, nil
 }
 
 type textInterface struct {
 	Config
 
-	ID spec.ObjectID
-
+	ID    spec.ObjectID
 	Mutex sync.Mutex
-
-	Type spec.ObjectType
+	Type  spec.ObjectType
 }
 
 // TODO this should actually fetch a url from the web
@@ -72,55 +82,62 @@ func (ti *textInterface) ReadStream(stream string) ([]byte, error) {
 }
 
 // return response
-func (ti *textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
+func (ti *textInterface) ReadPlainWithID(ctx context.Context, jobID string) (string, error) {
 	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithID")
 
-	newConfig := gateway.DefaultSignalConfig()
-	newSignal := gateway.NewSignal(newConfig)
-	newSignal.SetID(ID)
-
-	response, err := ti.waitForSignal(ctx, newSignal)
+	job, err := ti.Scheduler.WaitForFinalStatus(spec.ObjectID(jobID), ctx.Done())
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	return response, nil
+	if job == nil {
+		// This should only happen in case the request was ended by ctx.Done().
+		return "", nil
+	}
+	result := job.GetResult()
+
+	return result, nil
 }
 
-// return ID
-func (ti *textInterface) ReadPlainWithPlain(ctx context.Context, plain string) (string, error) {
-	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithPlain")
+// return jobID
+func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected string) (string, error) {
+	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithInput")
 
-	newConfig := gateway.DefaultSignalConfig()
-	newSignal := gateway.NewSignal(newConfig)
-	newSignal.SetInput(plain)
+	action := func(closer <-chan struct{}) (string, error) {
+		newConfig := gateway.DefaultSignalConfig()
+		newConfig.Input = input
+		newSignal := gateway.NewSignal(newConfig)
 
-	response, err := ti.waitForSignal(ctx, newSignal)
+		for {
+			select {
+			case <-closer:
+				// This action was closed by the scheduler itself. This happens e.g.
+				// when the job's final status was manually set.
+				break
+			default:
+				newSignal, err := ti.TextGateway.Send(newSignal, nil)
+				if err != nil {
+					return "", maskAny(err)
+				}
+
+				output := newSignal.GetOutput()
+				o := output.(string)
+				if expected == "" || (expected != "" && o == expected) {
+					// When there is no expected output given, simply return what we got.
+					// When there is expected output given and it matches what we got,
+					// return it.
+					return o, nil
+				}
+
+				time.Sleep(1 * time.Second)
+			}
+		}
+	}
+
+	job, err := ti.Scheduler.Create(action)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	return response, nil
-}
-
-func (ti *textInterface) waitForSignal(ctx context.Context, newSignal spec.Signal) (string, error) {
-	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call waitForSignal")
-
-	var err error
-
-	for {
-		newSignal, err = ti.TextGateway.Send(newSignal, ctx.Done())
-		if err != nil {
-			return "", maskAny(err)
-		}
-
-		output := newSignal.GetOutput()
-		o := output.(string)
-
-		if o == "" {
-			time.Sleep(1 * time.Second)
-		} else {
-			return o, nil
-		}
-	}
+	return string(job.GetID()), nil
 }
