@@ -7,5 +7,7 @@ import (
 )
 
 const (
+	// ObjectTypeImpulse represents the object type of the impulse object. This
+	// is used to identify the object during client-server communication.
 	ObjectTypeImpulse spec.ObjectType = "impulse"
 )

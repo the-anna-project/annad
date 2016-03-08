@@ -17,6 +17,8 @@ const (
 	ObjectTypeIdeaExecNet spec.ObjectType = "idea-exec-net"
 )
 
+// Config represents the configuration used to create a new idea execution
+// network object.
 type Config struct {
 	Log spec.Log
 }

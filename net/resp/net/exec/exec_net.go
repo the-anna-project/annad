@@ -17,6 +17,8 @@ const (
 	ObjectTypeRespExecNet spec.ObjectType = "resp-exec-net"
 )
 
+// Config represents the configuration used to create a new response execution
+// network object.
 type Config struct {
 	Log spec.Log
 }

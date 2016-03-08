@@ -1,5 +1,5 @@
-// FactoryClient implements spec.Factory and provides a decentralized service for
-// general object creation.
+// Package factoryclient implements spec.Factory and provides a decentralized
+// service for general object creation.
 package factoryclient
 
 import (

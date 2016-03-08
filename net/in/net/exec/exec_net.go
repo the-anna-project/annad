@@ -17,6 +17,8 @@ const (
 	ObjectTypeInExecNet spec.ObjectType = "in-exec-net"
 )
 
+// Config represents the configuration used to create a new input execution
+// network object.
 type Config struct {
 	Log spec.Log
 

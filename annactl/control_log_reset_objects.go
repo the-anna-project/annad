@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
 var (
@@ -27,7 +28,6 @@ func controlLogResetObjectsRun(cmd *cobra.Command, args []string) {
 
 	err := logControl.ResetObjects(ctx)
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
-		os.Exit(1)
+		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

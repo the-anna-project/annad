@@ -1,3 +1,5 @@
+// Package storage implements spec.Storage and provides functionality to
+// persist data in redis.
 package redisstorage
 
 import (
@@ -23,6 +25,8 @@ type Config struct {
 	Pool *redis.Pool
 }
 
+// DefaultConfigWithConn provides a configuration that can be mocked using a
+// redis connection. This is used for testing.
 func DefaultConfigWithConn(redisConn redis.Conn) Config {
 	newPoolConfig := DefaultRedisPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()

@@ -7,6 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// NewHandlers returns HTTP handlers configured for the text interface object.
 func NewHandlers(ctx context.Context, ti spec.TextInterface) map[string]*httptransport.Server {
 	handlers := map[string]*httptransport.Server{}
 

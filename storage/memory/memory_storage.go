@@ -1,3 +1,5 @@
+// Package storage implements spec.Storage and provides functionality to
+// persist data in memory.
 package memorystorage
 
 import (
@@ -16,7 +18,7 @@ const (
 	ObjectTypeMemoryStorage spec.ObjectType = "memory-storage"
 )
 
-type ScoredElements struct {
+type scoredElements struct {
 	// ElementScores represents the mapping between elements and their scores.
 	// This is a 1:1 relation. Key is element. Value is score.
 	ElementScores map[string]float64
@@ -30,27 +32,21 @@ type ScoredElements struct {
 	Scores []float64
 }
 
-type Storage struct {
-	KeyValue map[string]string
-	Weighted map[string]ScoredElements
-}
-
 // Config represents the configuration used to create a new memory storage
 // object.
 type Config struct {
-	Log     spec.Log
-	Storage Storage
+	KeyValue map[string]string
+	Log      spec.Log
+	Weighted map[string]scoredElements
 }
 
 // DefaultConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		Log: log.NewLog(log.DefaultConfig()),
-		Storage: Storage{
-			KeyValue: map[string]string{},
-			Weighted: map[string]ScoredElements{},
-		},
+		KeyValue: map[string]string{},
+		Log:      log.NewLog(log.DefaultConfig()),
+		Weighted: map[string]scoredElements{},
 	}
 
 	return newConfig
@@ -83,7 +79,7 @@ func (s *storage) Get(key string) (string, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	if value, ok := s.Storage.KeyValue[key]; ok {
+	if value, ok := s.KeyValue[key]; ok {
 		return value, nil
 	}
 
@@ -91,30 +87,30 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	if _, ok := s.Storage.Weighted[key]; !ok {
+	if _, ok := s.Weighted[key]; !ok {
 		return nil, nil
 	}
 
-	if elements, ok := s.Storage.Weighted[key].ScoreElements[score]; ok {
+	if elements, ok := s.Weighted[key].ScoreElements[score]; ok {
 		n := maxElements
 		if n > len(elements) {
 			n = len(elements)
 		}
 
 		return elements[:n], nil
-	} else {
-		return nil, nil
 	}
+
+	return nil, nil
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	if _, ok := s.Storage.Weighted[key]; !ok {
+	if _, ok := s.Weighted[key]; !ok {
 		return nil, nil
 	}
 
 	var t int
 	var scoredElements []string
-	orig := s.Storage.Weighted[key].Scores
+	orig := s.Weighted[key].Scores
 	l := len(orig)
 
 	for i := 1; i <= l; i++ {
@@ -144,7 +140,7 @@ func (s *storage) Set(key, value string) error {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	s.Storage.KeyValue[key] = value
+	s.KeyValue[key] = value
 
 	return nil
 }
@@ -160,9 +156,9 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 	}
 
 	// Initialize the weighted list.
-	if _, ok := s.Storage.Weighted[key]; !ok {
+	if _, ok := s.Weighted[key]; !ok {
 		// The weighted list for key does not yet exist.
-		s.Storage.Weighted[key] = ScoredElements{
+		s.Weighted[key] = scoredElements{
 			ElementScores: map[string]float64{},
 			ScoreElements: map[float64][]string{},
 			Scores:        []float64{},
@@ -170,7 +166,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 	}
 
 	// Add and sort
-	wl := s.Storage.Weighted[key]
+	wl := s.Weighted[key]
 
 	wl.ElementScores[element] = score
 
@@ -189,7 +185,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 		sort.Float64s(wl.Scores)
 	}
 
-	s.Storage.Weighted[key] = wl
+	s.Weighted[key] = wl
 
 	return nil
 }

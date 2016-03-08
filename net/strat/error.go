@@ -45,14 +45,14 @@ func IsInvalidScope(err error) bool {
 
 var noStrategyError = errgo.New("no strategy")
 
-// IsInvalidScope asserts noStrategyError.
+// IsNoStrategy asserts noStrategyError.
 func IsNoStrategy(err error) bool {
 	return errgo.Cause(err) == noStrategyError
 }
 
 var invalidStrategyError = errgo.New("invalid strategy")
 
-// IsInvalidScope asserts invalidStrategyError.
+// IsInvalidStrategy asserts invalidStrategyError.
 func IsInvalidStrategy(err error) bool {
 	return errgo.Cause(err) == invalidStrategyError
 }

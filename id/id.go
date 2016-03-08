@@ -8,24 +8,24 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// IDType represents some kind of configuration for ID creation.
-type IDType int
+// Type represents some kind of configuration for ID creation.
+type Type int
 
 const (
 	// Hex128 creates a new hexa decimal encoded, pseudo random, 128 bit hash.
-	Hex128 IDType = 16
+	Hex128 Type = 16
 
 	// Hex512 creates a new hexa decimal encoded, pseudo random, 512 bit hash.
-	Hex512 IDType = 64
+	Hex512 Type = 64
 
 	// Hex1024 creates a new hexa decimal encoded, pseudo random, 1024 bit hash.
-	Hex1024 IDType = 128
+	Hex1024 Type = 128
 
 	// Hex2048 creates a new hexa decimal encoded, pseudo random, 2048 bit hash.
-	Hex2048 IDType = 256
+	Hex2048 Type = 256
 
-	// Hex4096Bit creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
-	Hex4096 IDType = 512
+	// Hex4096 creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
+	Hex4096 Type = 512
 )
 
 var (
@@ -33,8 +33,8 @@ var (
 )
 
 // NewObjectID creates a new object ID for the given type.
-func NewObjectID(idType IDType) spec.ObjectID {
-	b := make([]byte, int(idType))
+func NewObjectID(t Type) spec.ObjectID {
+	b := make([]byte, int(t))
 	ns := []int{}
 
 	for i := range b {
