@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	DateTimeMilli = "06/01/02 15:04:05.000"
+	// dateTimeMilli represents the date-time format used in log messages.
+	dateTimeMilli = "06/01/02 15:04:05.000"
 )
 
 var (
@@ -26,12 +27,12 @@ var (
 func extendFormatWithTags(f string, tags spec.Tags) string {
 	newFormat := ""
 
-	newFormat += fmt.Sprintf("[%s] ", time.Now().Format(DateTimeMilli))
+	newFormat += fmt.Sprintf("[%s] ", time.Now().Format(dateTimeMilli))
 	if tags.L != "" {
 		newFormat += fmt.Sprintf("[L: %s] ", tags.L)
 	}
 	if tags.O != nil {
-		newFormat += fmt.Sprintf("[O: %-16s / %s] ", tags.O.GetType(), tags.O.GetID())
+		newFormat += fmt.Sprintf("[O: %s / %s] ", tags.O.GetType(), tags.O.GetID())
 	}
 	if tags.T != nil {
 		newFormat += fmt.Sprintf("[T: %s] ", tags.T.GetTraceID())

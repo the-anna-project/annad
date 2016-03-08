@@ -90,7 +90,6 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 		}
 	}
 
-	// TODO proper logging
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
@@ -117,6 +116,5 @@ func (ti textInterface) ReadPlainWithInput(ctx context.Context, input, expected 
 		}
 	}
 
-	// TODO proper logging
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }

@@ -17,6 +17,8 @@ const (
 	ObjectTypeCoreExecNet spec.ObjectType = "core-exec-net"
 )
 
+// Config represents the configuration used to create a new core execution
+// network object.
 type Config struct {
 	Log spec.Log
 

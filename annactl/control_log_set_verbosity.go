@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
 var (
@@ -28,13 +29,11 @@ func controlLogSetVerbosityRun(cmd *cobra.Command, args []string) {
 
 	v, err := strconv.Atoi(args[0])
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
-		os.Exit(1)
+		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	err = logControl.SetVerbosity(ctx, v)
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
-		os.Exit(1)
+		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

@@ -1,4 +1,4 @@
-// package api implements structures and helpers for network responses. The
+// Package api implements structures and helpers for network responses. The
 // server packages makes use of this to provide a consistent API response
 // scheme.
 package api

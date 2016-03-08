@@ -1,5 +1,5 @@
-// FactoryServer implements spec.Factory and provides a centralized service for
-// general object creation accessible via a gateway.
+// Package factoryserver implements spec.Factory and provides a centralized
+// service for general object creation accessible via a gateway.
 package factoryserver
 
 import (

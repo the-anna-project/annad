@@ -35,6 +35,7 @@ import (
 	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage/memory"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
@@ -44,11 +45,14 @@ const (
 
 var (
 	globalFlags struct {
+		Addr string
+
 		ControlLogLevels    string
 		ControlLogObejcts   string
 		ControlLogVerbosity int
 
-		Addr string
+		Storage     string
+		StorageAddr string
 	}
 
 	annaCmd = &cobra.Command{
@@ -64,21 +68,22 @@ var (
 )
 
 func init() {
+	annaCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to bind Anna's server to")
+
 	annaCmd.PersistentFlags().StringVar(&globalFlags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
 	annaCmd.PersistentFlags().StringVar(&globalFlags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. core-net,impulse)")
 	annaCmd.PersistentFlags().IntVar(&globalFlags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 
-	annaCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to bind Anna's server to")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
+	annaCmd.PersistentFlags().StringVar(&globalFlags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")
 }
 
 type annaConfig struct {
-	CoreNet spec.Network
-
+	CoreNet       spec.Network
 	FactoryServer spec.Factory
-
-	Log spec.Log
-
-	Server spec.Server
+	Log           spec.Log
+	Server        spec.Server
+	Storage       spec.Storage
 }
 
 func defaultAnnaConfig() annaConfig {
@@ -87,6 +92,7 @@ func defaultAnnaConfig() annaConfig {
 		FactoryServer: factoryserver.NewFactory(factoryserver.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		Server:        nil,
+		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 	}
 
 	return newConfig
@@ -137,6 +143,7 @@ func (a *anna) Boot() {
 	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "hello, I am Anna")
 
 	go a.listenToSignal()
+	go a.writeStateInfo()
 
 	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
 	go a.FactoryServer.Boot()
@@ -202,14 +209,22 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
 	// storage
-	newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
-	newRedisDialConfig.Addr = "127.0.0.1:6379"
-	newPoolConfig := redisstorage.DefaultRedisPoolConfig()
-	newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
-	newStorageConfig := redisstorage.DefaultConfig()
-	newStorageConfig.Log = newLog
-	newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
-	newStorage := redisstorage.NewRedisStorage(newStorageConfig)
+	var newStorage spec.Storage
+	switch globalFlags.Storage {
+	case "redis":
+		newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
+		newRedisDialConfig.Addr = globalFlags.StorageAddr
+		newPoolConfig := redisstorage.DefaultRedisPoolConfig()
+		newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
+		newStorageConfig := redisstorage.DefaultConfig()
+		newStorageConfig.Log = newLog
+		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
+		newStorage = redisstorage.NewRedisStorage(newStorageConfig)
+	case "memory":
+		newStorage = memorystorage.NewMemoryStorage(memorystorage.DefaultConfig())
+	default:
+		panic("invalid storage flag")
+	}
 
 	// scheduler
 	newSchedulerConfig := scheduler.DefaultConfig()
@@ -398,6 +413,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newAnnaConfig.FactoryServer = newFactoryServer
 	newAnnaConfig.Log = newLog
 	newAnnaConfig.Server = newServer
+	newAnnaConfig.Storage = newStorage
 	a, err := newAnna(newAnnaConfig)
 	panicOnError(err)
 

@@ -47,7 +47,7 @@ type job struct {
 	// ActiveStatus represents a status indicating activation or deactivation.
 	ActiveStatus spec.ActiveStatus `json:"active_status,omitempty"`
 
-	// Error represents the message of an error occured during job execution, if
+	// Error represents the message of an error occurred during job execution, if
 	// any.
 	Error string `json:"error,omitempty"`
 

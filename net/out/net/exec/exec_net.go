@@ -17,6 +17,8 @@ const (
 	ObjectTypeOutExecNet spec.ObjectType = "out-exec-net"
 )
 
+// Config represents the configuration used to create a new output execution
+// network object.
 type Config struct {
 	Log spec.Log
 

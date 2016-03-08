@@ -3,24 +3,31 @@
 package main
 
 import (
-	"fmt"
 	"net"
-	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
+	"github.com/xh3b4sd/anna/id"
+	logpkg "github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	objectTypeAnnactl spec.ObjectType = "annactl"
+)
+
 var (
+	a spec.Object
+
 	globalFlags struct {
 		Addr string
 	}
 
-	textInterface spec.TextInterface
+	log           spec.Log
 	logControl    spec.LogControl
+	textInterface spec.TextInterface
 
 	mainCmd = &cobra.Command{
 		Use:   "annactl",
@@ -28,20 +35,27 @@ var (
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Run:   mainRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			// annactl
+			a = newAnnactl(defaultAnnactlConfig())
+
+			// log
+			log = logpkg.NewLog(logpkg.DefaultConfig())
+			log.Register(a.GetType())
+
+			// host and port
 			host, port, err := net.SplitHostPort(globalFlags.Addr)
-			if err != nil {
-				fmt.Printf("%#v\n", maskAny(err))
-				os.Exit(1)
-			}
+			panicOnError(err)
 			hostport := net.JoinHostPort(host, port)
 
-			newTextInterfaceConfig := textinterface.DefaultConfig()
-			newTextInterfaceConfig.URL.Host = hostport
-			textInterface = textinterface.NewTextInterface(newTextInterfaceConfig)
-
+			// log control
 			newLogControlConfig := logcontrol.DefaultConfig()
 			newLogControlConfig.URL.Host = hostport
 			logControl = logcontrol.NewLogControl(newLogControlConfig)
+
+			// text interface
+			newTextInterfaceConfig := textinterface.DefaultConfig()
+			newTextInterfaceConfig.URL.Host = hostport
+			textInterface = textinterface.NewTextInterface(newTextInterfaceConfig)
 		},
 	}
 
@@ -52,6 +66,31 @@ var (
 
 func init() {
 	mainCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
+}
+
+type annactlConfig struct{}
+
+func defaultAnnactlConfig() annactlConfig {
+	newConfig := annactlConfig{}
+
+	return newConfig
+}
+
+func newAnnactl(config annactlConfig) spec.Object {
+	newAnnactl := &annactl{
+		annactlConfig: config,
+		ID:            id.NewObjectID(id.Hex128),
+		Type:          spec.ObjectType(objectTypeAnnactl),
+	}
+
+	return newAnnactl
+}
+
+type annactl struct {
+	annactlConfig
+
+	ID   spec.ObjectID
+	Type spec.ObjectType
 }
 
 func mainRun(cmd *cobra.Command, args []string) {

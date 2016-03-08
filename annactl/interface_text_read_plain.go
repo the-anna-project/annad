@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
 var (
@@ -36,14 +38,12 @@ func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
 
 	ID, err := textInterface.ReadPlainWithInput(ctx, strings.Join(args, " "), readPlainFlags.Expected)
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
-		os.Exit(1)
+		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	data, err := textInterface.ReadPlainWithID(ctx, ID)
 	if err != nil {
-		fmt.Printf("%#v\n", maskAny(err))
-		os.Exit(1)
+		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	fmt.Printf("%s\n", data)

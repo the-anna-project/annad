@@ -8,6 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// NewFileSystem creates a new configured memory file system.
 func NewFileSystem() spec.FileSystem {
 	newFileSystem := &memory{
 		Storage: map[string][]byte{},

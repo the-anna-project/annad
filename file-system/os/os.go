@@ -9,6 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// NewFileSystem creates a new configured real OS bound file system.
 func NewFileSystem() spec.FileSystem {
 	newFileSystem := &os{}
 

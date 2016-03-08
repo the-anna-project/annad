@@ -7,12 +7,15 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// Config represents the configuration used to create a new gateway signal.
 type SignalConfig struct {
 	ID     string
 	Input  interface{}
 	Output interface{}
 }
 
+// DefaultSignalConfig provides a default configuration to create a new gateway
+// signal by best effort.
 func DefaultSignalConfig() SignalConfig {
 	newConfig := SignalConfig{
 		ID:     string(id.NewObjectID(id.Hex128)),
@@ -23,6 +26,7 @@ func DefaultSignalConfig() SignalConfig {
 	return newConfig
 }
 
+// NewSignal creates a new configured gateway signal.
 func NewSignal(config SignalConfig) spec.Signal {
 	return &signal{
 		SignalConfig: config,

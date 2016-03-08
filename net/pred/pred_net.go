@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// ObjectTypsPredNet represents the object type of the prediction network
+	// ObjectTypePredNet represents the object type of the prediction network
 	// object. This is used e.g. to register itself to the logger.
 	ObjectTypePredNet spec.ObjectType = "pred-net"
 )

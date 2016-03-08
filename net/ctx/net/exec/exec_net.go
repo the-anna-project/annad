@@ -17,6 +17,8 @@ const (
 	ObjectTypeCtxExecNet spec.ObjectType = "ctx-exec-net"
 )
 
+// Config represents the configuration used to create a new context execution
+// network object.
 type Config struct {
 	Log spec.Log
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// NewHandlers returns HTTP handlers configured for the log control object.
 func NewHandlers(ctx context.Context, lc spec.LogControl) map[string]*httptransport.Server {
 	handlers := map[string]*httptransport.Server{}
 

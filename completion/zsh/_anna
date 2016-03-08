@@ -10,16 +10,19 @@ _describe 'values' options
 
 _arguments \
   '1: :->business-logic' \
+  '--addr[host:port to bind Anna`s server to]:addr:->addr' \
   '--control-log-levels[set log levels for log control]:level:->levels' \
   '--control-log-objects[set log objects for log control]:object:->objects' \
   '--control-log-verbosity[set log verbosity for log control]:verbosity:->verbosity' \
-  '--addr[host:port to bind Anna`s server to]:addr:->addr' \
-  '--state-reader[where to read state from]:state-reader:->state-reader' \
-  '--state-writer[where to write state to]:state-writer:->state-writer' \
+  '--storage[storage type to use for persistency]:storagetype:->storagetype' \
+  '--storage-addr[host:port to connect to storage]:storageaddr:->storageaddr'
 
 case "$state" in
   business-logic)
     _arguments '1:business logic:(version)'
+  ;;
+  addr)
+    _values 'addr' '127.0.0.1\:9119'
   ;;
   levels)
     _values -s , 'levels' D E F I W
@@ -30,13 +33,10 @@ case "$state" in
   verbosity)
     _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
   ;;
-  addr)
-    _values 'addr' '127.0.0.1\:9119'
+  storagetype)
+    _values 'storagetype' memory redis
   ;;
-  state-reader)
-    _values 'state-reader' fs none
-  ;;
-  state-writer)
-    _values 'state-writer' fs none
+  storageaddr)
+    _values 'storageaddr' '127.0.0.1\:6379'
   ;;
 esac
