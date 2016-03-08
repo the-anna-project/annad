@@ -32,8 +32,10 @@ from the very top we consider the following 4 layers.
 
 4. The `core` layer describes the implementation of Anna's most inner workings.
    It bundles everything around data processing and intelligence. The core
-   itself is able to contain multiple `networks`. Signals provided by the
-   gateway are translated to impulses that pass through the networks.
+   network itself is able to contain multiple networks which itself can contain
+   multiple networks as well. That way a deeply nested neural network is
+   formed. Signals provided by the gateway are translated to impulses that pass
+   through the networks and magic happens.
 
 This is how it basically looks like. Note that the white pale boxes represent
 ideas that are not yet implemented. The strong grey boxes in fact represent

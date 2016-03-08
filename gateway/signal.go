@@ -7,7 +7,8 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// Config represents the configuration used to create a new gateway signal.
+// SignalConfig represents the configuration used to create a new gateway
+// signal.
 type SignalConfig struct {
 	ID     string
 	Input  interface{}

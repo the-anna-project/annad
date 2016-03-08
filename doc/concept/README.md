@@ -19,6 +19,4 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [interface](interface.md)
 - [logging](logging.md)
 - [network](network.md)
-- neuron: TBD (behavior)
 - [state](state.md)
-- object: TBD (orderable, multiple states)

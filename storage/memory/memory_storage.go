@@ -1,4 +1,4 @@
-// Package storage implements spec.Storage and provides functionality to
+// Package memorystorage implements spec.Storage and provides functionality to
 // persist data in memory.
 package memorystorage
 

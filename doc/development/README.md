@@ -7,14 +7,21 @@ ask 5 people how to do it, you probably get six answers. Here I simply describe
 my personal workflow. Setup the project as you like so it fits your workflow.
 So this is how I am doing it.
 
+###### requirements
+To develop and run the projects unit test suite there is only your favorite
+editor and `>=go1.5` required.
+
+There is a redis storage implementation. Using this a running redis instance is
+required. For convenience this can be run in a docker container. Obviously then
+docker is required as well.
+
 ###### directory structure
 In golang the `GOPATH` assumes that there is something like
 `src/github.com/xh3b4sd/anna/` within your workspace. See
 https://golang.org/doc/code.html. I am using the `Makefile` to execute all go
 commands. Note how the `GOPATH` is set in the `Makefile`.
 ```
-$(mkdir -p .workspace/)
-GOPATH := ${PWD}/.workspace/:${PWD}/../../../..:${GOPATH}
+GOPATH := ${PWD}/.workspace/
 export GOPATH
 ```
 
@@ -22,33 +29,10 @@ This takes care that the workspace is properly set up for the dependencies that
 `go get` fetches and that `GOPATH` itself is properly set. So the result after
 the setup will be similar to this.
 ```
-~/projects/private/anna                   # this is the second GOPATH used for the project
+~/projects/private/anna    # holds the project's source code
 ├── ...
-└── src
-    └── github.com
-        └── xh3b4sd
-            └── anna
-                ├── ...
-                └── .workspace            # this is the first GOPATH used for the dependencies
-                    └── ...
-```
-
-This approach ensures that there is a dedicated workspace for the Anna project.
-That is, `~/projects/private/anna/src/github.com/xh3b4sd/anna/.workspace/`.
-This approach also ensures that the directiory structure for the Anna project
-itself is fulfilled, so the go tools can operate properly on it. Just following
-the standard go project layout leads to the fact that all project dependencies
-are lying around outside the project itself. So when I would like to clean all
-dependencies, I would need to go though the directory structure and delete all
-directories but that one of my own project. This is not really straight
-forward, even if the bash magicians have other opinions. Other approaches like
-symlinking the project into the `.workspace/` directory lead to the fact that
-the go tools cannot properly operate on the project. Symlinks are prohibited by
-`GOPATH`. Thus `go test ./... -cover` will not work in all cases.
-
-So at first, I prepare the directory structure.
-```
-mkdir -p ~/projects/private/anna/src/github.com/xh3b4sd/anna/
+└── .workspace             # represents the GOPATH holding the project's dependencies
+    └── ...
 ```
 
 ---
@@ -57,7 +41,8 @@ mkdir -p ~/projects/private/anna/src/github.com/xh3b4sd/anna/
 Now I am going into the working directory that holds the source code of the
 Anna project.
 ```
-cd ~/projects/private/anna/src/github.com/xh3b4sd/anna/
+mkdir -p ~/projects/private/anna/
+cd ~/projects/private/anna/
 ```
 
 Then, I clone the repository. Note the `.` at the end of the command.
@@ -76,22 +61,15 @@ make goget
 Now what happened? Because of our directory structure and `Makefile` magic the
 `.workspace` directory was extended with the dependencies.
 ```
-~/projects/private/anna                   # this is the second GOPATH used for the project
+~/projects/private/anna
 ├── ...
-└── src
-    └── github.com
-        └── xh3b4sd
-            └── anna
-                ├── ...
-                └── .workspace            # this is the first GOPATH used for the dependencies
-                    ├── ...
-                    └── src
-                        ├── github.com
-                        │   ├── ...
-                        ├── golang.org
-                        │   └── ...
-                        └── gopkg.in
-                            └── ...
+└── .workspace
+    ├── github.com
+    │   ├── ...
+    ├── golang.org
+    │   └── ...
+    └── gopkg.in
+        └── ...
 ```
 
 ---

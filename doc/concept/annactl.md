@@ -53,5 +53,5 @@ The [text interface](interface.md#text) is used to feed Anna with text input.
 
 ```yaml
 # feed Anna with the text "some text input"
-.workspace/bin/annactl interface text read plain some text input
+.workspace/bin/annactl interface text read plain some text input --expected="output expected"
 ```
