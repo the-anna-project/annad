@@ -35,7 +35,7 @@ type Config struct {
 	// For example a log line then looks like this. Nothe that there is a padding
 	// of 16 characters to align log lines.
 	//
-	//   [16/02/09 12:05:52.628] [L: I] [O: main             / 56139b39e2f979be] [V: 10] hello, I am Anna
+	//   [16/02/09 12:05:52.628] [L: I] [O: anna / 56139b39e2f979be] [V: 10] hello, I am Anna
 	//
 	Format string
 

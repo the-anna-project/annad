@@ -98,9 +98,9 @@ func Test_FactoryClient_BootShutdown_Single(t *testing.T) {
 	}
 }
 
-// Test_FactoryClient_Shutdown_Multiple checks that shutting down multiple
+// Test_FactoryClient_Shutdown_Multi checks that shutting down multiple
 // times causes no problems.
-func Test_FactoryClient_BootShutdown_Multiple(t *testing.T) {
+func Test_FactoryClient_BootShutdown_Multi(t *testing.T) {
 	// Create new test gateway that all participants can use.
 	newFactoryGateway := gateway.NewGateway(gateway.DefaultConfig())
 

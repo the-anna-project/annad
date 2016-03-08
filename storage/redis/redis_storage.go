@@ -1,4 +1,4 @@
-// Package storage implements spec.Storage and provides functionality to
+// Package redisstorage implements spec.Storage and provides functionality to
 // persist data in redis.
 package redisstorage
 
