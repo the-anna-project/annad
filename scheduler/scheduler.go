@@ -118,7 +118,7 @@ func (s *scheduler) Create(action spec.Action) (spec.Job, error) {
 }
 
 func (s *scheduler) FetchState(jobID spec.ObjectID) (spec.Job, error) {
-	value, err := s.Storage.Get(s.Ctx.GetKey("job:%s", string(jobID)))
+	value, err := s.Storage.Get(s.Ctx.SysKey("job:%s", string(jobID)))
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -167,7 +167,7 @@ func (s *scheduler) PersistState(job spec.Job) error {
 		return maskAny(err)
 	}
 
-	err = s.Storage.Set(s.Ctx.GetKey("job:%s", job.GetID()), string(raw))
+	err = s.Storage.Set(s.Ctx.SysKey("job:%s", job.GetID()), string(raw))
 	if err != nil {
 		return maskAny(err)
 	}

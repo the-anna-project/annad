@@ -82,23 +82,14 @@ func (en *execNet) Shutdown() {
 func (en *execNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Trigger")
 
-	// Dynamically walk impulse through the other networks.
-	var err error
-	for {
-		imp, err = en.InNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		imp, err = en.OutNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		break
+	imp, err := en.InNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	imp, err = en.OutNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	// Note that the impulse returned here is not actually the same as received
-	// at the beginning of the call, but was manipulated during its walk through
-	// the networks.
 	return imp, nil
 }

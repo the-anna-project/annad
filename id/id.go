@@ -3,7 +3,8 @@
 package id
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -35,14 +36,15 @@ var (
 // NewObjectID creates a new object ID for the given type.
 func NewObjectID(t Type) spec.ObjectID {
 	b := make([]byte, int(t))
-	ns := []int{}
 
 	for i := range b {
-		if i%len(hashChars) == 0 {
-			ns = rand.Perm(len(hashChars))
+		max := big.NewInt(int64(len(hashChars)))
+		j, err := rand.Int(rand.Reader, max)
+		if err != nil {
+			panic(err)
 		}
 
-		b[i] = hashChars[ns[i]]
+		b[i] = hashChars[int(j.Int64())]
 	}
 
 	return spec.ObjectID(b)

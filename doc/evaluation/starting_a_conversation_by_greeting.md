@@ -23,8 +23,8 @@ her](/doc/challenge/guidance.md) beforehand that there are digits and letters.
 ### create character tree
 As soon as she knows what letters and words are, she can create a character
 tree. The word `hello` would result in the following character tree: `h - e - l - l - o`.
-The character tree should be "publicly" available accross the whole basic core,
-so it can be extended and used accross multiple and parallel contexts. Each
+The character tree should be "publicly" available across the whole basic core,
+so it can be extended and used across multiple and parallel contexts. Each
 node of the tree holds information about the string it is part of up to the
 nodes position. That is, `e` holds `he`. Each node holds and adds further
 information about itself and the string it is part of during its lifetime. The
@@ -33,7 +33,7 @@ associated string is actually some kind of greeting.
 
 Questions
 - What relation should `hello` - `greeting` have?
-- Simply meta string informtion within a character neuron?
+- Simply meta string information within a character neuron?
 - A link to a new neuron? What neuron type?
 
 ### lookup historical events

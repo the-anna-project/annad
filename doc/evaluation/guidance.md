@@ -9,11 +9,11 @@ mechanisms to manipulate and help Anna structuring information, this option
 should only be considered as very last option. The most important thing is to
 make Anna learn herself, to make her dynamic and smart. Guiding her through all
 problems will not push her into the right direction, but keep her dumb and
-static. So it always must be very conciously thought about when, why and how
-Anna should be teached actively.
+static. So it always must be very consciously thought about when, why and how
+Anna should be taught actively.
 
 Finally the strategic results of guidance should be recognized by Anna and lead
-to a dynamically learned behavior and cause conciously connected neurons within
+to a dynamically learned behavior and cause consciously connected neurons within
 Anna's neural networks.
 
 ### provide BI, Basic Information

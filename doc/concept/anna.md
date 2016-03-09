@@ -18,7 +18,7 @@ This is the ten thousand feet view of Anna. To understand how she looks like
 from the very top we consider the following 4 layers.
 
 1. The `i/o` layer describes a set of network protocols Anna understands. Data
-   can be written to and retreived from her over network. I/O is flowing to and
+   can be written to and retrieved from her over network. I/O is flowing to and
    coming from the server.
 
 2. The `server` layer describes the actual server listening for traffic of

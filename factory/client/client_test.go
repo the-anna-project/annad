@@ -56,6 +56,15 @@ func Test_FactoryClient_GetType(t *testing.T) {
 	}
 }
 
+func Test_FactoryClient_GetID(t *testing.T) {
+	firstClient := NewFactory(DefaultConfig())
+	secondClient := NewFactory(DefaultConfig())
+
+	if firstClient.GetID() == secondClient.GetID() {
+		t.Fatalf("IDs of client factories are equal")
+	}
+}
+
 // Test_FactoryClient_Shutdown_Single checks that the factory client properly
 // shuts down.
 func Test_FactoryClient_BootShutdown_Single(t *testing.T) {

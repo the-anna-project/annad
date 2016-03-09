@@ -145,7 +145,7 @@ func (sn *stratNet) GetMostSuccesses(imp spec.Impulse) ([]string, error) {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetHighestScore")
 
 	ctx := imp.GetCtx(sn)
-	successes, err := sn.Storage.GetHighestScoredElements(ctx.GetKey("strategy:successes"), sn.MaxElements)
+	successes, err := sn.Storage.GetHighestScoredElements(ctx.NetKey("strategy:successes"), sn.MaxElements)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -155,7 +155,7 @@ func (sn *stratNet) GetMostSuccesses(imp spec.Impulse) ([]string, error) {
 
 func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.Strategy, error) {
 	ctx := imp.GetCtx(sn)
-	value, err := sn.Storage.Get(ctx.GetKey("strategy:%s", ID))
+	value, err := sn.Storage.Get(ctx.NetKey("strategy:%s", ID))
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -240,7 +240,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		//
 		// TODO this needs to be improved. There are already ideas. See
 		// https://github.com/xh3b4sd/anna/issues/79.
-		_, err := sn.Storage.Get(ctx.GetKey("strategy:%s", newStrategy.String()))
+		_, err := sn.Storage.Get(ctx.NetKey("strategy:%s", newStrategy.String()))
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -277,11 +277,11 @@ func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) e
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
 	ctx := imp.GetCtx(sn)
-	err := sn.Storage.Set(ctx.GetKey("strategy:%s", newStrategy.GetID()), newStrategy.String())
+	err := sn.Storage.Set(ctx.NetKey("strategy:%s", newStrategy.GetID()), newStrategy.String())
 	if err != nil {
 		return maskAny(err)
 	}
-	err = sn.Storage.Set(ctx.GetKey("context:%s", ctx.GetID()), string(newStrategy.GetID()))
+	err = sn.Storage.Set(ctx.NetKey("context:%s", ctx.GetID()), string(newStrategy.GetID()))
 	if err != nil {
 		return maskAny(err)
 	}

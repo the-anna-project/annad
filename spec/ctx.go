@@ -3,25 +3,30 @@ package spec
 // Ctx represents a container for contextual information supposed to be carried
 // around.
 type Ctx interface {
-	// GetKey returns a well configured key used to store and fetch data. The
+	// NetKey returns a well configured key used to store and fetch data. Keys
+	// generated with NetKey should only be used by objects related to the neural
+	// network scope. This can be e.g. the CharNet, or the StratNet. These
+	// objects generate and structure dynamic information used to learn. The
 	// returned key has the following scheme. "s" stands for the scope, that is,
-	// an object type.  "c" stands for the context identifier, e.g. "default" or
-	// "math". "<key>" stands for the key-value pair identifying the most
-	// specific part of the key.
+	// the network scope. "o" stands for the object requesting the key. "<key>"
+	// stands for the key-value pair identifying the most specific part of the
+	// key.
 	//
-	//     s:<object-type>:c:<context>:<key>
+	//     s:net:o:<object>:<key>
 	//
-	GetKey(f string, v ...interface{}) string
+	NetKey(f string, v ...interface{}) string
 
 	Object
 
-	// SetID sets the contect's ID. This is configurable because the context
-	// object is a container for contextual information. So even the ID needs to
-	// be configured when e.g. storing and fetching contextual information from
-	// a database.
+	// SysKey returns a well configured key used to store and fetch data. Keys
+	// generated with SysKey should only be used by objects related to the system
+	// scope. This can be e.g. the Scheduler. These objects generate and
+	// structure fundamental information used to manage the system. The returned
+	// key has the following scheme. "s" stands for the scope, that is, the
+	// system scope. "o" stands for the object requesting the key. "<key>" stands
+	// for the key-value pair identifying the most specific part of the key.
 	//
-	// Note that this needs to be well known. The configured context makes sure
-	// that storage keys are consistently created. Customize this carefully and
-	// make sure you know what you are doing.
-	SetID(ID ObjectID)
+	//     s:sys:o:<object>:<key>
+	//
+	SysKey(f string, v ...interface{}) string
 }

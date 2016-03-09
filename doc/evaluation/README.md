@@ -8,11 +8,12 @@ solutions.
 
 ### ideas
 - [guidance](guidance.md)
+- [character tree](character_tree.md)
 - [pattern recognition](pattern_recognition.md)
 - [selective perception](selective_perception.md)
 - [starting a conversation by greeting](starting_a_conversation_by_greeting.md)
 - Context awareness. Make Anna understand what information belong together
-  accross multiple and consecutive requests.
+  across multiple and consecutive requests.
 
 ### questions
 - How to understand what a quote is and what the character `"` is good for?

@@ -93,31 +93,24 @@ func (cn *charNet) Shutdown() {
 func (cn *charNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Trigger")
 
-	// Dynamically walk impulse through the other networks.
-	var err error
-	for {
-		imp, err = cn.StratNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		imp, err = cn.PredNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		imp, err = cn.ExecNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		imp, err = cn.EvalNet.Trigger(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
+	// TODO prepare (new?) impulse (with CLGs?) for strat net
 
-		break
+	imp, err := cn.StratNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	imp, err = cn.PredNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	imp, err = cn.ExecNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	imp, err = cn.EvalNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	// Note that the impulse returned here is not actually the same as received
-	// at the beginning of the call, but was manipulated during its walk through
-	// the networks.
 	return imp, nil
 }

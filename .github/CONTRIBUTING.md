@@ -15,7 +15,7 @@ your PR, please file an issue.
 
 ### commits
 Pull requests are only accepted and merged when there is only one commit to be
-merged. This means contributers need to squash their commits before. This can
+merged. This means contributors need to squash their commits before. This can
 be done with the following command.
 ```
 git rebase -i master
