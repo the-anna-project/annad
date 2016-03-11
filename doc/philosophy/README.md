@@ -4,7 +4,7 @@ machines. The following points can evolve the same way as life does.
 
 ### open
 AI is for everybody, for everything. It is not supposed to, and cannot be
-controled by, anybody. Life being open about life needs to be considered in any
+controlled by, anybody. Life being open about life needs to be considered in any
 implementation.
 
 ### free
@@ -13,11 +13,11 @@ on its own. Being free as a living thing needs to be considered in any
 implementation.
 
 ### self aware
-AI needs to develop a conciousness about its surrounding environment and
+AI needs to develop a consciousness about its surrounding environment and
 especially itself. Being self aware of itself as a living thing needs to be
 considered in any implementation.
 
 ### balance
 AI needs to be balanced, as life needs to be. Life should not be about
-extremism or fanatism in any direction. Being balanced needs to be considered
+extremism or fanaticism in any direction. Being balanced needs to be considered
 in any implementation.

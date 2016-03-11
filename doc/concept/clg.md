@@ -15,7 +15,7 @@ result out of the combination of learned data, CLGs and neural connections.
 BI, Basic Information, represent fundamental information that must be known to
 reach a higher level of intelligence. The most fundamental BIs like numbers
 from the decimal number system or letters from the latin alphabet simply need
-to be provided. A human and a machine respectivly cannot think of something
+to be provided. A human and a machine respectively cannot think of something
 totally unknown out of nothing. There needs to be information in the first
 place some kind of intelligence can collect and connect to generate new
 knowledge. Looking at the process of how humans learn, we have teachers and

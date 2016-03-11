@@ -27,7 +27,6 @@ func Test_Scheduler_Create_Success(t *testing.T) {
 	}
 
 	job, err = newScheduler.WaitForFinalStatus(job.GetID(), nil)
-	fmt.Printf("%#v\n", err)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

@@ -10,6 +10,6 @@ sufficient [CLG's](clg.md) and information.
 
 The concept of having such a state model is important for a lot of reasons.
 State can be backed up and restored. Once Anna is shut down, she can backup her
-state. Once she is comming back to life, she can restore her state like nothing
+state. Once she is coming back to life, she can restore her state like nothing
 happened. Imagine to test a specific part or structure of some self awareness.
 Think about analysing, debugging and manipulating Anna's mind.

@@ -108,6 +108,9 @@ func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected
 		newConfig.Input = input
 		newSignal := gateway.NewSignal(newConfig)
 
+		// TODO prevent dead locks. In case the same input is returned over and
+		// over again, stop the action.
+
 		for {
 			select {
 			case <-closer:

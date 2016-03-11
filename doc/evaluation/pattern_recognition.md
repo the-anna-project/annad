@@ -93,7 +93,7 @@ endings) of a word, resulting in retrieving the word stem.
 
 So there might be situations where we cannot calculate any deeper meaning of a
 word based on the currently known connections. In this case we can analyse word
-stems and group them together. In case of character trees we implicitely create
+stems and group them together. In case of character trees we implicitly create
 this relationships automatically. Here the root of the tree most like implies a
 semantic relationship between all words within this tree.
 

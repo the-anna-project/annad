@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -17,9 +18,6 @@ const (
 
 // Config represents the configuration used to create a new context object.
 type Config struct {
-	// ID represents the context's ID.
-	ID spec.ObjectID
-
 	// Object represents the object configuring and using this context.
 	Object spec.Object
 }
@@ -28,7 +26,6 @@ type Config struct {
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		ID:     spec.ObjectID("default"),
 		Object: nil,
 	}
 
@@ -39,6 +36,7 @@ func DefaultConfig() Config {
 func NewCtx(config Config) spec.Ctx {
 	newCtx := &ctx{
 		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeCtx,
 	}
@@ -48,19 +46,28 @@ func NewCtx(config Config) spec.Ctx {
 
 type ctx struct {
 	Config
+
+	ID    spec.ObjectID
 	Mutex sync.Mutex
 	Type  spec.ObjectType
 }
 
-func (c *ctx) GetKey(f string, v ...interface{}) string {
-	// keyValuePair is supposed to hold a structured key representation delimited
-	// by colons, e.g. "strategy:successes".
-	keyValuePair := fmt.Sprintf(f, v...)
-	return fmt.Sprintf("o:%s:c:%s:%s", c.Object.GetType(), c.GetID(), keyValuePair)
+const (
+	// NetKeyFormat represents the format used to create storage keys for the
+	// network scope.
+	NetKeyFormat = "s:net:%s:%s"
+)
+
+func (c *ctx) NetKey(f string, v ...interface{}) string {
+	return fmt.Sprintf(NetKeyFormat, c.Object.GetType(), fmt.Sprintf(f, v...))
 }
 
-func (c *ctx) SetID(ID spec.ObjectID) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
-	c.ID = ID
+const (
+	// SysKeyFormat represents the format used to create storage keys for the
+	// system scope.
+	SysKeyFormat = "s:sys:%s:%s"
+)
+
+func (c *ctx) SysKey(f string, v ...interface{}) string {
+	return fmt.Sprintf(SysKeyFormat, c.Object.GetType(), fmt.Sprintf(f, v...))
 }

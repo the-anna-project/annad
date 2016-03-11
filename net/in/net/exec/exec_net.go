@@ -81,5 +81,15 @@ func (en *execNet) Shutdown() {
 
 func (en *execNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Trigger")
+
+	imp, err := en.CharNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	imp, err = en.CtxNet.Trigger(imp)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
 	return imp, nil
 }

@@ -64,7 +64,7 @@ Reaching this level is in my opinion key to go further with all other smart
 achievements Anna can make. Understanding humans, its terminology and meanings
 of language will make interactions with Anna more easy. Pushing her into
 certain directions of thinking by interacting with her could prove her real
-power of inteligence.
+power of intelligence.
 
 ---
 
