@@ -6,10 +6,22 @@ self-improving software.
 
 # abstract
 
-> AI is the last invention humanity will ever need to make
+> AI is the last invention humanity will ever need to make.
 
-The project is at its very beginning. So don't expect too much. For quite a
-while now I am thinking about machine learning and AI. This field is
+This is not about machine learning. This is about machines learn to learn.
+Machine learning with all its scientific theories and approaches is still way
+too rigid. To make AI actually work we need to make them as dynamic as
+possible. The way to a truly intelligent system is probably so hard and long
+nobody can just code it right away. Humanity needs to discover the path of
+creating something flexible and smart as human brains sometimes pretend to be.
+Walking this very long path manually seems to be insane. Since the industrial
+revolution machines helped us to faster achieve better results. We aim to go
+along the way to AI, step by step, with Anna together. See the
+[roadmap](doc/roadmap) for an idea about the various stages this project aims
+to reach.
+
+Anyway this project is still at its beginning. So don't expect too much. For
+quite a while now I am thinking about machine learning and AI. This field is
 fascinating and challenging in so many different ways. I want to use this
 project as playground to improve knowledge by solving problems.
 
@@ -32,11 +44,21 @@ somebody else, or some group of people way smarter than me. Live will find a way
 - [roadmap](doc/roadmap)
 
 # contribution
-This project is very ambitious, thus help is always appreciated. See the
+This project is very ambitious, thus help is always appreciated. Get in touch
+with us for the following topics and more. Further see the
 [CONTRIBUTING.md](/.github.com/CONTRIBUTING.md) and go for it.
+
+- Software architecture and software design.
+- Software engineering to get issues and pull requests done.
+- Scientific feedback and research.
+- Brainstorming and idea generation.
+- Hosting for web based solutions.
+- Integration in all kind of hardware and mobile devices.
+- Creating industrial use cases.
+- Networking (the human to human kindof network).
 
 # license
 The Anna project is open source and license free software. This means I am
-holding the copyright in the first place to be defensive. Further I am open to
-change that, as long as the project serves humanity. See [LICENSE](LICENSE).
-
+holding the copyright in the first place to be defensive for now. Further I am
+open to change that, as long as the project stay open, free and serves
+humanity. See [LICENSE](LICENSE).

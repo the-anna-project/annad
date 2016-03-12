@@ -72,7 +72,7 @@ func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 		if req.ID == "" && req.Input != "" {
 			// Only Input given means we want to do something, but only return an ID
 			// in the first place.
-			ID, err = ti.ReadPlainWithInput(ctx, req.Input, req.Expected)
+			ID, err = ti.ReadPlainWithInput(ctx, req.Input, req.Expected, req.SessionID)
 			if err != nil {
 				return api.WithError(maskAny(err)), nil
 			}

@@ -50,7 +50,7 @@ func Test_TextInterface_ReadPlainWithInput_001(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "")
+	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
 	if err != nil {
 		t.Fatalf("TextInterface.ReadPlainWithInput returned error: %#v", err)
 	}
@@ -73,7 +73,7 @@ func Test_TextInterface_ReadPlainWithInput_002(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "")
+	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
 	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
 	}
@@ -92,7 +92,7 @@ func Test_TextInterface_ReadPlainWithInput_003(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "")
+	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
 	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
 	}
@@ -111,7 +111,7 @@ func Test_TextInterface_ReadPlainWithInput_004(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "")
+	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
 	if !IsInvalidAPIResponse(err) {
 		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
 	}
@@ -138,6 +138,9 @@ func Test_TextInterface_ReadPlainWithInput_Request(t *testing.T) {
 		if request.Expected != "expected" {
 			t.Fatal("expected", "expected", "got", request.Expected)
 		}
+		if request.SessionID != "session-id" {
+			t.Fatal("expected", "expected", "got", request.SessionID)
+		}
 
 		response := api.WithID("test-id")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -147,7 +150,7 @@ func Test_TextInterface_ReadPlainWithInput_Request(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	_, err := newTextInterface.ReadPlainWithInput(ctx, "input", "expected")
+	_, err := newTextInterface.ReadPlainWithInput(ctx, "input", "expected", "session-id")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

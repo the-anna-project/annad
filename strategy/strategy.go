@@ -5,6 +5,7 @@ package strategy
 import (
 	"crypto/rand"
 	"math/big"
+	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -22,11 +23,18 @@ type Config struct {
 	// Actions represents a list of ordered action items, that are object types.
 	Actions []spec.ObjectType
 
-	// ID represents the strategy's ID. This is configurable because the strategy
-	// object is a container for strategy information. So even the ID needs to be
-	// configured when e.g. fetching strategy information from a database and
-	// creating a new object to carry around the fetched data.
-	ID spec.ObjectID
+	// HashMap provides a way to create a new strategy object out of a given hash
+	// map containing bare strategy data. If this nil or empty, a completely new
+	// strategy is created. Otherwise it is tried to create a new strategy using
+	// the information of the given hash map.
+	HashMap map[string]string
+
+	// Requestor represents the object requesting a strategy. E.g. when the
+	// character network requests a strategy to act on the given input, it will
+	// instruct an impulse to go through the strategy network while being
+	// configured with information about the character network. Here the
+	// requestor would hold the object tyope of the character network.
+	Requestor spec.ObjectType
 }
 
 // DefaultConfig provides a default configuration to create a new strategy
@@ -34,8 +42,9 @@ type Config struct {
 // be properly set before the strategy creation.
 func DefaultConfig() Config {
 	newConfig := Config{
-		Actions: []spec.ObjectType{},
-		ID:      id.NewObjectID(id.Hex128),
+		Actions:   []spec.ObjectType{},
+		HashMap:   nil,
+		Requestor: "",
 	}
 
 	return newConfig
@@ -43,14 +52,43 @@ func DefaultConfig() Config {
 
 // NewStrategy creates a new configured strategy object.
 func NewStrategy(config Config) (spec.Strategy, error) {
-	newStrategy := &strategy{
-		Config: config,
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeStrategy,
+	var newStrategy *strategy
+
+	if config.HashMap != nil {
+		newStrategy = &strategy{}
+
+		for k, v := range config.HashMap {
+			if k == "actions" {
+				var newActions []spec.ObjectType
+				for _, a := range strings.Split(v, ",") {
+					newActions = append(newActions, spec.ObjectType(a))
+				}
+				newStrategy.Actions = newActions
+			}
+			if k == "id" {
+				newStrategy.ID = spec.ObjectID(v)
+			}
+			if k == "requestor" {
+				newStrategy.Requestor = spec.ObjectType(v)
+			}
+		}
+	} else {
+		newStrategy = &strategy{
+			Config: config,
+			ID:     id.NewObjectID(id.Hex128),
+		}
 	}
 
+	newStrategy.Type = ObjectTypeStrategy
+
 	if len(newStrategy.Actions) == 0 {
-		return nil, maskAnyf(invalidActionsError, "must not be empty")
+		return nil, maskAnyf(invalidConfigError, "actions must not be empty")
+	}
+	if newStrategy.ID == "" {
+		return nil, maskAnyf(invalidConfigError, "ID must not be empty")
+	}
+	if newStrategy.Requestor == "" {
+		return nil, maskAnyf(invalidConfigError, "requestor not be empty")
 	}
 
 	newStrategy.Actions = randomizeActions(newStrategy.Actions)
@@ -60,15 +98,13 @@ func NewStrategy(config Config) (spec.Strategy, error) {
 
 type strategy struct {
 	Config
+
+	ID    spec.ObjectID
 	Mutex sync.Mutex
 	Type  spec.ObjectType
 }
 
-func (s *strategy) GetActions() []spec.ObjectType {
-	return s.Actions
-}
-
-func (s *strategy) String() string {
+func (s *strategy) ActionsToString() string {
 	str := ""
 	actions := s.GetActions()
 
@@ -84,6 +120,24 @@ func (s *strategy) String() string {
 	}
 
 	return str
+}
+
+func (s *strategy) GetActions() []spec.ObjectType {
+	return s.Actions
+}
+
+func (s *strategy) GetHashMap() map[string]string {
+	hashMap := map[string]string{
+		"actions":   s.ActionsToString(),
+		"id":        string(s.GetID()),
+		"requestor": string(s.GetRequestor()),
+	}
+
+	return hashMap
+}
+
+func (s *strategy) GetRequestor() spec.ObjectType {
+	return s.Requestor
 }
 
 const (

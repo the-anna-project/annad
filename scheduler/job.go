@@ -3,6 +3,7 @@ package scheduler
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
@@ -15,12 +16,19 @@ const (
 
 // JobConfig represents the configuration used to create a new job object.
 type JobConfig struct {
+	ActionID  string
+	Args      interface{}
+	SessionID string
 }
 
 // DefaultJobConfig provides a default configuration to create a new job object
 // by best effort.
 func DefaultJobConfig() JobConfig {
-	newConfig := JobConfig{}
+	newConfig := JobConfig{
+		ActionID:  "",
+		Args:      nil,
+		SessionID: string(id.NewObjectID(id.Hex128)),
+	}
 
 	return newConfig
 }
@@ -30,11 +38,16 @@ func NewJob(config JobConfig) (spec.Job, error) {
 	newJob := &job{
 		JobConfig: config,
 
-		ActiveStatus: StatusStarted,
+		ActiveStatus: "",
+		CreatedAt:    time.Now(),
 		ID:           id.NewObjectID(id.Hex128),
 		Mutex:        sync.Mutex{},
 		FinalStatus:  "",
 		Type:         ObjectTypeJob,
+	}
+
+	if newJob.ActionID == "" {
+		return nil, maskAnyf(invalidConfigError, "action ID must not be empty")
 	}
 
 	return newJob, nil
@@ -46,6 +59,9 @@ type job struct {
 
 	// ActiveStatus represents a status indicating activation or deactivation.
 	ActiveStatus spec.ActiveStatus `json:"active_status,omitempty"`
+
+	// CreatedAt represents the creation time of the job.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 
 	// Error represents the message of an error occurred during job execution, if
 	// any.
@@ -68,11 +84,32 @@ type job struct {
 	Type spec.ObjectType `json:"type,omitempty"`
 }
 
+func (j *job) GetActionID() string {
+	j.Mutex.Lock()
+	defer j.Mutex.Unlock()
+
+	return j.ActionID
+}
+
 func (j *job) GetActiveStatus() spec.ActiveStatus {
 	j.Mutex.Lock()
 	defer j.Mutex.Unlock()
 
 	return j.ActiveStatus
+}
+
+func (j *job) GetArgs() interface{} {
+	j.Mutex.Lock()
+	defer j.Mutex.Unlock()
+
+	return j.Args
+}
+
+func (j *job) GetCreatedAt() time.Time {
+	j.Mutex.Lock()
+	defer j.Mutex.Unlock()
+
+	return j.CreatedAt
 }
 
 func (j *job) GetError() error {
@@ -98,6 +135,13 @@ func (j *job) GetResult() string {
 	defer j.Mutex.Unlock()
 
 	return j.Result
+}
+
+func (j *job) GetSessionID() string {
+	j.Mutex.Lock()
+	defer j.Mutex.Unlock()
+
+	return j.SessionID
 }
 
 func (j *job) SetActiveStatus(activeStatus spec.ActiveStatus) {

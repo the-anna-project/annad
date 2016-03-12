@@ -24,7 +24,7 @@ func Test_FactoryClient_NewImpulse(t *testing.T) {
 			newConfig := impulse.DefaultConfig()
 			newImpulse, err := impulse.NewImpulse(newConfig)
 			if err != nil {
-				t.Fatalf("impulse.NewImpulse returned err: %#v", err)
+				return nil, maskAny(err)
 			}
 			objectID = newImpulse.GetID()
 
@@ -38,7 +38,7 @@ func Test_FactoryClient_NewImpulse(t *testing.T) {
 
 	impulse, err := newClient.NewImpulse()
 	if err != nil {
-		t.Fatalf("NewImpulse returned err: %#v", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 
 	if objectID != impulse.GetID() {

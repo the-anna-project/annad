@@ -1,5 +1,9 @@
 package spec
 
+import (
+	"time"
+)
+
 // ActiveStatus represents a job's status indicating activation or
 // deactivation.
 type ActiveStatus string
@@ -10,8 +14,17 @@ type FinalStatus string
 
 // Job represents a job that is executable by a Scheduler.
 type Job interface {
+	// GetActionID returns the job's action ID.
+	GetActionID() string
+
 	// GetActiveStatus returns the job's active status.
 	GetActiveStatus() ActiveStatus
+
+	// GetArgs returns the job's arguments.
+	GetArgs() interface{}
+
+	// GetCreatedAt returns the job's creation time.
+	GetCreatedAt() time.Time
 
 	// GetError returns the error returned during job execution, if any.
 	GetError() error
@@ -21,6 +34,9 @@ type Job interface {
 
 	// GetResult returns the result returned during job execution, if any.
 	GetResult() string
+
+	// GetSessionID returns the job's session ID.
+	GetSessionID() string
 
 	Object
 

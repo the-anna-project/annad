@@ -11,24 +11,29 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	readPlainFlags struct {
-		Expected string
-	}
+func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitInterfaceTextReadPlainCmd")
 
-	interfaceTextReadPlainCmd = &cobra.Command{
+	newCmd := &cobra.Command{
 		Use:   "plain [text] ...",
 		Short: "Make Anna read plain text.",
 		Long:  "Make Anna read plain text.",
-		Run:   interfaceTextReadPlainRun,
+		Run:   a.ExecInterfaceTextReadPlainCmd,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			var err error
+			a.SessionID, err = a.GetSessionID()
+			panicOnError(err)
+		},
 	}
-)
 
-func init() {
-	interfaceTextReadPlainCmd.PersistentFlags().StringVar(&readPlainFlags.Expected, "expected", "", "output expected to receive with respect to the given input")
+	newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expected, "expected", "", "output expected to receive with respect to the given input")
+
+	return newCmd
 }
 
-func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
+func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadPlainCmd")
+
 	if len(args) == 0 {
 		cmd.Help()
 		os.Exit(1)
@@ -36,14 +41,14 @@ func interfaceTextReadPlainRun(cmd *cobra.Command, args []string) {
 
 	ctx := context.Background()
 
-	ID, err := textInterface.ReadPlainWithInput(ctx, strings.Join(args, " "), readPlainFlags.Expected)
+	ID, err := a.TextInterface.ReadPlainWithInput(ctx, strings.Join(args, " "), a.Flags.InterfaceTextReadPlain.Expected, a.SessionID)
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	data, err := textInterface.ReadPlainWithID(ctx, ID)
+	data, err := a.TextInterface.ReadPlainWithID(ctx, ID)
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	fmt.Printf("%s\n", data)

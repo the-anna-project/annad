@@ -9,112 +9,147 @@ import (
 
 	"github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
+	"github.com/xh3b4sd/anna/file-system/memory"
+	"github.com/xh3b4sd/anna/file-system/os"
 	"github.com/xh3b4sd/anna/id"
-	logpkg "github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
 const (
-	objectTypeAnnactl spec.ObjectType = "annactl"
+	// ObjectTypeAnnactl represents the object type of the command line object.
+	// This is used e.g. to register itself to the logger.
+	ObjectTypeAnnactl spec.ObjectType = "annactl"
 )
 
 var (
-	a spec.Object
+	// version is the project version. It is given via buildflags that inject the
+	// commit hash.
+	version string
+)
 
-	globalFlags struct {
-		Addr string
+// Config represents the configuration used to create a new command line
+// object.
+type Config struct {
+	// Dependencies.
+	FileSystem    spec.FileSystem
+	Log           spec.Log
+	LogControl    spec.LogControl
+	TextInterface spec.TextInterface
+
+	// Settings.
+	Cmd       *cobra.Command
+	Flags     Flags
+	SessionID string
+	Version   string
+}
+
+// DefaultConfig provides a default configuration to create a new command line
+// object by best effort.
+func DefaultConfig() Config {
+	newConfig := Config{
+		FileSystem:    memoryfilesystem.NewFileSystem(),
+		Log:           log.NewLog(log.DefaultConfig()),
+		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
+		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
+
+		SessionID: string(id.NewObjectID(id.Hex128)),
+		Version:   version,
 	}
 
-	log           spec.Log
-	logControl    spec.LogControl
-	textInterface spec.TextInterface
+	return newConfig
+}
 
-	mainCmd = &cobra.Command{
+// NewImpulse creates a new configured command line object.
+func NewAnnactl(config Config) spec.Annactl {
+	// annactl
+	newAnnactl := &annactl{
+		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Type:   spec.ObjectType(ObjectTypeAnnactl),
+	}
+
+	// command
+	newAnnactl.Cmd = &cobra.Command{
 		Use:   "annactl",
 		Short: "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
-		Run:   mainRun,
+
+		Run: func(cmd *cobra.Command, args []string) {
+			newAnnactl.Log.WithTags(spec.Tags{L: "D", O: newAnnactl, T: nil, V: 13}, "call ExecCmd") // this is the first stage we can log
+
+			cmd.Help()
+		},
+
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// annactl
-			a = newAnnactl(defaultAnnactlConfig())
+			var err error
 
 			// log
-			log = logpkg.NewLog(logpkg.DefaultConfig())
-			log.Register(a.GetType())
+			newLog := log.NewLog(log.DefaultConfig())
+			err = newLog.SetLevels(newAnnactl.Flags.ControlLogLevels)
+			panicOnError(err)
+			err = newLog.SetVerbosity(newAnnactl.Flags.ControlLogVerbosity)
+			panicOnError(err)
+
+			newAnnactl.Log.WithTags(spec.Tags{L: "D", O: newAnnactl, T: nil, V: 13}, "call InitCmd") // this is the first stage we can log
+
+			// file system
+			newFileSystem := osfilesystem.NewFileSystem()
 
 			// host and port
-			host, port, err := net.SplitHostPort(globalFlags.Addr)
+			host, port, err := net.SplitHostPort(newAnnactl.Flags.Addr)
 			panicOnError(err)
 			hostport := net.JoinHostPort(host, port)
 
 			// log control
 			newLogControlConfig := logcontrol.DefaultConfig()
 			newLogControlConfig.URL.Host = hostport
-			logControl = logcontrol.NewLogControl(newLogControlConfig)
+			newLogControl := logcontrol.NewLogControl(newLogControlConfig)
 
 			// text interface
 			newTextInterfaceConfig := textinterface.DefaultConfig()
 			newTextInterfaceConfig.URL.Host = hostport
-			textInterface = textinterface.NewTextInterface(newTextInterfaceConfig)
+			newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
+
+			// annactl
+			newAnnactl.FileSystem = newFileSystem
+			newAnnactl.Log = newLog
+			newAnnactl.LogControl = newLogControl
+			newAnnactl.TextInterface = newTextInterface
+
+			newAnnactl.Log.Register(newAnnactl.GetType())
 		},
 	}
 
-	// Version is the project version. It is given via buildflags that inject the
-	// commit hash.
-	version string
-)
+	// flags
+	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
 
-func init() {
-	mainCmd.PersistentFlags().StringVar(&globalFlags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
-}
-
-type annactlConfig struct{}
-
-func defaultAnnactlConfig() annactlConfig {
-	newConfig := annactlConfig{}
-
-	return newConfig
-}
-
-func newAnnactl(config annactlConfig) spec.Object {
-	newAnnactl := &annactl{
-		annactlConfig: config,
-		ID:            id.NewObjectID(id.Hex128),
-		Type:          spec.ObjectType(objectTypeAnnactl),
-	}
+	newAnnactl.Cmd.PersistentFlags().StringVarP(&newAnnactl.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
+	newAnnactl.Cmd.PersistentFlags().IntVarP(&newAnnactl.Flags.ControlLogVerbosity, "control-log-verbosity", "v", 10, "set log verbosity for log control")
 
 	return newAnnactl
 }
 
+func (a *annactl) Boot() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+
+	// init
+	a.Cmd.AddCommand(a.InitControlCmd())
+	a.Cmd.AddCommand(a.InitInterfaceCmd())
+	a.Cmd.AddCommand(a.InitVersionCmd())
+
+	// execute
+	a.Cmd.Execute()
+}
+
 type annactl struct {
-	annactlConfig
+	Config
 
 	ID   spec.ObjectID
 	Type spec.ObjectType
 }
 
-func mainRun(cmd *cobra.Command, args []string) {
-	cmd.Help()
-}
-
 func main() {
-	controlLogResetCmd.AddCommand(controlLogResetLevelsCmd)
-	controlLogResetCmd.AddCommand(controlLogResetObjectsCmd)
-	controlLogResetCmd.AddCommand(controlLogResetVerbosityCmd)
-	controlLogSetCmd.AddCommand(controlLogSetLevelsCmd)
-	controlLogSetCmd.AddCommand(controlLogSetObjectsCmd)
-	controlLogSetCmd.AddCommand(controlLogSetVerbosityCmd)
-	controlLogCmd.AddCommand(controlLogResetCmd)
-	controlLogCmd.AddCommand(controlLogSetCmd)
-	controlCmd.AddCommand(controlLogCmd)
-	mainCmd.AddCommand(controlCmd)
-
-	interfaceTextReadCmd.AddCommand(interfaceTextReadPlainCmd)
-	interfaceTextCmd.AddCommand(interfaceTextReadCmd)
-	interfaceCmd.AddCommand(interfaceTextCmd)
-	mainCmd.AddCommand(interfaceCmd)
-
-	mainCmd.AddCommand(versionCmd)
-
-	mainCmd.Execute()
+	newAnnactl := NewAnnactl(DefaultConfig())
+	newAnnactl.Boot()
 }

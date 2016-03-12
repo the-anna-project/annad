@@ -10,16 +10,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	controlLogSetVerbosityCmd = &cobra.Command{
+func (a *annactl) InitControlLogSetVerbosityCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogSetVerbosityCmd")
+
+	newCmd := &cobra.Command{
 		Use:   "verbosity [verbosity]",
 		Short: "Make Anna set log verbosity.",
 		Long:  "Make Anna set log verbosity.",
-		Run:   controlLogSetVerbosityRun,
+		Run:   a.ExecControlLogSetVerbosityCmd,
 	}
-)
 
-func controlLogSetVerbosityRun(cmd *cobra.Command, args []string) {
+	return newCmd
+}
+
+func (a *annactl) ExecControlLogSetVerbosityCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetVerbosityCmd")
+
 	if len(args) != 1 {
 		cmd.Help()
 		os.Exit(1)
@@ -29,11 +35,11 @@ func controlLogSetVerbosityRun(cmd *cobra.Command, args []string) {
 
 	v, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: nil, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	err = logControl.SetVerbosity(ctx, v)
+	err = a.LogControl.SetVerbosity(ctx, v)
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: nil, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

@@ -51,9 +51,10 @@ type ReadStreamResponse api.Response
 // ReadPlainRequest represents the request payload of the route used to read
 // plain input.
 type ReadPlainRequest struct {
-	ID       string `json:"id,omitempty"`
-	Input    string `json:"input,omitempty"`
-	Expected string `json:"expected,omitempty"`
+	ID        string `json:"id,omitempty"`
+	Input     string `json:"input,omitempty"`
+	Expected  string `json:"expected,omitempty"`
+	SessionID string `json:"session_id,omitempty"`
 }
 
 // ReadPlainResponse represents the response's payload of the route used to read

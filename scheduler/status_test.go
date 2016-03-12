@@ -85,7 +85,24 @@ func Test_Status_HasFinalStatus(t *testing.T) {
 			},
 			Expected: false,
 		},
-
+		{
+			Input: &job{
+				ActiveStatus: StatusStopped,
+				Error:        "",
+				FinalStatus:  StatusReplaced,
+				ID:           "",
+			},
+			Expected: true,
+		},
+		{
+			Input: &job{
+				ActiveStatus: StatusStarted,
+				Error:        "",
+				FinalStatus:  StatusReplaced,
+				ID:           "",
+			},
+			Expected: false,
+		},
 		{
 			Input: &job{
 				ActiveStatus: StatusStopped,
