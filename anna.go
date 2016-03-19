@@ -62,7 +62,7 @@ var (
 		Run:   mainRun,
 	}
 
-	// Version is the project version. It is given via buildflags that inject the
+	// version is the project version. It is given via buildflags that inject the
 	// commit hash.
 	version string
 )

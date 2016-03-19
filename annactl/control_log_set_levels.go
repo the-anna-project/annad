@@ -10,16 +10,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	controlLogSetLevelsCmd = &cobra.Command{
+func (a *annactl) InitControlLogSetLevelsCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogSetLevelsCmd")
+
+	newCmd := &cobra.Command{
 		Use:   "levels [level] ...",
 		Short: "Make Anna set log levels.",
 		Long:  "Make Anna set log levels.",
-		Run:   controlLogSetLevelsRun,
+		Run:   a.ExecControlLogSetLevelsCmd,
 	}
-)
 
-func controlLogSetLevelsRun(cmd *cobra.Command, args []string) {
+	return newCmd
+}
+
+func (a *annactl) ExecControlLogSetLevelsCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetLevelsCmd")
+
 	if len(args) == 0 {
 		cmd.Help()
 		os.Exit(1)
@@ -27,8 +33,8 @@ func controlLogSetLevelsRun(cmd *cobra.Command, args []string) {
 
 	ctx := context.Background()
 
-	err := logControl.SetLevels(ctx, strings.Join(args, ","))
+	err := a.LogControl.SetLevels(ctx, strings.Join(args, ","))
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

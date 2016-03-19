@@ -29,5 +29,5 @@ type TextInterface interface {
 	//
 	// Note that this only returns a job ID. The actual output can be read with
 	// ReadPlainWithID.
-	ReadPlainWithInput(ctx context.Context, input, expected string) (string, error)
+	ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error)
 }

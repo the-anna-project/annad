@@ -3,10 +3,8 @@
 package stratnet
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -69,23 +67,35 @@ func DefaultConfig() Config {
 // the following. Note that these key namespaces might be reused in other
 // networks as well.
 //
-//     strategy:successes
+// Note the requestor is used to differentiate generated strategies for
+// different purposes.
 //
-//         Holds the weighted list of strategy IDs ordered by most successes.
+//     strategy:<requestor>:max:success
 //
-//         ID1:score1,ID2:score2,...
+//         Holds the weighted list of strategy IDs ordered from least to most
+//         successes.
 //
-//     strategy:<strategyID>
+//         ID1,score1,ID2,score2,...
 //
-//         Holds the action sequence of a strategy.
+//     strategy:<requestor>:data:<strategyID>
 //
-//         action1,action2,...
+//         Holds the strategy's data.
 //
-//     context:<contextID>
+//         key: value
+//         key: value
+//         ...
 //
-//         Holds the list of strategy IDs associated with the given context.
+//     strategy:<requestor>:actions:<list>
 //
-//         strategyID1,strategyID2,...
+//         Holds the comma separated representation of a strategy's generated
+//         action sequence.
+//
+//     strategy:<requestor>:min:score
+//
+//         Holds the number of the minimal required score a strategy needs to
+//         fulfil to be evaluated as sufficient.
+//
+//         number
 //
 func NewStratNet(config Config) (spec.Network, error) {
 	newNetwork := &stratNet{
@@ -142,35 +152,52 @@ func (sn *stratNet) GetBestStrategy(imp spec.Impulse) (spec.Strategy, error) {
 }
 
 func (sn *stratNet) GetMostSuccesses(imp spec.Impulse) ([]string, error) {
-	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetHighestScore")
+	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetMostSuccesses")
 
-	ctx := imp.GetCtx(sn)
-	successes, err := sn.Storage.GetHighestScoredElements(ctx.NetKey("strategy:successes"), sn.MaxElements)
+	key := sn.key("strategy:%s:max:success", imp.GetRequestor())
+	successes, err := sn.Storage.GetHighestScoredElements(key, sn.MaxElements)
 	if err != nil {
 		return nil, maskAny(err)
+	}
+	if len(successes) < 2 {
+		return nil, nil
+	}
+	highestScore, err := strconv.Atoi(successes[1])
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	// Here it is likely to return the same weak strategies over and over again.
+	// We need a dynamic adjustment of the successes that are accepted or denied.
+	// That way we are able to create new strategies in case there are no
+	// sufficient strategies found so far. Thus we compare the minimal required
+	// score a strategy needs to fulfil to be evaluated as sufficient.
+	minScore, err := sn.Storage.Get(sn.key("min:score"))
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	requiredScore, err := strconv.Atoi(minScore)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if highestScore < requiredScore {
+		return nil, nil
 	}
 
 	return successes, nil
 }
 
 func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.Strategy, error) {
-	ctx := imp.GetCtx(sn)
-	value, err := sn.Storage.Get(ctx.NetKey("strategy:%s", ID))
+	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetStrategyByID")
+
+	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), ID)
+	hashMap, err := sn.Storage.GetHashMap(key)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	var newActions []spec.ObjectType
-	for _, a := range strings.Split(value, ",") {
-		newActions = append(newActions, spec.ObjectType(a))
-	}
-	if newActions == nil {
-		return nil, maskAny(invalidStrategyError)
-	}
-
 	newConfig := strategy.DefaultConfig()
-	newConfig.Actions = newActions
-	newConfig.ID = ID
+	newConfig.HashMap = hashMap
 	newStrategy, err := strategy.NewStrategy(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -186,7 +213,7 @@ func (sn *stratNet) GetStrategyBySuccesses(imp spec.Impulse, successes []string)
 	var highScore int
 	var mapped map[int][]string
 	for i, e := range successes {
-		if i%2 == 0 {
+		if i%2 != 0 {
 			// We are only interested in the scores and the list has the following
 			// scheme. So we skip the elements, that are indexed with an even number.
 			//
@@ -222,10 +249,11 @@ func (sn *stratNet) GetStrategyBySuccesses(imp spec.Impulse, successes []string)
 }
 
 func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
-	ctx := imp.GetCtx(sn)
+	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call NewStrategy")
 
 	newConfig := strategy.Config{
-		Actions: sn.Actions,
+		Actions:   imp.GetActions(),
+		Requestor: imp.GetRequestor(),
 	}
 
 	var err error
@@ -240,7 +268,8 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		//
 		// TODO this needs to be improved. There are already ideas. See
 		// https://github.com/xh3b4sd/anna/issues/79.
-		_, err := sn.Storage.Get(ctx.NetKey("strategy:%s", newStrategy.String()))
+		key := sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
+		_, err := sn.Storage.Get(key)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -276,12 +305,13 @@ func (sn *stratNet) Shutdown() {
 func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) error {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
-	ctx := imp.GetCtx(sn)
-	err := sn.Storage.Set(ctx.NetKey("strategy:%s", newStrategy.GetID()), newStrategy.String())
+	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), newStrategy.GetID())
+	err := sn.Storage.SetHashMap(key, newStrategy.GetHashMap())
 	if err != nil {
 		return maskAny(err)
 	}
-	err = sn.Storage.Set(ctx.NetKey("context:%s", ctx.GetID()), string(newStrategy.GetID()))
+	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
+	err = sn.Storage.Set(key, string(newStrategy.GetID()))
 	if err != nil {
 		return maskAny(err)
 	}
@@ -294,11 +324,7 @@ func (sn *stratNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 
 	newStrategy, err := sn.GetBestStrategy(imp)
 	if IsNoStrategy(err) {
-		// No strategy could be found. Lets create a new one.
-		//
-		// TODO this creates ony the first strategy. We need to create more new
-		// strategies in case the ones we already used turned out to be not
-		// sufficient.
+		// No sufficient strategy could be found. Lets create a new one.
 		newStrategy, err = sn.NewStrategy(imp)
 		if err != nil {
 			return nil, maskAny(err)
@@ -307,8 +333,7 @@ func (sn *stratNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		return nil, maskAny(err)
 	}
 
-	// TODO add strategy to impulse
-	fmt.Printf("%#v\n", newStrategy)
+	imp.SetStrategyByRequestor(imp.GetRequestor(), newStrategy)
 
 	return imp, nil
 }

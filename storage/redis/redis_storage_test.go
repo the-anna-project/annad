@@ -1,6 +1,7 @@
 package redisstorage
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/rafaeljusto/redigomock"
@@ -75,6 +76,37 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	newStorage := NewRedisStorage(newConfig)
 
 	_, err := newStorage.GetElementsByScore("foo", 0.8, 3)
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// GetHashMap
+
+func Test_RedisStorage_GetHashMap_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HGETALL", "foo").Expect([]interface{}{[]byte("k1"), []byte("v1")})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	value, err := newStorage.GetHashMap("foo")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if !reflect.DeepEqual(value, map[string]string{"k1": "v1"}) {
+		t.Fatal("expected", map[string]string{"k1": "v1"}, "got", value)
+	}
+}
+
+func Test_RedisStorage_GetHashMap_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HGETALL", "foo").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	_, err := newStorage.GetHashMap("foo")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -179,9 +211,9 @@ func Test_RedisStorage_SetElementByScore_Success(t *testing.T) {
 	}
 }
 
-func Test_RedisStorage_SetElementByScore_NoSuccess(t *testing.T) {
+func Test_RedisStorage_SetElementByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("ZADD", "key", 0.8, "element").Expect(int64(3))
+	c.Command("ZADD", "key", 0.8, "element").ExpectError(queryExecutionFailedError)
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
@@ -192,14 +224,350 @@ func Test_RedisStorage_SetElementByScore_NoSuccess(t *testing.T) {
 	}
 }
 
-func Test_RedisStorage_SetElementByScore_Error(t *testing.T) {
+// PushToSet
+
+func Test_RedisStorage_PushToSet(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("ZADD", "key", 0.8, "element").ExpectError(queryExecutionFailedError)
+	c.Command("SADD", "test-key", "test-element").Expect(int64(1))
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	err := newStorage.SetElementByScore("key", "element", 0.8)
+	err := newStorage.PushToSet("test-key", "test-element")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_RedisStorage_PushToSet_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SADD", "test-key", "test-element").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.PushToSet("test-key", "test-element")
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// RemoveFromSet
+
+func Test_RedisStorage_RemoveFromSet(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SREM", "test-key", "test-element").Expect(int64(1))
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.RemoveFromSet("test-key", "test-element")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_RedisStorage_RemoveFromSet_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SREM", "test-key", "test-element").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.RemoveFromSet("test-key", "test-element")
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// RemoveScoredElement
+
+func Test_RedisStorage_RemoveScoredElement(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZREM", "test-key", "test-element").Expect(int64(1))
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.RemoveScoredElement("test-key", "test-element")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_RedisStorage_RemoveScoredElement_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZREM", "test-key", "test-element").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.RemoveScoredElement("test-key", "test-element")
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// SetHashMap
+
+func Test_RedisStorage_SetHashMap_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HMSET", "foo", "k1", "v1").Expect("OK")
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_RedisStorage_SetHashMap_NotOK(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HMSET", "foo", "k1", "v1").Expect("Not OK")
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_RedisStorage_SetHashMap_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HMSET", "foo", "k1", "v1").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// WalkScoredElements
+
+func Test_RedisStorage_WalkScoredElements(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	var values []interface{}
+	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+		values = append(values, element, score)
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if !reflect.DeepEqual(values, []interface{}{"test-value-1", 0.8, "test-value-2", 0.8}) {
+		t.Fatal("expected", []interface{}{"test-value-1", 0.8, "test-value-2", 0.8}, "got", values)
+	}
+}
+
+func Test_RedisStorage_WalkScoredElements_CloseDirectly(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	// Directly close and end walking.
+	closer := make(chan struct{}, 1)
+	closer <- struct{}{}
+
+	var values []interface{}
+	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+		values = append(values, element, score)
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if values != nil {
+		t.Fatal("expected", nil, "got", values)
+	}
+}
+
+func Test_RedisStorage_WalkScoredElements_CloseAfterCallback(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	var count int
+	closer := make(chan struct{}, 1)
+
+	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+		count++
+
+		// Close and end walking.
+		closer <- struct{}{}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count != 1 {
+		t.Fatal("expected", 1, "got", count)
+	}
+}
+
+func Test_RedisStorage_WalkScoredElements_QueryError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZSCAN").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.WalkScoredElements("test-key", nil, nil)
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_RedisStorage_WalkScoredElements_CallbackError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+		return maskAny(queryExecutionFailedError)
+	})
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// WalkSet
+
+func Test_RedisStorage_WalkSet(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	var element1 string
+	err := newStorage.WalkSet("test-key", nil, func(element string) error {
+		element1 = element
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if element1 != "test-value" {
+		t.Fatal("expected", "test-value", "got", element1)
+	}
+}
+
+func Test_RedisStorage_WalkSet_CloseDirectly(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "test-value-2"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	// Directly close and end walking.
+	closer := make(chan struct{}, 1)
+	closer <- struct{}{}
+
+	var element1 string
+	err := newStorage.WalkSet("test-key", closer, func(element string) error {
+		element1 = element
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if element1 != "" {
+		t.Fatal("expected", "", "got", element1)
+	}
+}
+
+func Test_RedisStorage_WalkSet_CloseAfterCallback(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "test-value-2"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	var count int
+	closer := make(chan struct{}, 1)
+
+	err := newStorage.WalkSet("test-key", closer, func(element string) error {
+		count++
+
+		// Close and end walking.
+		closer <- struct{}{}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count != 1 {
+		t.Fatal("expected", 1, "got", count)
+	}
+}
+
+func Test_RedisStorage_WalkSet_QueryError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SSCAN").ExpectError(queryExecutionFailedError)
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.WalkSet("test-key", nil, nil)
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_RedisStorage_WalkSet_CallbackError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SSCAN", "test-key", int64(0), "COUNT", 100).Expect([]interface{}{
+		int64(0),
+		[]string{"test-value-1", "test-value-2"},
+	})
+
+	newConfig := DefaultConfigWithConn(c)
+	newStorage := NewRedisStorage(newConfig)
+
+	err := newStorage.WalkSet("test-key", nil, func(element string) error {
+		return maskAny(queryExecutionFailedError)
+	})
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}

@@ -9,16 +9,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	controlLogResetLevelsCmd = &cobra.Command{
+func (a *annactl) InitControlLogResetLevelsCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogResetLevelsCmd")
+
+	newCmd := &cobra.Command{
 		Use:   "levels",
 		Short: "Make Anna reset log levels.",
 		Long:  "Make Anna reset log levels.",
-		Run:   controlLogResetLevelsRun,
+		Run:   a.ExecControlLogResetLevelsCmd,
 	}
-)
 
-func controlLogResetLevelsRun(cmd *cobra.Command, args []string) {
+	return newCmd
+}
+
+func (a *annactl) ExecControlLogResetLevelsCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogResetLevelsCmd")
+
 	if len(args) > 0 {
 		cmd.Help()
 		os.Exit(1)
@@ -26,8 +32,8 @@ func controlLogResetLevelsRun(cmd *cobra.Command, args []string) {
 
 	ctx := context.Background()
 
-	err := logControl.ResetLevels(ctx)
+	err := a.LogControl.ResetLevels(ctx)
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

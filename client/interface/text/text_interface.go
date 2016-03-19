@@ -93,8 +93,8 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (ti textInterface) ReadPlainWithInput(ctx context.Context, input, expected string) (string, error) {
-	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Input: input, Expected: expected})
+func (ti textInterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
+	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}

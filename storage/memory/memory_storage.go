@@ -36,7 +36,9 @@ type scoredElements struct {
 // object.
 type Config struct {
 	KeyValue map[string]string
+	HashMap  map[string]map[string]string
 	Log      spec.Log
+	MathSet  map[string]map[string]struct{}
 	Weighted map[string]scoredElements
 }
 
@@ -45,7 +47,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		KeyValue: map[string]string{},
+		HashMap:  map[string]map[string]string{},
 		Log:      log.NewLog(log.DefaultConfig()),
+		MathSet:  map[string]map[string]struct{}{},
 		Weighted: map[string]scoredElements{},
 	}
 
@@ -87,13 +91,16 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	if _, ok := s.Weighted[key]; !ok {
+	s.Mutex.Lock()
+	weighted, ok := s.Weighted[key]
+	s.Mutex.Unlock()
+	if !ok {
 		return nil, nil
 	}
 
-	if elements, ok := s.Weighted[key].ScoreElements[score]; ok {
+	if elements, ok := weighted.ScoreElements[score]; ok {
 		n := maxElements
-		if n > len(elements) {
+		if n > len(elements) || n < 0 {
 			n = len(elements)
 		}
 
@@ -103,25 +110,39 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return nil, nil
 }
 
+func (s *storage) GetHashMap(key string) (map[string]string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if value, ok := s.HashMap[key]; ok {
+		return value, nil
+	}
+
+	return nil, nil
+}
+
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	if _, ok := s.Weighted[key]; !ok {
+	s.Mutex.Lock()
+	weighted, ok := s.Weighted[key]
+	s.Mutex.Unlock()
+	if !ok {
 		return nil, nil
 	}
 
 	var t int
 	var scoredElements []string
-	orig := s.Weighted[key].Scores
+	orig := weighted.Scores
 	l := len(orig)
 
 	for i := 1; i <= l; i++ {
 		score := orig[l-i]
-		formatted := strconv.FormatFloat(score, 'f', 5, 64)
 
 		elements, err := s.GetElementsByScore(key, score, maxElements)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
+		formatted := strconv.FormatFloat(score, 'f', -1, 64)
 		for _, e := range elements {
 			scoredElements = append(scoredElements, e)
 			scoredElements = append(scoredElements, formatted)
@@ -136,6 +157,76 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	return scoredElements, nil
 }
 
+func (s *storage) PushToSet(key string, element string) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	set, ok := s.MathSet[key]
+	if !ok {
+		set = map[string]struct{}{
+			element: struct{}{},
+		}
+	}
+
+	set[element] = struct{}{}
+	s.MathSet[key] = set
+
+	return nil
+}
+
+func (s *storage) RemoveFromSet(key string, element string) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	set, ok := s.MathSet[key]
+	if !ok {
+		return nil
+	}
+	delete(set, element)
+
+	return nil
+}
+
+func (s *storage) RemoveScoredElement(key string, element string) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	weighted, ok := s.Weighted[key]
+	if !ok {
+		return nil
+	}
+
+	score := weighted.ElementScores[element]
+	delete(weighted.ElementScores, element)
+
+	elements := weighted.ScoreElements[score]
+	if len(elements) == 1 {
+		delete(weighted.ScoreElements, score)
+	} else {
+		var newElements []string
+		for _, e := range elements {
+			if e != element {
+				newElements = append(newElements, e)
+			}
+		}
+		weighted.ScoreElements[score] = newElements
+	}
+
+	if len(elements) == 1 {
+		var newScores []float64
+		for _, es := range weighted.Scores {
+			if es != score {
+				newScores = append(newScores, es)
+			}
+		}
+		weighted.Scores = newScores
+	}
+
+	s.Weighted[key] = weighted
+
+	return nil
+}
+
 func (s *storage) Set(key, value string) error {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
@@ -148,12 +239,6 @@ func (s *storage) Set(key, value string) error {
 func (s *storage) SetElementByScore(key, element string, score float64) error {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
-
-	formatted := strconv.FormatFloat(score, 'f', 5, 64)
-	score, err := strconv.ParseFloat(formatted, 64)
-	if err != nil {
-		return maskAny(err)
-	}
 
 	// Initialize the weighted list.
 	if _, ok := s.Weighted[key]; !ok {
@@ -170,22 +255,90 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 
 	wl.ElementScores[element] = score
 
-	wl.ScoreElements[score] = append(wl.ScoreElements[score], element)
-	sort.Strings(wl.ScoreElements[score])
-
-	var found bool
-	for _, item := range wl.Scores {
-		if item == score {
-			found = true
+	var foundScoreElements bool
+	for _, item := range wl.ScoreElements[score] {
+		if item == element {
+			foundScoreElements = true
 			break
 		}
 	}
-	if !found {
+	if !foundScoreElements {
+		wl.ScoreElements[score] = append(wl.ScoreElements[score], element)
+		sort.Strings(wl.ScoreElements[score])
+	}
+
+	var foundScores bool
+	for _, item := range wl.Scores {
+		if item == score {
+			foundScores = true
+			break
+		}
+	}
+	if !foundScores {
 		wl.Scores = append(wl.Scores, score)
 		sort.Float64s(wl.Scores)
 	}
 
 	s.Weighted[key] = wl
+
+	return nil
+}
+
+func (s *storage) SetHashMap(key string, hashMap map[string]string) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	s.HashMap[key] = hashMap
+
+	return nil
+}
+
+func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
+	s.Mutex.Lock()
+	weighted, ok := s.Weighted[key]
+	s.Mutex.Unlock()
+	if !ok {
+		return nil
+	}
+
+	for _, score := range weighted.Scores {
+		for _, element := range weighted.ScoreElements[score] {
+			select {
+			case <-closer:
+				return nil
+			default:
+			}
+
+			err := cb(element, score)
+			if err != nil {
+				return maskAny(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
+	s.Mutex.Lock()
+	set, ok := s.MathSet[key]
+	s.Mutex.Unlock()
+	if !ok {
+		return nil
+	}
+
+	for element, _ := range set {
+		select {
+		case <-closer:
+			return nil
+		default:
+		}
+
+		err := cb(element)
+		if err != nil {
+			return maskAny(err)
+		}
+	}
 
 	return nil
 }

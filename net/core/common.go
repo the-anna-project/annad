@@ -23,10 +23,7 @@ func (cn *coreNet) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = newImpulse.SetInput(input.(string))
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	newImpulse.SetInputByImpulseID(newImpulse.GetID(), input.(string))
 
 	// Increment the impulse count to track how many impulses are processed
 	// inside the core network. Note that the laborious assignment makes `go vet`
@@ -46,11 +43,7 @@ func (cn *coreNet) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 		return nil, maskAny(err)
 	}
 
-	output, err := newImpulse.GetOutput()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
+	output := newImpulse.GetOutput()
 	newSignal.SetOutput(output)
 
 	return newSignal, nil

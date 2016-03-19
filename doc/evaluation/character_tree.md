@@ -41,21 +41,86 @@ outupt
 
 ### data structures
 
-###### context-input relationship
-Relationships between context and input can be stored as a hash. `key` is a
-context ID holding basic information about itself. Information that should be
+###### impulse-input relationship
+Relationships between impulse and input can be stored as a hash map. `key` is a
+impulse ID holding basic information about itself. Information that should be
 stored are this.
 
 - given input
 - given expected output
-- count of how often this the context's input was triggered to generate sufficient output
-- count of how often this context helped to create a successful response
+- count of how often the impulse's input was triggered to generate sufficient output
+- count of how often the impulse's input helped to create a successful response
 - date of occurrence
 
 ```
 key
-  hashkey  hashvalue
-  hashkey  hashvalue
+  hashkey: hashvalue
+  hashkey: hashvalue
+  ...      ...
+```
+
+---
+
+###### impulse-session relationship
+Relationships between impulse and session can be stored as a key-value pair.
+`key` is an impulse ID. `value` is a session ID. This is a 1:1 relationship.
+One impulse is associated with exactly one session.
+
+```
+key: value
+```
+
+---
+
+###### session-impulse relationship
+Relationships between session and impulse can be stored as a list. `key` is a
+session ID. `listitem` is an impulse ID. This is a 1:n relationship. One
+session is associated with multiple impulses.
+```
+key
+  listitem, listitem, ...
+```
+
+---
+
+###### basic character information
+Basic character information is stored as a hash map. `key` is a character
+sequence holding basic information about itself. How many characters should
+form the sequence should be dynamically found out using different strategies.
+Default might be 3. Information that should be stored are this.
+
+- count of how often this sequence was ever seen
+- count of how often this sequence helped to create a successful response
+- date of first occurrence
+- date of last occurrence
+
+```
+key
+  hashkey: hashvalue
+  hashkey: hashvalue
+  ...      ...
+```
+
+---
+
+###### basic word information
+Basic word information is stored as a hash map. `key` is a word sequence
+holding basic information about itself. How many word should form the sequence
+should be dynamically found out using different strategies. Default might be 3.
+Information that should be stored are this.
+
+- count of how often this sequence was ever seen
+- count of how often this sequence helped to create a successful response
+- date of first occurrence
+- date of last occurrence
+- impulse ID
+- session ID
+
+
+```
+key
+  hashkey: hashvalue
+  hashkey: hashvalue
   ...      ...
 ```
 
@@ -69,68 +134,11 @@ how to structure and measure semantic relationships?
 
 # ???
 
-context-generated-output relationship
+impulse-generated-output relationship
 ```
-key        value
-
-"ctxID"    ["split", "mid dle", "the string", ...]
-...
+impulseID
+  split, mid dle, ...
 ```
-
----
-
-###### input-context relationship
-Relationships between input and context can be stored as a lists. `key` is the
-input's word sequence. `listitem` is a context ID. How many words should form
-the sequence should be dynamically found out using different strategies.
-Default might be 3. Information that should be stored are this.
-
-```
-key
-  listitem listitem ...
-```
-
----
-
-###### basic character information
-Basic character information is stored as a hashe. `key` is a character sequence
-holding basic information about itself. How many characters should form the
-sequence should be dynamically found out using different strategies. Default
-might be 3. Information that should be stored are this.
-
-- count of how often this sequence was ever seen
-- count of how often this sequence helped to create a successful response
-- date of first occurrence
-- date of last occurrence
-
-```
-key
-  hashkey  hashvalue
-  hashkey  hashvalue
-  ...      ...
-```
-
----
-
-###### basic word information
-Basic word information is stored as a hash. `key` is a word sequence holding
-basic information about itself. How many word should form the sequence should
-be dynamically found out using different strategies. Default might be 3.
-Information that should be stored are this.
-
-- count of how often this sequence was ever seen
-- count of how often this sequence helped to create a successful response
-- date of first occurrence
-- date of last occurrence
-
-```
-key
-  hashkey  hashvalue
-  hashkey  hashvalue
-  ...      ...
-```
-
----
 
 # relative character relevance
 Relevance of character sequences can be efficiently stored in a diagram like

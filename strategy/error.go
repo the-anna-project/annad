@@ -22,9 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var invalidActionsError = errgo.New("invalid actions")
+var invalidConfigError = errgo.New("invalid config")
 
-// IsInvalidActions asserts invalidActionsError.
-func IsInvalidActions(err error) bool {
-	return errgo.Cause(err) == invalidActionsError
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return errgo.Cause(err) == invalidConfigError
 }

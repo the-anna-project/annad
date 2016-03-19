@@ -10,16 +10,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	controlLogSetObjectsCmd = &cobra.Command{
+func (a *annactl) InitControlLogSetObjectsCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogSetObjectsCmd")
+
+	newCmd := &cobra.Command{
 		Use:   "objects [object] ...",
 		Short: "Make Anna set log objects.",
 		Long:  "Make Anna set log objects.",
-		Run:   controlLogSetObjectsRun,
+		Run:   a.ExecControlLogSetObjectsCmd,
 	}
-)
 
-func controlLogSetObjectsRun(cmd *cobra.Command, args []string) {
+	return newCmd
+}
+
+func (a *annactl) ExecControlLogSetObjectsCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetObjectsCmd")
+
 	if len(args) == 0 {
 		cmd.Help()
 		os.Exit(1)
@@ -27,8 +33,8 @@ func controlLogSetObjectsRun(cmd *cobra.Command, args []string) {
 
 	ctx := context.Background()
 
-	err := logControl.SetObjects(ctx, strings.Join(args, ","))
+	err := a.LogControl.SetObjects(ctx, strings.Join(args, ","))
 	if err != nil {
-		log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

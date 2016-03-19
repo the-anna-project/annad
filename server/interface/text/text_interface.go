@@ -13,6 +13,7 @@ import (
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -54,6 +55,7 @@ func NewTextInterface(config Config) (spec.TextInterface, error) {
 	if newInterface.Scheduler == nil {
 		return nil, maskAnyf(invalidConfigError, "scheduler must not be empty")
 	}
+	newInterface.Scheduler.Register("ReadPlainWithInputAction", newInterface.ReadPlainWithInputAction)
 
 	return newInterface, nil
 }
@@ -100,47 +102,81 @@ func (ti *textInterface) ReadPlainWithID(ctx context.Context, jobID string) (str
 }
 
 // return jobID
-func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected string) (string, error) {
+func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
 	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithInput")
 
-	action := func(closer <-chan struct{}) (string, error) {
-		newConfig := gateway.DefaultSignalConfig()
-		newConfig.Input = input
-		newSignal := gateway.NewSignal(newConfig)
-
-		// TODO prevent dead locks. In case the same input is returned over and
-		// over again, stop the action.
-
-		for {
-			select {
-			case <-closer:
-				// This action was closed by the scheduler itself. This happens e.g.
-				// when the job's final status was manually set.
-				break
-			default:
-				newSignal, err := ti.TextGateway.Send(newSignal, nil)
-				if err != nil {
-					return "", maskAny(err)
-				}
-
-				output := newSignal.GetOutput()
-				o := output.(string)
-				if expected == "" || (expected != "" && o == expected) {
-					// When there is no expected output given, simply return what we got.
-					// When there is expected output given and it matches what we got,
-					// return it.
-					return o, nil
-				}
-
-				time.Sleep(1 * time.Second)
-			}
-		}
+	newJobConfig := scheduler.DefaultJobConfig()
+	newJobConfig.ActionID = "ReadPlainWithInputAction"
+	newJobConfig.Args = readPlainWithInputArgs{
+		Input:    input,
+		Expected: expected,
 	}
-
-	job, err := ti.Scheduler.Create(action)
+	newJobConfig.SessionID = sessionID
+	newJob, err := scheduler.NewJob(newJobConfig)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	return string(job.GetID()), nil
+	err = ti.Scheduler.Execute(newJob)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return string(newJob.GetID()), nil
+}
+
+// readPlainWithInputArgs represents the arguments configured for and passed to
+// ReadPlainWithInputAction.
+type readPlainWithInputArgs struct {
+	Input    string
+	Expected string
+}
+
+// ReadPlainWithInputAction represents the action of a scheduler job being
+// executed to process ReadPlainWithInput requests asynchronously. args is
+// supposed to be of type readPlainWithInputArgs and represents the arguments
+// passed to this action method. closer represents a notification channel
+// signaling the cancelation of the current job. Thus it informs the action to
+// stop.
+func (ti *textInterface) ReadPlainWithInputAction(args interface{}, closer <-chan struct{}) (string, error) {
+	input := args.(readPlainWithInputArgs).Input
+	expected := args.(readPlainWithInputArgs).Expected
+
+	newConfig := gateway.DefaultSignalConfig()
+	newConfig.Input = input
+	newSignal := gateway.NewSignal(newConfig)
+
+	// Start processing the input. Note that we in all cases want to send a
+	// signal with the given input at least ones to the neural networks,
+	// regardless any cancelations through the closer. The closer is allowed to
+	// end the work being done here in case the input was processed by the neural
+	// networks at least one time.
+	for {
+		newSignal, err := ti.TextGateway.Send(newSignal, nil)
+		if err != nil {
+			return "", maskAny(err)
+		}
+
+		output := newSignal.GetOutput()
+		o := output.(string)
+		if expected == "" || (expected != "" && o == expected) {
+			// When there is no expected output given, simply return what we got.
+			// When there is expected output given and it matches what we got,
+			// return it.
+			return o, nil
+		}
+
+		select {
+		case <-closer:
+			// This action was closed by the scheduler itself. This happens e.g.
+			// when the job's final status was manually set, or another job for the
+			// same session ID was scheduled.
+			return "", nil
+		default:
+			// We did not yet receive the signal to stop the work of this action. Go
+			// ahead with the next iteration.
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }

@@ -3,6 +3,7 @@
 package redisstorage
 
 import (
+	"strconv"
 	"sync"
 
 	"github.com/garyburd/redigo/redis"
@@ -102,6 +103,18 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return newList, nil
 }
 
+func (s *storage) GetHashMap(key string) (map[string]string, error) {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	hashMap, err := redis.StringMap(conn.Do("HGETALL", key))
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return hashMap, nil
+}
+
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	conn := s.Pool.Get()
 	defer conn.Close()
@@ -117,6 +130,42 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	}
 
 	return newList, nil
+}
+
+func (s *storage) PushToSet(key string, element string) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	_, err := redis.Int(conn.Do("SADD", key, element))
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
+func (s *storage) RemoveFromSet(key string, element string) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	_, err := redis.Int(conn.Do("SREM", key, element))
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
+func (s *storage) RemoveScoredElement(key string, element string) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	_, err := redis.Int(conn.Do("ZREM", key, element))
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (s *storage) Set(key, value string) error {
@@ -139,13 +188,125 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 	conn := s.Pool.Get()
 	defer conn.Close()
 
-	reply, err := redis.Int(conn.Do("ZADD", key, score, element))
+	_, err := redis.Int(conn.Do("ZADD", key, score, element))
 	if err != nil {
 		return maskAny(err)
 	}
 
-	if reply != 1 {
-		return maskAnyf(queryExecutionFailedError, "ZADD not executed correctly")
+	return nil
+}
+
+func (s *storage) SetHashMap(key string, hashMap map[string]string) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(hashMap)...))
+	if err != nil {
+		return maskAny(err)
+	}
+
+	if reply != "OK" {
+		return maskAnyf(queryExecutionFailedError, "HMSET not executed correctly")
+	}
+
+	return nil
+}
+
+func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	var cursor int64
+
+	// Start to scan the set until the cursor is 0 again. Note that we check for
+	// the closer twice. At first we prevent scans in case the closer was
+	// triggered directly, and second before each callback execution. That way
+	// ending the walk immediately is guaranteed.
+	for {
+		select {
+		case <-closer:
+			return nil
+		default:
+		}
+
+		reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		cursor := reply[0].(int64)
+		values := reply[1].([]string)
+
+		for i, _ := range values {
+			select {
+			case <-closer:
+				return nil
+			default:
+			}
+
+			if i%2 != 0 {
+				continue
+			}
+
+			score, err := strconv.ParseFloat(values[i+1], 64)
+			if err != nil {
+				return maskAny(err)
+			}
+			err = cb(values[i], score)
+			if err != nil {
+				return maskAny(err)
+			}
+		}
+
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return nil
+}
+
+func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+
+	var cursor int64
+
+	// Start to scan the set until the cursor is 0 again. Note that we check for
+	// the closer twice. At first we prevent scans in case the closer was
+	// triggered directly, and second before each callback execution. That way
+	// ending the walk immediately is guaranteed.
+	for {
+		select {
+		case <-closer:
+			return nil
+		default:
+		}
+
+		reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		cursor := reply[0].(int64)
+		values := reply[1].([]string)
+
+		for _, v := range values {
+			select {
+			case <-closer:
+				return nil
+			default:
+			}
+
+			err := cb(v)
+			if err != nil {
+				return maskAny(err)
+			}
+		}
+
+		if cursor == 0 {
+			break
+		}
 	}
 
 	return nil
