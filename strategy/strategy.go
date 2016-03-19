@@ -24,9 +24,9 @@ type Config struct {
 	Actions []spec.ObjectType
 
 	// HashMap provides a way to create a new strategy object out of a given hash
-	// map containing bare strategy data. If this nil or empty, a completely new
-	// strategy is created. Otherwise it is tried to create a new strategy using
-	// the information of the given hash map.
+	// map containing bare strategy data. If this is nil or empty, a completely
+	// new strategy is created. Otherwise it is tried to create a new strategy
+	// using the information of the given hash map.
 	HashMap map[string]string
 
 	// Requestor represents the object requesting a strategy. E.g. when the
@@ -57,19 +57,19 @@ func NewStrategy(config Config) (spec.Strategy, error) {
 	if config.HashMap != nil {
 		newStrategy = &strategy{}
 
-		for k, v := range config.HashMap {
-			if k == "actions" {
+		for key, value := range config.HashMap {
+			if key == "actions" {
 				var newActions []spec.ObjectType
-				for _, a := range strings.Split(v, ",") {
+				for _, a := range strings.Split(value, ",") {
 					newActions = append(newActions, spec.ObjectType(a))
 				}
 				newStrategy.Actions = newActions
 			}
-			if k == "id" {
-				newStrategy.ID = spec.ObjectID(v)
+			if key == "id" {
+				newStrategy.ID = spec.ObjectID(value)
 			}
-			if k == "requestor" {
-				newStrategy.Requestor = spec.ObjectType(v)
+			if key == "requestor" {
+				newStrategy.Requestor = spec.ObjectType(value)
 			}
 		}
 	} else {
@@ -109,14 +109,10 @@ func (s *strategy) ActionsToString() string {
 	actions := s.GetActions()
 
 	for i, action := range actions {
-		str += string(action)
-
-		// When length of actions is 4, and in the last iteration i is 3, there
-		// will be no more item to append. Thus we don't want to further append a
-		// comma. So 3+1 is higher than 4-1, and we are save.
-		if i+1 <= len(actions)-1 {
+		if i > 0 {
 			str += ","
 		}
+		str += string(action)
 	}
 
 	return str
@@ -127,13 +123,13 @@ func (s *strategy) GetActions() []spec.ObjectType {
 }
 
 func (s *strategy) GetHashMap() map[string]string {
-	hashMap := map[string]string{
+	newHashMap := map[string]string{
 		"actions":   s.ActionsToString(),
 		"id":        string(s.GetID()),
 		"requestor": string(s.GetRequestor()),
 	}
 
-	return hashMap
+	return newHashMap
 }
 
 func (s *strategy) GetRequestor() spec.ObjectType {
@@ -142,7 +138,7 @@ func (s *strategy) GetRequestor() spec.ObjectType {
 
 const (
 	// objectTypeNone is simply a dummy object type injected during randomization
-	// of the action list.
+	// of the action list. See documentations below for more information.
 	objectTypeNone spec.ObjectType = "none"
 )
 
