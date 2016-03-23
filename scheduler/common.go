@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/key"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *scheduler) key(f string, v ...interface{}) string {
@@ -46,7 +46,7 @@ func (s *scheduler) preventDuplicates(job spec.Job) error {
 		return nil
 	}
 
-	for i, _ := range values {
+	for i := range values {
 		if i%2 != 0 {
 			continue
 		}

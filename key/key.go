@@ -34,7 +34,7 @@ const (
 	SysKeyFormat = "s:sys:%s:%s"
 )
 
-// SysKey returns a well configured key used to store and fetch data. Keys
+// NewSysKey returns a well configured key used to store and fetch data. Keys
 // generated with NewSysKey should only be used by objects related to the
 // system scope. This can be e.g. the Scheduler. These objects generate and
 // structure fundamental information used to manage the system. The returned

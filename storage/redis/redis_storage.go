@@ -237,7 +237,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 		cursor := reply[0].(int64)
 		values := reply[1].([]string)
 
-		for i, _ := range values {
+		for i := range values {
 			select {
 			case <-closer:
 				return nil

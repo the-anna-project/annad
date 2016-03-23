@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -79,28 +78,16 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 				newDistribution.ID = spec.ObjectID(value)
 			}
 			if key == "static-channels" {
-				var newStaticChannels []float64
-				for _, c := range strings.Split(value, ",") {
-					f, err := strconv.ParseFloat(c, 64)
-					if err != nil {
-						return nil, maskAnyf(invalidConfigError, err.Error())
-					}
-					newStaticChannels = append(newStaticChannels, f)
+				newStaticChannels, err := staticChannelsFromString(value)
+				if err != nil {
+					return nil, maskAnyf(invalidConfigError, err.Error())
 				}
 				newDistribution.StaticChannels = newStaticChannels
 			}
 			if key == "vectors" {
-				var newVectors [][]float64
-				for _, v := range strings.Split(value, "|") {
-					var newVector []float64
-					for _, d := range strings.Split(v, ",") {
-						f, err := strconv.ParseFloat(d, 64)
-						if err != nil {
-							return nil, maskAnyf(invalidConfigError, err.Error())
-						}
-						newVector = append(newVector, f)
-					}
-					newVectors = append(newVectors, newVector)
+				newVectors, err := vectorsFromString(value)
+				if err != nil {
+					return nil, maskAnyf(invalidConfigError, err.Error())
 				}
 				newDistribution.Vectors = newVectors
 			}
