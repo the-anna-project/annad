@@ -231,7 +231,7 @@ func Test_Gateway_005(t *testing.T) {
 	closer <- struct{}{}
 
 	// Send the signal.
-	newSignal, err = newGateway.Send(newSignal, closer)
+	_, err = newGateway.Send(newSignal, closer)
 	if !IsSignalCanceled(err) {
 		t.Fatalf("Gateway.Send did NOT return proper error")
 	}

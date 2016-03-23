@@ -1,6 +1,7 @@
 package strategy
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/xh3b4sd/anna/spec"
@@ -22,6 +23,21 @@ func Test_Strategy_NewStrategy_ActionsError(t *testing.T) {
 	// Action configuration is missing.
 	newConfig.Requestor = spec.ObjectType("requestor")
 
+	_, err := NewStrategy(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_Strategy_NewStrategy_IDError(t *testing.T) {
+	newHashMap := map[string]string{
+		"actions": "action,action",
+		// Note the ID configuration is missing.
+		"requestor": "requestor",
+	}
+
+	newConfig := DefaultConfig()
+	newConfig.HashMap = newHashMap
 	_, err := NewStrategy(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -65,6 +81,25 @@ func Test_Strategy_GetHashMap(t *testing.T) {
 	}
 	if newStrategy.GetRequestor() != spec.ObjectType("requestor") {
 		t.Fatal("expected", spec.ObjectType("requestor"), "got", newStrategy.GetRequestor())
+	}
+
+	output := newStrategy.GetHashMap()
+
+	if len(output) != len(newHashMap) {
+		t.Fatal("expected", len(newHashMap), "got", len(output))
+	}
+	// Note that we only check for the first action since the actions are
+	// randomized on strategy creation. Having "action" given two times, should
+	// always result in the first action being "action". The second may be
+	// omitted, dependening on the current randomization.
+	if !strings.Contains(output["actions"], "action") {
+		t.Fatal("expected", true, "got", false)
+	}
+	if output["id"] != "id" {
+		t.Fatal("expected", "id", "got", output["id"])
+	}
+	if output["requestor"] != "requestor" {
+		t.Fatal("expected", "requestor", "got", output["requestor"])
 	}
 }
 

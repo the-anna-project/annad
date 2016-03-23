@@ -10,7 +10,7 @@ information.
 ### checklist
 - [ ] Make sure you read and understood the [CONTRIBUTING.md](/.github.com/CONTRIBUTING.md).
 - [ ] Make sure you applied sufficient labels, milestone and assignee.
-- [ ] Make sure all TODO's are addressed.
+- [ ] Make sure all TODOs are addressed.
 - [ ] Make sure there is sufficient documentation.
 - [ ] Make sure there are sufficient tests.
 - [ ] Make sure all commits are squashed before merging.

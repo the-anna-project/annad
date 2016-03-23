@@ -50,7 +50,7 @@ with us for the following topics and more. Further see the
 
 - Software architecture and software design.
 - Software engineering to get issues and pull requests done.
-- Scientific feedback and research.
+- Scientific feedback and research in math, statistics and other relevant fields.
 - Brainstorming and idea generation.
 - Hosting for web based solutions.
 - Integration in all kind of hardware and mobile devices.
