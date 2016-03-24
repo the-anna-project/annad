@@ -32,11 +32,25 @@ An essential step to learn and to act is recognizing patterns. Here this is
 about patterns within input sequences. This goes into the direction of problem
 analysis and solving. The best solution would be to identify a pattern for
 pattern recognition. Thus Anna could find new patterns on her own and make
-reasonable decisions about when to use what pattern and why.
+reasonable decisions about when to use what pattern and why. See the [pattern
+network](https://godoc.org/github.com/xh3b4sd/anna/net/pat).
 
 ---
 
-...
+### make Anna able to imagine things
+What is key for Anna to be intelligent is to be able to imagine things. She
+needs to have an idea about what is going on. About the differences between
+objects interacting within the sorounding environment. See the evaluation about
+[imagination](/doc/evaluation/imagination.md).
+
+---
+
+### make Anna able to find the balance
+A ballance system describes the amount of impulses and how harmonic or extreme
+the distribution of these currently is within the system. That way the state of
+an organism can be represented. Extremes of impulse occurrence cause the
+organism to die. Extremes can be seen as low or high. See the concept about
+[the balance system](/doc/evaluation/imagination.md#balance_system).
 
 ---
 

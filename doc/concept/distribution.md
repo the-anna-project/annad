@@ -5,11 +5,12 @@ characteristics of features and their location in space can be represented and
 alanysed. See https://godoc.org/github.com/xh3b4sd/anna/spec#Distribution for
 implementation details.
 
-### ballance system
-The distribution can be used a ballance system. That describes the amount of impulses and how harmonic or
-extreme the distribution of these currently is within a system. That way the state of an
-organism can be represented. Extremes of impulse occurrence cause the organism
-to die. Extremes can be seen as low or high.
+### balance system
+The distribution can be used a balance system. That describes the amount of
+impulses and how harmonic or extreme the distribution of these currently is
+within a system. That way the state of an organism can be represented. Extremes
+of impulse occurrence cause imbalance within the organism. Extremes can be seen
+as low or high.
 
 No impulses at all represent a low extreme. This is the bar chart
 representation of no impulses.
@@ -32,7 +33,7 @@ x  x  x
 ```
 
 The organism's motivation is the balance of the impulse distribution. This is
-the bar chart representation of a more ballanced distribution of impulses.
+the bar chart representation of a more balanced distribution of impulses.
 ```
       x
 x     x
@@ -47,7 +48,7 @@ As we see there are different channels obtaining their own impulse population.
 This can indicate different evaluations of whatever is going on within the
 organism. Each channel has an separate input and an separate output. Pushing
 an impulse to the input of one channel causes the impulse distribution for the
-given channel to increase. The whole impulse population within a ballance
+given channel to increase. The whole impulse population within a balance
 system is capped. In case the overall impulse population is already saturated,
 an adaption of the other channels happens automatically. That means, that at
 the same time some input is received on one channel, some output is received on
@@ -55,7 +56,7 @@ the other channels. The population of one channel increases and the population
 of the other channels decreases symmetrically. Having three saturated channels
 and one channel pushes an impulse, the value of it is divided by two and
 population worth the half of the pushed impulse is decreased from the other two
-channels, causing a ballance or imballance.
+channels, causing a balance or imbalance.
 
 # weighted analysis
 Weighted analysis can represent vector population within space. The more
