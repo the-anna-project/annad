@@ -11,9 +11,9 @@ type FeatureSet interface {
 	// times.
 	GetFeaturesByCount(count int) []Feature
 
-	// GetFeaturesByLength returns all features which underlying sequences are at
-	// least length characters long.
-	GetFeaturesByLength(length int) []Feature
+	// GetFeaturesByLength returns all features which underlying sequences have a
+	// character length between min and max.
+	GetFeaturesByLength(min, max int) []Feature
 
 	// GetFeaturesBySequence returns all features that are represented by the
 	// given sequence. Note this is usually only one feature.

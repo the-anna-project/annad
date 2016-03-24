@@ -142,7 +142,7 @@ dynamically. Anyway I think we really need visualization to truly understand
 the meaning of things, to grasp contextual information over time and space
 where information flow in. Further imagine the following problem. Having an
 arbitrary sentence given, there are words that are more and there are words
-that are less descriptive.  E.g. a noun like `tree` has more semantic meaning
+that are less descriptive. E.g. a noun like `tree` has more semantic meaning
 and is more descriptive than the word `have`. We can try to find out what
 sequences have a dedicated meaning by looking up connections between nodes
 within the knowledge network. Inspecting the lookups outcome we will see that
@@ -154,9 +154,35 @@ information.
 Imagine inputs like that.
 ```
 Trees have leaves.
+Trees need leaves.
+Leaves are attached to trees.
+Trees have roots.
+Trees need roots.
+Roots are essential for trees.
+Children have lollipos.
+Lollipops are sweet.
+Children like lollipos.
+Children have shoes.
+Children need shoes.
+Children walk better with shoes.
+```
+
+```
+Trees have leaves.
 Trees have roots.
 Children have lollipos.
 Children have shoes.
+
+Children have no leaves.
+Children don't have roots.
+Lollipops not have roots.
+Trees do not have shoes.
+```
+
+```
+have
+have not
+don't have
 ```
 
 We see that `leaves` and `roots` are more tightly coupled to `trees`. This

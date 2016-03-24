@@ -122,19 +122,9 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 	return newDistribution, nil
 }
 
-// TODO add moving similarity with threshold
-// TODO add surrounding lengths
-// TODO add sequence combination distributions
-//
-//
-//
-//
-//
-//
-//
-//
-//
 // TODO find a way to find these patterns automatically
+//
+// TODO detect irregularities
 type distribution struct {
 	DistributionConfig
 
