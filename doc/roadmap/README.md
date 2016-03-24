@@ -28,11 +28,11 @@ her.
 Here is a list of incomplete steps necesarry to be done.
 
 ### make Anna able to recognize patterns
-An essential step to learn and to act is recognizing patterns. This goes into
-the direction of problem analysis and solving. The best solution would be to
-identify a pattern for pattern recognition. Thus Anna could find new patterns
-on her own and make reasonable decisions about when to use what pattern and
-why.
+An essential step to learn and to act is recognizing patterns. Here this is
+about patterns within input sequences. This goes into the direction of problem
+analysis and solving. The best solution would be to identify a pattern for
+pattern recognition. Thus Anna could find new patterns on her own and make
+reasonable decisions about when to use what pattern and why.
 
 ---
 
