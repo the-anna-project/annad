@@ -125,6 +125,7 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 // TODO find a way to find these patterns automatically
 //
 // TODO detect irregularities
+// TODO add thrift threshold
 type distribution struct {
 	DistributionConfig
 
