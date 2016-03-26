@@ -41,6 +41,12 @@ func Test_String_ContainsString(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			// Note all args are missing.
+			Input:        []interface{}{},
+			Expected:     false,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
 			// Note substr is missing.
 			Input:        []interface{}{"test string"},
 			Expected:     false,
@@ -85,78 +91,73 @@ func Test_String_ContainsString(t *testing.T) {
 	}
 }
 
-func Test_String_ContainsStringSlice(t *testing.T) {
+func Test_String_RepeatString(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
-		Expected     bool
+		Expected     string
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, ""},
-			Expected:     false,
+			Input:        []interface{}{"ab", 0},
+			Expected:     "",
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "test"},
-			Expected:     true,
+			Input:        []interface{}{"ab", 1},
+			Expected:     "ab",
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, " "},
-			Expected:     true,
+			Input:        []interface{}{"ab", 2},
+			Expected:     "abab",
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "string"},
-			Expected:     true,
+			Input:        []interface{}{"ab", 4},
+			Expected:     "abababab",
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "foo"},
-			Expected:     false,
-			ErrorMatcher: nil,
-		},
-		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "  "},
-			Expected:     false,
-			ErrorMatcher: nil,
-		},
-		{
-			// Note substr is missing.
-			Input:        []interface{}{[]string{"test", " ", "string"}},
-			Expected:     false,
+			// Note all args are missing.
+			Input:        []interface{}{},
+			Expected:     "",
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			// Note ss is wrong.
-			Input:        []interface{}{"test string", " "},
-			Expected:     false,
+			// Note substr is missing.
+			Input:        []interface{}{"ab"},
+			Expected:     "",
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{23, "ab"},
+			Expected:     "",
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, 23},
-			Expected:     false,
+			Input:        []interface{}{false, 23},
+			Expected:     "",
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, 0.82},
-			Expected:     false,
+			Input:        []interface{}{"ab", 0.82},
+			Expected:     "",
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, []bool{false}},
-			Expected:     false,
+			Input:        []interface{}{"ab", []bool{false}},
+			Expected:     "",
 			ErrorMatcher: IsWrongArgumentType,
 		},
 	}
 
 	for i, testCase := range testCases {
-		args, err := ContainsStringSlice(testCase.Input...)
+		args, err := RepeatString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 		if testCase.ErrorMatcher == nil {
-			output, err := ArgToBool(args, 0)
+			output, err := ArgToString(args, 0)
 			if err != nil {
 				t.Fatal("case", i+1, "expected", nil, "got", err)
 			}

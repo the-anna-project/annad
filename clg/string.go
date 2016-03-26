@@ -19,23 +19,17 @@ func ContainsString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{contains}, nil
 }
 
-func ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
-	ss, err := ArgToStringSlice(args, 0)
+func RepeatString(args ...interface{}) ([]interface{}, error) {
+	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	str, err := ArgToString(args, 1)
+	count, err := ArgToInt(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	var contains bool
-	for _, s := range ss {
-		if s == str {
-			contains = true
-			break
-		}
-	}
+	repeated := strings.Repeat(s, count)
 
-	return []interface{}{contains}, nil
+	return []interface{}{repeated}, nil
 }

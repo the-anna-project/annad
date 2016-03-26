@@ -12,6 +12,18 @@ func ArgToBool(args []interface{}, index int) (bool, error) {
 	return false, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
 }
 
+func ArgToInt(args []interface{}, index int) (int, error) {
+	if len(args) < index+1 {
+		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if i, ok := args[index].(int); ok {
+		return i, nil
+	}
+
+	return 0, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
+}
+
 func ArgToString(args []interface{}, index int) (string, error) {
 	if len(args) < index+1 {
 		return "", maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))

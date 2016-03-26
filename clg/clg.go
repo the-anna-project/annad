@@ -8,7 +8,11 @@ var (
 
 func init() {
 	Index = map[string]func(args ...interface{}) ([]interface{}, error){
-		"ContainsString":      ContainsString,
+		// String.
+		"ContainsString": ContainsString,
+		"RepeatString":   RepeatString,
+
+		// String Slice.
 		"ContainsStringSlice": ContainsStringSlice,
 	}
 }
