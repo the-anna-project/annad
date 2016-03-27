@@ -10,9 +10,12 @@ func init() {
 	Index = map[string]func(args ...interface{}) ([]interface{}, error){
 		// String.
 		"ContainsString": ContainsString,
+		"LongerString":   LongerString,
 		"RepeatString":   RepeatString,
+		"ShorterString":  ShorterString,
 
 		// String Slice.
 		"ContainsStringSlice": ContainsStringSlice,
+		"SwapStringSlice":     SwapStringSlice,
 	}
 }

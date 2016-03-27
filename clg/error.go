@@ -29,6 +29,13 @@ func IsNotEnoughArguments(err error) bool {
 	return errgo.Cause(err) == notEnoughArgumentsError
 }
 
+var tooManyArgumentsError = errgo.New("not enough arguments")
+
+// IsTooManyArguments asserts tooManyArgumentsError.
+func IsTooManyArguments(err error) bool {
+	return errgo.Cause(err) == tooManyArgumentsError
+}
+
 var wrongArgumentTypeError = errgo.New("wrong argument type")
 
 // IsWrongArgumentType asserts wrongArgumentTypeError.

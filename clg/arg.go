@@ -1,17 +1,5 @@
 package clg
 
-func ArgToBool(args []interface{}, index int) (bool, error) {
-	if len(args) < index+1 {
-		return false, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
-	}
-
-	if s, ok := args[index].(bool); ok {
-		return s, nil
-	}
-
-	return false, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
-}
-
 func ArgToInt(args []interface{}, index int) (int, error) {
 	if len(args) < index+1 {
 		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
