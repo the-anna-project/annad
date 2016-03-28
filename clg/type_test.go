@@ -1,7 +1,6 @@
 package clg
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -61,7 +60,6 @@ func Test_Type_ArgType(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		fmt.Printf("%#v\n", testCase.Input)
 		output, err := ArgType(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
