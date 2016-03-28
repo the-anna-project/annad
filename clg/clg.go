@@ -3,6 +3,7 @@
 package clg
 
 var (
+	// Index represents the CLG index containing all CLGs that can be used.
 	Index map[string]func(args ...interface{}) ([]interface{}, error)
 )
 
@@ -13,9 +14,16 @@ func init() {
 		"LongerString":   LongerString,
 		"RepeatString":   RepeatString,
 		"ShorterString":  ShorterString,
+		"SplitString":    SplitString,
 
 		// String Slice.
-		"ContainsStringSlice": ContainsStringSlice,
-		"SwapStringSlice":     SwapStringSlice,
+		"ContainsStringSlice":  ContainsStringSlice,
+		"JoinStringSlice":      JoinStringSlice,
+		"SortStringSlice":      SortStringSlice,
+		"SwapLeftStringSlice":  SwapLeftStringSlice,
+		"SwapRightStringSlice": SwapRightStringSlice,
+
+		// Type.
+		"ArgType": ArgType,
 	}
 }
