@@ -16,3 +16,30 @@ behaviour could be influenced. That way a simulation of currently experienced
 situatiuons would go a step further. The surrounding environment influences
 created thoughts. Created thoughts are recognized. Recognized thoughts
 influence behavior. Behavior influences the surrounding environment.
+
+```
+A concept is a common feature or characteristic. Kant investigated the way that
+empirical a posteriori concepts are created. The logical acts of the
+understanding by which concepts are generated as to their form are:
+
+- comparison, i.e., the likening of mental images to one another in relation to
+  the unity of consciousness;
+- reflection, i.e., the going back over different mental images, how they can
+  be comprehended in one consciousness; and finally
+- abstraction or the segregation of everything else by which the mental images
+  differ ...
+
+In order to make our mental images into concepts, one must thus be able to
+compare, reflect, and abstract, for these three logical operations of the
+understanding are essential and general conditions of generating any concept
+whatever. For example, I see a fir, a willow, and a linden. In firstly
+comparing these objects, I notice that they are different from one another in
+respect of trunk, branches, leaves, and the like; further, however, I reflect
+only on what they have in common, the trunk, the branches, the leaves
+themselves, and abstract from their size, shape, and so forth; thus I gain a
+concept of a tree.
+
+— Logic, §6
+```
+
+See https://en.wikipedia.org/wiki/Concept.
