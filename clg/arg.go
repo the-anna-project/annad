@@ -1,7 +1,6 @@
 package clg
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -56,7 +55,6 @@ func ArgsToValues(args []interface{}) []reflect.Value {
 }
 
 func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
-	fmt.Printf("values: %#v\n", values)
 	if len(values) > 2 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(values))
 	}
@@ -64,11 +62,9 @@ func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(values))
 	}
 
-	if !values[1].IsValid() {
-		fmt.Print(1)
+	if !values[1].IsValid() || values[1].IsNil() {
 		return values[0].Interface().([]interface{}), nil
 	} else {
-		fmt.Print(2)
 		return nil, maskAny(values[1].Interface().(error))
 	}
 }
