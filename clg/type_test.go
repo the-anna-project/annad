@@ -59,8 +59,14 @@ func Test_Type_ArgType(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := ArgType(testCase.Input...)
+		output, err := newIndex.ArgType(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

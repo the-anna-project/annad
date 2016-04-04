@@ -90,8 +90,14 @@ func Test_String_ContainsString(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := ContainsString(testCase.Input...)
+		output, err := newIndex.ContainsString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -171,8 +177,14 @@ func Test_String_LongerString(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := LongerString(testCase.Input...)
+		output, err := newIndex.LongerString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -259,8 +271,14 @@ func Test_String_RepeatString(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := RepeatString(testCase.Input...)
+		output, err := newIndex.RepeatString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -340,8 +358,14 @@ func Test_String_ShorterString(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := ShorterString(testCase.Input...)
+		output, err := newIndex.ShorterString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -421,8 +445,14 @@ func Test_String_SplitString(t *testing.T) {
 		},
 	}
 
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
 	for i, testCase := range testCases {
-		output, err := SplitString(testCase.Input...)
+		output, err := newIndex.SplitString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

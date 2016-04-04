@@ -4,8 +4,7 @@ import (
 	"reflect"
 )
 
-// ArgType provides functionality to retreive an arguments type.
-func ArgType(args ...interface{}) ([]interface{}, error) {
+func (i *index) ArgType(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 1 got %d", len(args))
 	}
