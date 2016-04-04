@@ -147,37 +147,74 @@ func Test_FeatureSet_GetFeaturesByCount(t *testing.T) {
 }
 
 func Test_FeatureSet_GetFeaturesByLength(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
-	newConfig.MinCount = 2
-	newConfig.Sequences = []string{
-		"This is, a test.",
-		"This is, another test.",
-	}
-	newFeatureSet, err := NewFeatureSet(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
+	testCases := []struct {
+		Sequences []string
+		Min       int
+		Max       int
+		Expected  string
+	}{
+		{
+			Sequences: []string{
+				"This is, a test.",
+				"This is, another test.",
+			},
+			Min:      1,
+			Max:      1,
+			Expected: ".",
+		},
+		{
+			Sequences: []string{
+				"This is, a test.",
+				"This is, another test.",
+			},
+			Min:      7,
+			Max:      7,
+			Expected: "This is",
+		},
+		{
+			Sequences: []string{
+				"This is, a test.",
+				"This is, another test.",
+			},
+			Min:      1,
+			Max:      -1,
+			Expected: ".",
+		},
+		{
+			Sequences: []string{
+				"This is, a test.",
+				"This is, another test.",
+			},
+			Min:      7,
+			Max:      -1,
+			Expected: "This is",
+		},
 	}
 
-	err = newFeatureSet.Scan()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	fs := newFeatureSet.GetFeaturesByLength(1)
-	for _, f := range fs {
-		if f.GetSequence() != "." {
-			continue
+	for i, testCase := range testCases {
+		newConfig := DefaultFeatureSetConfig()
+		newConfig.MinCount = 2
+		newConfig.Sequences = testCase.Sequences
+		newFeatureSet, err := NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
 		}
 
-		if f.GetCount() != 2 {
-			t.Fatal("expected", 2, "got", f.GetCount())
+		err = newFeatureSet.Scan()
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
 		}
-		calculate := []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.5}
-		if !reflect.DeepEqual(f.GetDistribution().Calculate(), calculate) {
-			t.Fatal("expected", calculate, "got", f.GetDistribution().Calculate())
+
+		var found bool
+		fs := newFeatureSet.GetFeaturesByLength(testCase.Min, testCase.Max)
+		for _, f := range fs {
+			if f.GetSequence() == testCase.Expected {
+				found = true
+				break
+			}
 		}
-		if f.GetSequence() != "." {
-			t.Fatal("expected", ".", "got", f.GetSequence())
+		if !found {
+			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 	}
 }

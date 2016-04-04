@@ -97,11 +97,12 @@ func (fs *featureSet) GetFeaturesByCount(count int) []spec.Feature {
 	return newFeatures
 }
 
-func (fs *featureSet) GetFeaturesByLength(length int) []spec.Feature {
+func (fs *featureSet) GetFeaturesByLength(min, max int) []spec.Feature {
 	var newFeatures []spec.Feature
 
 	for _, f := range fs.Features {
-		if len(f.GetSequence()) >= length {
+		l := len(f.GetSequence())
+		if l >= min && (l <= max || max == -1) {
 			newFeatures = append(newFeatures, f)
 		}
 	}

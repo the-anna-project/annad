@@ -164,7 +164,7 @@ func (s *storage) PushToSet(key string, element string) error {
 	set, ok := s.MathSet[key]
 	if !ok {
 		set = map[string]struct{}{
-			element: struct{}{},
+			element: {},
 		}
 	}
 
@@ -327,7 +327,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 		return nil
 	}
 
-	for element, _ := range set {
+	for element := range set {
 		select {
 		case <-closer:
 			return nil

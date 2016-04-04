@@ -1,6 +1,7 @@
 package patnet
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -62,7 +63,7 @@ func mapVectorsToChannels(vectors [][]float64, channels []float64) []float64 {
 func channelDistance(perc1, perc2 []float64) []float64 {
 	var distance []float64
 
-	for index, _ := range perc1 {
+	for index := range perc1 {
 		distance = append(distance, perc2[index]-perc1[index])
 	}
 
@@ -131,7 +132,7 @@ func seqCombinations(sequence, separator string, minCount int) []string {
 	var combs []string
 	splitted := strings.Split(sequence, separator)
 
-	for i, _ := range splitted {
+	for i := range splitted {
 		comb := splitted[i]
 		if !containsString(combs, comb) && len(comb) >= minCount {
 			combs = append(combs, comb)
@@ -160,7 +161,7 @@ func seqPositions(sequence, seq string) [][]float64 {
 	rdsf := 100 / ll
 	rdef := float64(len(seq)) * 100 / ll
 
-	for i, _ := range sequence {
+	for i := range sequence {
 		if strings.HasPrefix(sequence[i:], seq) {
 			// Position must be represented by its relative dimensions. When trying
 			// to find out if a period is always at the end of a sentence, the
@@ -184,4 +185,36 @@ func containsString(combs []string, comb string) bool {
 	}
 
 	return false
+}
+
+func staticChannelsFromString(value string) ([]float64, error) {
+	var newStaticChannels []float64
+
+	for _, c := range strings.Split(value, ",") {
+		f, err := strconv.ParseFloat(c, 64)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		newStaticChannels = append(newStaticChannels, f)
+	}
+
+	return newStaticChannels, nil
+}
+
+func vectorsFromString(value string) ([][]float64, error) {
+	var newVectors [][]float64
+
+	for _, v := range strings.Split(value, "|") {
+		var newVector []float64
+		for _, d := range strings.Split(v, ",") {
+			f, err := strconv.ParseFloat(d, 64)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newVector = append(newVector, f)
+		}
+		newVectors = append(newVectors, newVector)
+	}
+
+	return newVectors, nil
 }

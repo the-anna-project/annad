@@ -235,7 +235,8 @@ func Test_Distribution_Difference(t *testing.T) {
 		output, err := newDistribution1.Difference(newDistribution2)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("expected", true, "got", false)
-		} else {
+		}
+		if testCase.ErrorMatcher == nil {
 			if len(output) != len(testCase.Expected) {
 				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
 			}

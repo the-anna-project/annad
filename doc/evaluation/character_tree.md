@@ -128,56 +128,87 @@ key
 
 # ???
 
-how to structure and measure semantic relationships?
-
----
-
-# ???
-
 impulse-generated-output relationship
 ```
 impulseID
   split, mid dle, ...
 ```
 
-# relative character relevance
-Relevance of character sequences can be efficiently stored in a diagram like
-matrix. The matrix provides `n` rows dependening on the required distributional
-accuracy. The more rows the matrix has the more differentiations can be made.
-The value of each row represents the sequence having highest score for this
-distribution. A sequence's relevant score is compared against each row of the
-matrix. Is the score bigger than the row value, the next row is compared. Is
-the score lower then the next row's value, the former row'S value will be set
-to the score of the current sequence.
+### semantic relationship
+To detect meaning, we need to see knowledge as a network, no matter if we can
+make information visible or not. We need to find the nodes with the most
+connections. These information can be used to feed the ballance system
+dynamically. Anyway I think we really need visualization to truly understand
+the meaning of things, to grasp contextual information over time and space
+where information flow in. Further imagine the following problem. Having an
+arbitrary sentence given, there are words that are more and there are words
+that are less descriptive. E.g. a noun like `tree` has more semantic meaning
+and is more descriptive than the word `have`. We can try to find out what
+sequences have a dedicated meaning by looking up connections between nodes
+within the knowledge network. Inspecting the lookups outcome we will see that
+nodes connected with the `tree` node are more tightly coupled and
+interconnected. The picture of the connections of the `have` node should be
+more mixed across all kinds of different semantics, causing contradictionary
+information.
 
-That way a relative relevance can be detected by comparing all `n` rows of the
-matrix and calculating medians, percentiles or other metrics. Using this method
-metric spikes can be ignored or used. This approach further benefits from its
-limited amount of information required to make the metrics detection work. Note
-that the sequence's score can be anything. A counter for occurrence, success, or
-failure, or simply a timestamp.
-
-For several reasons the methods metrics can be capped. To prevent technical
-overflows or subsets fulfilling certain requirements. Lets say there is a
-maximum value given scores must not exceed. This cap then must be implemented
-by preserving the relative distances between the matrix's rows. To prevent
-overflowing all rows values can be cut down by some percentage, e.g. 50%. This
-leads to the problem that the manipulating sequences still hold their 100%
-scores. The matrix defines the cap that must be applied to each sequence, if
-not yet done. For this there must be the information of the cap value, and if
-the cap should be applied before operating against the matrix. Here that means
-any operation. Reads and writes.
-
-This is how such a matrix looks like.
+Imagine inputs like that.
 ```
- 1    -
- 2    -
- 3    -
- 4    --
- 5    --
- 6    --
- 7    ---
- 8    ---
- 9    ----
-10    ----------
+Trees have leaves.
+Trees need leaves.
+Leaves are attached to trees.
+Trees have roots.
+Trees need roots.
+Roots are essential for trees.
+Children have lollipos.
+Lollipops are sweet.
+Children like lollipos.
+Children have shoes.
+Children need shoes.
+Children walk better with shoes.
 ```
+
+```
+Trees have leaves.
+Trees have roots.
+Children have lollipos.
+Children have shoes.
+
+Children have no leaves.
+Children don't have roots.
+Lollipops not have roots.
+Trees do not have shoes.
+```
+
+```
+have
+have not
+don't have
+```
+
+We see that `leaves` and `roots` are more tightly coupled to `trees`. This
+connections form a dense cluster where participating nodes have first class
+connections.
+```
+trees
+  - leaves
+  - roots
+```
+
+We see that the nouns have more broad connections across different topics where
+nodes semantically don't really have tight connections to each other.
+```
+have
+  - lollipos
+  - children
+  - shoes
+  - trees
+  - leaves
+```
+
+**One idea could be to detect this pattern using k-means clustering and using
+the occupied space of a clusters vectors to weight semantic relationships.**
+
+See
+- https://www.youtube.com/watch?v=Q-B_ONJIEcE
+- https://www.youtube.com/watch?v=hBpetDxIEMU
+- https://en.wikipedia.org/wiki/Damasio%27s_theory_of_consciousness.

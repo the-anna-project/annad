@@ -60,7 +60,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewImpulse creates a new configured command line object.
+// NewAnnactl creates a new configured command line object.
 func NewAnnactl(config Config) spec.Annactl {
 	// annactl
 	newAnnactl := &annactl{
