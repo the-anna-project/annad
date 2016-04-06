@@ -17,9 +17,14 @@ const (
 // FeatureSetConfig represents the configuration used to create a new feature
 // set object.
 type FeatureSetConfig struct {
-	// MinLength represents the length of a sequence detected as feature. E.g.
-	// MinLength set to 3 results in sequences having at least the length of 3
-	// when detected features.
+	// MaxLength represents the length maximum of a sequence detected as feature.
+	// E.g. MaxLength set to 3 results in sequences having a length not larger
+	// than 3 when detected as features. The value -1 disables any limitiation.
+	MaxLength int
+
+	// MinLength represents the minimum length of a sequence detected as feature.
+	// E.g. MinLength set to 3 results in sequences having a length not smaller
+	// than 3 when detected as features. The value -1 disables any limitiation.
 	MinLength int
 
 	// MinCount represents the number of occurrences at least required to be
@@ -46,6 +51,7 @@ type FeatureSetConfig struct {
 // feature set object by best effort.
 func DefaultFeatureSetConfig() FeatureSetConfig {
 	newConfig := FeatureSetConfig{
+		MaxLength: -1,
 		MinLength: 1,
 		MinCount:  1,
 		Separator: "",
@@ -130,7 +136,7 @@ func (fs *featureSet) Scan() error {
 	// Prepare sequence combinations.
 	var allSeqs []string
 	for _, sequence := range fs.Sequences {
-		for _, seq := range seqCombinations(sequence, fs.Separator, fs.MinLength) {
+		for _, seq := range seqCombinations(sequence, fs.Separator, fs.MinLength, fs.MaxLength) {
 			if !containsString(allSeqs, seq) {
 				allSeqs = append(allSeqs, seq)
 			}

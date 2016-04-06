@@ -128,31 +128,46 @@ func betweenFloat64(i, min, max float64) bool {
 	return true
 }
 
-func seqCombinations(sequence, separator string, minCount int) []string {
+func seqCombinations(sequence, separator string, minLength, maxLength int) []string {
 	var combs []string
 	splitted := strings.Split(sequence, separator)
 
+	if matchesLength(sequence, minLength, maxLength) {
+		combs = append(combs, sequence)
+	}
+
 	for i := range splitted {
 		comb := splitted[i]
-		if !containsString(combs, comb) && len(comb) >= minCount {
+		if !containsString(combs, comb) && matchesLength(comb, minLength, maxLength) {
 			combs = append(combs, comb)
 		}
 
 		j := i
 		for range splitted {
 			j++
-			if j > len(splitted)-1 {
+
+			if j > len(splitted) {
 				break
 			}
 
 			comb := strings.Join(splitted[i:j], separator)
-			if !containsString(combs, comb) && len(comb) >= minCount {
+			if !containsString(combs, comb) && matchesLength(comb, minLength, maxLength) {
 				combs = append(combs, comb)
 			}
 		}
 	}
 
 	return combs
+}
+
+func matchesLength(seq string, min, max int) bool {
+	if min != -1 && len(seq) < min {
+		return false
+	}
+	if max != -1 && len(seq) > max {
+		return false
+	}
+	return true
 }
 
 func seqPositions(sequence, seq string) [][]float64 {

@@ -196,6 +196,73 @@ func Test_String_LongerString(t *testing.T) {
 	}
 }
 
+func Test_String_NewIDString(t *testing.T) {
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+
+	output1, err := newIndex.NewIDString([]interface{}{}...)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	output2, err := newIndex.NewIDString([]interface{}{}...)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	s1, err := ArgToString(output1, 0)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	s2, err := ArgToString(output2, 0)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if s1 == s2 {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_String_NewIDString_Error(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"ab", "abc", false},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"ab"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{23, "ab"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.NewIDString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_String_RepeatString(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
@@ -453,6 +520,140 @@ func Test_String_SplitString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newIndex.SplitString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_String_ToLowerString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     []interface{}{"foo"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"Foo"},
+			Expected:     []interface{}{"foo"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"FoO"},
+			Expected:     []interface{}{"foo"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"FOO"},
+			Expected:     []interface{}{"foo"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"FOO", "bar"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3.4},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.ToLowerString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_String_ToUpperString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"FOO"},
+			Expected:     []interface{}{"FOO"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"fOO"},
+			Expected:     []interface{}{"FOO"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"fOo"},
+			Expected:     []interface{}{"FOO"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     []interface{}{"FOO"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"foo", "bar"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3.4},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.ToUpperString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

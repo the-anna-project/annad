@@ -50,6 +50,7 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
+// TODO rename to SynNet
 // NewCharNet creates a new configured character network object.
 func NewCharNet(config Config) (spec.Network, error) {
 	newNet := &charNet{

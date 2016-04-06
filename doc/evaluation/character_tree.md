@@ -105,7 +105,7 @@ key
 
 ###### basic word information
 Basic word information is stored as a hash map. `key` is a word sequence
-holding basic information about itself. How many word should form the sequence
+holding basic information about itself. How many words should form the sequence
 should be dynamically found out using different strategies. Default might be 3.
 Information that should be stored are this.
 
@@ -115,7 +115,6 @@ Information that should be stored are this.
 - date of last occurrence
 - impulse ID
 - session ID
-
 
 ```
 key
@@ -134,7 +133,7 @@ impulseID
   split, mid dle, ...
 ```
 
-### semantic relationship
+### semantic relationship (TODO nothing for the character network)
 To detect meaning, we need to see knowledge as a network, no matter if we can
 make information visible or not. We need to find the nodes with the most
 connections. These information can be used to feed the ballance system

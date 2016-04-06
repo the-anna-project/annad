@@ -5,54 +5,59 @@ import (
 	"testing"
 )
 
-func Test_StringSlice_ContainsStringSlice(t *testing.T) {
+func Test_IntSlice_ContainsIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, ""},
+			Input:        []interface{}{[]int{2, 0, 3}, 1},
 			Expected:     []interface{}{false},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "test"},
+			Input:        []interface{}{[]int{2, 0, 3}, 3},
 			Expected:     []interface{}{true},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, " "},
+			Input:        []interface{}{[]int{2, 0, 3}, 0},
 			Expected:     []interface{}{true},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "string"},
+			Input:        []interface{}{[]int{2, 0, 3}, 2},
 			Expected:     []interface{}{true},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "foo"},
+			Input:        []interface{}{[]int{2, 0, 3}, 22},
 			Expected:     []interface{}{false},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "  "},
+			Input:        []interface{}{[]int{2, 0, 3}, 0000}, // 0000 translates to 0
+			Expected:     []interface{}{true},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{2, 0, 3}, 2222},
 			Expected:     []interface{}{false},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "test", "foo"},
+			Input:        []interface{}{[]int{2, 0, 3}, 0000, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "test", 23},
+			Input:        []interface{}{[]int{2, 0, 3}, 0000, 23},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, "test", false},
+			Input:        []interface{}{[]int{2, 0, 3}, 0000, false},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
@@ -64,7 +69,7 @@ func Test_StringSlice_ContainsStringSlice(t *testing.T) {
 		},
 		{
 			// Note substr is missing.
-			Input:        []interface{}{[]string{"test", " ", "string"}},
+			Input:        []interface{}{[]int{2, 0, 3}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -75,17 +80,17 @@ func Test_StringSlice_ContainsStringSlice(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, 23},
+			Input:        []interface{}{[]int{2, 0, 3}, "ab"},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, 0.82},
+			Input:        []interface{}{[]int{2, 0, 3}, 0.82},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"test", " ", "string"}, []bool{false}},
+			Input:        []interface{}{[]int{2, 0, 3}, []bool{false}},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
@@ -98,7 +103,7 @@ func Test_StringSlice_ContainsStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.ContainsStringSlice(testCase.Input...)
+		output, err := newIndex.ContainsIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -110,24 +115,24 @@ func Test_StringSlice_ContainsStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_CountStringSlice(t *testing.T) {
+func Test_IntSlice_CountIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Input:        []interface{}{[]int{1, 2, 3}},
 			Expected:     []interface{}{3},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{}},
+			Input:        []interface{}{[]int{}},
 			Expected:     []interface{}{0},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"", "", "", "foo", "", "bar"}},
+			Input:        []interface{}{[]int{0, 0, 0, 3, 0, 4}},
 			Expected:     []interface{}{6},
 			ErrorMatcher: nil,
 		},
@@ -137,12 +142,12 @@ func Test_StringSlice_CountStringSlice(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]int{1, 2, 3}},
+			Input:        []interface{}{[]string{"a", "b", "c"}},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{}, "foo"},
+			Input:        []interface{}{[]int{}, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
@@ -155,7 +160,7 @@ func Test_StringSlice_CountStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.CountStringSlice(testCase.Input...)
+		output, err := newIndex.CountIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -167,34 +172,34 @@ func Test_StringSlice_CountStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_GlobMatcherStringSlice(t *testing.T) {
+func Test_IntSlice_EqualMatcherIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "a"},
-			Expected:     []interface{}{[]string{"a"}, []string{"b", "c"}},
+			Input:        []interface{}{[]int{1, 2, 3}, 1},
+			Expected:     []interface{}{[]int{1}, []int{2, 3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "ab"},
-			Expected:     []interface{}{[]string{"a", "b"}, []string{"c"}},
+			Input:        []interface{}{[]int{1, 2, 3}, 12},
+			Expected:     []interface{}{[]int(nil), []int{1, 2, 3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}, "c"},
-			Expected:     []interface{}{[]string{"c", "c", "c"}, []string(nil)},
+			Input:        []interface{}{[]int{3, 3, 3}, 3},
+			Expected:     []interface{}{[]int{3, 3, 3}, []int(nil)},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}, "c", "foo"},
+			Input:        []interface{}{[]int{3, 3, 3}, 3, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}},
+			Input:        []interface{}{[]int{3, 3, 3}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -204,7 +209,7 @@ func Test_StringSlice_GlobMatcherStringSlice(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{3, "c"},
+			Input:        []interface{}{3, 3},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
@@ -217,7 +222,7 @@ func Test_StringSlice_GlobMatcherStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.GlobMatcherStringSlice(testCase.Input...)
+		output, err := newIndex.EqualMatcherIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -229,34 +234,34 @@ func Test_StringSlice_GlobMatcherStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_EqualMatcherStringSlice(t *testing.T) {
+func Test_IntSlice_GlobMatcherIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "a"},
-			Expected:     []interface{}{[]string{"a"}, []string{"b", "c"}},
+			Input:        []interface{}{[]int{1, 2, 3}, 1},
+			Expected:     []interface{}{[]int{1}, []int{2, 3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "ab"},
-			Expected:     []interface{}{[]string(nil), []string{"a", "b", "c"}},
+			Input:        []interface{}{[]int{1, 2, 3}, 12},
+			Expected:     []interface{}{[]int{1, 2}, []int{3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}, "c"},
-			Expected:     []interface{}{[]string{"c", "c", "c"}, []string(nil)},
+			Input:        []interface{}{[]int{3, 3, 3}, 3},
+			Expected:     []interface{}{[]int{3, 3, 3}, []int(nil)},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}, "c", "foo"},
+			Input:        []interface{}{[]int{3, 3, 3}, 3, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "c", "c"}},
+			Input:        []interface{}{[]int{3, 3, 3}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -266,7 +271,7 @@ func Test_StringSlice_EqualMatcherStringSlice(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{3, "c"},
+			Input:        []interface{}{3, 3},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
@@ -279,7 +284,7 @@ func Test_StringSlice_EqualMatcherStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.EqualMatcherStringSlice(testCase.Input...)
+		output, err := newIndex.GlobMatcherIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -291,25 +296,25 @@ func Test_StringSlice_EqualMatcherStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_IndexStringSlice(t *testing.T) {
+func Test_IntSlice_IndexIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, 0},
-			Expected:     []interface{}{"a"},
+			Input:        []interface{}{[]int{1, 2, 3}, 0},
+			Expected:     []interface{}{1},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, 1},
-			Expected:     []interface{}{"b"},
+			Input:        []interface{}{[]int{1, 2, 3}, 1},
+			Expected:     []interface{}{2},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, 2},
-			Expected:     []interface{}{"c"},
+			Input:        []interface{}{[]int{1, 2, 3}, 2},
+			Expected:     []interface{}{3},
 			ErrorMatcher: nil,
 		},
 		{
@@ -318,22 +323,22 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "a"},
+			Input:        []interface{}{[]int{1, 2, 3}, "a"},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, 3},
+			Input:        []interface{}{[]int{1, 2, 3}, 3},
 			Expected:     nil,
 			ErrorMatcher: IsIndexOutOfRange,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, 3, "foo"},
+			Input:        []interface{}{[]int{1, 2, 3}, 3, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Input:        []interface{}{[]int{1, 2, 3}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -346,7 +351,7 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.IndexStringSlice(testCase.Input...)
+		output, err := newIndex.IndexIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -358,39 +363,34 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_JoinStringSlice(t *testing.T) {
+func Test_IntSlice_JoinIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b"}, ""},
-			Expected:     []interface{}{"ab"},
+			Input:        []interface{}{[]int{1, 2}},
+			Expected:     []interface{}{12},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, " "},
-			Expected:     []interface{}{"a b c"},
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{123},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c", "d", "e"}, "-"},
-			Expected:     []interface{}{"a-b-c-d-e"},
-			ErrorMatcher: nil,
-		},
-		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Input:        []interface{}{},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a"}, ""},
+			Input:        []interface{}{[]int{1}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, " ", "foo"},
+			Input:        []interface{}{[]int{1, 2}, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
@@ -413,7 +413,7 @@ func Test_StringSlice_JoinStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.JoinStringSlice(testCase.Input...)
+		output, err := newIndex.JoinIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -425,44 +425,272 @@ func Test_StringSlice_JoinStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_SortStringSlice(t *testing.T) {
+func Test_maxInt(t *testing.T) {
+	i := maxInt(nil)
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+	i = maxInt([]int{})
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+}
+
+func Test_IntSlice_MaxIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b"}},
-			Expected:     []interface{}{[]string{"a", "b"}},
+			Input:        []interface{}{[]int{4, 26, 12}},
+			Expected:     []interface{}{26},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 312}},
+			Expected:     []interface{}{312},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 26, 12}},
+			Expected:     []interface{}{94},
 			ErrorMatcher: nil,
 		},
 		{
 			Input:        []interface{}{[]string{"a", "b", "c"}},
-			Expected:     []interface{}{[]string{"a", "b", "c"}},
-			ErrorMatcher: nil,
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"b", "a"}},
-			Expected:     []interface{}{[]string{"a", "b"}},
-			ErrorMatcher: nil,
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
-			Input:        []interface{}{[]string{"c", "a", "b"}},
-			Expected:     []interface{}{[]string{"a", "b", "c"}},
-			ErrorMatcher: nil,
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"4", "13", "01", "b", "c", "a"}},
-			Expected:     []interface{}{[]string{"01", "13", "4", "a", "b", "c"}},
-			ErrorMatcher: nil,
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a"}},
+			Input:        []interface{}{[]int{}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "foo"},
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.MaxIntSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_minInt(t *testing.T) {
+	i := minInt(nil)
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+	i = minInt([]int{})
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+}
+
+func Test_IntSlice_MinIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{4, 26, 12}},
+			Expected:     []interface{}{4},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 312}},
+			Expected:     []interface{}{4},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 26, 12}},
+			Expected:     []interface{}{12},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.MinIntSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_IntSlice_SortIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{4, 26, 12}},
+			Expected:     []interface{}{[]int{4, 12, 26}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 312}},
+			Expected:     []interface{}{[]int{4, 26, 312}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 26, 12}},
+			Expected:     []interface{}{[]int{12, 26, 94}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newIndex, err := NewIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newIndex.SortIntSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_IntSlice_SwapLeftIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{1, 2}},
+			Expected:     []interface{}{[]int{2, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{[]int{2, 3, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5}},
+			Expected:     []interface{}{[]int{2, 3, 4, 5, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3}, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
@@ -485,7 +713,7 @@ func Test_StringSlice_SortStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SortStringSlice(testCase.Input...)
+		output, err := newIndex.SwapLeftIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -497,34 +725,34 @@ func Test_StringSlice_SortStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_SwapLeftStringSlice(t *testing.T) {
+func Test_IntSlice_SwapRightIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b"}},
-			Expected:     []interface{}{[]string{"b", "a"}},
+			Input:        []interface{}{[]int{1, 2}},
+			Expected:     []interface{}{[]int{2, 1}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
-			Expected:     []interface{}{[]string{"b", "c", "a"}},
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{[]int{3, 1, 2}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c", "d", "e"}},
-			Expected:     []interface{}{[]string{"b", "c", "d", "e", "a"}},
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5}},
+			Expected:     []interface{}{[]int{5, 1, 2, 3, 4}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a"}},
+			Input:        []interface{}{[]int{1}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "foo"},
+			Input:        []interface{}{[]int{1, 2, 3}, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
@@ -547,7 +775,7 @@ func Test_StringSlice_SwapLeftStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SwapLeftStringSlice(testCase.Input...)
+		output, err := newIndex.SwapRightIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -559,91 +787,29 @@ func Test_StringSlice_SwapLeftStringSlice(t *testing.T) {
 	}
 }
 
-func Test_StringSlice_SwapRightStringSlice(t *testing.T) {
+func Test_IntSlice_UniqueIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b"}},
-			Expected:     []interface{}{[]string{"b", "a"}},
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{[]int{1, 2, 3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
-			Expected:     []interface{}{[]string{"c", "a", "b"}},
+			Input:        []interface{}{[]int{1, 2, 1, 2, 3, 1, 3}},
+			Expected:     []interface{}{[]int{1, 2, 3}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c", "d", "e"}},
-			Expected:     []interface{}{[]string{"e", "a", "b", "c", "d"}},
-			ErrorMatcher: nil,
-		},
-		{
-			Input:        []interface{}{[]string{"a"}},
-			Expected:     nil,
-			ErrorMatcher: IsNotEnoughArguments,
-		},
-		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "foo"},
+			Input:        []interface{}{[]int{1, 2, 3}, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{23},
-			Expected:     nil,
-			ErrorMatcher: IsWrongArgumentType,
-		},
-		{
-			Input:        []interface{}{[]bool{}},
-			Expected:     nil,
-			ErrorMatcher: IsWrongArgumentType,
-		},
-	}
-
-	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	for i, testCase := range testCases {
-		output, err := newIndex.SwapRightStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
-			t.Fatal("case", i+1, "expected", true, "got", false)
-		}
-		if testCase.ErrorMatcher == nil {
-			if !reflect.DeepEqual(output, testCase.Expected) {
-				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
-			}
-		}
-	}
-}
-
-func Test_StringSlice_UniqueStringSlice(t *testing.T) {
-	testCases := []struct {
-		Input        []interface{}
-		Expected     []interface{}
-		ErrorMatcher func(err error) bool
-	}{
-		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
-			Expected:     []interface{}{[]string{"a", "b", "c"}},
-			ErrorMatcher: nil,
-		},
-		{
-			Input:        []interface{}{[]string{"a", "b", "a", "b", "c", "a", "c"}},
-			Expected:     []interface{}{[]string{"a", "b", "c"}},
-			ErrorMatcher: nil,
-		},
-		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "foo"},
-			Expected:     nil,
-			ErrorMatcher: IsTooManyArguments,
-		},
-		{
-			Input:        []interface{}{[]string{"a"}},
+			Input:        []interface{}{[]int{1}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -666,7 +832,7 @@ func Test_StringSlice_UniqueStringSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.UniqueStringSlice(testCase.Input...)
+		output, err := newIndex.UniqueIntSlice(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
