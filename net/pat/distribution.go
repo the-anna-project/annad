@@ -124,8 +124,8 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 
 // TODO find a way to find these patterns automatically
 //
-// TODO detect irregularities
-// TODO add thrift threshold
+// TODO detect irregularities (like a double space within a sentence)
+// TODO add thrift threshold (like an allowed moving margin into a certain direction)
 type distribution struct {
 	DistributionConfig
 

@@ -2,6 +2,7 @@ package patnet
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -46,6 +47,103 @@ func Test_FeatureSet_Separator(t *testing.T) {
 		}
 		if f.GetSequence() != "another" {
 			t.Fatal("expected", "another", "got", f.GetSequence())
+		}
+	}
+}
+
+func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
+	testCases := []struct {
+		MinLength int
+		MaxLength int
+		Sequences []string
+		Expected  []string
+	}{
+		{
+			MinLength: -1,
+			MaxLength: -1,
+			Sequences: []string{"ab"},
+			Expected:  nil,
+		},
+		{
+			MinLength: -1,
+			MaxLength: -1,
+			Sequences: []string{"ab", "ab"},
+			Expected:  []string{"a", "b", "ab"},
+		},
+		{
+			MinLength: -1,
+			MaxLength: -1,
+			Sequences: []string{"ab", "ab", "ab"},
+			Expected:  []string{"a", "b", "ab"},
+		},
+		{
+			MinLength: -1,
+			MaxLength: -1,
+			Sequences: []string{"ab", "ab", "abc"},
+			Expected:  []string{"a", "b", "ab"},
+		},
+		{
+			MinLength: -1,
+			MaxLength: -1,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"a", "b", "c", "ab", "bc", "abc"},
+		},
+		{
+			MinLength: 1,
+			MaxLength: 1,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"a", "b", "c"},
+		},
+		{
+			MinLength: 2,
+			MaxLength: 2,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"ab", "bc"},
+		},
+		{
+			MinLength: 3,
+			MaxLength: 3,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"abc"},
+		},
+		{
+			MinLength: 2,
+			MaxLength: 3,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"ab", "bc", "abc"},
+		},
+		{
+			MinLength: 2,
+			MaxLength: -1,
+			Sequences: []string{"ab", "ab", "abc", "abc"},
+			Expected:  []string{"ab", "bc", "abc"},
+		},
+	}
+
+	for i, testCase := range testCases {
+		newConfig := DefaultFeatureSetConfig()
+		newConfig.MinCount = 2
+		newConfig.MaxLength = testCase.MaxLength
+		newConfig.MinLength = testCase.MinLength
+		newConfig.Sequences = testCase.Sequences
+		newFeatureSet, err := NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+
+		err = newFeatureSet.Scan()
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		var sequences []string
+		for _, f := range newFeatureSet.GetFeatures() {
+			sequences = append(sequences, f.GetSequence())
+		}
+
+		sort.Strings(sequences)
+		sort.Strings(testCase.Expected)
+		if !reflect.DeepEqual(sequences, testCase.Expected) {
+			t.Fatal("case", i+1, "expected", testCase.Expected, "got", sequences)
 		}
 	}
 }

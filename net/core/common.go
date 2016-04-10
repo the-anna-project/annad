@@ -26,18 +26,13 @@ func (cn *coreNet) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	newImpulse.SetInputByImpulseID(newImpulse.GetID(), input.(string))
 
 	// Increment the impulse count to track how many impulses are processed
-	// inside the core network. Note that the laborious assignment makes `go vet`
-	// happy.
-	v := atomic.AddInt64(&cn.ImpulsesInProgress, 1)
-	cn.ImpulsesInProgress = v
-
+	// inside the core network.
+	atomic.AddInt64(&cn.ImpulsesInProgress, 1)
 	newImpulse, err = cn.Trigger(newImpulse)
-
 	// Decrement the impulse count once all hard work is done. Note that this
 	// is important to be done before the error handling of Core.Trigger to
 	// ensure the impulse count is properly decreased.
-	v = atomic.AddInt64(&cn.ImpulsesInProgress, -1)
-	cn.ImpulsesInProgress = v
+	atomic.AddInt64(&cn.ImpulsesInProgress, -1)
 
 	if err != nil {
 		return nil, maskAny(err)

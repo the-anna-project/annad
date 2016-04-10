@@ -42,3 +42,17 @@ var wrongArgumentTypeError = errgo.New("wrong argument type")
 func IsWrongArgumentType(err error) bool {
 	return errgo.Cause(err) == wrongArgumentTypeError
 }
+
+var methodNotFoundError = errgo.New("method not found")
+
+// IsMethodNotFound asserts methodNotFoundError.
+func IsMethodNotFound(err error) bool {
+	return errgo.Cause(err) == methodNotFoundError
+}
+
+var indexOutOfRangeError = errgo.New("index out of range")
+
+// IsIndexOutOfRange asserts indexOutOfRangeError.
+func IsIndexOutOfRange(err error) bool {
+	return errgo.Cause(err) == indexOutOfRangeError
+}
