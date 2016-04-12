@@ -50,12 +50,13 @@ with us for the following topics and more. Further see the
 
 - Software architecture and software design.
 - Software engineering to get issues and pull requests done.
+- Documentation of code and concepts.
 - Scientific feedback and research in math, statistics and other relevant fields.
 - Brainstorming and idea generation.
 - Hosting for web based solutions.
 - Integration in all kind of hardware and mobile devices.
 - Creating industrial use cases.
-- Networking (the human to human kindof network).
+- Networking (the human to human kind of network).
 
 # license
 The Anna project is open source and license free software. This means I am

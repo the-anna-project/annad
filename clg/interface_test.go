@@ -60,13 +60,13 @@ func Test_Interface_DiscardInterface(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.DiscardInterface(testCase.Input...)
+		output, err := newCLGIndex.DiscardInterface(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -167,13 +167,13 @@ func Test_Interface_EqualInterface(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.EqualInterface(testCase.Input...)
+		output, err := newCLGIndex.EqualInterface(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -240,13 +240,13 @@ func Test_Interface_TypeInterface(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.TypeInterface(testCase.Input...)
+		output, err := newCLGIndex.TypeInterface(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

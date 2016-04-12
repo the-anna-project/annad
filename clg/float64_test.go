@@ -60,13 +60,13 @@ func Test_Float64_DivideFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.DivideFloat64(testCase.Input...)
+		output, err := newCLGIndex.DivideFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -137,13 +137,13 @@ func Test_Float64_GreaterThanFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.GreaterThanFloat64(testCase.Input...)
+		output, err := newCLGIndex.GreaterThanFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -214,13 +214,13 @@ func Test_Float64_LesserThanFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.LesserThanFloat64(testCase.Input...)
+		output, err := newCLGIndex.LesserThanFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -286,13 +286,13 @@ func Test_Float64_MultiplyFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.MultiplyFloat64(testCase.Input...)
+		output, err := newCLGIndex.MultiplyFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -354,13 +354,13 @@ func Test_Float64_PowFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.PowFloat64(testCase.Input...)
+		output, err := newCLGIndex.PowFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -439,13 +439,13 @@ func Test_Float64_SqrtFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SqrtFloat64(testCase.Input...)
+		output, err := newCLGIndex.SqrtFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -523,13 +523,13 @@ func Test_Float64_SubtractFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SubtractFloat64(testCase.Input...)
+		output, err := newCLGIndex.SubtractFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -595,13 +595,13 @@ func Test_Float64_SumFloat64(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SumFloat64(testCase.Input...)
+		output, err := newCLGIndex.SumFloat64(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

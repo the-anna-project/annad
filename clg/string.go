@@ -6,7 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/id"
 )
 
-func (i *index) ContainsString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ContainsString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -24,7 +24,7 @@ func (i *index) ContainsString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{contains}, nil
 }
 
-func (i *index) LongerString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) LongerString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -42,7 +42,7 @@ func (i *index) LongerString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{longer}, nil
 }
 
-func (i *index) NewIDString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) NewIDString(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
@@ -52,7 +52,7 @@ func (i *index) NewIDString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newID}, nil
 }
 
-func (i *index) RepeatString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) RepeatString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -70,7 +70,7 @@ func (i *index) RepeatString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{repeated}, nil
 }
 
-func (i *index) ShorterString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ShorterString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -88,7 +88,7 @@ func (i *index) ShorterString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{shorter}, nil
 }
 
-func (i *index) SplitString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SplitString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -106,7 +106,7 @@ func (i *index) SplitString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) ToLowerString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ToLowerString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -120,7 +120,7 @@ func (i *index) ToLowerString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *index) ToUpperString(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ToUpperString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

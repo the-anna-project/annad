@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (i *index) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -29,7 +29,7 @@ func (i *index) ContainsStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{contains}, nil
 }
 
-func (i *index) CountStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -43,7 +43,7 @@ func (i *index) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{count}, nil
 }
 
-func (i *index) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -69,7 +69,7 @@ func (i *index) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, err
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -95,7 +95,7 @@ func (i *index) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -116,7 +116,7 @@ func (i *index) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *index) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -137,7 +137,7 @@ func (i *index) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *index) SortStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -155,7 +155,7 @@ func (i *index) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -172,7 +172,7 @@ func (i *index) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -189,7 +189,7 @@ func (i *index) SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

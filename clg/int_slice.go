@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (i *index) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -30,7 +30,7 @@ func (i *index) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{contains}, nil
 }
 
-func (i *index) CountIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) CountIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -44,7 +44,7 @@ func (i *index) CountIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{count}, nil
 }
 
-func (i *index) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -70,7 +70,7 @@ func (i *index) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -96,7 +96,7 @@ func (i *index) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -117,7 +117,7 @@ func (i *index) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newInt}, nil
 }
 
-func (i *index) JoinIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) JoinIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -154,7 +154,7 @@ func maxInt(list []int) int {
 	return max
 }
 
-func (i *index) MaxIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) MaxIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -187,7 +187,7 @@ func minInt(list []int) int {
 	return min
 }
 
-func (i *index) MinIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -204,7 +204,7 @@ func (i *index) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{m}, nil
 }
 
-func (i *index) SortIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -221,7 +221,7 @@ func (i *index) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
-func (i *index) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -238,7 +238,7 @@ func (i *index) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newIntSlice}, nil
 }
 
-func (i *index) SwapRightIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapRightIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -255,7 +255,7 @@ func (i *index) SwapRightIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newIntSlice}, nil
 }
 
-func (i *index) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

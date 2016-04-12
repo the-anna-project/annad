@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-func (i *index) DivideInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) DivideInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -22,7 +22,7 @@ func (i *index) DivideInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) GreaterThanInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GreaterThanInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -40,7 +40,7 @@ func (i *index) GreaterThanInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{greater}, nil
 }
 
-func (i *index) LesserThanInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) LesserThanInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -58,7 +58,7 @@ func (i *index) LesserThanInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{lesser}, nil
 }
 
-func (i *index) MultiplyInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) MultiplyInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -76,7 +76,7 @@ func (i *index) MultiplyInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) PowInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) PowInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -94,7 +94,7 @@ func (i *index) PowInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SqrtInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SqrtInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -108,7 +108,7 @@ func (i *index) SqrtInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SubtractInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SubtractInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -126,7 +126,7 @@ func (i *index) SubtractInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SumInt(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SumInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

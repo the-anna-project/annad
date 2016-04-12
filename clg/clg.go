@@ -13,19 +13,19 @@ import (
 )
 
 const (
-	// ObjectTypeIndex represents the object type of the index object. This is
-	// used e.g. to register itself to the logger.
-	ObjectTypeIndex spec.ObjectType = "index"
+	// ObjectTypeCLGIndex represents the object type of the CLG index object.
+	// This is used e.g. to register itself to the logger.
+	ObjectTypeCLGIndex spec.ObjectType = "clg-index"
 )
 
-// Config represents the configuration used to create a new index object.
+// Config represents the configuration used to create a new CLG index object.
 type Config struct {
 	// Dependencies.
 	Log spec.Log
 }
 
-// DefaultConfig provides a default configuration to create a new index object
-// by best effort.
+// DefaultConfig provides a default configuration to create a new CLG index
+// object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
@@ -35,21 +35,21 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewIndex creates a new configured index object.
-func NewIndex(config Config) (spec.Index, error) {
-	newIndex := &index{
+// NewCLGIndex creates a new configured CLG index object.
+func NewCLGIndex(config Config) (spec.CLGIndex, error) {
+	newCLGIndex := &clgIndex{
 		Config: config,
 		ID:     id.NewObjectID(id.Hex128),
 		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeIndex,
+		Type:   ObjectTypeCLGIndex,
 	}
 
-	newIndex.Log.Register(newIndex.GetType())
+	newCLGIndex.Log.Register(newCLGIndex.GetType())
 
-	return newIndex, nil
+	return newCLGIndex, nil
 }
 
-type index struct {
+type clgIndex struct {
 	Config
 
 	ID    spec.ObjectID
@@ -57,7 +57,7 @@ type index struct {
 	Type  spec.ObjectType
 }
 
-func (i *index) CallCLGByName(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) CallCLGByName(args ...interface{}) ([]interface{}, error) {
 	methodName, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -78,7 +78,7 @@ func (i *index) CallCLGByName(args ...interface{}) ([]interface{}, error) {
 	return results, nil
 }
 
-func (i *index) GetCLGNames(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GetCLGNames(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}

@@ -1,11 +1,11 @@
 package patnet
 
-// Distance implementes the Levenshtein distance to measure similarity between
-// two strings. Here all edit operations are weighted with the cost 1. See
-// http://en.wikipedia.org/wiki/Levenshtein_distance. The following code is a
-// golang port of the optimized C version of
+// EditDistance implementes the Levenshtein distance to measure similarity
+// between two strings. Here all edit operations are weighted with the cost 1.
+// See http://en.wikipedia.org/wiki/Levenshtein_distance. The following code is
+// a golang port of the optimized C version of
 // http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance#C.
-func Distance(s1, s2 string) int {
+func EditDistance(s1, s2 string) int {
 	var cost, lastdiag, olddiag int
 	ls1 := len([]rune(s1))
 	ls2 := len([]rune(s2))

@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-func (i *index) DivideFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) DivideFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -22,7 +22,7 @@ func (i *index) DivideFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -40,7 +40,7 @@ func (i *index) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{greater}, nil
 }
 
-func (i *index) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -58,7 +58,7 @@ func (i *index) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{lesser}, nil
 }
 
-func (i *index) MultiplyFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) MultiplyFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -76,7 +76,7 @@ func (i *index) MultiplyFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) PowFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) PowFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -94,7 +94,7 @@ func (i *index) PowFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -108,7 +108,7 @@ func (i *index) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -126,7 +126,7 @@ func (i *index) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
-func (i *index) SumFloat64(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SumFloat64(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

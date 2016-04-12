@@ -6,6 +6,7 @@ import (
 
 // Arg
 
+// ArgToFloat64 converts the argument under index to a float64, if possible.
 func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	if len(args) < index+1 {
 		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -18,6 +19,7 @@ func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	return 0, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
 }
 
+// ArgToInt converts the argument under index to a int, if possible.
 func ArgToInt(args []interface{}, index int) (int, error) {
 	if len(args) < index+1 {
 		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -30,6 +32,7 @@ func ArgToInt(args []interface{}, index int) (int, error) {
 	return 0, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
 }
 
+// ArgToIntSlice converts the argument under index to a int slice, if possible.
 func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -42,6 +45,7 @@ func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
 }
 
+// ArgToString converts the argument under index to a string, if possible.
 func ArgToString(args []interface{}, index int) (string, error) {
 	if len(args) < index+1 {
 		return "", maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -54,6 +58,8 @@ func ArgToString(args []interface{}, index int) (string, error) {
 	return "", maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
 }
 
+// ArgToStringSlice converts the argument under index to a string slice, if
+// possible.
 func ArgToStringSlice(args []interface{}, index int) ([]string, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -68,6 +74,7 @@ func ArgToStringSlice(args []interface{}, index int) ([]string, error) {
 
 // Args
 
+// ArgsToValues converts the given arguments to reflect values.
 func ArgsToValues(args []interface{}) []reflect.Value {
 	values := make([]reflect.Value, len(args))
 
@@ -78,6 +85,7 @@ func ArgsToValues(args []interface{}) []reflect.Value {
 	return values
 }
 
+// ValuesToArgs converts the given reflect values to a slice of interfaces.
 func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 	if len(values) > 2 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(values))

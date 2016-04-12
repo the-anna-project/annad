@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_Distance(t *testing.T) {
+func Test_EditDistance(t *testing.T) {
 	testCases := []struct {
 		Input    []string
 		Expected int
@@ -67,7 +67,7 @@ func Test_Distance(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output := Distance(testCase.Input[0], testCase.Input[1])
+		output := EditDistance(testCase.Input[0], testCase.Input[1])
 
 		if output != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)

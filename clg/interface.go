@@ -4,11 +4,11 @@ import (
 	"reflect"
 )
 
-func (i *index) DiscardInterface(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) DiscardInterface(args ...interface{}) ([]interface{}, error) {
 	return nil, nil
 }
 
-func (i *index) EqualInterface(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) EqualInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 2 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
 	}
@@ -21,7 +21,7 @@ func (i *index) EqualInterface(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{t}, nil
 }
 
-func (i *index) TypeInterface(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) TypeInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 1 got %d", len(args))
 	}
