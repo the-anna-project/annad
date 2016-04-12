@@ -56,3 +56,17 @@ var indexOutOfRangeError = errgo.New("index out of range")
 func IsIndexOutOfRange(err error) bool {
 	return errgo.Cause(err) == indexOutOfRangeError
 }
+
+var negativeIntError = errgo.New("negative integer")
+
+// IsNegativeInt asserts negativeIntError.
+func IsNegativeInt(err error) bool {
+	return errgo.Cause(err) == negativeIntError
+}
+
+var invalidDividerError = errgo.New("invalid divider")
+
+// IsInvalidDivider asserts invalidDividerError.
+func IsInvalidDivider(err error) bool {
+	return errgo.Cause(err) == invalidDividerError
+}

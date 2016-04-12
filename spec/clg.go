@@ -148,14 +148,13 @@ type CLGMethod interface {
 	GetCLGNames(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO
 type CLGString interface {
 	// ContainsString provides functionality of strings.Contains.
 	ContainsString(args ...interface{}) ([]interface{}, error)
 
 	// CountCharacterString returns a map of characters expressing their
 	// corresponding occurence count within the given string.
-	//CountCharacterString(args ...interface{}) ([]interface{}, error)
+	CountCharacterString(args ...interface{}) ([]interface{}, error)
 
 	// ContainsString provides functionality to check if one string is longer
 	// than the other.
@@ -176,7 +175,7 @@ type CLGString interface {
 
 	// SplitEqualString splits the given string into a given number of equal
 	// parts.
-	//SplitEqualString(args ...interface{}) ([]interface{}, error)
+	SplitEqualString(args ...interface{}) ([]interface{}, error)
 
 	// ToLowerString provides functionality of strings.ToLower.
 	ToLowerString(args ...interface{}) ([]interface{}, error)

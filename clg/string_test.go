@@ -109,6 +109,71 @@ func Test_String_ContainsString(t *testing.T) {
 	}
 }
 
+func Test_String_CountCharacterString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input: []interface{}{"foo"},
+			Expected: []interface{}{map[string]int{
+				"f": 1,
+				"o": 2,
+			}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input: []interface{}{"foo boo"},
+			Expected: []interface{}{map[string]int{
+				"f": 1,
+				"o": 4,
+				" ": 1,
+				"b": 1,
+			}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"foo boo", "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.CountCharacterString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_String_LongerString(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
@@ -287,6 +352,11 @@ func Test_String_RepeatString(t *testing.T) {
 		{
 			Input:        []interface{}{"ab", 4},
 			Expected:     []interface{}{"abababab"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"ab", -4},
+			Expected:     nil,
 			ErrorMatcher: nil,
 		},
 		{
@@ -520,6 +590,91 @@ func Test_String_SplitString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SplitString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_String_SplitEqualString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"ab", 2},
+			Expected:     []interface{}{[]string{"a", "b"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abc", 2},
+			Expected:     []interface{}{[]string{"ab", "bc"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abcd", 2},
+			Expected:     []interface{}{[]string{"ab", "cd"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"ab", 3},
+			Expected:     nil,
+			ErrorMatcher: IsInvalidDivider,
+		},
+		{
+			Input:        []interface{}{"abc", 3},
+			Expected:     []interface{}{[]string{"a", "b", "c"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abcd", 3},
+			Expected:     []interface{}{[]string{"ab", "bc", "cd"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"ab", -1},
+			Expected:     nil,
+			ErrorMatcher: IsNegativeInt,
+		},
+		{
+			Input:        []interface{}{"ab", 2, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"ab"},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{2, "ab"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{"ab", true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		if i != 1 {
+			continue
+		}
+		output, err := newCLGIndex.SplitEqualString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
