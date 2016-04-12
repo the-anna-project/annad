@@ -29,6 +29,23 @@ func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{contains}, nil
 }
 
+func (i *clgIndex) CountCharacterStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newMap := map[string]int{}
+	for _, s := range ss {
+		newMap[s]++
+	}
+
+	return []interface{}{newMap}, nil
+}
+
 func (i *clgIndex) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
@@ -135,6 +152,26 @@ func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	newString := strings.Join(ss, sep)
 
 	return []interface{}{newString}, nil
+}
+
+func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss))
+	}
+
+	var newStringSlice []string
+	for i := len(ss) - 1; i >= 0; i-- {
+		newStringSlice = append(newStringSlice, ss[i])
+	}
+
+	return []interface{}{newStringSlice}, nil
 }
 
 func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {

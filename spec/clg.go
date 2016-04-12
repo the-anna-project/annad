@@ -22,7 +22,6 @@ type CLGIndex interface {
 	// TODO Sets for all slice types. (union, intersect, difference)
 }
 
-// TODO
 type CLGFloat64 interface {
 	// DivideFloat64 creates the difference of the given float64s.
 	DivideFloat64(args ...interface{}) ([]interface{}, error)
@@ -40,7 +39,7 @@ type CLGFloat64 interface {
 	PowFloat64(args ...interface{}) ([]interface{}, error)
 
 	// RoundFloat64 returns a number rounded using the given precision.
-	//RoundFloat64(args ...interface{}) ([]interface{}, error)
+	RoundFloat64(args ...interface{}) ([]interface{}, error)
 
 	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
 	SqrtFloat64(args ...interface{}) ([]interface{}, error)
@@ -188,9 +187,11 @@ type CLGString interface {
 type CLGStringMap interface {
 	// KeyStringMap returns the value under key within the given string map.
 	//KeyStringMap(args ...interface{}) ([]interface{}, error)
+
+	// SwapIntStringMap returns a string map having keys and values swapped.
+	//SwapIntStringMap(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO
 type CLGStringSlice interface {
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
@@ -198,7 +199,7 @@ type CLGStringSlice interface {
 
 	// CountCharacterStringSlice returns a map of characters expressing their
 	// corresponding occurence count within the given string slice.
-	//CountCharacterStringSlice(args ...interface{}) ([]interface{}, error)
+	CountCharacterStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountStringSlice returns the number of elements in args.
 	CountStringSlice(args ...interface{}) ([]interface{}, error)
@@ -222,7 +223,7 @@ type CLGStringSlice interface {
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// ReverseStringSlice provides functionality of strings.Join.
-	//ReverseStringSlice(args ...interface{}) ([]interface{}, error)
+	ReverseStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortStringSlice provides functionality of sort.Strings.
 	SortStringSlice(args ...interface{}) ([]interface{}, error)
