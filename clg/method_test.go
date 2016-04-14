@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_CLG_CallCLGByName(t *testing.T) {
+func Test_Method_CallCLGByName(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
@@ -62,7 +62,7 @@ func Test_CLG_CallCLGByName(t *testing.T) {
 	}
 }
 
-func Test_CLG_GetCLGNames(t *testing.T) {
+func Test_Method_GetCLGNames(t *testing.T) {
 	testCases := []struct {
 		Input            []interface{}
 		ExpectedSubSet   []string

@@ -6,6 +6,46 @@ import (
 
 // Arg
 
+// ArgToArg converts the argument under index to a arguments, if possible.
+func ArgToArg(args []interface{}, index int) (interface{}, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if a, ok := args[index].(interface{}); ok {
+		return a, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
+}
+
+// ArgToArgs converts the argument under index to a list of arguments, if
+// possible.
+func ArgToArgs(args []interface{}, index int) ([]interface{}, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if as, ok := args[index].([]interface{}); ok {
+		return as, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
+}
+
+// ArgToBool converts the argument under index to a bool, if possible.
+func ArgToBool(args []interface{}, index int) (bool, error) {
+	if len(args) < index+1 {
+		return false, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if b, ok := args[index].(bool); ok {
+		return b, nil
+	}
+
+	return false, maskAnyf(wrongArgumentTypeError, "expected %T got %T", "", args[index])
+}
+
 // ArgToFloat64 converts the argument under index to a float64, if possible.
 func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	if len(args) < index+1 {

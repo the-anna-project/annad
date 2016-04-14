@@ -70,3 +70,17 @@ var invalidDividerError = errgo.New("invalid divider")
 func IsInvalidDivider(err error) bool {
 	return errgo.Cause(err) == invalidDividerError
 }
+
+var tooManyResultsError = errgo.New("too many results")
+
+// IsTooManyResults asserts tooManyResultsError.
+func IsTooManyResults(err error) bool {
+	return errgo.Cause(err) == tooManyResultsError
+}
+
+var duplicatedMemberError = errgo.New("duplicated member")
+
+// IsDuplicatedMember asserts duplicatedMemberError.
+func IsDuplicatedMember(err error) bool {
+	return errgo.Cause(err) == duplicatedMemberError
+}

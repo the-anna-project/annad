@@ -61,6 +61,8 @@ func DefaultFeatureSetConfig() FeatureSetConfig {
 	return newConfig
 }
 
+// TODO do we need to cap input sequences to align output distributions?
+//
 // NewFeatureSet creates a new configured feature set object. A feature set
 // tries to detect all patterns within the configured input sequences.
 func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {

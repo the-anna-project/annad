@@ -185,6 +185,83 @@ func Test_Interface_EqualInterface(t *testing.T) {
 	}
 }
 
+func Test_Interface_InsertArgInterface(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]interface{}{}, "b", []int{0, 1}},
+			Expected:     []interface{}{[]interface{}{"b", "b"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{1}},
+			Expected:     []interface{}{[]interface{}{"a", "b", "c"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{1, 2, 4}},
+			Expected:     []interface{}{[]interface{}{"a", "b", "b", "c", "b"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "b", "c"}, "b", []int{1, 2, 5}},
+			Expected:     []interface{}{[]interface{}{"a", "b", "b", "b", "c", "b"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{0, 4}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{0, 0}},
+			Expected:     nil,
+			ErrorMatcher: IsDuplicatedMember,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{0, 1}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b"},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{"a", "b", []int{0, 1}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]interface{}{"a", "c"}, "b", 3.4},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.InsertArgInterface(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_Interface_TypeInterface(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

@@ -2,6 +2,7 @@ package clg
 
 import (
 	"reflect"
+	"sort"
 )
 
 func (i *clgIndex) DiscardInterface(args ...interface{}) ([]interface{}, error) {
@@ -19,6 +20,45 @@ func (i *clgIndex) EqualInterface(args ...interface{}) ([]interface{}, error) {
 	t := reflect.DeepEqual(args[0], args[1])
 
 	return []interface{}{t}, nil
+}
+
+func (i *clgIndex) InsertArgInterface(args ...interface{}) ([]interface{}, error) {
+	scopeArgs, err := ArgToArgs(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	scopeArg, err := ArgToArg(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	indizes, err := ArgToIntSlice(args, 2)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 3 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 3 got %d", len(args))
+	}
+
+	seen := map[int]struct{}{}
+	for _, indiz := range indizes {
+		if _, ok := seen[indiz]; ok {
+			return nil, maskAnyf(duplicatedMemberError, "members of %#v must be unique", indizes)
+		}
+		seen[indiz] = struct{}{}
+	}
+	sort.Ints(indizes)
+
+	newArgs := scopeArgs
+	for _, indiz := range indizes {
+		if indiz > len(newArgs) {
+			return nil, maskAny(indexOutOfRangeError)
+		}
+		newArgs = append(newArgs, 0)
+		copy(newArgs[indiz+1:], newArgs[indiz:])
+		newArgs[indiz] = scopeArg
+	}
+
+	return []interface{}{newArgs}, nil
 }
 
 func (i *clgIndex) TypeInterface(args ...interface{}) ([]interface{}, error) {

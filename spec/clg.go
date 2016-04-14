@@ -2,6 +2,7 @@ package spec
 
 // TODO CLGIndex represents the CLG index providing all CLGs that can be used.
 type CLGIndex interface {
+	CLGControl
 	CLGFloat64
 	// CLGFloat64Slice
 	CLGInt
@@ -17,9 +18,18 @@ type CLGIndex interface {
 	// CLGTime
 
 	// TODO control flow ??? for, if, else, switch, goto, strategy modifier
-	// TODO knowledge network ??? create, delete, find peers and connections
+	// TODO knowledge network ??? create, delete, find peers and connections, distance between peers, distance to peers towards a connection path
 	// TODO Similarity. (stem, edit-distance, manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
+}
+
+type CLGControl interface {
+	// IfControl provides code flow functionallity of the if statement. It
+	// expects the following four arguments in the given order.
+	//
+	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
+	//
+	IfControl(args ...interface{}) ([]interface{}, error)
 }
 
 type CLGFloat64 interface {
@@ -85,10 +95,21 @@ type CLGInterface interface {
 	// EqualInterface provides functionality of reflect.DeepEqual.
 	EqualInterface(args ...interface{}) ([]interface{}, error)
 
+	// ReturnInterface returns the argument it receives.
+	//ReturnInterface(args ...interface{}) ([]interface{}, error)
+
+	// InsertArgInterface inserts certain arguments in a specific order and
+	// returns the manipulated arguments.
+	InsertArgInterface(args ...interface{}) ([]interface{}, error)
+
+	// SwapInterface returns the two arguments it receives, but in swapped order.
+	//SwapInterface(args ...interface{}) ([]interface{}, error)
+
 	// TypeInterface returns the string representation of the given arg's type.
 	TypeInterface(args ...interface{}) ([]interface{}, error)
 }
 
+// TODO
 type CLGIntSlice interface {
 	// ContainsIntSlice provides functionality to check if a int slice
 	// contains a certain member.
@@ -111,6 +132,10 @@ type CLGIntSlice interface {
 
 	// IndexIntSlice returns the element under the given index.
 	IndexIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// IsUniqueIntSlice checks whether the given int slice only contains unique
+	// members.
+	//IsUniqueIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// JoinIntSlice provides functionality of strings.Join after converting ints
 	// to strings.
@@ -185,13 +210,50 @@ type CLGString interface {
 
 // TODO
 type CLGStringMap interface {
-	// KeyStringMap returns the value under key within the given string map.
+	// KeyIntMap returns the value under the given key within the given int
+	// map.
+	//KeyIntMap(args ...interface{}) ([]interface{}, error)
+
+	// KeyFloat64Map returns the value under the given key within the given float64
+	// map.
+	//KeyFloat64Map(args ...interface{}) ([]interface{}, error)
+
+	// KeyStringMap returns the value under the given key within the given string
+	// map.
 	//KeyStringMap(args ...interface{}) ([]interface{}, error)
+
+	// SwapFloat64IntMap returns a string map having keys and values swapped.
+	//SwapFloat64IntMap(args ...interface{}) ([]interface{}, error)
+
+	// SwapFloat64StringMap returns a string map having keys and values swapped.
+	//SwapFloat64StringMap(args ...interface{}) ([]interface{}, error)
+
+	// SwapIntFloat64Map returns a string map having keys and values swapped.
+	//SwapIntFloat64Map(args ...interface{}) ([]interface{}, error)
 
 	// SwapIntStringMap returns a string map having keys and values swapped.
 	//SwapIntStringMap(args ...interface{}) ([]interface{}, error)
+
+	// SwapStringFloat64Map returns a string map having keys and values swapped.
+	//SwapStringFloat64Map(args ...interface{}) ([]interface{}, error)
+
+	// SwapStringIntMap returns a string map having keys and values swapped.
+	//SwapStringIntMap(args ...interface{}) ([]interface{}, error)
+
+	// ValueFloat64Map returns the keys corresponding to the given value within
+	// the given float64 map.
+	//ValueFloat64Map(args ...interface{}) ([]interface{}, error)
+
+	// ValueIntMap returns the keys corresponding to the given value within
+	// the given int map.
+	//ValueIntMap(args ...interface{}) ([]interface{}, error)
+
+	// ValueStringMap returns the keys corresponding to the given value within
+	// the given string map.
+	//ValueStringMap(args ...interface{}) ([]interface{}, error)
 }
 
+// TODO
 type CLGStringSlice interface {
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
@@ -218,6 +280,10 @@ type CLGStringSlice interface {
 
 	// IndexStringSlice returns the element under the given index.
 	IndexStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// IsUniqueStringSlice checks whether the given string slice only contains
+	// unique members.
+	//IsUniqueStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
