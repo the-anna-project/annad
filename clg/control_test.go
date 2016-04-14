@@ -5,29 +5,34 @@ import (
 	"testing"
 )
 
-func Test_Control_ForStringControl(t *testing.T) {
+func Test_Control_ForControl(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "ToUpperString"},
-			Expected:     []interface{}{[]string{"A", "B", "C"}},
+			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}, "ToUpperString"},
+			Expected:     []interface{}{[]interface{}{"A", "B", "C"}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}, "ToUpperString", "foo"},
+			Input:        []interface{}{[][]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}, []interface{}{5, 6}}, "SumInt"},
+			Expected:     []interface{}{[]interface{}{3, 7, 11}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}, "ToUpperString", "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[]string{"a"}, "ToUpperString"},
+			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}}, "ToUpperString"},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
@@ -50,7 +55,7 @@ func Test_Control_ForStringControl(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ForStringControl(testCase.Input...)
+		output, err := newCLGIndex.ForControl(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

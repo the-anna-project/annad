@@ -22,19 +22,12 @@ type CLGIndex interface {
 	// TODO Sets for all slice types. (union, intersect, difference)
 }
 
-// TODO CLGControl represents all control flow CLGs that can be used.
+// CLGControl represents all control flow CLGs that can be used.
 type CLGControl interface {
-	// ForFloat64Control provides code flow functionallity of the for statement to
-	// iterate over string slices.
-	//ForFloat64Control(args ...interface{}) ([]interface{}, error)
-
-	// ForIntControl provides code flow functionallity of the for statement to
-	// iterate over string slices.
-	//ForIntControl(args ...interface{}) ([]interface{}, error)
-
-	// ForStringControl provides code flow functionallity of the for statement to
-	// iterate over string slices.
-	ForStringControl(args ...interface{}) ([]interface{}, error)
+	// ForControl provides code flow functionallity of the for statement to
+	// iterate over the given argument lists and applying some action to them
+	// identified by a CLG name.
+	ForControl(args ...interface{}) ([]interface{}, error)
 
 	// IfControl provides code flow functionallity of the if statement. It
 	// expects the following four arguments in the given order.
@@ -50,7 +43,7 @@ type CLGControl interface {
 	//
 	IfElseControl(args ...interface{}) ([]interface{}, error)
 
-	// control flow ??? switch, goto, strategy modifier
+	// TODO control flow ??? switch, goto, strategy modifier
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.

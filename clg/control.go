@@ -1,11 +1,9 @@
 package clg
 
-import (
-	"fmt"
-)
+import ()
 
-func (i *clgIndex) ForStringControl(args ...interface{}) ([]interface{}, error) {
-	ss, err := ArgToStringSlice(args, 0)
+func (i *clgIndex) ForControl(args ...interface{}) ([]interface{}, error) {
+	asl, err := ArgToArgsList(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -16,30 +14,21 @@ func (i *clgIndex) ForStringControl(args ...interface{}) ([]interface{}, error) 
 	if len(args) > 2 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
-	if len(ss) < 2 {
+	if len(asl) < 2 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	var newStringSlice []string
-	for _, s := range ss {
-		actionResults, err := i.CallCLGByName(action, s)
-		fmt.Printf("err: %#v\n", err)
+	var allResults []interface{}
+	for _, as := range asl {
+		rs, err := i.CallCLGByName(append([]interface{}{action}, as...)...)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		fmt.Printf("actionResults: %#v\n", actionResults)
-		for n, _ := range actionResults {
-			s, err := ArgToString(actionResults, n)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			fmt.Printf("s: %#v\n", s)
-			newStringSlice = append(newStringSlice, s)
-		}
+		allResults = append(allResults, rs...)
 	}
 
-	return []interface{}{newStringSlice}, nil
+	return []interface{}{allResults}, nil
 }
 
 func (i *clgIndex) IfControl(args ...interface{}) ([]interface{}, error) {
