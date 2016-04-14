@@ -363,6 +363,68 @@ func Test_IntSlice_IndexIntSlice(t *testing.T) {
 	}
 }
 
+func Test_IntSlice_IsUniqueIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{true},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3, 1, 2, 3}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3, 1, 2, 1, 3}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3, 3, 3, 3, 3}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{3, 2, 1}, true},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.IsUniqueIntSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_IntSlice_JoinIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

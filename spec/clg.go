@@ -17,20 +17,40 @@ type CLGIndex interface {
 	// CLGOS
 	// CLGTime
 
-	// TODO control flow ??? for, if, else, switch, goto, strategy modifier
 	// TODO knowledge network ??? create, delete, find peers and connections, distance between peers, distance to peers towards a connection path
 	// TODO Similarity. (stem, edit-distance, manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
 }
 
-// CLGControl represents all control flow CLGs that can be used.
+// TODO CLGControl represents all control flow CLGs that can be used.
 type CLGControl interface {
+	// ForFloat64Control provides code flow functionallity of the for statement to
+	// iterate over string slices.
+	//ForFloat64Control(args ...interface{}) ([]interface{}, error)
+
+	// ForIntControl provides code flow functionallity of the for statement to
+	// iterate over string slices.
+	//ForIntControl(args ...interface{}) ([]interface{}, error)
+
+	// ForStringControl provides code flow functionallity of the for statement to
+	// iterate over string slices.
+	ForStringControl(args ...interface{}) ([]interface{}, error)
+
 	// IfControl provides code flow functionallity of the if statement. It
 	// expects the following four arguments in the given order.
 	//
 	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
 	//
 	IfControl(args ...interface{}) ([]interface{}, error)
+
+	// IfElseControl provides code flow functionallity of the if-else statement.
+	// It expects the following six arguments in the given order.
+	//
+	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs, AlternativeCLG, AlternativeArgs
+	//
+	IfElseControl(args ...interface{}) ([]interface{}, error)
+
+	// control flow ??? switch, goto, strategy modifier
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
@@ -90,7 +110,7 @@ type CLGInt interface {
 	SumInt(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO CLGInterface represents all interface compatible CLGs that can be used.
+// CLGInterface represents all interface compatible CLGs that can be used.
 type CLGInterface interface {
 	// DiscardInterface does nothing. It discards the given arguments and returns
 	// nil.
@@ -99,21 +119,21 @@ type CLGInterface interface {
 	// EqualInterface provides functionality of reflect.DeepEqual.
 	EqualInterface(args ...interface{}) ([]interface{}, error)
 
-	// ReturnInterface returns the argument it receives.
-	//ReturnInterface(args ...interface{}) ([]interface{}, error)
-
 	// InsertArgInterface inserts certain arguments in a specific order and
 	// returns the manipulated arguments.
 	InsertArgInterface(args ...interface{}) ([]interface{}, error)
 
+	// ReturnInterface returns the arguments it receives.
+	ReturnInterface(args ...interface{}) ([]interface{}, error)
+
 	// SwapInterface returns the two arguments it receives, but in swapped order.
-	//SwapInterface(args ...interface{}) ([]interface{}, error)
+	SwapInterface(args ...interface{}) ([]interface{}, error)
 
 	// TypeInterface returns the string representation of the given arg's type.
 	TypeInterface(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO CLGIntSlice represents all int slice compatible CLGs that can be used.
+// CLGIntSlice represents all int slice compatible CLGs that can be used.
 type CLGIntSlice interface {
 	// ContainsIntSlice provides functionality to check if a int slice
 	// contains a certain member.
@@ -139,7 +159,7 @@ type CLGIntSlice interface {
 
 	// IsUniqueIntSlice checks whether the given int slice only contains unique
 	// members.
-	//IsUniqueIntSlice(args ...interface{}) ([]interface{}, error)
+	IsUniqueIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// JoinIntSlice provides functionality of strings.Join after converting ints
 	// to strings.
@@ -259,7 +279,7 @@ type CLGStringMap interface {
 	//ValueStringMap(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO CLGStringSlice represents all string slice compatible CLGs that can be used.
+// CLGStringSlice represents all string slice compatible CLGs that can be used.
 type CLGStringSlice interface {
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
@@ -289,7 +309,7 @@ type CLGStringSlice interface {
 
 	// IsUniqueStringSlice checks whether the given string slice only contains
 	// unique members.
-	//IsUniqueStringSlice(args ...interface{}) ([]interface{}, error)
+	IsUniqueStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)

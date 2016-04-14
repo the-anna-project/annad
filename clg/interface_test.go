@@ -262,6 +262,100 @@ func Test_Interface_InsertArgInterface(t *testing.T) {
 	}
 }
 
+func Test_Interface_ReturnInterface(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{},
+			Expected:     []interface{}{},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"ab"},
+			Expected:     []interface{}{"ab"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{true, 3, "foo"},
+			Expected:     []interface{}{true, 3, "foo"},
+			ErrorMatcher: nil,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.ReturnInterface(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_Interface_SwapInterface(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"a", "b"},
+			Expected:     []interface{}{"b", "a"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{3, true},
+			Expected:     []interface{}{true, 3},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{true, 3, "foo"},
+			Expected:     []interface{}{true, 3, "foo"},
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{8.1},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.SwapInterface(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_Interface_TypeInterface(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

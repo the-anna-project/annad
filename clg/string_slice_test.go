@@ -423,6 +423,68 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 	}
 }
 
+func Test_StringSlice_IsUniqueStringSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     []interface{}{true},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"c", "a", "b", "c"}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"c", "a", "b", "a", "c"}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"c", "c", "c", "c", "c"}},
+			Expected:     []interface{}{false},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"c"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]string{"c", "b", "a"}, true},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.IsUniqueStringSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_StringSlice_JoinStringSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

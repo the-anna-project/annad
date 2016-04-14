@@ -61,6 +61,21 @@ func (i *clgIndex) InsertArgInterface(args ...interface{}) ([]interface{}, error
 	return []interface{}{newArgs}, nil
 }
 
+func (i *clgIndex) ReturnInterface(args ...interface{}) ([]interface{}, error) {
+	return args, nil
+}
+
+func (i *clgIndex) SwapInterface(args ...interface{}) ([]interface{}, error) {
+	if len(args) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	args[0], args[1] = args[1], args[0]
+	return args, nil
+}
+
 func (i *clgIndex) TypeInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 1 got %d", len(args))

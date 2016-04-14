@@ -133,6 +133,31 @@ func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newString}, nil
 }
 
+func (i *clgIndex) IsUniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	unique := true
+	seen := map[string]struct{}{}
+	for _, s := range ss {
+		if _, ok := seen[s]; ok {
+			unique = false
+			break
+		}
+		seen[s] = struct{}{}
+	}
+
+	return []interface{}{unique}, nil
+}
+
 func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
