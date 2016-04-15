@@ -619,6 +619,17 @@ func Test_StringSlice_ReverseStringSlice(t *testing.T) {
 	}
 }
 
+func Test_stem(t *testing.T) {
+	i := stem(nil)
+	if i != "" {
+		t.Fatal("expected", 0, "got", i)
+	}
+	i = stem([]string{})
+	if i != "" {
+		t.Fatal("expected", 0, "got", i)
+	}
+}
+
 func Test_StringSlice_StemStringSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

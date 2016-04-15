@@ -437,6 +437,16 @@ func Test_Float64_RoundFloat64(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			Input:        []interface{}{3.87263, -4},
+			Expected:     nil,
+			ErrorMatcher: IsCannotParse,
+		},
+		{
+			Input:        []interface{}{3.87263, -2},
+			Expected:     nil,
+			ErrorMatcher: IsCannotParse,
+		},
+		{
 			Input:        []interface{}{3.87263, 4, "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,

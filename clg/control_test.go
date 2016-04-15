@@ -22,6 +22,11 @@ func Test_Control_ForControl(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			Input:        []interface{}{[][]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}, []interface{}{5, 6}}, "not found"},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
+		},
+		{
 			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}, "ToUpperString", "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
@@ -82,6 +87,16 @@ func Test_Control_IfControl(t *testing.T) {
 			Input:        []interface{}{"GreaterThanInt", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}},
 			Expected:     []interface{}{},
 			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"not found", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
+		},
+		{
+			Input:        []interface{}{"GreaterThanInt", []interface{}{5, 3}, "not found", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
 		},
 		{
 			Input:        []interface{}{"GreaterThanInt", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}, "foo"},
@@ -159,6 +174,21 @@ func Test_Control_IfElseControl(t *testing.T) {
 			Input:        []interface{}{"GreaterThanInt", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}},
 			Expected:     []interface{}{8},
 			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"not found", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
+		},
+		{
+			Input:        []interface{}{"GreaterThanInt", []interface{}{5, 3}, "not found", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
+		},
+		{
+			Input:        []interface{}{"GreaterThanInt", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}, "not found", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsMethodNotFound,
 		},
 		{
 			Input:        []interface{}{"GreaterThanInt", []interface{}{3, 5}, "SubtractInt", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}, "foo"},

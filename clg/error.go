@@ -84,3 +84,10 @@ var duplicatedMemberError = errgo.New("duplicated member")
 func IsDuplicatedMember(err error) bool {
 	return errgo.Cause(err) == duplicatedMemberError
 }
+
+var cannotParseError = errgo.New("cannot parse")
+
+// IsCannotParse asserts cannotParseError.
+func IsCannotParse(err error) bool {
+	return errgo.Cause(err) == cannotParseError
+}

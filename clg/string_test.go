@@ -784,9 +784,6 @@ func Test_String_SplitEqualString(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		if i != 1 {
-			continue
-		}
 		output, err := newCLGIndex.SplitEqualString(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)

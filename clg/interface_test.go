@@ -232,6 +232,11 @@ func Test_Interface_InsertArgInterface(t *testing.T) {
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
+			Input:        []interface{}{[]interface{}{"a", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
 			Input:        []interface{}{"a", "b", []int{0, 1}},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,

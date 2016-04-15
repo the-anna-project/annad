@@ -111,7 +111,7 @@ func (i *clgIndex) RoundFloat64(args ...interface{}) ([]interface{}, error) {
 
 	newFloat, err := strconv.ParseFloat(fmt.Sprintf(fmt.Sprintf("%%.%df", n), f), 64)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, maskAnyf(cannotParseError, "%s", err)
 	}
 
 	return []interface{}{newFloat}, nil
