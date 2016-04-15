@@ -298,7 +298,7 @@ func Test_Distribution_GetDimensions(t *testing.T) {
 	}
 }
 
-func Test_Distribution_GetHashMap(t *testing.T) {
+func Test_Distribution_GetHashMap_Success(t *testing.T) {
 	newHashMap := map[string]string{
 		"name":            "name",
 		"id":              "id",
@@ -342,6 +342,34 @@ func Test_Distribution_GetHashMap(t *testing.T) {
 	}
 	if output["vectors"] != "2,3|14,15|38,49" {
 		t.Fatal("expected", "2,3|14,15|38,49", "got", output["vectors"])
+	}
+}
+
+func Test_Distribution_GetHashMap_Error(t *testing.T) {
+	newHashMap := map[string]string{
+		"name":            "name",
+		"id":              "id",
+		"static-channels": "25,invalid,100",
+		"vectors":         "2,3|14,15|38,49",
+	}
+	newConfig := DefaultDistributionConfig()
+	newConfig.HashMap = newHashMap
+	_, err := NewDistribution(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+
+	newHashMap = map[string]string{
+		"name":            "name",
+		"id":              "id",
+		"static-channels": "25,50,100",
+		"vectors":         "2,3|0,14,15,0|38,49",
+	}
+	newConfig = DefaultDistributionConfig()
+	newConfig.HashMap = newHashMap
+	_, err = NewDistribution(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
 	}
 }
 

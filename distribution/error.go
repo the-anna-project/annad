@@ -29,13 +29,6 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidPositionError = errgo.New("invalid position")
-
-// IsInvalidPosition asserts invalidPositionError.
-func IsInvalidPosition(err error) bool {
-	return errgo.Cause(err) == invalidPositionError
-}
-
 var channelsDifferError = errgo.New("channels differ")
 
 // IsChannelsDiffer asserts channelsDifferError.
