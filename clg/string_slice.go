@@ -199,6 +199,62 @@ func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error
 	return []interface{}{newStringSlice}, nil
 }
 
+func stem(list []string) string {
+	if len(list) == 0 {
+		return ""
+	}
+
+	ri := 0
+	li := 0
+	ll := len(list)
+	ref := list[0]
+	rm := ""
+
+	for {
+		if ri > len(ref) {
+			break
+		}
+		if ri > len(list[li]) {
+			break
+		}
+
+		rm = ref[:ri]
+		lm := list[li][:ri]
+
+		if rm == lm {
+			li++
+			if li == ll {
+				li = 0
+				ri++
+			}
+
+			continue
+		} else {
+			break
+		}
+	}
+
+	rm = ref[:ri-1]
+	return rm
+}
+
+func (i *clgIndex) StemStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss))
+	}
+
+	newString := stem(ss)
+
+	return []interface{}{newString}, nil
+}
+
 func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {

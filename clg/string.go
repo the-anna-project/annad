@@ -42,6 +42,70 @@ func (i *clgIndex) CountCharacterString(args ...interface{}) ([]interface{}, err
 	return []interface{}{newMap}, nil
 }
 
+// The following code is a golang port of the optimized C version of
+// http://en.wikibooks.org/wiki/Algorithm_implementation/Strings/Levenshtein_distance#C.
+func editDistance(s1, s2 string) int {
+	var cost, lastdiag, olddiag int
+	ls1 := len([]rune(s1))
+	ls2 := len([]rune(s2))
+
+	column := make([]int, ls1+1)
+
+	for i := 1; i <= ls1; i++ {
+		column[i] = i
+	}
+
+	for i := 1; i <= ls2; i++ {
+		column[0] = i
+		lastdiag = i - 1
+
+		for j := 1; j <= ls1; j++ {
+			olddiag = column[j]
+
+			cost = 0
+			if s1[j-1] != s2[i-1] {
+				cost = 1
+			}
+
+			column[j] = editDistanceMin(column[j]+1, column[j-1]+1, lastdiag+cost)
+			lastdiag = olddiag
+		}
+	}
+
+	return column[ls1]
+}
+
+func editDistanceMin(a, b, c int) int {
+	if a < b {
+		if a < c {
+			return a
+		}
+	} else {
+		if b < c {
+			return b
+		}
+	}
+	return c
+}
+
+func (i *clgIndex) EditDistanceString(args ...interface{}) ([]interface{}, error) {
+	s1, err := ArgToString(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	s2, err := ArgToString(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	newInt := editDistance(s1, s2)
+
+	return []interface{}{newInt}, nil
+}
+
 func (i *clgIndex) LongerString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {

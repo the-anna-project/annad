@@ -174,6 +174,119 @@ func Test_String_CountCharacterString(t *testing.T) {
 	}
 }
 
+func Test_String_EditDistanceString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"", ""},
+			Expected:     []interface{}{0},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"a", "a"},
+			Expected:     []interface{}{0},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abc", "abc"},
+			Expected:     []interface{}{0},
+			ErrorMatcher: nil,
+		},
+
+		{
+			Input:        []interface{}{"abc", "abcd"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abc", "abx"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abc", "axc"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abc", "xbc"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abx", "abc"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"axc", "abc"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"xbc", "abc"},
+			Expected:     []interface{}{1},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"car", "egg"},
+			Expected:     []interface{}{3},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abcdef", "xcxe"},
+			Expected:     []interface{}{4},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"hock", "shocking"},
+			Expected:     []interface{}{4},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"hock", "shocking", "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"hock"},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{"hock", true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{8.1, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.EditDistanceString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_String_LongerString(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

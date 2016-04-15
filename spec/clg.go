@@ -17,7 +17,6 @@ type CLGIndex interface {
 	// CLGOS
 	// CLGTime
 
-	// TODO knowledge network ??? create, delete, find peers and connections, distance between peers, distance to peers towards a connection path
 	// TODO Similarity. (stem, edit-distance, manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
 }
@@ -190,7 +189,7 @@ type CLGMethod interface {
 	GetCLGNames(args ...interface{}) ([]interface{}, error)
 }
 
-// CLGString represents all string compatible CLGs that can be used.
+// TODO CLGString represents all string compatible CLGs that can be used.
 type CLGString interface {
 	// ContainsString provides functionality of strings.Contains.
 	ContainsString(args ...interface{}) ([]interface{}, error)
@@ -198,6 +197,11 @@ type CLGString interface {
 	// CountCharacterString returns a map of characters expressing their
 	// corresponding occurence count within the given string.
 	CountCharacterString(args ...interface{}) ([]interface{}, error)
+
+	// EditDistanceString implementes the Levenshtein distance to measure
+	// similarity between two strings. Here all edit operations are weighted with
+	// the cost 1. See http://en.wikipedia.org/wiki/Levenshtein_distance.
+	EditDistanceString(args ...interface{}) ([]interface{}, error)
 
 	// ContainsString provides functionality to check if one string is longer
 	// than the other.
@@ -208,6 +212,9 @@ type CLGString interface {
 
 	// ContainsString provides functionality of strings.Repeat.
 	RepeatString(args ...interface{}) ([]interface{}, error)
+
+	// ReverseString reverses the order of characters of the given string.
+	//ReverseString(args ...interface{}) ([]interface{}, error)
 
 	// ContainsString provides functionality to check if one string is shorter
 	// than the other.
@@ -307,8 +314,20 @@ type CLGStringSlice interface {
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
 
-	// ReverseStringSlice provides functionality of strings.Join.
+	// ReverseStringSlice reverses the order of the given list.
 	ReverseStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// StemStringSlice returns the word stem that all words provided by the given
+	// list have in common. Having the following list.
+	//
+	//     abc
+	//     abcd
+	//     abcde
+	//     abcdef
+	//
+	// Results in the word stem "abc".
+	//
+	StemStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortStringSlice provides functionality of sort.Strings.
 	SortStringSlice(args ...interface{}) ([]interface{}, error)

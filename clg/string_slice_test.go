@@ -619,6 +619,88 @@ func Test_StringSlice_ReverseStringSlice(t *testing.T) {
 	}
 }
 
+func Test_StringSlice_StemStringSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]string{"a", "b"}},
+			Expected:     []interface{}{""},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "ab"}},
+			Expected:     []interface{}{"a"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "bab"}},
+			Expected:     []interface{}{""},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"ab", "ac", "cd", "ce"}},
+			Expected:     []interface{}{""},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"cab", "cac", "cd", "ce"}},
+			Expected:     []interface{}{"c"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"abcdefg", "abcde", "abcd", "abcd"}},
+			Expected:     []interface{}{"abcd"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"abcdefg", "abcde", "abcd", "abcd"}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]string{"abcdefg"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{3, 5, 7}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.StemStringSlice(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_StringSlice_SortStringSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
