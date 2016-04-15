@@ -212,6 +212,16 @@ func Test_Interface_InsertArgInterface(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			Input:        []interface{}{[]interface{}{3, "b", true}, []interface{}{"6", 8.1}, []int{1}},
+			Expected:     []interface{}{[]interface{}{3, []interface{}{"6", 8.1}, "b", true}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]interface{}{3, "b", true}, nil, []int{1}},
+			Expected:     []interface{}{[]interface{}{3, nil, "b", true}},
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
 			Input:        []interface{}{[]interface{}{"a", "c"}, "b", []int{0, 4}},
 			Expected:     nil,
 			ErrorMatcher: IsIndexOutOfRange,

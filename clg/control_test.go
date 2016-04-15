@@ -12,32 +12,32 @@ func Test_Control_ForControl(t *testing.T) {
 		ErrorMatcher func(err error) bool
 	}{
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}, "ToUpperString"},
+			Input:        []interface{}{[][]interface{}{{"a"}, {"b"}, {"c"}}, "ToUpperString"},
 			Expected:     []interface{}{[]interface{}{"A", "B", "C"}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}, []interface{}{5, 6}}, "SumInt"},
+			Input:        []interface{}{[][]interface{}{{1, 2}, {3, 4}, {5, 6}}, "SumInt"},
 			Expected:     []interface{}{[]interface{}{3, 7, 11}},
 			ErrorMatcher: nil,
 		},
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}, []interface{}{5, 6}}, "not found"},
+			Input:        []interface{}{[][]interface{}{{1, 2}, {3, 4}, {5, 6}}, "not found"},
 			Expected:     nil,
 			ErrorMatcher: IsMethodNotFound,
 		},
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}, "ToUpperString", "foo"},
+			Input:        []interface{}{[][]interface{}{{"a"}, {"b"}, {"c"}}, "ToUpperString", "foo"},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"c"}}},
+			Input:        []interface{}{[][]interface{}{{"a"}, {"b"}, {"c"}}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
-			Input:        []interface{}{[][]interface{}{[]interface{}{"a"}}, "ToUpperString"},
+			Input:        []interface{}{[][]interface{}{{"a"}}, "ToUpperString"},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
 		},

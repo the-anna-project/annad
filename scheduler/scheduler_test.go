@@ -326,3 +326,20 @@ func Test_Scheduler_Execute_Scheduler_Ends_Wait(t *testing.T) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
+
+func Test_Scheduler_MarkAsReplaced(t *testing.T) {
+	c := redigomock.NewConn()
+	// Note returning this specific error here makes no sense business wise. It
+	// is only to verify the test.
+	c.Command("ZREM").ExpectError(jobNotFoundError)
+	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
+	newStorage := redisstorage.NewRedisStorage(newStorageConfig)
+
+	newScheduler := newTestScheduler(newStorage)
+
+	newJob := newTestJob(nil, "test-session", "test-action")
+	_, err := newScheduler.(*scheduler).MarkAsReplaced(newJob)
+	if !IsJobNotFound(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}

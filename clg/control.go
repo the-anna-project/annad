@@ -1,7 +1,5 @@
 package clg
 
-import ()
-
 func (i *clgIndex) ForControl(args ...interface{}) ([]interface{}, error) {
 	asl, err := ArgToArgsList(args, 0)
 	if err != nil {
