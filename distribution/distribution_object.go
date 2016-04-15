@@ -1,4 +1,4 @@
-package patnet
+package distribution
 
 import (
 	"github.com/xh3b4sd/anna/spec"

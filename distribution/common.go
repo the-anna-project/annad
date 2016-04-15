@@ -1,4 +1,4 @@
-package patnet
+package distribution
 
 import (
 	"strconv"

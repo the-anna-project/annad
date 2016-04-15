@@ -42,6 +42,11 @@ func Test_Control_ForControl(t *testing.T) {
 			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
 			Input:        []interface{}{true, "ToUpperString"},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
