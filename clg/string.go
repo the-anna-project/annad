@@ -155,6 +155,24 @@ func (i *clgIndex) RepeatString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{repeated}, nil
 }
 
+func (i *clgIndex) ReverseString(args ...interface{}) ([]interface{}, error) {
+	s, err := ArgToString(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	chars := []rune(s)
+	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
+		chars[i], chars[j] = chars[j], chars[i]
+	}
+	newString := string(chars)
+
+	return []interface{}{newString}, nil
+}
+
 func (i *clgIndex) ShorterString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {

@@ -213,6 +213,8 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 	}
 
 	if len(elements) == 1 {
+		// In case there was only one element, and we removed it, we also need to
+		// remove the score from the "global" list.
 		var newScores []float64
 		for _, es := range weighted.Scores {
 			if es != score {

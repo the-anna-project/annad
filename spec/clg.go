@@ -12,7 +12,6 @@ type CLGIndex interface {
 	// CLGNetwork
 	Object
 	CLGString
-	CLGStringMap
 	CLGStringSlice
 	// CLGOS
 	// CLGTime
@@ -189,7 +188,7 @@ type CLGMethod interface {
 	GetCLGNames(args ...interface{}) ([]interface{}, error)
 }
 
-// TODO CLGString represents all string compatible CLGs that can be used.
+// CLGString represents all string compatible CLGs that can be used.
 type CLGString interface {
 	// ContainsString provides functionality of strings.Contains.
 	ContainsString(args ...interface{}) ([]interface{}, error)
@@ -214,7 +213,7 @@ type CLGString interface {
 	RepeatString(args ...interface{}) ([]interface{}, error)
 
 	// ReverseString reverses the order of characters of the given string.
-	//ReverseString(args ...interface{}) ([]interface{}, error)
+	ReverseString(args ...interface{}) ([]interface{}, error)
 
 	// ContainsString provides functionality to check if one string is shorter
 	// than the other.
@@ -232,51 +231,6 @@ type CLGString interface {
 
 	// ToUpperString provides functionality of strings.ToUpper.
 	ToUpperString(args ...interface{}) ([]interface{}, error)
-}
-
-// TODO CLGStringMap represents all string map compatible CLGs that can be used.
-type CLGStringMap interface {
-	// KeyIntMap returns the value under the given key within the given int
-	// map.
-	//KeyIntMap(args ...interface{}) ([]interface{}, error)
-
-	// KeyFloat64Map returns the value under the given key within the given float64
-	// map.
-	//KeyFloat64Map(args ...interface{}) ([]interface{}, error)
-
-	// KeyStringMap returns the value under the given key within the given string
-	// map.
-	//KeyStringMap(args ...interface{}) ([]interface{}, error)
-
-	// SwapFloat64IntMap returns a string map having keys and values swapped.
-	//SwapFloat64IntMap(args ...interface{}) ([]interface{}, error)
-
-	// SwapFloat64StringMap returns a string map having keys and values swapped.
-	//SwapFloat64StringMap(args ...interface{}) ([]interface{}, error)
-
-	// SwapIntFloat64Map returns a string map having keys and values swapped.
-	//SwapIntFloat64Map(args ...interface{}) ([]interface{}, error)
-
-	// SwapIntStringMap returns a string map having keys and values swapped.
-	//SwapIntStringMap(args ...interface{}) ([]interface{}, error)
-
-	// SwapStringFloat64Map returns a string map having keys and values swapped.
-	//SwapStringFloat64Map(args ...interface{}) ([]interface{}, error)
-
-	// SwapStringIntMap returns a string map having keys and values swapped.
-	//SwapStringIntMap(args ...interface{}) ([]interface{}, error)
-
-	// ValueFloat64Map returns the keys corresponding to the given value within
-	// the given float64 map.
-	//ValueFloat64Map(args ...interface{}) ([]interface{}, error)
-
-	// ValueIntMap returns the keys corresponding to the given value within
-	// the given int map.
-	//ValueIntMap(args ...interface{}) ([]interface{}, error)
-
-	// ValueStringMap returns the keys corresponding to the given value within
-	// the given string map.
-	//ValueStringMap(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGStringSlice represents all string slice compatible CLGs that can be used.

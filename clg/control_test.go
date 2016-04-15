@@ -138,6 +138,11 @@ func Test_Control_IfControl(t *testing.T) {
 			Expected:     nil,
 			ErrorMatcher: IsTooManyResults,
 		},
+		{
+			Input:        []interface{}{"ReturnInterface", []interface{}{}, "SubtractInt", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
 	}
 
 	newConfig := DefaultConfig()
@@ -239,6 +244,11 @@ func Test_Control_IfElseControl(t *testing.T) {
 			Input:        []interface{}{"ReturnInterface", []interface{}{true, "foo"}, "SubtractInt", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}},
 			Expected:     nil,
 			ErrorMatcher: IsTooManyResults,
+		},
+		{
+			Input:        []interface{}{"ReturnInterface", []interface{}{}, "SubtractInt", []interface{}{5, 3}, "SumInt", []interface{}{5, 3}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
 		},
 	}
 

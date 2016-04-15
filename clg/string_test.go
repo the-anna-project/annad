@@ -540,6 +540,73 @@ func Test_String_RepeatString(t *testing.T) {
 	}
 }
 
+func Test_String_ReverseString(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{""},
+			Expected:     []interface{}{""},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"a"},
+			Expected:     []interface{}{"a"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"ab"},
+			Expected:     []interface{}{"ba"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"abcdefg"},
+			Expected:     []interface{}{"gfedcba"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"12345"},
+			Expected:     []interface{}{"54321"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{"ab", "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.ReverseString(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_String_ShorterString(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
