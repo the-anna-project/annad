@@ -54,3 +54,17 @@ E.g. she could do something and provide records of what she has done in a form
 as it would be provided by some external instance. Maybe that way we could
 make her explore herself up to a stage where she realizes that action and
 reaction are related and even come from the same individual. That is, herself.
+
+### challenge index
+```
+| input                           | expected             |
+|---------------------------------|----------------------|
+| Show me the letter a            | a                    |
+| Show me the letter a            | This is the letter a |
+| Show me the letter a twice      | aa                   |
+| Show me the letter a twice      | a a                  |
+| Show me the letter a twice      | a,a                  |
+| Repeat the string ab            | abab                 |
+| Repeat the string ab            | ab ab                |
+| Repeat the string ab            | ab,ab                |
+```
