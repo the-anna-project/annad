@@ -11,6 +11,10 @@ This builtin functionality should be the only hard coded logic. All other
 behavior must result out of the combination of learned data, CLGs and
 connections between these two.
 
+Random fact: currently Anna is capable of more than 70 CLG implementations.
+This number is expected to to be raised even further. For now manually, later
+on automatically.
+
 ### BI, Basic Information
 BI, Basic Information, represent fundamental information that must be known to
 reach a higher level of intelligence. The most fundamental BIs like numbers
