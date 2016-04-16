@@ -377,3 +377,23 @@ func Test_Scheduler_MarkAsFailedWithError(t *testing.T) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
+
+func Test_Scheduler_Execute_MarkAsActiveError(t *testing.T) {
+	c := redigomock.NewConn()
+	// Note returning this specific error here makes no sense business wise. It
+	// is only to verify the test.
+	c.Command("ZADD").ExpectError(jobNotFoundError)
+	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
+	newStorage := redisstorage.NewRedisStorage(newStorageConfig)
+
+	newScheduler := newTestScheduler(newStorage)
+	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
+		return "", nil
+	})
+
+	newJob := newTestJob(nil, "test-session", "test-action")
+	err := newScheduler.(*scheduler).Execute(newJob)
+	if !IsJobNotFound(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
