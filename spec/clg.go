@@ -19,6 +19,7 @@ type CLGIndex interface {
 
 	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
+	// TODO Converting types (string to string slice, float to string, string to int, bool to int)
 }
 
 // CLGControl represents all control flow CLGs that can be used.
@@ -48,9 +49,21 @@ type CLGControl interface {
 // CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
 // used.
 type CLGFeatureSet interface {
-	// GetNewFeatureSet provides a way to create a new feature set. Optionally
-	// decent configuration can be given.
-	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
+	// GetFeaturesFeatureSet returns all features detected during scanning of the
+	// configured sequences.
+	GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesByCountFeatureSet returns all features detected during scanning
+	// of the configured sequences, that occur the given times.
+	GetFeaturesByCountFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesByLengthFeatureSet returns all features detected during
+	// scanning of the configured sequences, that satisfy the given length.
+	GetFeaturesByLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesBySequenceFeatureSet returns all features detected during
+	// scanning of the configured sequences, that satisfy the given glob pattern.
+	GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
 	// feature set.
@@ -63,6 +76,10 @@ type CLGFeatureSet interface {
 	// GetMinCountFeatureSet returns the configured MinCount of the given
 	// feature set.
 	GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetNewFeatureSet provides a way to create a new feature set. Optionally
+	// decent configuration can be given.
+	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetSeparatorFeatureSet returns the configured Separator of the given
 	// feature set.

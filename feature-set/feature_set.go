@@ -134,7 +134,7 @@ func (fs *featureSet) GetFeaturesBySequence(sequence string) []spec.Feature {
 	var newFeatures []spec.Feature
 
 	for _, f := range fs.Features {
-		if f.GetSequence() == sequence {
+		if strings.Contains(f.GetSequence(), sequence) {
 			newFeatures = append(newFeatures, f)
 		}
 	}

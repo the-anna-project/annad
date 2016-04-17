@@ -161,36 +161,70 @@ func Test_FeatureSet_GetFeaturesByLength(t *testing.T) {
 }
 
 func Test_FeatureSet_GetFeaturesBySequence(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
-	newConfig.MinCount = 2
-	newConfig.Sequences = []string{
-		"This is, a test.",
-		"This is, another test.",
-	}
-	newFeatureSet, err := NewFeatureSet(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
+	testCases := []struct {
+		Input            string
+		ExpectedSubSet   []string
+		UnexpectedSubSet []string
+		ErrorMatcher     func(err error) bool
+	}{
+		{
+			Input:            "ab",
+			ExpectedSubSet:   nil,
+			UnexpectedSubSet: nil,
+			ErrorMatcher:     nil,
+		},
+		{
+			Input:            "This",
+			ExpectedSubSet:   []string{"This", "This is"},
+			UnexpectedSubSet: []string{"another", "test."},
+			ErrorMatcher:     nil,
+		},
+		{
+			Input:            "",
+			ExpectedSubSet:   []string{"This", "This is", "another", "test.", "."},
+			UnexpectedSubSet: nil,
+			ErrorMatcher:     nil,
+		},
 	}
 
-	err = newFeatureSet.Scan()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	fs := newFeatureSet.GetFeaturesBySequence(".")
-	if len(fs) != 1 {
-		t.Fatal("expected", 1, "got", len(fs))
-	}
-	f := fs[0]
-	if f.GetCount() != 2 {
-		t.Fatal("expected", 2, "got", f.GetCount())
-	}
-	calculate := []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 1.5}
-	if !reflect.DeepEqual(f.GetDistribution().Calculate(), calculate) {
-		t.Fatal("expected", calculate, "got", f.GetDistribution().Calculate())
-	}
-	if f.GetSequence() != "." {
-		t.Fatal("expected", ".", "got", f.GetSequence())
+	for i, testCase := range testCases {
+		newConfig := DefaultFeatureSetConfig()
+		newConfig.Sequences = []string{"This is a test.", "This is another test."}
+		newFeatureSet, err := NewFeatureSet(newConfig)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			err = newFeatureSet.Scan()
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+			fs := newFeatureSet.GetFeaturesBySequence(testCase.Input)
+			for j, e := range testCase.ExpectedSubSet {
+				var contains bool
+				for _, f := range fs {
+					if f.GetSequence() == e {
+						contains = true
+						break
+					}
+				}
+				if !contains {
+					t.Fatal("case", j+1, "of", i+1, "expected", e, "got", "empty string")
+				}
+			}
+			for j, e := range testCase.UnexpectedSubSet {
+				var contains bool
+				for _, f := range fs {
+					if f.GetSequence() == e {
+						contains = true
+						break
+					}
+				}
+				if contains {
+					t.Fatal("case", j+1, "of", i+1, "expected", e, "got", "empty string")
+				}
+			}
+		}
 	}
 }
 

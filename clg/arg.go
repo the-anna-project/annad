@@ -62,6 +62,20 @@ func ArgToBool(args []interface{}, index int) (bool, error) {
 	return false, maskAnyf(wrongArgumentTypeError, "expected bool got %T", args[index])
 }
 
+// ArgToFeatures converts the argument under index to a []spec.Feature, if
+// possible.
+func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if fs, ok := args[index].([]spec.Feature); ok {
+		return fs, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected []spec.Feature got %T", args[index])
+}
+
 // ArgToFeatureSet converts the argument under index to a spec.FeatureSet, if
 // possible.
 func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
