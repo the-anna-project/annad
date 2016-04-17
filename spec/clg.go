@@ -3,6 +3,7 @@ package spec
 // TODO CLGIndex represents the CLG index providing all CLGs that can be used.
 type CLGIndex interface {
 	CLGControl
+	CLGFeatureSet
 	CLGFloat64
 	// CLGFloat64Slice
 	CLGInt
@@ -16,7 +17,7 @@ type CLGIndex interface {
 	// CLGOS
 	// CLGTime
 
-	// TODO Similarity. (stem, edit-distance, manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
+	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
 }
 
@@ -42,6 +43,14 @@ type CLGControl interface {
 	IfElseControl(args ...interface{}) ([]interface{}, error)
 
 	// TODO control flow ??? switch, goto, strategy modifier
+}
+
+// CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
+// used.
+type CLGFeatureSet interface {
+	// NewFeatureSet provides a way to create a new feature set. Optionally
+	// decent configuration can be given.
+	NewFeatureSet(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
@@ -179,13 +188,17 @@ type CLGIntSlice interface {
 
 // CLGMethod represents all CLGs that can be used to operate on CLG methods.
 type CLGMethod interface {
-	// CallCLGByName provides a way to dynamically execute any index's CLG by
-	// providing the CLG's name as string argument.
-	CallCLGByName(args ...interface{}) ([]interface{}, error)
+	// CallMethodByName provides a way to dynamically execute any index's CLG by
+	// providing the method's name as string argument.
+	CallMethodByName(args ...interface{}) ([]interface{}, error)
 
-	// GetCLGNames provides a way to fetch all CLG names. Optionally a glob
+	// GetMethodNames provides a way to fetch all method names. Optionally a glob
 	// pattern can be provided to limit the returned names.
-	GetCLGNames(args ...interface{}) ([]interface{}, error)
+	GetMethodNames(args ...interface{}) ([]interface{}, error)
+
+	// GetNumMethods returns the number of available methods the CLG index
+	// provides.
+	GetNumMethods(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGString represents all string compatible CLGs that can be used.

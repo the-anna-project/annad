@@ -2,6 +2,8 @@ package clg
 
 import (
 	"reflect"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // Arg
@@ -60,6 +62,20 @@ func ArgToBool(args []interface{}, index int) (bool, error) {
 	return false, maskAnyf(wrongArgumentTypeError, "expected bool got %T", args[index])
 }
 
+// ArgToFeatureSet converts the argument under index to a spec.FeatureSet, if
+// possible.
+func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if fs, ok := args[index].(spec.FeatureSet); ok {
+		return fs, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.FeatureSet got %T", args[index])
+}
+
 // ArgToFloat64 converts the argument under index to a float64, if possible.
 func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	if len(args) < index+1 {
@@ -73,9 +89,19 @@ func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	return 0, maskAnyf(wrongArgumentTypeError, "expected float64 got %T", args[index])
 }
 
-// ArgToInt converts the argument under index to a int, if possible.
-func ArgToInt(args []interface{}, index int) (int, error) {
+// ArgToInt converts the argument under index to a int, if possible. Optionally
+// it takes one default value that is returned in case there is no argument
+// available for the given index.
+func ArgToInt(args []interface{}, index int, def ...int) (int, error) {
+	if len(def) > 1 {
+		return 0, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+	}
 	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+
 		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
 	}
 
@@ -100,8 +126,18 @@ func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 }
 
 // ArgToString converts the argument under index to a string, if possible.
-func ArgToString(args []interface{}, index int) (string, error) {
+// Optionally it takes one default value that is returned in case there is no
+// argument available for the given index.
+func ArgToString(args []interface{}, index int, def ...string) (string, error) {
+	if len(def) > 1 {
+		return "", maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+	}
 	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+
 		return "", maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
 	}
 
@@ -113,9 +149,18 @@ func ArgToString(args []interface{}, index int) (string, error) {
 }
 
 // ArgToStringSlice converts the argument under index to a string slice, if
-// possible.
-func ArgToStringSlice(args []interface{}, index int) ([]string, error) {
+// possible. Optionally it takes one default value that is returned in case
+// there is no argument available for the given index.
+func ArgToStringSlice(args []interface{}, index int, def ...[]string) ([]string, error) {
+	if len(def) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+	}
 	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
 	}
 

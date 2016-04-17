@@ -73,6 +73,18 @@ func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
 		Type:             ObjectTypeFeatureSet,
 	}
 
+	if newFeatureSet.MaxLength < -1 {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be greater than -2")
+	}
+	if newFeatureSet.MinLength < 1 {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be greater than 0")
+	}
+	if newFeatureSet.MaxLength != -1 && newFeatureSet.MaxLength < newFeatureSet.MinLength {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be greater than MinLength")
+	}
+	if newFeatureSet.MinCount < 1 {
+		return nil, maskAnyf(invalidConfigError, "MinCount must be greater than 0")
+	}
 	if len(newFeatureSet.Sequences) == 0 {
 		return nil, maskAnyf(invalidConfigError, "sequences must not be empty")
 	}
@@ -128,6 +140,22 @@ func (fs *featureSet) GetFeaturesBySequence(sequence string) []spec.Feature {
 	}
 
 	return newFeatures
+}
+
+func (fs *featureSet) GetMaxLength() int {
+	return fs.MaxLength
+}
+
+func (fs *featureSet) GetMinLength() int {
+	return fs.MinLength
+}
+
+func (fs *featureSet) GetMinCount() int {
+	return fs.MinCount
+}
+
+func (fs *featureSet) GetSeparator() string {
+	return fs.Separator
 }
 
 func (fs *featureSet) GetSequences() []string {
