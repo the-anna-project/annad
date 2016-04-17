@@ -18,7 +18,7 @@ annactl:
 		github.com/xh3b4sd/anna/annactl
 
 cicover:
-	.workspace/bin/goveralls -service=travis-ci
+	${TRAVIS_BUILD_DIR}/.workspace/bin/goveralls -service=travis-ci
 
 goclean:
 	@rm -rf .workspace/ coverage.txt
