@@ -1,9 +1,9 @@
-.PHONY: all anna annactl goclean gofmt goget gotest
+.PHONY: all anna annactl cicover goclean gofmt goget gotest
 
 GOPATH := ${PWD}/.workspace/
 export GOPATH
 
-all: anna annactl cicover goclean gofmt goget gotest
+all: goget annactl anna
 
 anna:
 	@go build \
