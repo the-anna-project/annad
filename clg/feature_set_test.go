@@ -196,6 +196,11 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
 	}
 
 	newConfig := DefaultConfig()
@@ -254,6 +259,11 @@ func Test_FeatureSet_GetMinLengthFeatureSet(t *testing.T) {
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
 	}
 
 	newConfig := DefaultConfig()
@@ -311,6 +321,11 @@ func Test_FeatureSet_GetMinCountFeatureSet(t *testing.T) {
 			Input:        []interface{}{"foo"},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
 		},
 	}
 
@@ -375,6 +390,11 @@ func Test_FeatureSet_GetSeparatorFeatureSet(t *testing.T) {
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
 		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
 	}
 
 	newConfig := DefaultConfig()
@@ -436,6 +456,11 @@ func Test_FeatureSet_GetSequencesFeatureSet(t *testing.T) {
 			Input:        []interface{}{"foo"},
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
 		},
 	}
 
