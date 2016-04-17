@@ -8,8 +8,8 @@ go:
 install: make all
 
 script:
-- make cicover
 - make gotest
+- make cicover
 
 notifications:
   email: false
