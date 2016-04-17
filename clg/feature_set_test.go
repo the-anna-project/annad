@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/xh3b4sd/anna/feature-set"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 func Test_FeatureSet_NewFeatureSet_Success(t *testing.T) {
@@ -40,7 +41,7 @@ func Test_FeatureSet_NewFeatureSet_Success(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Test.
-		output, err := newCLGIndex.NewFeatureSet(testCase.Input...)
+		output, err := newCLGIndex.GetNewFeatureSet(testCase.Input...)
 		if err != nil {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
@@ -111,6 +112,18 @@ func Test_FeatureSet_NewFeatureSet_Error(t *testing.T) {
 			ErrorMatcher: IsWrongArgumentType,
 		},
 		{
+			Input:        []interface{}{[]string{"foo", "bar"}, -1, []int{1, 2, 3}},
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]string{"foo", "bar"}, -1, 1, "invalid"},
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]string{"foo", "bar"}, -1, 1, 3, 8.1},
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
 			Input:        []interface{}{[]string{"foo", "bar"}, -2},
 			ErrorMatcher: featureset.IsInvalidConfig,
 		},
@@ -135,9 +148,52 @@ func Test_FeatureSet_NewFeatureSet_Error(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		_, err := newCLGIndex.NewFeatureSet(testCase.Input...)
+		_, err := newCLGIndex.GetNewFeatureSet(testCase.Input...)
 		if !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+	}
+}
+
+func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
+	testFeatureSet := func(maxLength int) spec.FeatureSet {
+		newConfig := featureset.DefaultFeatureSetConfig()
+		newConfig.MaxLength = maxLength
+		newConfig.Sequences = []string{"a", "b"}
+		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newFeatureSet
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testFeatureSet(3)},
+			Expected:     []interface{}{3},
+			ErrorMatcher: nil,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetMaxLengthFeatureSet(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
 		}
 	}
 }

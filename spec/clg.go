@@ -48,9 +48,13 @@ type CLGControl interface {
 // CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
 // used.
 type CLGFeatureSet interface {
-	// NewFeatureSet provides a way to create a new feature set. Optionally
+	// GetNewFeatureSet provides a way to create a new feature set. Optionally
 	// decent configuration can be given.
-	NewFeatureSet(args ...interface{}) ([]interface{}, error)
+	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
+	// feature set.
+	GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.

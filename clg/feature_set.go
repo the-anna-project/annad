@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/feature-set"
 )
 
-func (i *clgIndex) NewFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GetNewFeatureSet(args ...interface{}) ([]interface{}, error) {
 	var err error
 	newConfig := featureset.DefaultFeatureSetConfig()
 
@@ -39,4 +39,18 @@ func (i *clgIndex) NewFeatureSet(args ...interface{}) ([]interface{}, error) {
 	}
 
 	return []interface{}{newFeatureSet}, nil
+}
+
+func (i *clgIndex) GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFeatureSet(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	maxLength := fs.GetMaxLength()
+
+	return []interface{}{maxLength}, nil
 }
