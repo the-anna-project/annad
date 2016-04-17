@@ -9,7 +9,6 @@ install: make all
 
 script:
 - make gotest
-- make cicover
 
 notifications:
   email: false

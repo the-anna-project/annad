@@ -17,11 +17,6 @@ annactl:
 		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
 		github.com/xh3b4sd/anna/annactl
 
-cicover:
-	go get github.com/mattn/goveralls
-	go get golang.org/x/tools/cmd/cover
-	.workspace/bin/goveralls -service=travis-ci
-
 goclean:
 	@rm -rf .workspace/ coverage.txt
 
