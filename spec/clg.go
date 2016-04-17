@@ -55,6 +55,22 @@ type CLGFeatureSet interface {
 	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
 	// feature set.
 	GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMinLengthFeatureSet returns the configured MinLength of the given
+	// feature set.
+	GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMinCountFeatureSet returns the configured MinCount of the given
+	// feature set.
+	GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetSeparatorFeatureSet returns the configured Separator of the given
+	// feature set.
+	GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetSequencesFeatureSet returns the configured Sequences of the given
+	// feature set.
+	GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.

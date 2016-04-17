@@ -216,3 +216,244 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 		}
 	}
 }
+
+func Test_FeatureSet_GetMinLengthFeatureSet(t *testing.T) {
+	testFeatureSet := func(minLength int) spec.FeatureSet {
+		newConfig := featureset.DefaultFeatureSetConfig()
+		newConfig.MinLength = minLength
+		newConfig.Sequences = []string{"a", "b"}
+		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newFeatureSet
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testFeatureSet(3)},
+			Expected:     []interface{}{3},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8)},
+			Expected:     []interface{}{8},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetMinLengthFeatureSet(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_FeatureSet_GetMinCountFeatureSet(t *testing.T) {
+	testFeatureSet := func(minCount int) spec.FeatureSet {
+		newConfig := featureset.DefaultFeatureSetConfig()
+		newConfig.MinCount = minCount
+		newConfig.Sequences = []string{"a", "b"}
+		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newFeatureSet
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testFeatureSet(3)},
+			Expected:     []interface{}{3},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8)},
+			Expected:     []interface{}{8},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetMinCountFeatureSet(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_FeatureSet_GetSeparatorFeatureSet(t *testing.T) {
+	testFeatureSet := func(separator string) spec.FeatureSet {
+		newConfig := featureset.DefaultFeatureSetConfig()
+		newConfig.Separator = separator
+		newConfig.Sequences = []string{"a", "b"}
+		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newFeatureSet
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testFeatureSet(",")},
+			Expected:     []interface{}{","},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet("|")},
+			Expected:     []interface{}{"|"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(" ")},
+			Expected:     []interface{}{" "},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(" "), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetSeparatorFeatureSet(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_FeatureSet_GetSequencesFeatureSet(t *testing.T) {
+	testFeatureSet := func(sequences []string) spec.FeatureSet {
+		newConfig := featureset.DefaultFeatureSetConfig()
+		newConfig.Sequences = sequences
+		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newFeatureSet
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testFeatureSet([]string{"a", "b"})},
+			Expected:     []interface{}{[]string{"a", "b"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet([]string{"1", "2"})},
+			Expected:     []interface{}{[]string{"1", "2"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet([]string{"foo", "bar"})},
+			Expected:     []interface{}{[]string{"foo", "bar"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet([]string{"foo", "bar"}), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetSequencesFeatureSet(testCase.Input...)
+		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}

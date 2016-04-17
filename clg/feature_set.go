@@ -54,3 +54,59 @@ func (i *clgIndex) GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, e
 
 	return []interface{}{maxLength}, nil
 }
+
+func (i *clgIndex) GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFeatureSet(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	minLength := fs.GetMinLength()
+
+	return []interface{}{minLength}, nil
+}
+
+func (i *clgIndex) GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFeatureSet(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	minCount := fs.GetMinCount()
+
+	return []interface{}{minCount}, nil
+}
+
+func (i *clgIndex) GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFeatureSet(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	separator := fs.GetSeparator()
+
+	return []interface{}{separator}, nil
+}
+
+func (i *clgIndex) GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFeatureSet(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	sequences := fs.GetSequences()
+
+	return []interface{}{sequences}, nil
+}
