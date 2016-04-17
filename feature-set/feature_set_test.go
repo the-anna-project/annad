@@ -59,31 +59,31 @@ func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
 		Expected  []string
 	}{
 		{
-			MinLength: -1,
+			MinLength: 1,
 			MaxLength: -1,
 			Sequences: []string{"ab"},
 			Expected:  nil,
 		},
 		{
-			MinLength: -1,
+			MinLength: 1,
 			MaxLength: -1,
 			Sequences: []string{"ab", "ab"},
 			Expected:  []string{"a", "b", "ab"},
 		},
 		{
-			MinLength: -1,
+			MinLength: 1,
 			MaxLength: -1,
 			Sequences: []string{"ab", "ab", "ab"},
 			Expected:  []string{"a", "b", "ab"},
 		},
 		{
-			MinLength: -1,
+			MinLength: 1,
 			MaxLength: -1,
 			Sequences: []string{"ab", "ab", "abc"},
 			Expected:  []string{"a", "b", "ab"},
 		},
 		{
-			MinLength: -1,
+			MinLength: 1,
 			MaxLength: -1,
 			Sequences: []string{"ab", "ab", "abc", "abc"},
 			Expected:  []string{"a", "b", "c", "ab", "bc", "abc"},
@@ -128,12 +128,12 @@ func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
 		newConfig.Sequences = testCase.Sequences
 		newFeatureSet, err := NewFeatureSet(newConfig)
 		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 
 		err = newFeatureSet.Scan()
 		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 		var sequences []string
 		for _, f := range newFeatureSet.GetFeatures() {
