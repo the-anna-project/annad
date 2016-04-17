@@ -1,18 +1,22 @@
 language: go
+
 sudo: false
 
 go:
-  - 1.6
+- 1.6
 
 install: make all
 
 script:
-  - make cicover
-  - make gotest
+- make cicover
+- make gotest
 
 notifications:
   email: false
 
-# codecov
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)
+
+env:
+  global:
+    secure: KEqHRp4pkUZ4o2AVjsT8ulBUrBCB/PaUhSNh0LubvjCextZw5fW0kAR2CwYQtRxqMWRFe9e1THenPZETXaJnyMd1q9P09U4c1GZOz6qHaAG8dUoM08NMFw0JSUziqCtixkXdp2lqoaKvKUIKPSN0HHpyzuXs3CqLj+3FunvSZPQI6Ee3V4vqijhY9lNbiASyoPLMM5LPZOFGy0+MzCrQY3WswYoLwUjWeeIqYB+7V+VfiTfx1QOMH3kKUkQKt+8UwoMKY+R1RlNwxF/cdqrUPIFwk30c/pOZQ+IV/1hyvUPkCErx7AWwy6bsr4y/V7OMBWgPvcX06PNKNQ7e2htQ/mhGV+dfdoQ1AlYXlNTS+JWgJ9Aj6n2iiyqjXXsPJ2eoFZxMtEHj++MEZc5HKfR3Sioa1cMLW4uXrUAav1Dsl8asOtL6MHLoSt4v3zZyk/IxwETn+ucFIegNHS7jnh9D7eCYWOYCcmKpWSwxdc7A69YhghpiWaX7CQuY29BxqZP2UDAYTG5jhv5Mcyb0ap8XRCOfiYAJEK0ZYkQsWTHobqgHG2qYP+PBMNuqLcV0v5PV4Qivi5V3jVReYvfq695TNyuFd3PKbUbK93v8LTVJLWn8AbS9tXpcqZB1TBACuGiqzB9wVZQH8NKyOyJXw7YK64RowTJv1Sftq7Wk6tEM5Aw=
