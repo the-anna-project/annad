@@ -1,4 +1,4 @@
-.PHONY: all anna annactl cicover goclean gofmt goget gotest
+.PHONY: all anna annactl goclean gofmt goget gotest
 
 GOPATH := ${PWD}/.workspace/
 export GOPATH
@@ -16,9 +16,6 @@ annactl:
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
 		github.com/xh3b4sd/anna/annactl
-
-cicover:
-	${TRAVIS_BUILD_DIR}/.workspace/bin/goveralls -service=travis-ci
 
 goclean:
 	@rm -rf .workspace/ coverage.txt
