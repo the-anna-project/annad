@@ -3,7 +3,7 @@
 GOPATH := ${PWD}/.workspace/
 export GOPATH
 
-all: goget annactl anna
+all: anna annactl cicover goclean gofmt goget gotest
 
 anna:
 	@go build \
@@ -16,6 +16,9 @@ annactl:
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
 		github.com/xh3b4sd/anna/annactl
+
+cicover:
+	.workspace/bin/goveralls -service=travis-ci
 
 goclean:
 	@rm -rf .workspace/ coverage.txt
