@@ -82,8 +82,8 @@ func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
 	if newFeatureSet.MaxLength != -1 && newFeatureSet.MaxLength < newFeatureSet.MinLength {
 		return nil, maskAnyf(invalidConfigError, "MaxLength must be equal to or greater thanMinLength")
 	}
-	if newFeatureSet.MinCount < 1 {
-		return nil, maskAnyf(invalidConfigError, "MinCount must be greater than 0")
+	if newFeatureSet.MinCount < 0 {
+		return nil, maskAnyf(invalidConfigError, "MinCount must be greater than -1")
 	}
 	if len(newFeatureSet.Sequences) == 0 {
 		return nil, maskAnyf(invalidConfigError, "sequences must not be empty")

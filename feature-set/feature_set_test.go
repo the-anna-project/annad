@@ -244,9 +244,17 @@ func Test_FeatureSet_GetMinLength(t *testing.T) {
 
 func Test_FeatureSet_GetMinCount(t *testing.T) {
 	newConfig := DefaultFeatureSetConfig()
-	newConfig.MinCount = 3
+	newConfig.MinCount = -1
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err := NewFeatureSet(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", false, "got", true)
+	}
+
+	newConfig = DefaultFeatureSetConfig()
+	newConfig.MinCount = 3
+	newConfig.Sequences = []string{"a", "b"}
+	newFeatureSet, err = NewFeatureSet(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

@@ -136,8 +136,12 @@ func Test_FeatureSet_NewFeatureSet_Error(t *testing.T) {
 			ErrorMatcher: featureset.IsInvalidConfig,
 		},
 		{
-			Input:        []interface{}{[]string{"foo", "bar"}, -1, 1, 0},
+			Input:        []interface{}{[]string{"foo", "bar"}, -1, 1, -1},
 			ErrorMatcher: featureset.IsInvalidConfig,
+		},
+		{
+			Input:        []interface{}{[]string{"foo", "bar"}, -1, 1, 0, "", "foo"},
+			ErrorMatcher: IsTooManyArguments,
 		},
 	}
 
@@ -176,6 +180,21 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 			Input:        []interface{}{testFeatureSet(3)},
 			Expected:     []interface{}{3},
 			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8)},
+			Expected:     []interface{}{8},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testFeatureSet(8), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{"foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
 		},
 	}
 
