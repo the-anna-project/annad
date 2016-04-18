@@ -19,7 +19,7 @@ type CLGIndex interface {
 
 	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
-	// TODO Converting types (string to string slice, float to string, string to int, bool to int)
+	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
 }
 
 // CLGControl represents all control flow CLGs that can be used.

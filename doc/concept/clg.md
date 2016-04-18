@@ -11,9 +11,9 @@ This builtin functionality should be the only hard coded logic. All other
 behavior must result out of the combination of learned data, CLGs and
 connections between these two.
 
-Random fact: currently Anna is capable of more than 70 CLG implementations.
+Random fact: currently Anna is capable of more than 80 CLG implementations.
 This number is expected to to be raised even further. For now manually, later
-on automatically.
+on automatically. See https://godoc.org/github.com/xh3b4sd/anna/spec#CLGIndex.
 
 ### BI, Basic Information
 BI, Basic Information, represent fundamental information that must be known to
