@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (i *index) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -29,7 +29,24 @@ func (i *index) ContainsStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{contains}, nil
 }
 
-func (i *index) CountStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) CountCharacterStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newMap := map[string]int{}
+	for _, s := range ss {
+		newMap[s]++
+	}
+
+	return []interface{}{newMap}, nil
+}
+
+func (i *clgIndex) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -43,7 +60,7 @@ func (i *index) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{count}, nil
 }
 
-func (i *index) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -69,7 +86,7 @@ func (i *index) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, err
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -95,7 +112,7 @@ func (i *index) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{m, u}, nil
 }
 
-func (i *index) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -116,7 +133,32 @@ func (i *index) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *index) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) IsUniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	unique := true
+	seen := map[string]struct{}{}
+	for _, s := range ss {
+		if _, ok := seen[s]; ok {
+			unique = false
+			break
+		}
+		seen[s] = struct{}{}
+	}
+
+	return []interface{}{unique}, nil
+}
+
+func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -137,7 +179,83 @@ func (i *index) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *index) SortStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss))
+	}
+
+	var newStringSlice []string
+	for i := len(ss) - 1; i >= 0; i-- {
+		newStringSlice = append(newStringSlice, ss[i])
+	}
+
+	return []interface{}{newStringSlice}, nil
+}
+
+func stem(list []string) string {
+	if len(list) == 0 {
+		return ""
+	}
+
+	ri := 0
+	li := 0
+	ll := len(list)
+	ref := list[0]
+	rm := ""
+
+	for {
+		if ri > len(ref) {
+			break
+		}
+		if ri > len(list[li]) {
+			break
+		}
+
+		rm = ref[:ri]
+		lm := list[li][:ri]
+
+		if rm == lm {
+			li++
+			if li == ll {
+				li = 0
+				ri++
+			}
+
+			continue
+		} else {
+			break
+		}
+	}
+
+	rm = ref[:ri-1]
+	return rm
+}
+
+func (i *clgIndex) StemStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(ss) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss))
+	}
+
+	newString := stem(ss)
+
+	return []interface{}{newString}, nil
+}
+
+func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -155,7 +273,7 @@ func (i *index) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -172,7 +290,7 @@ func (i *index) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -189,7 +307,7 @@ func (i *index) SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *index) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+func (i *clgIndex) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

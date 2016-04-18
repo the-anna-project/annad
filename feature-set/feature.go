@@ -1,8 +1,9 @@
-package patnet
+package featureset
 
 import (
 	"sync"
 
+	"github.com/xh3b4sd/anna/distribution"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -53,12 +54,12 @@ func NewFeature(config FeatureConfig) (spec.Feature, error) {
 		return nil, maskAnyf(invalidConfigError, "sequence must not be empty")
 	}
 
-	newConfig := DefaultDistributionConfig()
+	newConfig := distribution.DefaultDistributionConfig()
 	newConfig.Name = newFeature.Sequence
 	newConfig.Vectors = newFeature.Positions
-	newDistribution, err := NewDistribution(newConfig)
+	newDistribution, err := distribution.NewDistribution(newConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, maskAnyf(invalidConfigError, err.Error())
 	}
 	newFeature.Distribution = newDistribution
 

@@ -15,9 +15,21 @@ type FeatureSet interface {
 	// character length between min and max.
 	GetFeaturesByLength(min, max int) []Feature
 
-	// GetFeaturesBySequence returns all features that are represented by the
-	// given sequence. Note this is usually only one feature.
+	// GetFeaturesBySequence returns all features that satisfy the given glob
+	// pattern.
 	GetFeaturesBySequence(sequence string) []Feature
+
+	// GetMaxLength returns the feature set's MaxLength configuration.
+	GetMaxLength() int
+
+	// GetMinLength returns the feature set's MinLength configuration.
+	GetMinLength() int
+
+	// GetMinCount returns the feature set's MinCount configuration.
+	GetMinCount() int
+
+	// GetSeparator returns the feature set's Separator configuration.
+	GetSeparator() string
 
 	// GetSequences simply returns the configured sequences of the current
 	// feature set.

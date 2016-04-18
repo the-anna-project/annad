@@ -1,15 +1,17 @@
 language: go
 
+sudo: false
+
 go:
-  - 1.5
+- 1.6
 
 install: make all
 
-script: make gotest
+script:
+- make gotest
 
 notifications:
   email: false
 
-# codecov
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)

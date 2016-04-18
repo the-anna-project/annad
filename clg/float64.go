@@ -1,15 +1,17 @@
 package clg
 
 import (
+	"fmt"
 	"math"
+	"strconv"
 )
 
-func (i *index) DivideFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) DivideFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -17,17 +19,17 @@ func (i *index) DivideFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	s := i1 / i2
+	s := f1 / f2
 
 	return []interface{}{s}, nil
 }
 
-func (i *index) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -35,17 +37,17 @@ func (i *index) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	greater := i1 > i2
+	greater := f1 > f2
 
 	return []interface{}{greater}, nil
 }
 
-func (i *index) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -53,35 +55,17 @@ func (i *index) LesserThanFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	lesser := i1 < i2
+	lesser := f1 < f2
 
 	return []interface{}{lesser}, nil
 }
 
-func (i *index) MultiplyFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) MultiplyFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	if len(args) > 2 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
-	}
-
-	s := i1 * i2
-
-	return []interface{}{s}, nil
-}
-
-func (i *index) PowFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -89,13 +73,52 @@ func (i *index) PowFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	s := math.Pow(i1, i2)
+	s := f1 * f2
 
 	return []interface{}{s}, nil
 }
 
-func (i *index) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) PowFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	f2, err := ArgToFloat64(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	s := math.Pow(f1, f2)
+
+	return []interface{}{s}, nil
+}
+
+func (i *clgIndex) RoundFloat64(args ...interface{}) ([]interface{}, error) {
+	f, err := ArgToFloat64(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	n, err := ArgToInt(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	newFloat, err := strconv.ParseFloat(fmt.Sprintf(fmt.Sprintf("%%.%df", n), f), 64)
+	if err != nil {
+		return nil, maskAnyf(cannotParseError, "%s", err)
+	}
+
+	return []interface{}{newFloat}, nil
+}
+
+func (i *clgIndex) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
+	f, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -103,17 +126,17 @@ func (i *index) SqrtFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
 
-	s := math.Sqrt(i1)
+	s := math.Sqrt(f)
 
 	return []interface{}{s}, nil
 }
 
-func (i *index) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -121,17 +144,17 @@ func (i *index) SubtractFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	s := i1 - i2
+	s := f1 - f2
 
 	return []interface{}{s}, nil
 }
 
-func (i *index) SumFloat64(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToFloat64(args, 0)
+func (i *clgIndex) SumFloat64(args ...interface{}) ([]interface{}, error) {
+	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	i2, err := ArgToFloat64(args, 1)
+	f2, err := ArgToFloat64(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -139,7 +162,7 @@ func (i *index) SumFloat64(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	s := i1 + i2
+	s := f1 + f2
 
 	return []interface{}{s}, nil
 }

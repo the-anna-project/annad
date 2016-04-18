@@ -1,19 +1,127 @@
 package spec
 
-// Index represents the CLG index providing all CLGs that can be used.
-type Index interface {
-	// CLG.
+// TODO CLGIndex represents the CLG index providing all CLGs that can be used.
+type CLGIndex interface {
+	CLGControl
+	CLGFeatureSet
+	CLGFloat64
+	// CLGFloat64Slice
+	CLGInt
+	CLGInterface
+	CLGIntSlice
+	CLGMethod
+	// CLGNetwork
+	Object
+	CLGString
+	CLGStringSlice
+	// CLGOS
+	// CLGTime
 
-	// CallCLGByName provides a way to dynamically execute any index's CLG by
-	// providing the CLG's name as string argument.
-	CallCLGByName(args ...interface{}) ([]interface{}, error)
+	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
+	// TODO Sets for all slice types. (union, intersect, difference)
+	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
+}
 
-	// GetCLGNames provides a way to fetch all CLG names. Optionally a glob
-	// pattern can be provided to limit the returned names.
-	GetCLGNames(args ...interface{}) ([]interface{}, error)
+// CLGControl represents all control flow CLGs that can be used.
+type CLGControl interface {
+	// ForControl provides code flow functionallity of the for statement to
+	// iterate over the given argument lists and applying some action to them
+	// identified by a CLG name.
+	ForControl(args ...interface{}) ([]interface{}, error)
 
-	// Int.
+	// IfControl provides code flow functionallity of the if statement. It
+	// expects the following four arguments in the given order.
+	//
+	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
+	//
+	IfControl(args ...interface{}) ([]interface{}, error)
 
+	// IfElseControl provides code flow functionallity of the if-else statement.
+	// It expects the following six arguments in the given order.
+	//
+	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs, AlternativeCLG, AlternativeArgs
+	//
+	IfElseControl(args ...interface{}) ([]interface{}, error)
+
+	// TODO control flow ??? switch, goto, strategy modifier
+}
+
+// CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
+// used.
+type CLGFeatureSet interface {
+	// GetFeaturesFeatureSet returns all features detected during scanning of the
+	// configured sequences.
+	GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesByCountFeatureSet returns all features detected during scanning
+	// of the configured sequences, that occur the given times.
+	GetFeaturesByCountFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesByLengthFeatureSet returns all features detected during
+	// scanning of the configured sequences, that satisfy the given length.
+	GetFeaturesByLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetFeaturesBySequenceFeatureSet returns all features detected during
+	// scanning of the configured sequences, that satisfy the given glob pattern.
+	GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
+	// feature set.
+	GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMinLengthFeatureSet returns the configured MinLength of the given
+	// feature set.
+	GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetMinCountFeatureSet returns the configured MinCount of the given
+	// feature set.
+	GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetNewFeatureSet provides a way to create a new feature set. Optionally
+	// decent configuration can be given.
+	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetSeparatorFeatureSet returns the configured Separator of the given
+	// feature set.
+	GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, error)
+
+	// GetSequencesFeatureSet returns the configured Sequences of the given
+	// feature set.
+	GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGFloat64 represents all float64 compatible CLGs that can be used.
+type CLGFloat64 interface {
+	// DivideFloat64 creates the difference of the given float64s.
+	DivideFloat64(args ...interface{}) ([]interface{}, error)
+
+	// GreaterThanFloat64 returns the int that is greater than the other.
+	GreaterThanFloat64(args ...interface{}) ([]interface{}, error)
+
+	// LesserThanFloat64 returns the int that is lesser than the other.
+	LesserThanFloat64(args ...interface{}) ([]interface{}, error)
+
+	// MultiplyFloat64 creates the product of the given float64s.
+	MultiplyFloat64(args ...interface{}) ([]interface{}, error)
+
+	// PowFloat64 provides functionality of math.Pow, but for float64s.
+	PowFloat64(args ...interface{}) ([]interface{}, error)
+
+	// RoundFloat64 returns a number rounded using the given precision.
+	RoundFloat64(args ...interface{}) ([]interface{}, error)
+
+	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
+	SqrtFloat64(args ...interface{}) ([]interface{}, error)
+
+	// SubtractFloat64 creates the difference of the given float64s.
+	SubtractFloat64(args ...interface{}) ([]interface{}, error)
+
+	// SumFloat64 creates the sum of the given float64s.
+	SumFloat64(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGInt represents all int compatible CLGs that can be used.
+type CLGInt interface {
 	// DivideInt creates the difference of the given ints.
 	DivideInt(args ...interface{}) ([]interface{}, error)
 
@@ -37,9 +145,33 @@ type Index interface {
 
 	// SumInt creates the sum of the given ints.
 	SumInt(args ...interface{}) ([]interface{}, error)
+}
 
-	// Int Slice.
+// CLGInterface represents all interface compatible CLGs that can be used.
+type CLGInterface interface {
+	// DiscardInterface does nothing. It discards the given arguments and returns
+	// nil.
+	DiscardInterface(args ...interface{}) ([]interface{}, error)
 
+	// EqualInterface provides functionality of reflect.DeepEqual.
+	EqualInterface(args ...interface{}) ([]interface{}, error)
+
+	// InsertArgInterface inserts certain arguments in a specific order and
+	// returns the manipulated arguments.
+	InsertArgInterface(args ...interface{}) ([]interface{}, error)
+
+	// ReturnInterface returns the arguments it receives.
+	ReturnInterface(args ...interface{}) ([]interface{}, error)
+
+	// SwapInterface returns the two arguments it receives, but in swapped order.
+	SwapInterface(args ...interface{}) ([]interface{}, error)
+
+	// TypeInterface returns the string representation of the given arg's type.
+	TypeInterface(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGIntSlice represents all int slice compatible CLGs that can be used.
+type CLGIntSlice interface {
 	// ContainsIntSlice provides functionality to check if a int slice
 	// contains a certain member.
 	ContainsIntSlice(args ...interface{}) ([]interface{}, error)
@@ -61,6 +193,10 @@ type Index interface {
 
 	// IndexIntSlice returns the element under the given index.
 	IndexIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// IsUniqueIntSlice checks whether the given int slice only contains unique
+	// members.
+	IsUniqueIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// JoinIntSlice provides functionality of strings.Join after converting ints
 	// to strings.
@@ -85,49 +221,36 @@ type Index interface {
 
 	// UniqueIntSlice returns an int slice only having unique members.
 	UniqueIntSlice(args ...interface{}) ([]interface{}, error)
-	// TODO Set. (union, intersect, difference)
+}
 
-	// Float64.
+// CLGMethod represents all CLGs that can be used to operate on CLG methods.
+type CLGMethod interface {
+	// CallMethodByName provides a way to dynamically execute any index's CLG by
+	// providing the method's name as string argument.
+	CallMethodByName(args ...interface{}) ([]interface{}, error)
 
-	// DivideFloat64 creates the difference of the given float64s.
-	DivideFloat64(args ...interface{}) ([]interface{}, error)
+	// GetMethodNames provides a way to fetch all method names. Optionally a glob
+	// pattern can be provided to limit the returned names.
+	GetMethodNames(args ...interface{}) ([]interface{}, error)
 
-	// GreaterThanFloat64 returns the int that is greater than the other.
-	GreaterThanFloat64(args ...interface{}) ([]interface{}, error)
+	// GetNumMethods returns the number of available methods the CLG index
+	// provides.
+	GetNumMethods(args ...interface{}) ([]interface{}, error)
+}
 
-	// LesserThanFloat64 returns the int that is lesser than the other.
-	LesserThanFloat64(args ...interface{}) ([]interface{}, error)
-
-	// MultiplyFloat64 creates the product of the given float64s.
-	MultiplyFloat64(args ...interface{}) ([]interface{}, error)
-
-	// PowFloat64 provides functionality of math.Pow, but for float64s.
-	PowFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
-	SqrtFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SubtractFloat64 creates the difference of the given float64s.
-	SubtractFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SumFloat64 creates the sum of the given float64s.
-	SumFloat64(args ...interface{}) ([]interface{}, error)
-
-	// TODO Network.
-
-	// Object.
-
-	Object
-
-	// TODO OS.
-
-	// TODO Pattern. (stem, distance, distribution)
-	// TODO we need more similarity measures
-
-	// String.
-
+// CLGString represents all string compatible CLGs that can be used.
+type CLGString interface {
 	// ContainsString provides functionality of strings.Contains.
 	ContainsString(args ...interface{}) ([]interface{}, error)
+
+	// CountCharacterString returns a map of characters expressing their
+	// corresponding occurence count within the given string.
+	CountCharacterString(args ...interface{}) ([]interface{}, error)
+
+	// EditDistanceString implementes the Levenshtein distance to measure
+	// similarity between two strings. Here all edit operations are weighted with
+	// the cost 1. See http://en.wikipedia.org/wiki/Levenshtein_distance.
+	EditDistanceString(args ...interface{}) ([]interface{}, error)
 
 	// ContainsString provides functionality to check if one string is longer
 	// than the other.
@@ -139,24 +262,36 @@ type Index interface {
 	// ContainsString provides functionality of strings.Repeat.
 	RepeatString(args ...interface{}) ([]interface{}, error)
 
+	// ReverseString reverses the order of characters of the given string.
+	ReverseString(args ...interface{}) ([]interface{}, error)
+
 	// ContainsString provides functionality to check if one string is shorter
 	// than the other.
 	ShorterString(args ...interface{}) ([]interface{}, error)
 
-	// ContainsString provides functionality of strings.Split.
+	// SplitString provides functionality of strings.Split.
 	SplitString(args ...interface{}) ([]interface{}, error)
+
+	// SplitEqualString splits the given string into a given number of equal
+	// parts.
+	SplitEqualString(args ...interface{}) ([]interface{}, error)
 
 	// ToLowerString provides functionality of strings.ToLower.
 	ToLowerString(args ...interface{}) ([]interface{}, error)
 
 	// ToUpperString provides functionality of strings.ToUpper.
 	ToUpperString(args ...interface{}) ([]interface{}, error)
+}
 
-	// String slice.
-
+// CLGStringSlice represents all string slice compatible CLGs that can be used.
+type CLGStringSlice interface {
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
 	ContainsStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// CountCharacterStringSlice returns a map of characters expressing their
+	// corresponding occurence count within the given string slice.
+	CountCharacterStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountStringSlice returns the number of elements in args.
 	CountStringSlice(args ...interface{}) ([]interface{}, error)
@@ -176,8 +311,27 @@ type Index interface {
 	// IndexStringSlice returns the element under the given index.
 	IndexStringSlice(args ...interface{}) ([]interface{}, error)
 
+	// IsUniqueStringSlice checks whether the given string slice only contains
+	// unique members.
+	IsUniqueStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// ReverseStringSlice reverses the order of the given list.
+	ReverseStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// StemStringSlice returns the word stem that all words provided by the given
+	// list have in common. Having the following list.
+	//
+	//     abc
+	//     abcd
+	//     abcde
+	//     abcdef
+	//
+	// Results in the word stem "abc".
+	//
+	StemStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortStringSlice provides functionality of sort.Strings.
 	SortStringSlice(args ...interface{}) ([]interface{}, error)
@@ -192,21 +346,4 @@ type Index interface {
 
 	// UniqueStringSlice returns a string slice only having unique members.
 	UniqueStringSlice(args ...interface{}) ([]interface{}, error)
-
-	// TODO Time.
-
-	// Interface.
-
-	// DiscardInterface does nothing. It discards the given arguments and returns
-	// nil.
-	DiscardInterface(args ...interface{}) ([]interface{}, error)
-
-	// EqualInterface provides functionality of reflect.DeepEqual.
-	EqualInterface(args ...interface{}) ([]interface{}, error)
-
-	// TypeInterface returns the string representation of the given arg's type.
-	TypeInterface(args ...interface{}) ([]interface{}, error)
-
-	// TODO control flow ??? for, if, else, switch, goto, strategy modifier
-	// TODO knowledge network ??? create, delete, find peers and connections
 }

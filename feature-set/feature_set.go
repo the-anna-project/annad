@@ -1,4 +1,4 @@
-package patnet
+package featureset
 
 import (
 	"strings"
@@ -61,6 +61,8 @@ func DefaultFeatureSetConfig() FeatureSetConfig {
 	return newConfig
 }
 
+// TODO do we need to cap input sequences to align output distributions?
+//
 // NewFeatureSet creates a new configured feature set object. A feature set
 // tries to detect all patterns within the configured input sequences.
 func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
@@ -71,6 +73,18 @@ func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
 		Type:             ObjectTypeFeatureSet,
 	}
 
+	if newFeatureSet.MaxLength < -1 {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be greater than -2")
+	}
+	if newFeatureSet.MinLength < 1 {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be greater than 0")
+	}
+	if newFeatureSet.MaxLength != -1 && newFeatureSet.MaxLength < newFeatureSet.MinLength {
+		return nil, maskAnyf(invalidConfigError, "MaxLength must be equal to or greater thanMinLength")
+	}
+	if newFeatureSet.MinCount < 0 {
+		return nil, maskAnyf(invalidConfigError, "MinCount must be greater than -1")
+	}
 	if len(newFeatureSet.Sequences) == 0 {
 		return nil, maskAnyf(invalidConfigError, "sequences must not be empty")
 	}
@@ -120,12 +134,28 @@ func (fs *featureSet) GetFeaturesBySequence(sequence string) []spec.Feature {
 	var newFeatures []spec.Feature
 
 	for _, f := range fs.Features {
-		if f.GetSequence() == sequence {
+		if strings.Contains(f.GetSequence(), sequence) {
 			newFeatures = append(newFeatures, f)
 		}
 	}
 
 	return newFeatures
+}
+
+func (fs *featureSet) GetMaxLength() int {
+	return fs.MaxLength
+}
+
+func (fs *featureSet) GetMinLength() int {
+	return fs.MinLength
+}
+
+func (fs *featureSet) GetMinCount() int {
+	return fs.MinCount
+}
+
+func (fs *featureSet) GetSeparator() string {
+	return fs.Separator
 }
 
 func (fs *featureSet) GetSequences() []string {

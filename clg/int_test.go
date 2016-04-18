@@ -60,13 +60,13 @@ func Test_Int_DivideInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.DivideInt(testCase.Input...)
+		output, err := newCLGIndex.DivideInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -137,13 +137,13 @@ func Test_Int_GreaterThanInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.GreaterThanInt(testCase.Input...)
+		output, err := newCLGIndex.GreaterThanInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -214,13 +214,13 @@ func Test_Int_LesserThanInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.LesserThanInt(testCase.Input...)
+		output, err := newCLGIndex.LesserThanInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -286,13 +286,13 @@ func Test_Int_MultiplyInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.MultiplyInt(testCase.Input...)
+		output, err := newCLGIndex.MultiplyInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -353,13 +353,13 @@ func Test_Int_PowInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.PowInt(testCase.Input...)
+		output, err := newCLGIndex.PowInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -426,13 +426,13 @@ func Test_Int_SqrtInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SqrtInt(testCase.Input...)
+		output, err := newCLGIndex.SqrtInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -510,13 +510,13 @@ func Test_Int_SubtractInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SubtractInt(testCase.Input...)
+		output, err := newCLGIndex.SubtractInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -582,13 +582,13 @@ func Test_Int_SumInt(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	for i, testCase := range testCases {
-		output, err := newIndex.SumInt(testCase.Input...)
+		output, err := newCLGIndex.SumInt(testCase.Input...)
 		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

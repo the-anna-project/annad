@@ -416,6 +416,22 @@ func Test_MemoryStorage_RemoveScoredElement(t *testing.T) {
 			Expected: []string{},
 		},
 		{
+			RemoveElement: "zero.five",
+			Elements: map[string]float64{
+				"zero.five":  0.5,
+				"three.four": 3.4,
+			},
+			Expected: []string{
+				"three.four",
+				"3.4",
+			},
+		},
+		{
+			RemoveElement: "zero.five",
+			Elements:      map[string]float64{},
+			Expected:      []string{},
+		},
+		{
 			RemoveElement: "invalid",
 			Elements: map[string]float64{
 				"zero.five": 0.5,
@@ -503,30 +519,57 @@ func Test_MemoryStorage_Push_WalkScoredElements_Remove(t *testing.T) {
 		t.Fatal("expected", "", "got", score1)
 	}
 
-	// Check an element can be pushed to a set.
+	// Check elements can be pushed to a set.
+
+	// Add first element.
 	err = newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	var element2 string
-	var score2 float64
+	var element2 []string
+	var score2 []float64
 	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
-		element2 = element
-		score2 = score
+		element2 = append(element2, element)
+		score2 = append(score2, score)
 		return nil
 	})
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	if element2 != "test-value-1" {
-		t.Fatal("expected", "test-value-1", "got", element2)
+	if !reflect.DeepEqual(element2, []string{"test-value-1"}) {
+		t.Fatal("expected", []string{"test-value-1"}, "got", element2)
 	}
-	if score2 != 0.8 {
-		t.Fatal("expected", 0.8, "got", score2)
+	if !reflect.DeepEqual(score2, []float64{0.8}) {
+		t.Fatal("expected", []float64{0.8}, "got", score2)
+	}
+	// Add second element.
+	err = newStorage.SetElementByScore("test-key", "test-value-2", 0.8)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	element2 = []string{}
+	score2 = []float64{}
+	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+		element2 = append(element2, element)
+		score2 = append(score2, score)
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if !reflect.DeepEqual(element2, []string{"test-value-1", "test-value-2"}) {
+		t.Fatal("expected", []string{"test-value-1", "test-value-2"}, "got", element2)
+	}
+	if !reflect.DeepEqual(score2, []float64{0.8, 0.8}) {
+		t.Fatal("expected", []float64{0.8, 0.8}, "got", score2)
 	}
 
 	// Check an element can be removed from a set.
 	err = newStorage.RemoveScoredElement("test-key", "test-value-1")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	err = newStorage.RemoveScoredElement("test-key", "test-value-2")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

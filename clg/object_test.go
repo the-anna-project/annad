@@ -6,27 +6,29 @@ import (
 
 func Test_Index_GetType(t *testing.T) {
 	newConfig := DefaultConfig()
-	newIndex, err := NewIndex(newConfig)
+	newCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	if newIndex.GetType() != ObjectTypeIndex {
-		t.Fatal("expected", ObjectTypeIndex, "got", newIndex.GetType())
+	if newCLGIndex.GetType() != ObjectTypeCLGIndex {
+		t.Fatal("expected", ObjectTypeCLGIndex, "got", newCLGIndex.GetType())
 	}
 }
 
 func Test_Index_GetID(t *testing.T) {
-	firstIndex, err := NewIndex(DefaultConfig())
+	newConfig := DefaultConfig()
+	firstCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	secondIndex, err := NewIndex(DefaultConfig())
+	newConfig = DefaultConfig()
+	secondCLGIndex, err := NewCLGIndex(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	if firstIndex.GetID() == secondIndex.GetID() {
+	if firstCLGIndex.GetID() == secondCLGIndex.GetID() {
 		t.Fatal("expected", false, "got", true)
 	}
 }

@@ -33,6 +33,51 @@ func newTextInterfaceAndServer(t *testing.T, handler http.Handler) (spec.TextInt
 	return newTextInterface, ts
 }
 
+// Test_TextInterface_FetchURL ensures that TextInterface.FetchURL is not
+// implemented yet.
+func Test_TextInterface_FetchURL(t *testing.T) {
+	newTextInterface, ts := newTextInterfaceAndServer(t, nil)
+	defer ts.Close()
+
+	res, err := newTextInterface.FetchURL("test-url")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if res != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+// Test_TextInterface_ReadFile ensures that TextInterface.ReadFile is not
+// implemented yet.
+func Test_TextInterface_ReadFile(t *testing.T) {
+	newTextInterface, ts := newTextInterfaceAndServer(t, nil)
+	defer ts.Close()
+
+	res, err := newTextInterface.ReadFile("test-url")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if res != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+// Test_TextInterface_ReadStream ensures that TextInterface.ReadStream is not
+// implemented yet.
+func Test_TextInterface_ReadStream(t *testing.T) {
+	newTextInterface, ts := newTextInterfaceAndServer(t, nil)
+	defer ts.Close()
+
+	res, err := newTextInterface.ReadStream("test-url")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if res != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
 // read plain with plain
 
 // Test_TextInterface_ReadPlainWithInput_001 checks for

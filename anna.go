@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	// TODO
+	_ "github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/file-system/os"
