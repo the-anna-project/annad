@@ -9,7 +9,8 @@ type Feature interface {
 	AddPosition(position []float64) error
 
 	// GetCount returns the number of occurrences within analysed sequences. That
-	// is, how often this feature was found.
+	// is, how often this feature was found. Technically spoken,
+	// len(feature.Positions).
 	GetCount() int
 
 	// GetDistribution returns the distribution representing this feature. See

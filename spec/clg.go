@@ -3,6 +3,7 @@ package spec
 // TODO CLGIndex represents the CLG index providing all CLGs that can be used.
 type CLGIndex interface {
 	CLGControl
+	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
 	// CLGFloat64Slice
@@ -77,8 +78,8 @@ type CLGFeatureSet interface {
 	// feature set.
 	GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error)
 
-	// GetNewFeatureSet provides a way to create a new feature set. Optionally
-	// decent configuration can be given.
+	// GetNewFeatureSet provides a way to create a new spec.FeatureSet.
+	// Optionally decent configuration can be given.
 	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetSeparatorFeatureSet returns the configured Separator of the given
@@ -88,6 +89,31 @@ type CLGFeatureSet interface {
 	// GetSequencesFeatureSet returns the configured Sequences of the given
 	// feature set.
 	GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGFeature represents all spec.Feature compatible CLGs that can be used.
+type CLGFeature interface {
+	// AddPositionFeature provides a way to add a position to the given the
+	// spec.Feature.
+	AddPositionFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetCountFeature returns the spec.Feature's configured count. That is, the
+	// number of configured positions.
+	GetCountFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetDistributionFeature returns the spec.Feature's configured
+	// spec.Distribution.
+	GetDistributionFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetNewFeature provides a way to create a new spec.Feature. Optionally
+	// decent configuration can be given.
+	GetNewFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetPositionsFeature returns the spec.Feature's configured positions.
+	GetPositionsFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetSequenceFeature returns the spec.Feature's configured sequence.
+	GetSequenceFeature(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
