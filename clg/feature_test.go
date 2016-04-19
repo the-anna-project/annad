@@ -41,6 +41,11 @@ func Test_Feature_AddPositionFeature(t *testing.T) {
 			ErrorMatcher:      nil,
 		},
 		{
+			Input:             []interface{}{testFeature([][]float64{{1, 1}}, ","), []float64{1, 2, 3}},
+			ExpectedPositions: nil,
+			ErrorMatcher:      featureset.IsInvalidPosition,
+		},
+		{
 			Input:             []interface{}{testFeature([][]float64{{1, 1}}, "seq"), []float64{2, 2}, "foo"},
 			ExpectedPositions: nil,
 			ErrorMatcher:      IsTooManyArguments,
@@ -272,6 +277,10 @@ func Test_Feature_NewFeatureSet(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			Input:        []interface{}{[][]float64{{1, 2}, {1, 2}}, "s", "foo"},
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
 			Input:        []interface{}{[][]float64{{1, 2}, {1, 2, 3}}, "s"},
 			ErrorMatcher: featureset.IsInvalidConfig,
 		},
@@ -285,6 +294,10 @@ func Test_Feature_NewFeatureSet(t *testing.T) {
 		},
 		{
 			Input:        []interface{}{[][]float64{{1, 1}}},
+			ErrorMatcher: featureset.IsInvalidConfig,
+		},
+		{
+			Input:        []interface{}{},
 			ErrorMatcher: featureset.IsInvalidConfig,
 		},
 		{
