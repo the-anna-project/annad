@@ -24,7 +24,7 @@ type CLGIndex interface {
 	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
 }
 
-// CLGConvert represents all convertion CLGs that can be used.
+// CLGConvert represents all conversion CLGs that can be used.
 type CLGConvert interface {
 	// BoolStringConvert provides functionality of strconv.FormatBool.
 	BoolStringConvert(args ...interface{}) ([]interface{}, error)
@@ -292,7 +292,7 @@ type CLGString interface {
 	ContainsString(args ...interface{}) ([]interface{}, error)
 
 	// CountCharacterString returns a map of characters expressing their
-	// corresponding occurence count within the given string.
+	// corresponding occurrence count within the given string.
 	CountCharacterString(args ...interface{}) ([]interface{}, error)
 
 	// EditDistanceString implementes the Levenshtein distance to measure
@@ -338,7 +338,7 @@ type CLGStringSlice interface {
 	ContainsStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountCharacterStringSlice returns a map of characters expressing their
-	// corresponding occurence count within the given string slice.
+	// corresponding occurrence count within the given string slice.
 	CountCharacterStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountStringSlice returns the number of elements in args.
