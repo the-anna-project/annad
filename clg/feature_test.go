@@ -80,7 +80,7 @@ func Test_Feature_AddPositionFeature(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.AddPositionFeature(testCase.Input...)
-		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+		if (err != nil && testCase.ErrorMatcher == nil) || ((err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err))) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -155,7 +155,7 @@ func Test_Feature_GetCountFeature(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetCountFeature(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -230,7 +230,7 @@ func Test_Feature_GetDistributionFeature(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetDistributionFeature(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -331,7 +331,7 @@ func Test_Feature_NewFeatureSet(t *testing.T) {
 	for i, testCase := range testCases {
 		// Test.
 		output, err := newCLGIndex.GetNewFeature(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		// Convert.
@@ -421,7 +421,7 @@ func Test_Feature_GetPositionsFeature(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetPositionsFeature(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -489,7 +489,7 @@ func Test_Feature_GetSequenceFeature(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetSequenceFeature(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

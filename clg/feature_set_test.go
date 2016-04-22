@@ -58,7 +58,7 @@ func Test_FeatureSet_GetFeaturesFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetFeaturesFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -158,7 +158,7 @@ func Test_FeatureSet_GetFeaturesByCountFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetFeaturesByCountFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -282,7 +282,7 @@ func Test_FeatureSet_GetFeaturesByLengthFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetFeaturesByLengthFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -406,7 +406,7 @@ func Test_FeatureSet_GetFeaturesBySequenceFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetFeaturesBySequenceFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -497,7 +497,7 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetMaxLengthFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -560,7 +560,7 @@ func Test_FeatureSet_GetMinLengthFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetMinLengthFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -623,7 +623,7 @@ func Test_FeatureSet_GetMinCountFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetMinCountFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -845,7 +845,7 @@ func Test_FeatureSet_GetSeparatorFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetSeparatorFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -912,7 +912,7 @@ func Test_FeatureSet_GetSequencesFeatureSet(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetSequencesFeatureSet(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

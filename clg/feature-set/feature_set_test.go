@@ -191,7 +191,7 @@ func Test_FeatureSet_GetFeaturesBySequence(t *testing.T) {
 		newConfig := DefaultFeatureSetConfig()
 		newConfig.Sequences = []string{"This is a test.", "This is another test."}
 		newFeatureSet, err := NewFeatureSet(newConfig)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -440,7 +440,7 @@ func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
 		newConfig.MinLength = testCase.MinLength
 		newConfig.Sequences = testCase.Sequences
 		newFeatureSet, err := NewFeatureSet(newConfig)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

@@ -59,7 +59,7 @@ func Test_ArgToInt(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := ArgToInt(testCase.Args, testCase.Index, testCase.Def...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -124,7 +124,7 @@ func Test_ArgToString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := ArgToString(testCase.Args, testCase.Index, testCase.Def...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -189,7 +189,7 @@ func Test_ArgToStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := ArgToStringSlice(testCase.Args, testCase.Index, testCase.Def...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -230,7 +230,7 @@ func Test_ValuesToArgs(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := ValuesToArgs(testCase.Input)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

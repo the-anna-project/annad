@@ -99,7 +99,7 @@ func Test_StringSlice_ContainsStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ContainsStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -164,7 +164,7 @@ func Test_StringSlice_CountCharacterStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.CountCharacterStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -221,7 +221,7 @@ func Test_StringSlice_CountStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.CountStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -283,7 +283,7 @@ func Test_StringSlice_GlobMatcherStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GlobMatcherStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -345,7 +345,7 @@ func Test_StringSlice_EqualMatcherStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.EqualMatcherStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -412,7 +412,7 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.IndexStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -474,7 +474,7 @@ func Test_StringSlice_IsUniqueStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.IsUniqueStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -541,7 +541,7 @@ func Test_StringSlice_JoinStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.JoinStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -608,7 +608,7 @@ func Test_StringSlice_ReverseStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ReverseStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -701,7 +701,7 @@ func Test_StringSlice_StemStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.StemStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -773,7 +773,7 @@ func Test_StringSlice_SortStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SortStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -835,7 +835,7 @@ func Test_StringSlice_SwapLeftStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SwapLeftStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -897,7 +897,7 @@ func Test_StringSlice_SwapRightStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SwapRightStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -954,7 +954,7 @@ func Test_StringSlice_UniqueStringSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.UniqueStringSlice(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

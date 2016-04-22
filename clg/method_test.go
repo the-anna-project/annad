@@ -51,7 +51,7 @@ func Test_Method_CallMethodByName(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.CallMethodByName(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -100,7 +100,7 @@ func Test_Method_GetMethodNames(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GetMethodNames(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

@@ -67,7 +67,7 @@ func Test_Interface_DiscardInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.DiscardInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -174,7 +174,7 @@ func Test_Interface_EqualInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.EqualInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -266,7 +266,7 @@ func Test_Interface_InsertArgInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.InsertArgInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -308,7 +308,7 @@ func Test_Interface_ReturnInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ReturnInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -360,7 +360,7 @@ func Test_Interface_SwapInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SwapInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -433,7 +433,7 @@ func Test_Interface_TypeInterface(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.TypeInterface(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
