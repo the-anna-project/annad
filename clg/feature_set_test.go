@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/feature-set"
+	"github.com/xh3b4sd/anna/clg/feature-set"
 	"github.com/xh3b4sd/anna/spec"
 )
 
