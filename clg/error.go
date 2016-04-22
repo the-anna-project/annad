@@ -91,3 +91,10 @@ var cannotParseError = errgo.New("cannot parse")
 func IsCannotParse(err error) bool {
 	return errgo.Cause(err) == cannotParseError
 }
+
+var cannotConvertError = errgo.New("cannot convert")
+
+// IsCannotConvert asserts cannotConvertError.
+func IsCannotConvert(err error) bool {
+	return errgo.Cause(err) == cannotConvertError
+}

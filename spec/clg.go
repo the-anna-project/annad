@@ -3,6 +3,7 @@ package spec
 // TODO CLGIndex represents the CLG index providing all CLGs that can be used.
 type CLGIndex interface {
 	CLGControl
+	CLGConvert
 	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
@@ -21,6 +22,27 @@ type CLGIndex interface {
 	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
 	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
+}
+
+// CLGConvert represents all convertion CLGs that can be used.
+type CLGConvert interface {
+	// BoolStringConvert provides functionality of strconv.FormatBool.
+	BoolStringConvert(args ...interface{}) ([]interface{}, error)
+
+	// Float64StringConvert provides functionality of strconv.FormatFloat.
+	Float64StringConvert(args ...interface{}) ([]interface{}, error)
+
+	// IntStringConvert provides functionality of strconv.Itoa.
+	IntStringConvert(args ...interface{}) ([]interface{}, error)
+
+	// StringBoolConvert provides functionality of strconv.ParseBool.
+	StringBoolConvert(args ...interface{}) ([]interface{}, error)
+
+	// StringFloat64Convert provides functionality of strconv.ParseFloat.
+	StringFloat64Convert(args ...interface{}) ([]interface{}, error)
+
+	// StringIntConvert provides functionality of strconv.Atoi.
+	StringIntConvert(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGControl represents all control flow CLGs that can be used.
