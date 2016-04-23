@@ -281,7 +281,7 @@ func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 
 	if !values[1].IsValid() || values[1].IsNil() {
 		return values[0].Interface().([]interface{}), nil
-	} else {
-		return nil, maskAny(values[1].Interface().(error))
 	}
+
+	return nil, maskAny(values[1].Interface().(error))
 }

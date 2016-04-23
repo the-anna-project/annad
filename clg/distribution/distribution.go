@@ -16,9 +16,9 @@ const (
 	ObjectTypeDistribution spec.ObjectType = "distribution"
 )
 
-// DistributionConfig represents the configuration used to create a new
-// distribution object.
-type DistributionConfig struct {
+// Config represents the configuration used to create a new distribution
+// object.
+type Config struct {
 	// HashMap provides a way to create a new distribution object out of a given
 	// hash map containing bare distribution data. If this is nil or empty, a
 	// completely new distribution is created. Otherwise it is tried to create a
@@ -36,10 +36,10 @@ type DistributionConfig struct {
 	Vectors [][]float64
 }
 
-// DefaultDistributionConfig provides a default configuration to create a new
-// distribution object by best effort.
-func DefaultDistributionConfig() DistributionConfig {
-	newConfig := DistributionConfig{
+// DefaultConfig provides a default configuration to create a new distribution
+// object by best effort.
+func DefaultConfig() Config {
+	newConfig := Config{
 		Name:           "",
 		StaticChannels: []float64{5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100},
 		Vectors:        [][]float64{},
@@ -64,7 +64,7 @@ func DefaultDistributionConfig() DistributionConfig {
 //     +------------------------>
 //                 x
 //
-func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
+func NewDistribution(config Config) (spec.Distribution, error) {
 	var newDistribution *distribution
 
 	if config.HashMap != nil {
@@ -94,10 +94,10 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 		}
 	} else {
 		newDistribution = &distribution{
-			DistributionConfig: config,
-			ID:                 id.NewObjectID(id.Hex128),
-			Mutex:              sync.Mutex{},
-			Type:               ObjectTypeDistribution,
+			Config: config,
+			ID:     id.NewObjectID(id.Hex128),
+			Mutex:  sync.Mutex{},
+			Type:   ObjectTypeDistribution,
 		}
 	}
 
@@ -127,7 +127,7 @@ func NewDistribution(config DistributionConfig) (spec.Distribution, error) {
 // TODO detect irregularities (like a double space within a sentence)
 // TODO add thrift threshold (like an allowed moving margin into a certain direction)
 type distribution struct {
-	DistributionConfig
+	Config
 
 	ID    spec.ObjectID
 	Mutex sync.Mutex

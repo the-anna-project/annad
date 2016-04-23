@@ -7,7 +7,7 @@ import (
 )
 
 func Test_NewFeatureSet_Error_Sequences(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	// Note sequences configuration is missing.
 	_, err := NewFeatureSet(newConfig)
 	if !IsInvalidConfig(err) {
@@ -16,7 +16,7 @@ func Test_NewFeatureSet_Error_Sequences(t *testing.T) {
 }
 
 func Test_FeatureSet_GetFeatures(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MinCount = 2
 	newConfig.Sequences = []string{
 		"This is, a test.",
@@ -52,7 +52,7 @@ func Test_FeatureSet_GetFeatures(t *testing.T) {
 }
 
 func Test_FeatureSet_GetFeaturesByCount(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MinCount = 2
 	newConfig.Sequences = []string{
 		"This is, a test.",
@@ -133,7 +133,7 @@ func Test_FeatureSet_GetFeaturesByLength(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultFeatureSetConfig()
+		newConfig := DefaultConfig()
 		newConfig.MinCount = 2
 		newConfig.Sequences = testCase.Sequences
 		newFeatureSet, err := NewFeatureSet(newConfig)
@@ -160,35 +160,31 @@ func Test_FeatureSet_GetFeaturesByLength(t *testing.T) {
 	}
 }
 
-func Test_FeatureSet_GetFeaturesBySequence(t *testing.T) {
+func Test_FeatureSet_GetFeaturesBySequence_Expected(t *testing.T) {
 	testCases := []struct {
-		Input            string
-		ExpectedSubSet   []string
-		UnexpectedSubSet []string
-		ErrorMatcher     func(err error) bool
+		Input          string
+		ExpectedSubSet []string
+		ErrorMatcher   func(err error) bool
 	}{
 		{
-			Input:            "ab",
-			ExpectedSubSet:   nil,
-			UnexpectedSubSet: nil,
-			ErrorMatcher:     nil,
+			Input:          "ab",
+			ExpectedSubSet: nil,
+			ErrorMatcher:   nil,
 		},
 		{
-			Input:            "This",
-			ExpectedSubSet:   []string{"This", "This is"},
-			UnexpectedSubSet: []string{"another", "test."},
-			ErrorMatcher:     nil,
+			Input:          "This",
+			ExpectedSubSet: []string{"This", "This is"},
+			ErrorMatcher:   nil,
 		},
 		{
-			Input:            "",
-			ExpectedSubSet:   []string{"This", "This is", "another", "test.", "."},
-			UnexpectedSubSet: nil,
-			ErrorMatcher:     nil,
+			Input:          "",
+			ExpectedSubSet: []string{"This", "This is", "another", "test.", "."},
+			ErrorMatcher:   nil,
 		},
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultFeatureSetConfig()
+		newConfig := DefaultConfig()
 		newConfig.Sequences = []string{"This is a test.", "This is another test."}
 		newFeatureSet, err := NewFeatureSet(newConfig)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
@@ -212,6 +208,46 @@ func Test_FeatureSet_GetFeaturesBySequence(t *testing.T) {
 					t.Fatal("case", j+1, "of", i+1, "expected", e, "got", "empty string")
 				}
 			}
+		}
+	}
+}
+
+func Test_FeatureSet_GetFeaturesBySequence_Unexpected(t *testing.T) {
+	testCases := []struct {
+		Input            string
+		UnexpectedSubSet []string
+		ErrorMatcher     func(err error) bool
+	}{
+		{
+			Input:            "ab",
+			UnexpectedSubSet: nil,
+			ErrorMatcher:     nil,
+		},
+		{
+			Input:            "This",
+			UnexpectedSubSet: []string{"another", "test."},
+			ErrorMatcher:     nil,
+		},
+		{
+			Input:            "",
+			UnexpectedSubSet: nil,
+			ErrorMatcher:     nil,
+		},
+	}
+
+	for i, testCase := range testCases {
+		newConfig := DefaultConfig()
+		newConfig.Sequences = []string{"This is a test.", "This is another test."}
+		newFeatureSet, err := NewFeatureSet(newConfig)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			err = newFeatureSet.Scan()
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+			fs := newFeatureSet.GetFeaturesBySequence(testCase.Input)
 			for j, e := range testCase.UnexpectedSubSet {
 				var contains bool
 				for _, f := range fs {
@@ -229,7 +265,7 @@ func Test_FeatureSet_GetFeaturesBySequence(t *testing.T) {
 }
 
 func Test_FeatureSet_GetMaxLength(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MaxLength = 3
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err := NewFeatureSet(newConfig)
@@ -240,7 +276,7 @@ func Test_FeatureSet_GetMaxLength(t *testing.T) {
 		t.Fatal("expected", 3, "got", newFeatureSet.GetMaxLength())
 	}
 
-	newConfig = DefaultFeatureSetConfig()
+	newConfig = DefaultConfig()
 	newConfig.MaxLength = 28
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err = NewFeatureSet(newConfig)
@@ -253,7 +289,7 @@ func Test_FeatureSet_GetMaxLength(t *testing.T) {
 }
 
 func Test_FeatureSet_GetMinLength(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MinLength = 3
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err := NewFeatureSet(newConfig)
@@ -264,7 +300,7 @@ func Test_FeatureSet_GetMinLength(t *testing.T) {
 		t.Fatal("expected", 3, "got", newFeatureSet.GetMinLength())
 	}
 
-	newConfig = DefaultFeatureSetConfig()
+	newConfig = DefaultConfig()
 	newConfig.MinLength = 28
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err = NewFeatureSet(newConfig)
@@ -277,7 +313,7 @@ func Test_FeatureSet_GetMinLength(t *testing.T) {
 }
 
 func Test_FeatureSet_GetMinCount(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MinCount = -1
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err := NewFeatureSet(newConfig)
@@ -285,7 +321,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 		t.Fatal("expected", false, "got", true)
 	}
 
-	newConfig = DefaultFeatureSetConfig()
+	newConfig = DefaultConfig()
 	newConfig.MinCount = 3
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err = NewFeatureSet(newConfig)
@@ -296,7 +332,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 		t.Fatal("expected", 3, "got", newFeatureSet.GetMinCount())
 	}
 
-	newConfig = DefaultFeatureSetConfig()
+	newConfig = DefaultConfig()
 	newConfig.MinCount = 28
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err = NewFeatureSet(newConfig)
@@ -309,7 +345,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 }
 
 func Test_FeatureSet_GetSeparator(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.Separator = ","
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err := NewFeatureSet(newConfig)
@@ -320,7 +356,7 @@ func Test_FeatureSet_GetSeparator(t *testing.T) {
 		t.Fatal("expected", ",", "got", newFeatureSet.GetSeparator())
 	}
 
-	newConfig = DefaultFeatureSetConfig()
+	newConfig = DefaultConfig()
 	newConfig.Separator = "foo"
 	newConfig.Sequences = []string{"a", "b"}
 	newFeatureSet, err = NewFeatureSet(newConfig)
@@ -434,7 +470,7 @@ func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultFeatureSetConfig()
+		newConfig := DefaultConfig()
 		newConfig.MinCount = 2
 		newConfig.MaxLength = testCase.MaxLength
 		newConfig.MinLength = testCase.MinLength
@@ -468,7 +504,7 @@ func Test_FeatureSet_GetSequences(t *testing.T) {
 		"This is, another test.",
 	}
 
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.MinCount = 2
 	newConfig.Sequences = newSequences
 	newFeatureSet, err := NewFeatureSet(newConfig)
@@ -487,7 +523,7 @@ func Test_FeatureSet_GetSequences(t *testing.T) {
 }
 
 func Test_FeatureSet_Separator(t *testing.T) {
-	newConfig := DefaultFeatureSetConfig()
+	newConfig := DefaultConfig()
 	newConfig.Separator = " "
 	newConfig.Sequences = []string{
 		"This is, a test.",

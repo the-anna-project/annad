@@ -54,7 +54,7 @@ func NewFeature(config FeatureConfig) (spec.Feature, error) {
 		return nil, maskAnyf(invalidConfigError, "sequence must not be empty")
 	}
 
-	newConfig := distribution.DefaultDistributionConfig()
+	newConfig := distribution.DefaultConfig()
 	newConfig.Name = newFeature.Sequence
 	newConfig.Vectors = newFeature.Positions
 	newDistribution, err := distribution.NewDistribution(newConfig)

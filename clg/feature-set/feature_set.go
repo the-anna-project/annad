@@ -14,9 +14,8 @@ const (
 	ObjectTypeFeatureSet spec.ObjectType = "feature-set"
 )
 
-// FeatureSetConfig represents the configuration used to create a new feature
-// set object.
-type FeatureSetConfig struct {
+// Config represents the configuration used to create a new feature set object.
+type Config struct {
 	// MaxLength represents the length maximum of a sequence detected as feature.
 	// E.g. MaxLength set to 3 results in sequences having a length not larger
 	// than 3 when detected as features. The value -1 disables any limitiation.
@@ -47,10 +46,10 @@ type FeatureSetConfig struct {
 	Sequences []string
 }
 
-// DefaultFeatureSetConfig provides a default configuration to create a new
-// feature set object by best effort.
-func DefaultFeatureSetConfig() FeatureSetConfig {
-	newConfig := FeatureSetConfig{
+// DefaultConfig provides a default configuration to create a new feature set
+// object by best effort.
+func DefaultConfig() Config {
+	newConfig := Config{
 		MaxLength: -1,
 		MinLength: 1,
 		MinCount:  1,
@@ -61,16 +60,14 @@ func DefaultFeatureSetConfig() FeatureSetConfig {
 	return newConfig
 }
 
-// TODO do we need to cap input sequences to align output distributions?
-//
 // NewFeatureSet creates a new configured feature set object. A feature set
 // tries to detect all patterns within the configured input sequences.
-func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
+func NewFeatureSet(config Config) (spec.FeatureSet, error) {
 	newFeatureSet := &featureSet{
-		FeatureSetConfig: config,
-		ID:               id.NewObjectID(id.Hex128),
-		Mutex:            sync.Mutex{},
-		Type:             ObjectTypeFeatureSet,
+		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   ObjectTypeFeatureSet,
 	}
 
 	if newFeatureSet.MaxLength < -1 {
@@ -93,7 +90,7 @@ func NewFeatureSet(config FeatureSetConfig) (spec.FeatureSet, error) {
 }
 
 type featureSet struct {
-	FeatureSetConfig
+	Config
 
 	Features []spec.Feature
 	ID       spec.ObjectID

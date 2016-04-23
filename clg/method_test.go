@@ -62,12 +62,11 @@ func Test_Method_CallMethodByName(t *testing.T) {
 	}
 }
 
-func Test_Method_GetMethodNames(t *testing.T) {
+func Test_Method_GetMethodNames_Expected(t *testing.T) {
 	testCases := []struct {
-		Input            []interface{}
-		ExpectedSubSet   []string
-		UnexpectedSubSet []string
-		ErrorMatcher     func(err error) bool
+		Input          []interface{}
+		ExpectedSubSet []string
+		ErrorMatcher   func(err error) bool
 	}{
 		{
 			Input:          []interface{}{},
@@ -75,10 +74,9 @@ func Test_Method_GetMethodNames(t *testing.T) {
 			ErrorMatcher:   nil,
 		},
 		{
-			Input:            []interface{}{"Method"},
-			ExpectedSubSet:   []string{"CallMethodByName", "GetMethodNames"},
-			UnexpectedSubSet: []string{"RepeatString"},
-			ErrorMatcher:     nil,
+			Input:          []interface{}{"Method"},
+			ExpectedSubSet: []string{"CallMethodByName", "GetMethodNames"},
+			ErrorMatcher:   nil,
 		},
 		{
 			Input:          []interface{}{"Method", "foo"},
@@ -119,6 +117,47 @@ func Test_Method_GetMethodNames(t *testing.T) {
 				if !contains {
 					t.Fatal("case", j+1, "of", i+1, "expected", e, "got", "")
 				}
+			}
+		}
+	}
+}
+
+func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
+	testCases := []struct {
+		Input            []interface{}
+		UnexpectedSubSet []string
+		ErrorMatcher     func(err error) bool
+	}{
+		{
+			Input:            []interface{}{"Method"},
+			UnexpectedSubSet: []string{"RepeatString"},
+			ErrorMatcher:     nil,
+		},
+		{
+			Input:        []interface{}{"Method", "foo"},
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{3.4},
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetMethodNames(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			ss, err := ArgToStringSlice(output, 0)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
 			}
 			for j, e := range testCase.UnexpectedSubSet {
 				var contains bool
