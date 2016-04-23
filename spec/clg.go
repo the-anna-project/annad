@@ -1,6 +1,7 @@
 package spec
 
-// TODO CLGIndex represents the CLG index providing all CLGs that can be used.
+// CLGIndex represents the CLG index providing all CLGs that can be used. TODO
+// add more CLGs.
 type CLGIndex interface {
 	CLGControl
 	CLGConvert
