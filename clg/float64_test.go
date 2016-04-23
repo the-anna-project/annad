@@ -67,7 +67,7 @@ func Test_Float64_DivideFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.DivideFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -144,7 +144,7 @@ func Test_Float64_GreaterThanFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.GreaterThanFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -221,7 +221,7 @@ func Test_Float64_LesserThanFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.LesserThanFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -293,7 +293,7 @@ func Test_Float64_MultiplyFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.MultiplyFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -361,7 +361,7 @@ func Test_Float64_PowFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.PowFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -486,7 +486,7 @@ func Test_Float64_RoundFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.RoundFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -571,7 +571,7 @@ func Test_Float64_SqrtFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SqrtFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -655,7 +655,7 @@ func Test_Float64_SubtractFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SubtractFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -727,7 +727,7 @@ func Test_Float64_SumFloat64(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SumFloat64(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

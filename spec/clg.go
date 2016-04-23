@@ -1,11 +1,14 @@
 package spec
 
-// TODO CLGIndex represents the CLG index providing all CLGs that can be used.
+// CLGIndex represents the CLG index providing all CLGs that can be used. TODO
+// add more CLGs.
 type CLGIndex interface {
 	CLGControl
+	CLGConvert
+	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
-	// CLGFloat64Slice
+	CLGFloat64Slice
 	CLGInt
 	CLGInterface
 	CLGIntSlice
@@ -20,6 +23,27 @@ type CLGIndex interface {
 	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
 	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
+}
+
+// CLGConvert represents all conversion CLGs that can be used.
+type CLGConvert interface {
+	// BoolStringConvert provides functionality of strconv.FormatBool.
+	BoolStringConvert(args ...interface{}) ([]interface{}, error)
+
+	// Float64StringConvert provides functionality of strconv.FormatFloat.
+	Float64StringConvert(args ...interface{}) ([]interface{}, error)
+
+	// IntStringConvert provides functionality of strconv.Itoa.
+	IntStringConvert(args ...interface{}) ([]interface{}, error)
+
+	// StringBoolConvert provides functionality of strconv.ParseBool.
+	StringBoolConvert(args ...interface{}) ([]interface{}, error)
+
+	// StringFloat64Convert provides functionality of strconv.ParseFloat.
+	StringFloat64Convert(args ...interface{}) ([]interface{}, error)
+
+	// StringIntConvert provides functionality of strconv.Atoi.
+	StringIntConvert(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGControl represents all control flow CLGs that can be used.
@@ -77,8 +101,8 @@ type CLGFeatureSet interface {
 	// feature set.
 	GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error)
 
-	// GetNewFeatureSet provides a way to create a new feature set. Optionally
-	// decent configuration can be given.
+	// GetNewFeatureSet provides a way to create a new spec.FeatureSet.
+	// Optionally decent configuration can be given.
 	GetNewFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetSeparatorFeatureSet returns the configured Separator of the given
@@ -88,6 +112,31 @@ type CLGFeatureSet interface {
 	// GetSequencesFeatureSet returns the configured Sequences of the given
 	// feature set.
 	GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGFeature represents all spec.Feature compatible CLGs that can be used.
+type CLGFeature interface {
+	// AddPositionFeature provides a way to add a position to the given the
+	// spec.Feature.
+	AddPositionFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetCountFeature returns the spec.Feature's configured count. That is, the
+	// number of configured positions.
+	GetCountFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetDistributionFeature returns the spec.Feature's configured
+	// spec.Distribution.
+	GetDistributionFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetNewFeature provides a way to create a new spec.Feature. Optionally
+	// decent configuration can be given.
+	GetNewFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetPositionsFeature returns the spec.Feature's configured positions.
+	GetPositionsFeature(args ...interface{}) ([]interface{}, error)
+
+	// GetSequenceFeature returns the spec.Feature's configured sequence.
+	GetSequenceFeature(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
@@ -118,6 +167,62 @@ type CLGFloat64 interface {
 
 	// SumFloat64 creates the sum of the given float64s.
 	SumFloat64(args ...interface{}) ([]interface{}, error)
+}
+
+// CLGFloat64Slice represents all float64 slice compatible CLGs that can be used.
+type CLGFloat64Slice interface {
+	// AppendFloat64Slice provides functionality of append for float64 slices.
+	AppendFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// ContainsFloat64Slice provides functionality to check if a float64 slice
+	// contains a certain member.
+	ContainsFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// CountFloat64Slice returns the number of elements in args.
+	CountFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// EqualMatcherFloat64Slice takes a float64 slice and a float64. It then
+	// returns two float64 slices, where the first one contains all items
+	// matching the given float64, and the second float64 slice contains all
+	// items not matching the given float64.
+	EqualMatcherFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// GlobMatcherFloat64Slice takes a float64 slice and a float64. It then
+	// returns two float64 slices, where the first one contains all items
+	// satisfying strings.Contains after converting the ints to strings, and the
+	// second float64 slice contains all items not satisfying strings.Contains
+	// after converting the ints to strings.
+	GlobMatcherFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// IndexFloat64Slice returns the element under the given index.
+	IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// IsUniqueFloat64Slice checks whether the given float64 slice only contains
+	// unique members.
+	IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// MaxFloat64Slice returns the highest number of a list.
+	MaxFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// MinFloat64Slice returns the lowest number of a list.
+	MinFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// NewFloat64Slice returns a new float64 slice.
+	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SortFloat64Slice provides functionality of strings.Contains.
+	SortFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SwapLeftFloat64Slice provides functionality to move the first member of a
+	// float64 slice to the left, that is, the end of the float64 slice.
+	SwapLeftFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SwapRightFloat64Slice provides functionality to move the last member of a
+	// float64 slice to the right, that is, the beginning of the float64 slice.
+	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// UniqueFloat64Slice returns an float64 slice only having unique members.
+	UniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGInt represents all int compatible CLGs that can be used.
@@ -172,6 +277,9 @@ type CLGInterface interface {
 
 // CLGIntSlice represents all int slice compatible CLGs that can be used.
 type CLGIntSlice interface {
+	// AppendIntSlice provides functionality of append for int slices.
+	AppendIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// ContainsIntSlice provides functionality to check if a int slice
 	// contains a certain member.
 	ContainsIntSlice(args ...interface{}) ([]interface{}, error)
@@ -207,6 +315,9 @@ type CLGIntSlice interface {
 
 	// MinIntSlice returns the lowest number of a list.
 	MinIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// NewIntSlice returns a new int slice.
+	NewIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortIntSlice provides functionality of strings.Contains.
 	SortIntSlice(args ...interface{}) ([]interface{}, error)
@@ -244,7 +355,7 @@ type CLGString interface {
 	ContainsString(args ...interface{}) ([]interface{}, error)
 
 	// CountCharacterString returns a map of characters expressing their
-	// corresponding occurence count within the given string.
+	// corresponding occurrence count within the given string.
 	CountCharacterString(args ...interface{}) ([]interface{}, error)
 
 	// EditDistanceString implementes the Levenshtein distance to measure
@@ -285,12 +396,15 @@ type CLGString interface {
 
 // CLGStringSlice represents all string slice compatible CLGs that can be used.
 type CLGStringSlice interface {
+	// AppendStringSlice provides functionality of append for string slices.
+	AppendStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
 	ContainsStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountCharacterStringSlice returns a map of characters expressing their
-	// corresponding occurence count within the given string slice.
+	// corresponding occurrence count within the given string slice.
 	CountCharacterStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// CountStringSlice returns the number of elements in args.
@@ -317,6 +431,9 @@ type CLGStringSlice interface {
 
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// NewStringSlice returns a new string slice.
+	NewStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// ReverseStringSlice reverses the order of the given list.
 	ReverseStringSlice(args ...interface{}) ([]interface{}, error)

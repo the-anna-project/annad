@@ -8,7 +8,7 @@ import (
 )
 
 func Test_NewDistribution_Success(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.Name = "test"
 	newConfig.StaticChannels = []float64{50, 100}
 	newConfig.Vectors = [][]float64{{0}, {0}, {0}}
@@ -19,7 +19,7 @@ func Test_NewDistribution_Success(t *testing.T) {
 }
 
 func Test_NewDistribution_Error_Name(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	// Name configuration is missing.
 	newConfig.StaticChannels = []float64{50, 100}
 	newConfig.Vectors = [][]float64{{0}, {0}, {0}}
@@ -30,7 +30,7 @@ func Test_NewDistribution_Error_Name(t *testing.T) {
 }
 
 func Test_NewDistribution_Error_Vectors_Empty(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.Name = "test"
 	newConfig.StaticChannels = []float64{50, 100}
 	// Vectors configuration is missing.
@@ -41,7 +41,7 @@ func Test_NewDistribution_Error_Vectors_Empty(t *testing.T) {
 }
 
 func Test_NewDistribution_Error_Vectors_Dimension(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.Name = "test"
 	newConfig.StaticChannels = []float64{50, 100}
 	// Vectors configuration is invalid.
@@ -53,7 +53,7 @@ func Test_NewDistribution_Error_Vectors_Dimension(t *testing.T) {
 }
 
 func Test_NewDistribution_Error_StaticChannels_Empty(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.Name = "test"
 	// StaticChannels configuration is missing.
 	newConfig.StaticChannels = []float64{}
@@ -65,7 +65,7 @@ func Test_NewDistribution_Error_StaticChannels_Empty(t *testing.T) {
 }
 
 func Test_NewDistribution_Error_StaticChannels_Duplicate(t *testing.T) {
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.Name = "test"
 	// StaticChannels configuration is invalid.
 	newConfig.StaticChannels = []float64{25, 25}
@@ -139,7 +139,7 @@ func Test_Distribution_Calculate(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultDistributionConfig()
+		newConfig := DefaultConfig()
 		newConfig.Name = "test"
 		newConfig.StaticChannels = testCase.StaticChannels
 		newConfig.Vectors = testCase.Vectors
@@ -214,7 +214,7 @@ func Test_Distribution_Difference(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig1 := DefaultDistributionConfig()
+		newConfig1 := DefaultConfig()
 		newConfig1.Name = "test"
 		newConfig1.StaticChannels = testCase.StaticChannels1
 		newConfig1.Vectors = testCase.Vectors1
@@ -223,7 +223,7 @@ func Test_Distribution_Difference(t *testing.T) {
 			t.Fatal("expected", nil, "got", err)
 		}
 
-		newConfig2 := DefaultDistributionConfig()
+		newConfig2 := DefaultConfig()
 		newConfig2.Name = "test"
 		newConfig2.StaticChannels = testCase.StaticChannels2
 		newConfig2.Vectors = testCase.Vectors2
@@ -233,7 +233,7 @@ func Test_Distribution_Difference(t *testing.T) {
 		}
 
 		output, err := newDistribution1.Difference(newDistribution2)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -282,7 +282,7 @@ func Test_Distribution_GetDimensions(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultDistributionConfig()
+		newConfig := DefaultConfig()
 		newConfig.Name = "test"
 		newConfig.StaticChannels = testCase.StaticChannels
 		newConfig.Vectors = testCase.Vectors
@@ -306,7 +306,7 @@ func Test_Distribution_GetHashMap_Success(t *testing.T) {
 		"vectors":         "2,3|14,15|38,49",
 	}
 
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.HashMap = newHashMap
 	newDistribution, err := NewDistribution(newConfig)
 	if err != nil {
@@ -352,7 +352,7 @@ func Test_Distribution_GetHashMap_Error(t *testing.T) {
 		"static-channels": "25,invalid,100",
 		"vectors":         "2,3|14,15|38,49",
 	}
-	newConfig := DefaultDistributionConfig()
+	newConfig := DefaultConfig()
 	newConfig.HashMap = newHashMap
 	_, err := NewDistribution(newConfig)
 	if !IsInvalidConfig(err) {
@@ -365,7 +365,7 @@ func Test_Distribution_GetHashMap_Error(t *testing.T) {
 		"static-channels": "25,50,100",
 		"vectors":         "2,3|invalid|38,49",
 	}
-	newConfig = DefaultDistributionConfig()
+	newConfig = DefaultConfig()
 	newConfig.HashMap = newHashMap
 	_, err = NewDistribution(newConfig)
 	if !IsInvalidConfig(err) {
@@ -401,7 +401,7 @@ func Test_Distribution_GetName(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultDistributionConfig()
+		newConfig := DefaultConfig()
 		newConfig.Name = testCase.Name
 		newConfig.StaticChannels = testCase.StaticChannels
 		newConfig.Vectors = testCase.Vectors
@@ -441,7 +441,7 @@ func Test_Distribution_GetStaticChannels(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultDistributionConfig()
+		newConfig := DefaultConfig()
 		newConfig.Name = "test"
 		newConfig.StaticChannels = testCase.StaticChannels
 		newConfig.Vectors = testCase.Vectors
@@ -486,7 +486,7 @@ func Test_Distribution_GetVectors(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		newConfig := DefaultDistributionConfig()
+		newConfig := DefaultConfig()
 		newConfig.Name = "test"
 		newConfig.StaticChannels = testCase.StaticChannels
 		newConfig.Vectors = testCase.Vectors

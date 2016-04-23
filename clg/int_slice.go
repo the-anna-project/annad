@@ -6,12 +6,30 @@ import (
 	"strings"
 )
 
+func (i *clgIndex) AppendIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	n, err := ArgToInt(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	is = append(is, n)
+
+	return []interface{}{is}, nil
+}
+
 func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	num, err := ArgToInt(args, 1)
+	n, err := ArgToInt(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -21,7 +39,7 @@ func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) 
 
 	var contains bool
 	for _, i := range is {
-		if i == num {
+		if i == n {
 			contains = true
 			break
 		}
@@ -49,7 +67,7 @@ func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, err
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	num, err := ArgToInt(args, 1)
+	n, err := ArgToInt(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -60,7 +78,7 @@ func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, err
 	var m []int
 	var u []int
 	for _, i := range is {
-		if i == num {
+		if i == n {
 			m = append(m, i)
 		} else {
 			u = append(u, i)
@@ -75,7 +93,7 @@ func (i *clgIndex) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, erro
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	num, err := ArgToInt(args, 1)
+	n, err := ArgToInt(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -86,7 +104,7 @@ func (i *clgIndex) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, erro
 	var m []int
 	var u []int
 	for _, i := range is {
-		if strings.Contains(strconv.Itoa(num), strconv.Itoa(i)) {
+		if strings.Contains(strconv.Itoa(n), strconv.Itoa(i)) {
 			m = append(m, i)
 		} else {
 			u = append(u, i)
@@ -227,6 +245,16 @@ func (i *clgIndex) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	m := minInt(is)
 
 	return []interface{}{m}, nil
+}
+
+func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
+	if len(args) > 0 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
+	}
+
+	var is []int
+
+	return []interface{}{is}, nil
 }
 
 func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {

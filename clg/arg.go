@@ -62,6 +62,34 @@ func ArgToBool(args []interface{}, index int) (bool, error) {
 	return false, maskAnyf(wrongArgumentTypeError, "expected bool got %T", args[index])
 }
 
+// ArgToDistribution converts the argument under index to spec.Distribution, if
+// possible.
+func ArgToDistribution(args []interface{}, index int) (spec.Distribution, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if d, ok := args[index].(spec.Distribution); ok {
+		return d, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.Distribution got %T", args[index])
+}
+
+// ArgToFeature converts the argument under index to a spec.Feature, if
+// possible.
+func ArgToFeature(args []interface{}, index int) (spec.Feature, error) {
+	if len(args) < index+1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if f, ok := args[index].(spec.Feature); ok {
+		return f, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.Feature got %T", args[index])
+}
+
 // ArgToFeatures converts the argument under index to a []spec.Feature, if
 // possible.
 func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
@@ -101,6 +129,50 @@ func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	}
 
 	return 0, maskAnyf(wrongArgumentTypeError, "expected float64 got %T", args[index])
+}
+
+// ArgToFloat64Slice converts the argument under index to a []float64, if
+// possible.
+func ArgToFloat64Slice(args []interface{}, index int, def ...[]float64) ([]float64, error) {
+	if len(def) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+	}
+	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if fs, ok := args[index].([]float64); ok {
+		return fs, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected []float64 got %T", args[index])
+}
+
+// ArgToFloat64SliceSlice converts the argument under index to a [][]float64,
+// if possible.
+func ArgToFloat64SliceSlice(args []interface{}, index int, def ...[][]float64) ([][]float64, error) {
+	if len(def) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+	}
+	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	}
+
+	if fss, ok := args[index].([][]float64); ok {
+		return fss, nil
+	}
+
+	return nil, maskAnyf(wrongArgumentTypeError, "expected [][]float64 got %T", args[index])
 }
 
 // ArgToInt converts the argument under index to a int, if possible. Optionally
@@ -209,7 +281,7 @@ func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 
 	if !values[1].IsValid() || values[1].IsNil() {
 		return values[0].Interface().([]interface{}), nil
-	} else {
-		return nil, maskAny(values[1].Interface().(error))
 	}
+
+	return nil, maskAny(values[1].Interface().(error))
 }

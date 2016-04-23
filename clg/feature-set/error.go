@@ -35,10 +35,3 @@ var invalidPositionError = errgo.New("invalid position")
 func IsInvalidPosition(err error) bool {
 	return errgo.Cause(err) == invalidPositionError
 }
-
-var channelsDifferError = errgo.New("channels differ")
-
-// IsChannelsDiffer asserts channelsDifferError.
-func IsChannelsDiffer(err error) bool {
-	return errgo.Cause(err) == channelsDifferError
-}

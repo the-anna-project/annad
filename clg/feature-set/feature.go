@@ -3,7 +3,7 @@ package featureset
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/distribution"
+	"github.com/xh3b4sd/anna/clg/distribution"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -54,7 +54,7 @@ func NewFeature(config FeatureConfig) (spec.Feature, error) {
 		return nil, maskAnyf(invalidConfigError, "sequence must not be empty")
 	}
 
-	newConfig := distribution.DefaultDistributionConfig()
+	newConfig := distribution.DefaultConfig()
 	newConfig.Name = newFeature.Sequence
 	newConfig.Vectors = newFeature.Positions
 	newDistribution, err := distribution.NewDistribution(newConfig)

@@ -242,7 +242,7 @@ func (i *clgIndex) SplitEqualString(args ...interface{}) ([]interface{}, error) 
 		newStringSlice = append(newStringSlice, s[int(start):int(end)])
 		start = end
 		if !isInt {
-			start -= 1
+			start--
 		}
 		end = start + size
 		if end >= l {

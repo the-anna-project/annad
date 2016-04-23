@@ -498,7 +498,7 @@ func Test_MemoryStorage_RemoveScoredElement(t *testing.T) {
 	}
 }
 
-func Test_MemoryStorage_Push_WalkScoredElements_Remove(t *testing.T) {
+func Test_MemoryStorage_WalkScoredElements_Empty(t *testing.T) {
 	newStorage := NewMemoryStorage(DefaultConfig())
 
 	// Check the set is empty by default
@@ -518,11 +518,12 @@ func Test_MemoryStorage_Push_WalkScoredElements_Remove(t *testing.T) {
 	if score1 != 0 {
 		t.Fatal("expected", "", "got", score1)
 	}
+}
 
-	// Check elements can be pushed to a set.
+func Test_MemoryStorage_Push_WalkScoredElements_Remove(t *testing.T) {
+	newStorage := NewMemoryStorage(DefaultConfig())
 
-	// Add first element.
-	err = newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
+	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

@@ -98,7 +98,7 @@ func Test_String_ContainsString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ContainsString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -163,7 +163,7 @@ func Test_String_CountCharacterString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.CountCharacterString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -276,7 +276,7 @@ func Test_String_EditDistanceString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.EditDistanceString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -363,7 +363,7 @@ func Test_String_LongerString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.LongerString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -430,7 +430,7 @@ func Test_String_NewIDString_Error(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.NewIDString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -470,7 +470,7 @@ func Test_String_RepeatString(t *testing.T) {
 		{
 			Input:        []interface{}{"ab", -4},
 			Expected:     nil,
-			ErrorMatcher: nil,
+			ErrorMatcher: IsNegativeInt,
 		},
 		{
 			Input:        []interface{}{"ab", 1, "foo"},
@@ -529,7 +529,7 @@ func Test_String_RepeatString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.RepeatString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -596,7 +596,7 @@ func Test_String_ReverseString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ReverseString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -683,7 +683,7 @@ func Test_String_ShorterString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ShorterString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -770,7 +770,7 @@ func Test_String_SplitString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SplitString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -852,7 +852,7 @@ func Test_String_SplitEqualString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.SplitEqualString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -919,7 +919,7 @@ func Test_String_ToLowerString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ToLowerString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
@@ -986,7 +986,7 @@ func Test_String_ToUpperString(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := newCLGIndex.ToUpperString(testCase.Input...)
-		if testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err) {
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {

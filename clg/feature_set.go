@@ -1,7 +1,7 @@
 package clg
 
 import (
-	"github.com/xh3b4sd/anna/feature-set"
+	"github.com/xh3b4sd/anna/clg/feature-set"
 )
 
 func (i *clgIndex) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error) {
@@ -120,7 +120,7 @@ func (i *clgIndex) GetMinCountFeatureSet(args ...interface{}) ([]interface{}, er
 
 func (i *clgIndex) GetNewFeatureSet(args ...interface{}) ([]interface{}, error) {
 	var err error
-	newConfig := featureset.DefaultFeatureSetConfig()
+	newConfig := featureset.DefaultConfig()
 
 	newConfig.Sequences, err = ArgToStringSlice(args, 0)
 	if err != nil {

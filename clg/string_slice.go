@@ -5,6 +5,24 @@ import (
 	"strings"
 )
 
+func (i *clgIndex) AppendStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	s, err := ArgToString(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	ss = append(ss, s)
+
+	return []interface{}{ss}, nil
+}
+
 func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
@@ -177,6 +195,16 @@ func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	newString := strings.Join(ss, sep)
 
 	return []interface{}{newString}, nil
+}
+
+func (i *clgIndex) NewStringSlice(args ...interface{}) ([]interface{}, error) {
+	if len(args) > 0 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
+	}
+
+	var ss []string
+
+	return []interface{}{ss}, nil
 }
 
 func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
