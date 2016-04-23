@@ -1,6 +1,6 @@
 .PHONY: all anna annactl goclean gofmt goget gotest
 
-GOPATH := ${PWD}/.workspace/
+GOPATH := ${PWD}/.workspace
 export GOPATH
 
 all: goget annactl anna
@@ -38,4 +38,4 @@ gotest:
 	@./go.test.sh
 	@echo -n "\n"
 	# Run project checks.
-	@./project.check.sh
+	@GOPATH=${GOPATH} ./project.check.sh
