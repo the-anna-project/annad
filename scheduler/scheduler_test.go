@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -40,11 +41,14 @@ func newTestJob(args interface{}, sessionID string, actionID string) spec.Job {
 func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 	newScheduler := newTestScheduler(nil)
 	var sleep int
+	var m sync.Mutex
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		// Note we increase the sleep time here so we have jobs simulating
 		// different workloads. This ensures testing the expicit handling of
 		// marking short living jobs as being replaced.
+		m.Lock()
 		sleep += 100
+		m.Unlock()
 		time.Sleep(time.Duration(sleep) * time.Millisecond)
 		return "test-result", nil
 	})
@@ -78,25 +82,28 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 		}
 	}
 
+	var c int
 	check := func() {
+		c++
+
 		for i, newJob := range newJobs {
 			// Check if the job has successfully finished.
 			newJob, err := newScheduler.FetchJob(newJob.GetID())
 			if err != nil {
-				t.Fatal("expected", nil, "got", err)
+				t.Fatal("call", c, "expected", nil, "got", err)
 			}
 			if i == len(newJobs)-1 {
 				// The last job should have succeeded.
 				if HasReplacedStatus(newJob) {
-					t.Fatal("expected", true, "got", false)
+					t.Fatal("call", c, "expected", true, "got", false)
 				}
 			} else {
 				// The other jobs should be replaced.
 				if !HasReplacedStatus(newJob) {
-					t.Fatal("expected", true, "got", false)
+					t.Fatal("call", c, "expected", true, "got", false)
 				}
 				if HasSucceededStatus(newJob) {
-					t.Fatal("expected", true, "got", false)
+					t.Fatal("call", c, "expected", true, "got", false)
 				}
 			}
 		}
