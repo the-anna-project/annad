@@ -166,6 +166,13 @@ func Test_Arg_ArgToFloat64Slice(t *testing.T) {
 		},
 		{
 			Args:         []interface{}{[]float64{1.1, 3.3}, []float64{2.2, 4.4}, true},
+			Index:        3,
+			Def:          nil,
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Args:         []interface{}{[]float64{1.1, 3.3}, []float64{2.2, 4.4}, true},
 			Index:        2,
 			Def:          [][]float64{{2.2, 4.4}},
 			Expected:     nil,
@@ -228,6 +235,13 @@ func Test_Arg_ArgToFloat64SliceSlice(t *testing.T) {
 			Def:          nil,
 			Expected:     nil,
 			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Args:         []interface{}{[][]float64{{1.1, 3.3}, {12.2, 14.2}}, [][]float64{{2.2, 4.4}, {44.2, 66.2}}, true},
+			Index:        3,
+			Def:          nil,
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
 			Args:         []interface{}{[][]float64{{1.1, 3.3}, {12.2, 14.2}}, [][]float64{{2.2, 4.4}, {44.2, 66.2}}, true},
