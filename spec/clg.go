@@ -7,7 +7,7 @@ type CLGIndex interface {
 	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
-	// CLGFloat64Slice
+	CLGFloat64Slice
 	CLGInt
 	CLGInterface
 	CLGIntSlice
@@ -168,6 +168,59 @@ type CLGFloat64 interface {
 	SumFloat64(args ...interface{}) ([]interface{}, error)
 }
 
+// CLGFloat64Slice represents all float64 slice compatible CLGs that can be used.
+type CLGFloat64Slice interface {
+	// AppendFloat64Slice provides functionality of append for float64 slices.
+	AppendFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// ContainsFloat64Slice provides functionality to check if a float64 slice
+	// contains a certain member.
+	ContainsFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// CountFloat64Slice returns the number of elements in args.
+	CountFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// EqualMatcherFloat64Slice takes a float64 slice and a float64. It then
+	// returns two float64 slices, where the first one contains all items
+	// matching the given float64, and the second float64 slice contains all
+	// items not matching the given float64.
+	EqualMatcherFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// GlobMatcherFloat64Slice takes a float64 slice and a float64. It then
+	// returns two float64 slices, where the first one contains all items
+	// satisfying strings.Contains after converting the ints to strings, and the
+	// second float64 slice contains all items not satisfying strings.Contains
+	// after converting the ints to strings.
+	GlobMatcherFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// IndexFloat64Slice returns the element under the given index.
+	IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// IsUniqueFloat64Slice checks whether the given float64 slice only contains
+	// unique members.
+	IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// MaxFloat64Slice returns the highest number of a list.
+	MaxFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// MinFloat64Slice returns the lowest number of a list.
+	MinFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SortFloat64Slice provides functionality of strings.Contains.
+	SortFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SwapLeftFloat64Slice provides functionality to move the first member of a
+	// float64 slice to the left, that is, the end of the float64 slice.
+	SwapLeftFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SwapRightFloat64Slice provides functionality to move the last member of a
+	// float64 slice to the right, that is, the beginning of the float64 slice.
+	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// UniqueFloat64Slice returns an float64 slice only having unique members.
+	UniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
+}
+
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
 	// DivideInt creates the difference of the given ints.
@@ -220,6 +273,9 @@ type CLGInterface interface {
 
 // CLGIntSlice represents all int slice compatible CLGs that can be used.
 type CLGIntSlice interface {
+	// AppendIntSlice provides functionality of append for int slices.
+	AppendIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// ContainsIntSlice provides functionality to check if a int slice
 	// contains a certain member.
 	ContainsIntSlice(args ...interface{}) ([]interface{}, error)
@@ -333,6 +389,9 @@ type CLGString interface {
 
 // CLGStringSlice represents all string slice compatible CLGs that can be used.
 type CLGStringSlice interface {
+	// AppendStringSlice provides functionality of append for string slices.
+	AppendStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// ContainsStringSlice provides functionality to check if a string slice
 	// contains a certain member.
 	ContainsStringSlice(args ...interface{}) ([]interface{}, error)
