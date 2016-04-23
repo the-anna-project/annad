@@ -226,6 +226,16 @@ func (i *clgIndex) MinFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{m}, nil
 }
 
+func (i *clgIndex) NewFloat64Slice(args ...interface{}) ([]interface{}, error) {
+	if len(args) > 0 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
+	}
+
+	var fs []float64
+
+	return []interface{}{fs}, nil
+}
+
 func (i *clgIndex) SortFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {

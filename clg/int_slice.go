@@ -247,6 +247,16 @@ func (i *clgIndex) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{m}, nil
 }
 
+func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
+	if len(args) > 0 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
+	}
+
+	var is []int
+
+	return []interface{}{is}, nil
+}
+
 func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {

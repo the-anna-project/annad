@@ -206,6 +206,9 @@ type CLGFloat64Slice interface {
 	// MinFloat64Slice returns the lowest number of a list.
 	MinFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// NewFloat64Slice returns a new float64 slice.
+	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// SortFloat64Slice provides functionality of strings.Contains.
 	SortFloat64Slice(args ...interface{}) ([]interface{}, error)
 
@@ -311,6 +314,9 @@ type CLGIntSlice interface {
 
 	// MinIntSlice returns the lowest number of a list.
 	MinIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// NewIntSlice returns a new int slice.
+	NewIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortIntSlice provides functionality of strings.Contains.
 	SortIntSlice(args ...interface{}) ([]interface{}, error)
@@ -424,6 +430,9 @@ type CLGStringSlice interface {
 
 	// JoinStringSlice provides functionality of strings.Join.
 	JoinStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// NewStringSlice returns a new string slice.
+	NewStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// ReverseStringSlice reverses the order of the given list.
 	ReverseStringSlice(args ...interface{}) ([]interface{}, error)

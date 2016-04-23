@@ -197,6 +197,16 @@ func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
+func (i *clgIndex) NewStringSlice(args ...interface{}) ([]interface{}, error) {
+	if len(args) > 0 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
+	}
+
+	var ss []string
+
+	return []interface{}{ss}, nil
+}
+
 func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
