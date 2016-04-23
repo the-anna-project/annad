@@ -469,3 +469,90 @@ func Test_Convert_StringFloat64Convert(t *testing.T) {
 		}
 	}
 }
+
+func Test_Convert_StringIntConvert(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{"33"},
+			Expected:     []interface{}{33},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"9433"},
+			Expected:     []interface{}{9433},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"-36"},
+			Expected:     []interface{}{-36},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{"-x36"},
+			Expected:     nil,
+			ErrorMatcher: IsCannotConvert,
+		},
+		{
+			Input:        []interface{}{"abc"},
+			Expected:     nil,
+			ErrorMatcher: IsCannotConvert,
+		},
+		{
+			Input:        []interface{}{"3,6"},
+			Expected:     nil,
+			ErrorMatcher: IsCannotConvert,
+		},
+		{
+			Input:        []interface{}{"true"},
+			Expected:     nil,
+			ErrorMatcher: IsCannotConvert,
+		},
+		{
+			Input:        []interface{}{3.6},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{-3.6},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{true},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{"36", "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.StringIntConvert(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
