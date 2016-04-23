@@ -521,8 +521,9 @@ func Test_MemoryStorage_WalkScoredElements_Empty(t *testing.T) {
 }
 
 func Test_MemoryStorage_Push_WalkScoredElements_Remove(t *testing.T) {
-	// Add first element.
-	err = newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
+	newStorage := NewMemoryStorage(DefaultConfig())
+
+	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
