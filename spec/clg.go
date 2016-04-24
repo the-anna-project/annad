@@ -1,7 +1,33 @@
 package spec
 
-// CLGIndex represents the CLG index providing all CLGs that can be used. TODO
-// add more CLGs.
+// CLGIndex represents the CLG index providing all CLGs that can be used. All
+// CLGs follow this signature, where the CLGs function name FuncScope describes
+// its CLG functionality Func and its CLG scope Scope.
+//
+//     FuncScope(args ...interface{}) ([]interface{}, error)
+//
+// Note that args is a variadic interface slice. This provides flexibility in
+// the number of arguments and their given types. Assuming an argument list is
+// given and we want to fetch a certain argument using a certain index using a
+// helper method like this.
+//
+//     newConfig.Foo, err = ArgToString(args, 1, newConfig.Foo)
+//
+// Here args may provide three arguments for whatever reason. Accessing an
+// argument using the index 1 would be possible though, but in the first place
+// we would rather prefer the default configuration, than the given argument
+// under index 1. One could argue to pass a zero value for the argument under
+// index 1, so we have a way to determine whether to use the given default
+// value. This is problematic, because there are probably cases where we
+// explicitly want to use the default value, and really don't want to overwrite
+// it with some default configuration. That is why there is the type DefaultArg.
+//
+//     args := []interface{}{"foo", DefaultArg{}, "baz"}
+//
+// This way we are capable of explicitly requesting default values. At the same
+// time this also allows to define arguments beyond certain default values.
+//
+// TODO add more CLGs.
 type CLGIndex interface {
 	CLGControl
 	CLGConvert

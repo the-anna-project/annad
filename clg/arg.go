@@ -6,9 +6,23 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// DefaultArg represents an identifier that, when used, signals to use the
+// default argument, if any given. DefaultArg can be used as follows.
+//
+//     args := []interface{}{"foo", DefaultArg{}, "baz"}
+//     def := ArgToString(args, 1, "bar")
+//
+// Here the second argument expresses to use the given default value. Thus
+// DefaultArg acts as placeholder to be able to define further arguments. See
+// documentation for spec.CLGIndex for more information.
+//
+type DefaultArg struct{}
+
 // Arg
 
-// ArgToArg converts the argument under index to a arguments, if possible.
+// ArgToArg converts the argument under index to interface{}, if possible.
+// Note that this is only not possible if the argument under index is nil, or
+// if there is no argument under the given index at all.
 func ArgToArg(args []interface{}, index int) (interface{}, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -21,8 +35,7 @@ func ArgToArg(args []interface{}, index int) (interface{}, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected interface{} got %T", args[index])
 }
 
-// ArgToArgs converts the argument under index to a list of arguments, if
-// possible.
+// ArgToArgs converts the argument under index to []interface{}, if possible.
 func ArgToArgs(args []interface{}, index int) ([]interface{}, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -35,8 +48,8 @@ func ArgToArgs(args []interface{}, index int) ([]interface{}, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []interface{} got %T", args[index])
 }
 
-// ArgToArgsList converts the argument under index to a list of argument lists,
-// if possible.
+// ArgToArgsList converts the argument under index to [][]interface{}, if
+// possible.
 func ArgToArgsList(args []interface{}, index int) ([][]interface{}, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -49,7 +62,7 @@ func ArgToArgsList(args []interface{}, index int) ([][]interface{}, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected [][]interface{} got %T", args[index])
 }
 
-// ArgToBool converts the argument under index to a bool, if possible.
+// ArgToBool converts the argument under index to bool, if possible.
 func ArgToBool(args []interface{}, index int) (bool, error) {
 	if len(args) < index+1 {
 		return false, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -76,7 +89,7 @@ func ArgToDistribution(args []interface{}, index int) (spec.Distribution, error)
 	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.Distribution got %T", args[index])
 }
 
-// ArgToFeature converts the argument under index to a spec.Feature, if
+// ArgToFeature converts the argument under index to spec.Feature, if
 // possible.
 func ArgToFeature(args []interface{}, index int) (spec.Feature, error) {
 	if len(args) < index+1 {
@@ -90,7 +103,7 @@ func ArgToFeature(args []interface{}, index int) (spec.Feature, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.Feature got %T", args[index])
 }
 
-// ArgToFeatures converts the argument under index to a []spec.Feature, if
+// ArgToFeatures converts the argument under index to []spec.Feature, if
 // possible.
 func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
 	if len(args) < index+1 {
@@ -104,7 +117,7 @@ func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []spec.Feature got %T", args[index])
 }
 
-// ArgToFeatureSet converts the argument under index to a spec.FeatureSet, if
+// ArgToFeatureSet converts the argument under index to spec.FeatureSet, if
 // possible.
 func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
 	if len(args) < index+1 {
@@ -118,7 +131,7 @@ func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected spec.FeatureSet got %T", args[index])
 }
 
-// ArgToFloat64 converts the argument under index to a float64, if possible.
+// ArgToFloat64 converts the argument under index to float64, if possible.
 func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	if len(args) < index+1 {
 		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -131,9 +144,11 @@ func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	return 0, maskAnyf(wrongArgumentTypeError, "expected float64 got %T", args[index])
 }
 
-// ArgToFloat64Slice converts the argument under index to a []float64, if
+// ArgToFloat64Slice converts the argument under index to []float64, if
 // possible.
 func ArgToFloat64Slice(args []interface{}, index int, def ...[]float64) ([]float64, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
 	}
@@ -153,9 +168,11 @@ func ArgToFloat64Slice(args []interface{}, index int, def ...[]float64) ([]float
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []float64 got %T", args[index])
 }
 
-// ArgToFloat64SliceSlice converts the argument under index to a [][]float64,
-// if possible.
+// ArgToFloat64SliceSlice converts the argument under index to [][]float64, if
+// possible.
 func ArgToFloat64SliceSlice(args []interface{}, index int, def ...[][]float64) ([][]float64, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
 	}
@@ -175,10 +192,12 @@ func ArgToFloat64SliceSlice(args []interface{}, index int, def ...[][]float64) (
 	return nil, maskAnyf(wrongArgumentTypeError, "expected [][]float64 got %T", args[index])
 }
 
-// ArgToInt converts the argument under index to a int, if possible. Optionally
+// ArgToInt converts the argument under index to int, if possible. Optionally
 // it takes one default value that is returned in case there is no argument
 // available for the given index.
 func ArgToInt(args []interface{}, index int, def ...int) (int, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
 		return 0, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
 	}
@@ -198,7 +217,7 @@ func ArgToInt(args []interface{}, index int, def ...int) (int, error) {
 	return 0, maskAnyf(wrongArgumentTypeError, "expected int got %T", args[index])
 }
 
-// ArgToIntSlice converts the argument under index to a int slice, if possible.
+// ArgToIntSlice converts the argument under index to []int, if possible.
 func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 	if len(args) < index+1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
@@ -270,7 +289,7 @@ func ArgsToValues(args []interface{}) []reflect.Value {
 	return values
 }
 
-// ValuesToArgs converts the given reflect values to a slice of interfaces.
+// ValuesToArgs converts the given reflect values to []interface{}.
 func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 	if len(values) > 2 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(values))
