@@ -31,6 +31,7 @@ package spec
 type CLGIndex interface {
 	CLGControl
 	CLGConvert
+	CLGDistribution
 	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
@@ -96,6 +97,21 @@ type CLGControl interface {
 	// TODO control flow ??? switch, goto, strategy modifier
 }
 
+// CLGDistribution represents all spec.Distribution CLGs that can be used.
+type CLGDistribution interface {
+	// GetNewDistribution provides a way to create a new spec.Distribution.
+	// Optionally decent configuration can be given.
+	GetNewDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetStaticChannelsDistribution returns the configured StaticChannels of the
+	// given spec.Distribution.
+	GetStaticChannelsDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetVectorsDistribution returns the configured Vectors of the given
+	// spec.Distribution.
+	GetVectorsDistribution(args ...interface{}) ([]interface{}, error)
+}
+
 // CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
 // used.
 type CLGFeatureSet interface {
@@ -116,7 +132,7 @@ type CLGFeatureSet interface {
 	GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
-	// feature set.
+	// spec.FeatureSet.
 	GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetMinLengthFeatureSet returns the configured MinLength of the given

@@ -25,7 +25,7 @@ type DefaultArg struct{}
 // if there is no argument under the given index at all.
 func ArgToArg(args []interface{}, index int) (interface{}, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if a, ok := args[index].(interface{}); ok {
@@ -38,7 +38,7 @@ func ArgToArg(args []interface{}, index int) (interface{}, error) {
 // ArgToArgs converts the argument under index to []interface{}, if possible.
 func ArgToArgs(args []interface{}, index int) ([]interface{}, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if as, ok := args[index].([]interface{}); ok {
@@ -52,7 +52,7 @@ func ArgToArgs(args []interface{}, index int) ([]interface{}, error) {
 // possible.
 func ArgToArgsList(args []interface{}, index int) ([][]interface{}, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if asl, ok := args[index].([][]interface{}); ok {
@@ -65,7 +65,7 @@ func ArgToArgsList(args []interface{}, index int) ([][]interface{}, error) {
 // ArgToBool converts the argument under index to bool, if possible.
 func ArgToBool(args []interface{}, index int) (bool, error) {
 	if len(args) < index+1 {
-		return false, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return false, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if b, ok := args[index].(bool); ok {
@@ -79,7 +79,7 @@ func ArgToBool(args []interface{}, index int) (bool, error) {
 // possible.
 func ArgToDistribution(args []interface{}, index int) (spec.Distribution, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if d, ok := args[index].(spec.Distribution); ok {
@@ -93,7 +93,7 @@ func ArgToDistribution(args []interface{}, index int) (spec.Distribution, error)
 // possible.
 func ArgToFeature(args []interface{}, index int) (spec.Feature, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if f, ok := args[index].(spec.Feature); ok {
@@ -107,7 +107,7 @@ func ArgToFeature(args []interface{}, index int) (spec.Feature, error) {
 // possible.
 func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if fs, ok := args[index].([]spec.Feature); ok {
@@ -121,7 +121,7 @@ func ArgToFeatures(args []interface{}, index int) ([]spec.Feature, error) {
 // possible.
 func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if fs, ok := args[index].(spec.FeatureSet); ok {
@@ -134,7 +134,7 @@ func ArgToFeatureSet(args []interface{}, index int) (spec.FeatureSet, error) {
 // ArgToFloat64 converts the argument under index to float64, if possible.
 func ArgToFloat64(args []interface{}, index int) (float64, error) {
 	if len(args) < index+1 {
-		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return 0, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if f, ok := args[index].(float64); ok {
@@ -150,21 +150,28 @@ func ArgToFloat64Slice(args []interface{}, index int, def ...[]float64) ([]float
 	// In any case we should make sure the defaults are validated. This causes a
 	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
 	}
+
 	if len(args) < index+1 {
 		if len(def) == 1 {
 			// There is no argument given, thus we use the default.
 			return def[0], nil
 		}
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
 
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return nil, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
 	}
 
 	if fs, ok := args[index].([]float64); ok {
 		return fs, nil
 	}
-
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []float64 got %T", args[index])
 }
 
@@ -174,21 +181,28 @@ func ArgToFloat64SliceSlice(args []interface{}, index int, def ...[][]float64) (
 	// In any case we should make sure the defaults are validated. This causes a
 	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
 	}
+
 	if len(args) < index+1 {
 		if len(def) == 1 {
 			// There is no argument given, thus we use the default.
 			return def[0], nil
 		}
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
 
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return nil, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
 	}
 
 	if fss, ok := args[index].([][]float64); ok {
 		return fss, nil
 	}
-
 	return nil, maskAnyf(wrongArgumentTypeError, "expected [][]float64 got %T", args[index])
 }
 
@@ -199,28 +213,35 @@ func ArgToInt(args []interface{}, index int, def ...int) (int, error) {
 	// In any case we should make sure the defaults are validated. This causes a
 	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
-		return 0, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+		return 0, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
 	}
+
 	if len(args) < index+1 {
 		if len(def) == 1 {
 			// There is no argument given, thus we use the default.
 			return def[0], nil
 		}
+		return 0, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
 
-		return 0, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return 0, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
 	}
 
 	if i, ok := args[index].(int); ok {
 		return i, nil
 	}
-
 	return 0, maskAnyf(wrongArgumentTypeError, "expected int got %T", args[index])
 }
 
 // ArgToIntSlice converts the argument under index to []int, if possible.
 func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 	if len(args) < index+1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
 	}
 
 	if i, ok := args[index].([]int); ok {
@@ -230,50 +251,100 @@ func ArgToIntSlice(args []interface{}, index int) ([]int, error) {
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []int got %T", args[index])
 }
 
-// ArgToString converts the argument under index to a string, if possible.
+// ArgToString converts the argument under index to string, if possible.
 // Optionally it takes one default value that is returned in case there is no
 // argument available for the given index.
 func ArgToString(args []interface{}, index int, def ...string) (string, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
-		return "", maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+		return "", maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
 	}
+
 	if len(args) < index+1 {
 		if len(def) == 1 {
 			// There is no argument given, thus we use the default.
 			return def[0], nil
 		}
+		return "", maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
 
-		return "", maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return "", maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
 	}
 
 	if s, ok := args[index].(string); ok {
 		return s, nil
 	}
-
 	return "", maskAnyf(wrongArgumentTypeError, "expected string got %T", args[index])
 }
 
-// ArgToStringSlice converts the argument under index to a string slice, if
-// possible. Optionally it takes one default value that is returned in case
-// there is no argument available for the given index.
+// ArgToStringSlice converts the argument under index to []string, if possible.
+// Optionally it takes one default value that is returned in case there is no
+// argument available for the given index.
 func ArgToStringSlice(args []interface{}, index int, def ...[]string) ([]string, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
 	if len(def) > 1 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(def))
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
 	}
+
 	if len(args) < index+1 {
 		if len(def) == 1 {
 			// There is no argument given, thus we use the default.
 			return def[0], nil
 		}
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
 
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d got %d", index+1, len(args))
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return nil, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
 	}
 
 	if ss, ok := args[index].([]string); ok {
 		return ss, nil
 	}
-
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []string got %T", args[index])
+}
+
+// ArgToStringStringMap converts the argument under index to map[string]string,
+// if possible. Optionally it takes one default value that is returned in case
+// there is no argument available for the given index.
+func ArgToStringStringMap(args []interface{}, index int, def ...map[string]string) (map[string]string, error) {
+	// In any case we should make sure the defaults are validated. This causes a
+	// more strict usage and understanding of the argument helper APIs.
+	if len(def) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
+	}
+
+	if len(args) < index+1 {
+		if len(def) == 1 {
+			// There is no argument given, thus we use the default.
+			return def[0], nil
+		}
+		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
+	}
+
+	if _, ok := args[index].(DefaultArg); ok {
+		if len(def) < 1 {
+			return nil, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
+		}
+		// There is no argument given, thus we use the default.
+		return def[0], nil
+	}
+
+	if ss, ok := args[index].(map[string]string); ok {
+		return ss, nil
+	}
+	return nil, maskAnyf(wrongArgumentTypeError, "expected map[string]string got %T", args[index])
 }
 
 // Args
