@@ -1,4 +1,4 @@
-.PHONY: all anna annactl goclean gofmt goget gotest
+.PHONY: all anna annactl goclean gofmt goget gotest projectcheck
 
 GOPATH := ${PWD}/.workspace
 export GOPATH
@@ -34,8 +34,7 @@ goget:
 	@go get github.com/golang/lint/golint
 
 gotest:
-	# Run unit tests.
 	@./go.test.sh
-	@echo -n "\n"
-	# Run project checks.
-	@GOPATH=${GOPATH} ./project.check.sh
+
+projectcheck:
+	@./project.check.sh

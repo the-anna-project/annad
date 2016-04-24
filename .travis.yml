@@ -9,6 +9,7 @@ install: make all
 
 script:
 - make gotest
+- make projectcheck
 
 notifications:
   email: false
