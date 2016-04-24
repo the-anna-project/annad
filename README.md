@@ -28,7 +28,8 @@ project as playground to improve knowledge by solving problems.
 In fact the aim is to implement something living. Something that learns and
 develops by itself. Something that solves the problems we are not capable of.
 This ambitious dream should drive this project. Wether it is driven by me, or
-somebody else, or some group of people way smarter than me. Live will find a way.
+somebody else, or some group of people way smarter than me. Life will find a
+way.
 
 # documentation
 - [api](doc/api)

@@ -1,3 +1,6 @@
+// Package featureset provides feature detection within sequences. A feature is
+// considered a recognized property of a sequence. A sequence can be any
+// string.
 package featureset
 
 import (
