@@ -335,6 +335,43 @@ func (i *clgIndex) SwapRightStringSlice(args ...interface{}) ([]interface{}, err
 	return []interface{}{newStringSlice}, nil
 }
 
+func unionString(ss1, ss2 []string) []string {
+	var newUnion []string
+
+	for _, s := range ss1 {
+		newUnion = append(newUnion, s)
+	}
+	for _, s := range ss2 {
+		newUnion = append(newUnion, s)
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) UnionStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss1, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	ss2, err := ArgToStringSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(ss1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss1))
+	}
+	if len(ss2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss2))
+	}
+
+	newUnion := unionString(ss1, ss2)
+
+	return []interface{}{newUnion}, nil
+}
+
 func (i *clgIndex) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {

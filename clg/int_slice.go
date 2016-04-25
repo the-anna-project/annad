@@ -328,6 +328,43 @@ func (i *clgIndex) SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newIntSlice}, nil
 }
 
+func unionInt(is1, is2 []int) []int {
+	var newUnion []int
+
+	for _, i := range is1 {
+		newUnion = append(newUnion, i)
+	}
+	for _, i := range is2 {
+		newUnion = append(newUnion, i)
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) UnionIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newUnion := unionInt(is1, is2)
+
+	return []interface{}{newUnion}, nil
+}
+
 func (i *clgIndex) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {

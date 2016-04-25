@@ -307,6 +307,43 @@ func (i *clgIndex) SwapRightFloat64Slice(args ...interface{}) ([]interface{}, er
 	return []interface{}{newFloat64Slice}, nil
 }
 
+func unionFloat64(fs1, fs2 []float64) []float64 {
+	var newUnion []float64
+
+	for _, f := range fs1 {
+		newUnion = append(newUnion, f)
+	}
+	for _, f := range fs2 {
+		newUnion = append(newUnion, f)
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) UnionFloat64Slice(args ...interface{}) ([]interface{}, error) {
+	fs1, err := ArgToFloat64Slice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	fs2, err := ArgToFloat64Slice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(fs1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs1))
+	}
+	if len(fs2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs2))
+	}
+
+	newUnion := unionFloat64(fs1, fs2)
+
+	return []interface{}{newUnion}, nil
+}
+
 func (i *clgIndex) UniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {

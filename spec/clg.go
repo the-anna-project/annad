@@ -286,6 +286,10 @@ type CLGFloat64Slice interface {
 	// float64 slice to the right, that is, the beginning of the float64 slice.
 	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// UnionFloat64Slice returns an float64 slice having members of both given
+	// slices.
+	UnionFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// UniqueFloat64Slice returns an float64 slice only having unique members.
 	UniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
 }
@@ -397,6 +401,10 @@ type CLGIntSlice interface {
 	// SwapRightIntSlice provides functionality to move the last member of a
 	// int slice to the right, that is, the beginning of the int slice.
 	SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// UnionIntSlice returns an float64 slice having members of both given
+	// slices.
+	UnionIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueIntSlice returns an int slice only having unique members.
 	UniqueIntSlice(args ...interface{}) ([]interface{}, error)
@@ -528,6 +536,10 @@ type CLGStringSlice interface {
 	// SwapRightStringSlice provides functionality to move the last member of a
 	// string slice to the right, that is, the beginning of the string slice.
 	SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// UnionStringSlice returns an float64 slice having members of both given
+	// slices.
+	UnionStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueStringSlice returns a string slice only having unique members.
 	UniqueStringSlice(args ...interface{}) ([]interface{}, error)
