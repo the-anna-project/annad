@@ -106,6 +106,224 @@ func Test_Distribution_GetNewDistribution(t *testing.T) {
 	}
 }
 
+func Test_Distribution_GetDimensionsDistribution(t *testing.T) {
+	testDistribution := func(vectors [][]float64) spec.Distribution {
+		newConfig := distribution.DefaultConfig()
+		newConfig.Name = "test-name"
+		newConfig.Vectors = vectors
+		newDistribution, err := distribution.NewDistribution(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newDistribution
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testDistribution([][]float64{{1, 1}, {2, 7}})},
+			Expected:     []interface{}{2},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([][]float64{{1, 1, 1, 1, 1}, {2, 2, 2, 2, 2}})},
+			Expected:     []interface{}{5},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([][]float64{{31, 12, 9}, {6, 2, -4}})},
+			Expected:     []interface{}{3},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([][]float64{{1, 1}, {2, 7}}), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{8.1},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetDimensionsDistribution(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_Distribution_GetHashMapDistribution(t *testing.T) {
+	testDistribution := func(name string, staticChannels []float64, vectors [][]float64) spec.Distribution {
+		newConfig := distribution.DefaultConfig()
+		newConfig.Name = name
+		newConfig.StaticChannels = staticChannels
+		newConfig.Vectors = vectors
+		newDistribution, err := distribution.NewDistribution(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newDistribution
+	}
+
+	testCases := []struct {
+		Input []interface{}
+		// Note that we expect the hash map of type map[string]string. To ease
+		// comparision we remove the randomy generated ID from the hash map. Thus
+		// we don't expect it in the expected result. That way we can more easily
+		// compare using reflect.DeepEqual.
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
+			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
+			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
+			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}}), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{8.1},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetHashMapDistribution(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			hashMap, err := ArgToStringStringMap(output, 0)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+			if len(output) != 1 {
+				t.Fatal("case", i+1, "expected", 1, "got", len(output))
+			}
+			// Because the ID is random, we simply remove it here and only check the rest.
+			delete(hashMap, "id")
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_Distribution_GetNameDistribution(t *testing.T) {
+	testDistribution := func(name string) spec.Distribution {
+		newConfig := distribution.DefaultConfig()
+		newConfig.Name = name
+		newConfig.Vectors = [][]float64{{1, 2}, {3, 4}}
+		newDistribution, err := distribution.NewDistribution(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newDistribution
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testDistribution("foo")},
+			Expected:     []interface{}{"foo"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("name")},
+			Expected:     []interface{}{"name"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("test")},
+			Expected:     []interface{}{"test"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution("test"), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{8.1},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.GetNameDistribution(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_Distribution_GetStaticChannelsDistribution(t *testing.T) {
 	testDistribution := func(staticChannels []float64) spec.Distribution {
 		newConfig := distribution.DefaultConfig()

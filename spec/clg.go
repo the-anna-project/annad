@@ -103,6 +103,19 @@ type CLGDistribution interface {
 	// Optionally decent configuration can be given.
 	GetNewDistribution(args ...interface{}) ([]interface{}, error)
 
+	// GetDimensionsDistribution returns the dimensions of the given
+	// spec.Distribution. Dimensions are given by the configured vectors. E.g.
+	// the vector {11, 22, 33} has a dimension of 3.
+	GetDimensionsDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetHashMapDistribution returns the configured HashMap of the given
+	// spec.Distribution.
+	GetHashMapDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetNameDistribution returns the configured Name of the given
+	// spec.Distribution.
+	GetNameDistribution(args ...interface{}) ([]interface{}, error)
+
 	// GetStaticChannelsDistribution returns the configured StaticChannels of the
 	// given spec.Distribution.
 	GetStaticChannelsDistribution(args ...interface{}) ([]interface{}, error)

@@ -4,6 +4,51 @@ import (
 	"github.com/xh3b4sd/anna/clg/distribution"
 )
 
+func (i *clgIndex) GetDimensionsDistribution(args ...interface{}) ([]interface{}, error) {
+	d, err := ArgToDistribution(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newDimensions := d.GetDimensions()
+
+	return []interface{}{newDimensions}, nil
+}
+
+func (i *clgIndex) GetHashMapDistribution(args ...interface{}) ([]interface{}, error) {
+	d, err := ArgToDistribution(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newHashMap := d.GetHashMap()
+
+	return []interface{}{newHashMap}, nil
+}
+
+func (i *clgIndex) GetNameDistribution(args ...interface{}) ([]interface{}, error) {
+	d, err := ArgToDistribution(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newName := d.GetName()
+
+	return []interface{}{newName}, nil
+}
+
 func (i *clgIndex) GetNewDistribution(args ...interface{}) ([]interface{}, error) {
 	var err error
 	newConfig := distribution.DefaultConfig()
