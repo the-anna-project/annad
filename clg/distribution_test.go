@@ -190,7 +190,7 @@ func Test_Distribution_GetHashMapDistribution(t *testing.T) {
 	testCases := []struct {
 		Input []interface{}
 		// Note that we expect the hash map of type map[string]string. To ease
-		// comparision we remove the randomy generated ID from the hash map. Thus
+		// comparison we remove the randomy generated ID from the hash map. Thus
 		// we don't expect it in the expected result. That way we can more easily
 		// compare using reflect.DeepEqual.
 		Expected     []interface{}
