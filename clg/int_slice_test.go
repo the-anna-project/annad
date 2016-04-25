@@ -762,6 +762,73 @@ func Test_IntSlice_NewIntSlice(t *testing.T) {
 	}
 }
 
+func Test_IntSlice_ReverseIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{1, 2}},
+			Expected:     []interface{}{[]int{2, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3}},
+			Expected:     []interface{}{[]int{3, 2, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3, 1, 2}},
+			Expected:     []interface{}{[]int{2, 1, 3}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 13, 1, 2, 3, 1}},
+			Expected:     []interface{}{[]int{1, 3, 2, 1, 13, 4}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{23},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]bool{}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.ReverseIntSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_IntSlice_SortIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

@@ -236,6 +236,26 @@ func (i *clgIndex) NewFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{fs}, nil
 }
 
+func (i *clgIndex) ReverseFloat64Slice(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFloat64Slice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(fs) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs))
+	}
+
+	var newFloat64Slice []float64
+	for i := len(fs) - 1; i >= 0; i-- {
+		newFloat64Slice = append(newFloat64Slice, fs[i])
+	}
+
+	return []interface{}{newFloat64Slice}, nil
+}
+
 func (i *clgIndex) SortFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {

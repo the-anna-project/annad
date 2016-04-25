@@ -4,6 +4,43 @@ import (
 	"github.com/xh3b4sd/anna/clg/distribution"
 )
 
+func (i *clgIndex) CalculateDistribution(args ...interface{}) ([]interface{}, error) {
+	d, err := ArgToDistribution(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+
+	newCalculation := d.Calculate()
+
+	return []interface{}{newCalculation}, nil
+}
+
+func (i *clgIndex) DifferenceDistribution(args ...interface{}) ([]interface{}, error) {
+	d1, err := ArgToDistribution(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	d2, err := ArgToDistribution(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+
+	newDifference, err := d1.Difference(d2)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return []interface{}{newDifference}, nil
+}
+
 func (i *clgIndex) GetDimensionsDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {

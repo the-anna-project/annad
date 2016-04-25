@@ -47,9 +47,9 @@ type CLGIndex interface {
 	// CLGOS
 	// CLGTime
 
-	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
+	// TODO Similarity. (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
-	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
+	// TODO Converting types (string to string slice, float to string, string to int, bool to int)
 }
 
 // CLGConvert represents all conversion CLGs that can be used.
@@ -99,9 +99,12 @@ type CLGControl interface {
 
 // CLGDistribution represents all spec.Distribution CLGs that can be used.
 type CLGDistribution interface {
-	// GetNewDistribution provides a way to create a new spec.Distribution.
-	// Optionally decent configuration can be given.
-	GetNewDistribution(args ...interface{}) ([]interface{}, error)
+	// CalculateDistribution returns the calculated distribution of the given
+	// spec.Distribution.
+	CalculateDistribution(args ...interface{}) ([]interface{}, error)
+
+	// DifferenceDistribution returns the difference between two distributions.
+	DifferenceDistribution(args ...interface{}) ([]interface{}, error)
 
 	// GetDimensionsDistribution returns the dimensions of the given
 	// spec.Distribution. Dimensions are given by the configured vectors. E.g.
@@ -115,6 +118,10 @@ type CLGDistribution interface {
 	// GetNameDistribution returns the configured Name of the given
 	// spec.Distribution.
 	GetNameDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetNewDistribution provides a way to create a new spec.Distribution.
+	// Optionally decent configuration can be given.
+	GetNewDistribution(args ...interface{}) ([]interface{}, error)
 
 	// GetStaticChannelsDistribution returns the configured StaticChannels of the
 	// given spec.Distribution.
@@ -265,6 +272,9 @@ type CLGFloat64Slice interface {
 	// NewFloat64Slice returns a new float64 slice.
 	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// ReverseFloat64Slice reverses the order of the given list.
+	ReverseFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// SortFloat64Slice provides functionality of strings.Contains.
 	SortFloat64Slice(args ...interface{}) ([]interface{}, error)
 
@@ -373,6 +383,9 @@ type CLGIntSlice interface {
 
 	// NewIntSlice returns a new int slice.
 	NewIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// ReverseIntSlice reverses the order of the given list.
+	ReverseIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// SortIntSlice provides functionality of strings.Contains.
 	SortIntSlice(args ...interface{}) ([]interface{}, error)

@@ -1,13 +1,171 @@
 package clg
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/xh3b4sd/anna/clg/distribution"
 	"github.com/xh3b4sd/anna/spec"
 )
+
+func Test_Distribution_CalculateDistribution(t *testing.T) {
+	testDistribution := func(staticChannels []float64, vectors [][]float64) spec.Distribution {
+		newConfig := distribution.DefaultConfig()
+		newConfig.Name = "name"
+		newConfig.StaticChannels = staticChannels
+		newConfig.Vectors = vectors
+		newDistribution, err := distribution.NewDistribution(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newDistribution
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
+			Expected:     []interface{}{[]float64{2, 0}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {88, 99}})},
+			Expected:     []interface{}{[]float64{1, 1}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([]float64{50, 100}, [][]float64{{54, 68}, {71, 84}})},
+			Expected:     []interface{}{[]float64{0, 2}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([]float64{33, 66, 99}, [][]float64{{54, 68}, {71, 84}})},
+			Expected:     []interface{}{[]float64{0, 0.5, 1.5}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {33, 44}}), "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{8.1},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.CalculateDistribution(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_Distribution_DifferenceDistribution(t *testing.T) {
+	testDistribution := func(staticChannels []float64, vectors [][]float64) spec.Distribution {
+		newConfig := distribution.DefaultConfig()
+		newConfig.Name = "name"
+		newConfig.StaticChannels = staticChannels
+		newConfig.Vectors = vectors
+		newDistribution, err := distribution.NewDistribution(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+		return newDistribution
+	}
+
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input: []interface{}{
+				testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {33, 44}}),
+				testDistribution([]float64{50, 100}, [][]float64{{35, 48}, {13, 22}}),
+			},
+			Expected:     []interface{}{[]float64{0, 0}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input: []interface{}{
+				testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {33, 44}}),
+				testDistribution([]float64{50, 100}, [][]float64{{57, 84}, {69, 87}}),
+			},
+			Expected:     []interface{}{[]float64{-2, 2}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input: []interface{}{
+				testDistribution([]float64{50, 100}, [][]float64{{11, 22}, {33, 44}}),
+				testDistribution([]float64{50, 100}, [][]float64{{57, 84}, {69, 87}}),
+				"foo",
+			},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input: []interface{}{
+				81,
+				testDistribution([]float64{50, 100}, [][]float64{{57, 84}, {69, 87}}),
+			},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input: []interface{}{
+				testDistribution([]float64{50, 100}, [][]float64{{57, 84}, {69, 87}}),
+				81,
+			},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.DifferenceDistribution(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
 
 func Test_Distribution_GetNewDistribution(t *testing.T) {
 	testCases := []struct {
@@ -72,7 +230,6 @@ func Test_Distribution_GetNewDistribution(t *testing.T) {
 		}
 		// Test.
 		output, err := newCLGIndex.GetNewDistribution(testCase.Input...)
-		fmt.Printf("%#v\n", err)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -193,22 +350,22 @@ func Test_Distribution_GetHashMapDistribution(t *testing.T) {
 		// comparison we remove the randomy generated ID from the hash map. Thus
 		// we don't expect it in the expected result. That way we can more easily
 		// compare using reflect.DeepEqual.
-		Expected     []interface{}
+		Expected     map[string]string
 		ErrorMatcher func(err error) bool
 	}{
 		{
 			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
-			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			Expected:     map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"},
 			ErrorMatcher: nil,
 		},
 		{
 			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
-			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			Expected:     map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"},
 			ErrorMatcher: nil,
 		},
 		{
 			Input:        []interface{}{testDistribution("foo", []float64{50, 100}, [][]float64{{11, 22}, {33, 44}})},
-			Expected:     []interface{}{map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"}},
+			Expected:     map[string]string{"name": "foo", "static-channels": "50,100", "vectors": "11,22|33,44"},
 			ErrorMatcher: nil,
 		},
 		{
@@ -249,7 +406,7 @@ func Test_Distribution_GetHashMapDistribution(t *testing.T) {
 			}
 			// Because the ID is random, we simply remove it here and only check the rest.
 			delete(hashMap, "id")
-			if !reflect.DeepEqual(output, testCase.Expected) {
+			if !reflect.DeepEqual(hashMap, testCase.Expected) {
 				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
 			}
 		}

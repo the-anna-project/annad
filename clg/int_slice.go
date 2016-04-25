@@ -257,6 +257,26 @@ func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
+func (i *clgIndex) ReverseIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
+	}
+
+	var newIntSlice []int
+	for i := len(is) - 1; i >= 0; i-- {
+		newIntSlice = append(newIntSlice, is[i])
+	}
+
+	return []interface{}{newIntSlice}, nil
+}
+
 func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
