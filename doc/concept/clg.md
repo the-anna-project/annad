@@ -11,7 +11,7 @@ This builtin functionality should be the only hard coded logic. All other
 behavior must result out of the combination of learned data, CLGs and
 connections between these two.
 
-Random fact: currently Anna is capable of more than 120 CLG implementations.
+Random fact: currently Anna is capable of more than 130 CLG implementations.
 This number is expected to to be raised even further. For now manually, later
 on automatically. See https://godoc.org/github.com/xh3b4sd/anna/spec#CLGIndex.
 
