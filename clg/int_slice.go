@@ -135,6 +135,45 @@ func (i *clgIndex) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newInt}, nil
 }
 
+func intersectionInt(is1, is2 []int) []int {
+	var newUnion []int
+
+	for _, i1 := range is1 {
+		for _, i2 := range is2 {
+			if i2 == i1 {
+				newUnion = append(newUnion, i2)
+				continue
+			}
+		}
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) IntersectionIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newIntersection := intersectionInt(is1, is2)
+
+	return []interface{}{newIntersection}, nil
+}
+
 func (i *clgIndex) IsUniqueIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {

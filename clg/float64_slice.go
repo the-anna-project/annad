@@ -135,6 +135,45 @@ func (i *clgIndex) IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newFloat64}, nil
 }
 
+func intersectionFloat64(fs1, fs2 []float64) []float64 {
+	var newUnion []float64
+
+	for _, f1 := range fs1 {
+		for _, f2 := range fs2 {
+			if f2 == f1 {
+				newUnion = append(newUnion, f2)
+				continue
+			}
+		}
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error) {
+	fs1, err := ArgToFloat64Slice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	fs2, err := ArgToFloat64Slice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(fs1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs1))
+	}
+	if len(fs2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs2))
+	}
+
+	newIntersection := intersectionFloat64(fs1, fs2)
+
+	return []interface{}{newIntersection}, nil
+}
+
 func (i *clgIndex) IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {

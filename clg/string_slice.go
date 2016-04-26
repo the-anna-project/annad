@@ -151,6 +151,45 @@ func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newString}, nil
 }
 
+func intersectionString(ss1, ss2 []string) []string {
+	var newUnion []string
+
+	for _, s1 := range ss1 {
+		for _, s2 := range ss2 {
+			if s2 == s1 {
+				newUnion = append(newUnion, s2)
+				continue
+			}
+		}
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) IntersectionStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss1, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	ss2, err := ArgToStringSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(ss1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss1))
+	}
+	if len(ss2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss2))
+	}
+
+	newIntersection := intersectionString(ss1, ss2)
+
+	return []interface{}{newIntersection}, nil
+}
+
 func (i *clgIndex) IsUniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {

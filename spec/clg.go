@@ -259,6 +259,10 @@ type CLGFloat64Slice interface {
 	// IndexFloat64Slice returns the element under the given index.
 	IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// IntersectionFloat64Slice returns an float64 slice having members that are
+	// in both given slices.
+	IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// IsUniqueFloat64Slice checks whether the given float64 slice only contains
 	// unique members.
 	IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
@@ -286,8 +290,8 @@ type CLGFloat64Slice interface {
 	// float64 slice to the right, that is, the beginning of the float64 slice.
 	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
 
-	// UnionFloat64Slice returns an float64 slice having members of both given
-	// slices.
+	// UnionFloat64Slice returns a float64 slice having members of both given
+	// slices. Note that the result may contain duplicated members.
 	UnionFloat64Slice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueFloat64Slice returns an float64 slice only having unique members.
@@ -371,6 +375,10 @@ type CLGIntSlice interface {
 	// IndexIntSlice returns the element under the given index.
 	IndexIntSlice(args ...interface{}) ([]interface{}, error)
 
+	// IntersectionIntSlice returns an int slice having members that are in both
+	// given slices.
+	IntersectionIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// IsUniqueIntSlice checks whether the given int slice only contains unique
 	// members.
 	IsUniqueIntSlice(args ...interface{}) ([]interface{}, error)
@@ -402,8 +410,8 @@ type CLGIntSlice interface {
 	// int slice to the right, that is, the beginning of the int slice.
 	SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
 
-	// UnionIntSlice returns an float64 slice having members of both given
-	// slices.
+	// UnionIntSlice returns an int slice having members of both given slices.
+	// Note that the result may contain duplicated members.
 	UnionIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueIntSlice returns an int slice only having unique members.
@@ -501,6 +509,10 @@ type CLGStringSlice interface {
 	// IndexStringSlice returns the element under the given index.
 	IndexStringSlice(args ...interface{}) ([]interface{}, error)
 
+	// IntersectionStringSlice returns a string slice having members that are in
+	// both given slices.
+	IntersectionStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// IsUniqueStringSlice checks whether the given string slice only contains
 	// unique members.
 	IsUniqueStringSlice(args ...interface{}) ([]interface{}, error)
@@ -537,8 +549,8 @@ type CLGStringSlice interface {
 	// string slice to the right, that is, the beginning of the string slice.
 	SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
 
-	// UnionStringSlice returns an float64 slice having members of both given
-	// slices.
+	// UnionStringSlice returns a string slice having members of both given
+	// slices. Note that the result may contain duplicated members.
 	UnionStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueStringSlice returns a string slice only having unique members.

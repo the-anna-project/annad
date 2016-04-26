@@ -490,6 +490,83 @@ func Test_StringSlice_IndexStringSlice(t *testing.T) {
 	}
 }
 
+func Test_StringSlice_IntersectionStringSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}, []string{"d", "y"}},
+			Expected:     []interface{}{[]string(nil)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "d", "c"}, []string{"d", "y"}},
+			Expected:     []interface{}{[]string{"d"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"y", "b", "c"}, []string{"c", "y"}},
+			Expected:     []interface{}{[]string{"y", "c"}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"h", "b", "c"}, []string{"c", "y"}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]string{"h"}, []string{"c", "y"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]string{"h", "b", "c"}, []string{"c"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]string{"h", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{true, []string{"c", "y"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]string{"h", "b", "c"}, 8.1},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+	}
+
+	newConfig := DefaultConfig()
+	newCLGIndex, err := NewCLGIndex(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, testCase := range testCases {
+		output, err := newCLGIndex.IntersectionStringSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_StringSlice_IsUniqueStringSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
