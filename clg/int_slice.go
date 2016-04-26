@@ -24,6 +24,16 @@ func (i *clgIndex) AppendIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
+func containsInt(is []int, n int) bool {
+	for _, i := range is {
+		if i == n {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
@@ -37,13 +47,7 @@ func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) 
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	var contains bool
-	for _, i := range is {
-		if i == n {
-			contains = true
-			break
-		}
-	}
+	contains := containsInt(is, n)
 
 	return []interface{}{contains}, nil
 }
@@ -60,6 +64,42 @@ func (i *clgIndex) CountIntSlice(args ...interface{}) ([]interface{}, error) {
 	count := len(is)
 
 	return []interface{}{count}, nil
+}
+
+func differenceInt(is1, is2 []int) []int {
+	var newDifference []int
+
+	for _, i1 := range is1 {
+		if !containsInt(is2, i1) {
+			newDifference = append(newDifference, i1)
+		}
+	}
+
+	return newDifference
+}
+
+func (i *clgIndex) DifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newDifference := differenceInt(is1, is2)
+
+	return []interface{}{newDifference}, nil
 }
 
 func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
@@ -133,6 +173,45 @@ func (i *clgIndex) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
 	newInt := is[index]
 
 	return []interface{}{newInt}, nil
+}
+
+func intersectionInt(is1, is2 []int) []int {
+	var newIntersection []int
+
+	for _, i1 := range is1 {
+		for _, i2 := range is2 {
+			if i2 == i1 {
+				newIntersection = append(newIntersection, i2)
+				continue
+			}
+		}
+	}
+
+	return newIntersection
+}
+
+func (i *clgIndex) IntersectionIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newIntersection := intersectionInt(is1, is2)
+
+	return []interface{}{newIntersection}, nil
 }
 
 func (i *clgIndex) IsUniqueIntSlice(args ...interface{}) ([]interface{}, error) {
@@ -257,6 +336,26 @@ func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
+func (i *clgIndex) ReverseIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
+	}
+
+	var newIntSlice []int
+	for i := len(is) - 1; i >= 0; i-- {
+		newIntSlice = append(newIntSlice, is[i])
+	}
+
+	return []interface{}{newIntSlice}, nil
+}
+
 func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
@@ -306,6 +405,84 @@ func (i *clgIndex) SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
 	newIntSlice := append([]int{is[len(is)-1]}, is[:len(is)-1]...)
 
 	return []interface{}{newIntSlice}, nil
+}
+
+func symmetricDifferenceInt(is1, is2 []int) []int {
+	var newSymmetricDifference []int
+
+	for _, i1 := range is1 {
+		if !containsInt(is2, i1) {
+			newSymmetricDifference = append(newSymmetricDifference, i1)
+		}
+	}
+	for _, i2 := range is2 {
+		if !containsInt(is1, i2) {
+			newSymmetricDifference = append(newSymmetricDifference, i2)
+		}
+	}
+
+	return newSymmetricDifference
+}
+
+func (i *clgIndex) SymmetricDifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newSymmetricDifference := symmetricDifferenceInt(is1, is2)
+
+	return []interface{}{newSymmetricDifference}, nil
+}
+
+func unionInt(is1, is2 []int) []int {
+	var newUnion []int
+
+	for _, i := range is1 {
+		newUnion = append(newUnion, i)
+	}
+	for _, i := range is2 {
+		newUnion = append(newUnion, i)
+	}
+
+	return newUnion
+}
+
+func (i *clgIndex) UnionIntSlice(args ...interface{}) ([]interface{}, error) {
+	is1, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	is2, err := ArgToIntSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(is1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is1))
+	}
+	if len(is2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is2))
+	}
+
+	newUnion := unionInt(is1, is2)
+
+	return []interface{}{newUnion}, nil
 }
 
 func (i *clgIndex) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {

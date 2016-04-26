@@ -1,3 +1,5 @@
+// Package distribution provides functionality to measure feature densities
+// within sequences.
 package distribution
 
 import (

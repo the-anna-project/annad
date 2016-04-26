@@ -1,0 +1,13 @@
+coverage:
+  precision: 0
+  round: nearest
+
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 10
+
+comment:
+  layout: header
+  behavior: new

@@ -200,7 +200,7 @@ func Test_Method_GetNumMethods(t *testing.T) {
 	}
 	// There shouldn't be a test that expects an exact amount of methods, thus
 	// we simply expect that there are more than a given threshold.
-	if num < 110 {
+	if num < 130 {
 		t.Fatal("expected", nil, "got", num)
 	}
 }

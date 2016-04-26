@@ -1,10 +1,37 @@
 package spec
 
-// CLGIndex represents the CLG index providing all CLGs that can be used. TODO
-// add more CLGs.
+// CLGIndex represents the CLG index providing all CLGs that can be used. All
+// CLGs follow this signature, where the CLGs function name FuncScope describes
+// its CLG functionality Func and its CLG scope Scope.
+//
+//     FuncScope(args ...interface{}) ([]interface{}, error)
+//
+// Note that args is a variadic interface slice. This provides flexibility in
+// the number of arguments and their given types. Assuming an argument list is
+// given and we want to fetch a certain argument using a certain index using a
+// helper method like this.
+//
+//     newConfig.Foo, err = ArgToString(args, 1, newConfig.Foo)
+//
+// Here args may provide three arguments for whatever reason. Accessing an
+// argument using the index 1 would be possible though, but in the first place
+// we would rather prefer the default configuration, than the given argument
+// under index 1. One could argue to pass a zero value for the argument under
+// index 1, so we have a way to determine whether to use the given default
+// value. This is problematic, because there are probably cases where we
+// explicitly want to use the default value, and really don't want to overwrite
+// it with some default configuration. That is why there is the type DefaultArg.
+//
+//     args := []interface{}{"foo", DefaultArg{}, "baz"}
+//
+// This way we are capable of explicitly requesting default values. At the same
+// time this also allows to define arguments beyond certain default values.
+//
+// TODO add more CLGs.
 type CLGIndex interface {
 	CLGControl
 	CLGConvert
+	CLGDistribution
 	CLGFeature
 	CLGFeatureSet
 	CLGFloat64
@@ -20,9 +47,9 @@ type CLGIndex interface {
 	// CLGOS
 	// CLGTime
 
-	// TODO Similarity. (manhatten-distance, distribution, syntactic similarity, semantic similarity, combined similarity)
+	// TODO Similarity. (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
 	// TODO Sets for all slice types. (union, intersect, difference)
-	// TODO Converting types (use also ArgTo... methods) (string to string slice, float to string, string to int, bool to int)
+	// TODO Converting types (string to string slice, float to string, string to int, bool to int)
 }
 
 // CLGConvert represents all conversion CLGs that can be used.
@@ -70,6 +97,41 @@ type CLGControl interface {
 	// TODO control flow ??? switch, goto, strategy modifier
 }
 
+// CLGDistribution represents all spec.Distribution CLGs that can be used.
+type CLGDistribution interface {
+	// CalculateDistribution returns the calculated distribution of the given
+	// spec.Distribution.
+	CalculateDistribution(args ...interface{}) ([]interface{}, error)
+
+	// DifferenceDistribution returns the difference between two distributions.
+	DifferenceDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetDimensionsDistribution returns the dimensions of the given
+	// spec.Distribution. Dimensions are given by the configured vectors. E.g.
+	// the vector {11, 22, 33} has a dimension of 3.
+	GetDimensionsDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetHashMapDistribution returns the configured HashMap of the given
+	// spec.Distribution.
+	GetHashMapDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetNameDistribution returns the configured Name of the given
+	// spec.Distribution.
+	GetNameDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetNewDistribution provides a way to create a new spec.Distribution.
+	// Optionally decent configuration can be given.
+	GetNewDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetStaticChannelsDistribution returns the configured StaticChannels of the
+	// given spec.Distribution.
+	GetStaticChannelsDistribution(args ...interface{}) ([]interface{}, error)
+
+	// GetVectorsDistribution returns the configured Vectors of the given
+	// spec.Distribution.
+	GetVectorsDistribution(args ...interface{}) ([]interface{}, error)
+}
+
 // CLGFeatureSet represents all spec.FeatureSet compatible CLGs that can be
 // used.
 type CLGFeatureSet interface {
@@ -90,7 +152,7 @@ type CLGFeatureSet interface {
 	GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetMaxLengthFeatureSet returns the configured MaxLength of the given
-	// feature set.
+	// spec.FeatureSet.
 	GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error)
 
 	// GetMinLengthFeatureSet returns the configured MinLength of the given
@@ -181,6 +243,10 @@ type CLGFloat64Slice interface {
 	// CountFloat64Slice returns the number of elements in args.
 	CountFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceFloat64Slice returns a float64 slice having members that are in
+	// the first, but not in the second given slice.
+	DifferenceFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherFloat64Slice takes a float64 slice and a float64. It then
 	// returns two float64 slices, where the first one contains all items
 	// matching the given float64, and the second float64 slice contains all
@@ -197,6 +263,10 @@ type CLGFloat64Slice interface {
 	// IndexFloat64Slice returns the element under the given index.
 	IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// IntersectionFloat64Slice returns a float64 slice having members that are
+	// in both given slices.
+	IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// IsUniqueFloat64Slice checks whether the given float64 slice only contains
 	// unique members.
 	IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
@@ -210,6 +280,9 @@ type CLGFloat64Slice interface {
 	// NewFloat64Slice returns a new float64 slice.
 	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// ReverseFloat64Slice reverses the order of the given list.
+	ReverseFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// SortFloat64Slice provides functionality of strings.Contains.
 	SortFloat64Slice(args ...interface{}) ([]interface{}, error)
 
@@ -220,6 +293,14 @@ type CLGFloat64Slice interface {
 	// SwapRightFloat64Slice provides functionality to move the last member of a
 	// float64 slice to the right, that is, the beginning of the float64 slice.
 	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceFloat64Slice returns a float64 slice having members of
+	// either the first, or the second given slices.
+	SymmetricDifferenceFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// UnionFloat64Slice returns a float64 slice having members of both given
+	// slices. Note that the result may contain duplicated members.
+	UnionFloat64Slice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueFloat64Slice returns an float64 slice only having unique members.
 	UniqueFloat64Slice(args ...interface{}) ([]interface{}, error)
@@ -287,6 +368,10 @@ type CLGIntSlice interface {
 	// CountIntSlice returns the number of elements in args.
 	CountIntSlice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceIntSlice returns an int slice having members that are in the
+	// first, but not in the second given slice.
+	DifferenceIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherIntSlice takes a int slice and a int. It then returns two int
 	// slices, where the first one contains all items matching the given int, and
 	// the second int slice contains all items not matching the given int.
@@ -301,6 +386,10 @@ type CLGIntSlice interface {
 
 	// IndexIntSlice returns the element under the given index.
 	IndexIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// IntersectionIntSlice returns an int slice having members that are in both
+	// given slices.
+	IntersectionIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// IsUniqueIntSlice checks whether the given int slice only contains unique
 	// members.
@@ -319,6 +408,9 @@ type CLGIntSlice interface {
 	// NewIntSlice returns a new int slice.
 	NewIntSlice(args ...interface{}) ([]interface{}, error)
 
+	// ReverseIntSlice reverses the order of the given list.
+	ReverseIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// SortIntSlice provides functionality of strings.Contains.
 	SortIntSlice(args ...interface{}) ([]interface{}, error)
 
@@ -329,6 +421,14 @@ type CLGIntSlice interface {
 	// SwapRightIntSlice provides functionality to move the last member of a
 	// int slice to the right, that is, the beginning of the int slice.
 	SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceIntSlice returns an int slice having members of either
+	// the first, or the second given slices.
+	SymmetricDifferenceIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// UnionIntSlice returns an int slice having members of both given slices.
+	// Note that the result may contain duplicated members.
+	UnionIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueIntSlice returns an int slice only having unique members.
 	UniqueIntSlice(args ...interface{}) ([]interface{}, error)
@@ -410,6 +510,10 @@ type CLGStringSlice interface {
 	// CountStringSlice returns the number of elements in args.
 	CountStringSlice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceStringSlice returns a string slice having members that are in
+	// the first, but not in the second given slice.
+	DifferenceStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherStringSlice takes a string slice and a string. It then returns
 	// two string slices, where the first one contains all items matching the
 	// given string, and the second string slice contains all items not matching
@@ -424,6 +528,10 @@ type CLGStringSlice interface {
 
 	// IndexStringSlice returns the element under the given index.
 	IndexStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// IntersectionStringSlice returns a string slice having members that are in
+	// both given slices.
+	IntersectionStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// IsUniqueStringSlice checks whether the given string slice only contains
 	// unique members.
@@ -460,6 +568,14 @@ type CLGStringSlice interface {
 	// SwapRightStringSlice provides functionality to move the last member of a
 	// string slice to the right, that is, the beginning of the string slice.
 	SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceStringSlice returns a string slice having members of
+	// either the first, or the second given slices.
+	SymmetricDifferenceStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// UnionStringSlice returns a string slice having members of both given
+	// slices. Note that the result may contain duplicated members.
+	UnionStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// UniqueStringSlice returns a string slice only having unique members.
 	UniqueStringSlice(args ...interface{}) ([]interface{}, error)
