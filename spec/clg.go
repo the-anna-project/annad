@@ -243,6 +243,10 @@ type CLGFloat64Slice interface {
 	// CountFloat64Slice returns the number of elements in args.
 	CountFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceFloat64Slice returns a float64 slice having members that are in
+	// the first, but not in the second given slice.
+	DifferenceFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherFloat64Slice takes a float64 slice and a float64. It then
 	// returns two float64 slices, where the first one contains all items
 	// matching the given float64, and the second float64 slice contains all
@@ -259,7 +263,7 @@ type CLGFloat64Slice interface {
 	// IndexFloat64Slice returns the element under the given index.
 	IndexFloat64Slice(args ...interface{}) ([]interface{}, error)
 
-	// IntersectionFloat64Slice returns an float64 slice having members that are
+	// IntersectionFloat64Slice returns a float64 slice having members that are
 	// in both given slices.
 	IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error)
 
@@ -289,6 +293,10 @@ type CLGFloat64Slice interface {
 	// SwapRightFloat64Slice provides functionality to move the last member of a
 	// float64 slice to the right, that is, the beginning of the float64 slice.
 	SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceFloat64Slice returns a float64 slice having members of
+	// either the first, or the second given slices.
+	SymmetricDifferenceFloat64Slice(args ...interface{}) ([]interface{}, error)
 
 	// UnionFloat64Slice returns a float64 slice having members of both given
 	// slices. Note that the result may contain duplicated members.
@@ -360,6 +368,10 @@ type CLGIntSlice interface {
 	// CountIntSlice returns the number of elements in args.
 	CountIntSlice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceIntSlice returns an int slice having members that are in the
+	// first, but not in the second given slice.
+	DifferenceIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherIntSlice takes a int slice and a int. It then returns two int
 	// slices, where the first one contains all items matching the given int, and
 	// the second int slice contains all items not matching the given int.
@@ -409,6 +421,10 @@ type CLGIntSlice interface {
 	// SwapRightIntSlice provides functionality to move the last member of a
 	// int slice to the right, that is, the beginning of the int slice.
 	SwapRightIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceIntSlice returns an int slice having members of either
+	// the first, or the second given slices.
+	SymmetricDifferenceIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// UnionIntSlice returns an int slice having members of both given slices.
 	// Note that the result may contain duplicated members.
@@ -494,6 +510,10 @@ type CLGStringSlice interface {
 	// CountStringSlice returns the number of elements in args.
 	CountStringSlice(args ...interface{}) ([]interface{}, error)
 
+	// DifferenceStringSlice returns a string slice having members that are in
+	// the first, but not in the second given slice.
+	DifferenceStringSlice(args ...interface{}) ([]interface{}, error)
+
 	// EqualMatcherStringSlice takes a string slice and a string. It then returns
 	// two string slices, where the first one contains all items matching the
 	// given string, and the second string slice contains all items not matching
@@ -548,6 +568,10 @@ type CLGStringSlice interface {
 	// SwapRightStringSlice provides functionality to move the last member of a
 	// string slice to the right, that is, the beginning of the string slice.
 	SwapRightStringSlice(args ...interface{}) ([]interface{}, error)
+
+	// SymmetricDifferenceStringSlice returns a string slice having members of
+	// either the first, or the second given slices.
+	SymmetricDifferenceStringSlice(args ...interface{}) ([]interface{}, error)
 
 	// UnionStringSlice returns a string slice having members of both given
 	// slices. Note that the result may contain duplicated members.

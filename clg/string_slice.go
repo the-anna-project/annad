@@ -23,12 +23,22 @@ func (i *clgIndex) AppendStringSlice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{ss}, nil
 }
 
+func containsString(ss []string, s string) bool {
+	for _, i := range ss {
+		if i == s {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	str, err := ArgToString(args, 1)
+	s, err := ArgToString(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -36,13 +46,7 @@ func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, erro
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	var contains bool
-	for _, s := range ss {
-		if s == str {
-			contains = true
-			break
-		}
-	}
+	contains := containsString(ss, s)
 
 	return []interface{}{contains}, nil
 }
@@ -76,6 +80,42 @@ func (i *clgIndex) CountStringSlice(args ...interface{}) ([]interface{}, error) 
 	count := len(ss)
 
 	return []interface{}{count}, nil
+}
+
+func differenceString(ss1, ss2 []string) []string {
+	var newDifference []string
+
+	for _, s1 := range ss1 {
+		if !containsString(ss2, s1) {
+			newDifference = append(newDifference, s1)
+		}
+	}
+
+	return newDifference
+}
+
+func (i *clgIndex) DifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss1, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	ss2, err := ArgToStringSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(ss1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss1))
+	}
+	if len(ss2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss2))
+	}
+
+	newDifference := differenceString(ss1, ss2)
+
+	return []interface{}{newDifference}, nil
 }
 
 func (i *clgIndex) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
@@ -152,18 +192,18 @@ func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) 
 }
 
 func intersectionString(ss1, ss2 []string) []string {
-	var newUnion []string
+	var newIntersection []string
 
 	for _, s1 := range ss1 {
 		for _, s2 := range ss2 {
 			if s2 == s1 {
-				newUnion = append(newUnion, s2)
+				newIntersection = append(newIntersection, s2)
 				continue
 			}
 		}
 	}
 
-	return newUnion
+	return newIntersection
 }
 
 func (i *clgIndex) IntersectionStringSlice(args ...interface{}) ([]interface{}, error) {
@@ -372,6 +412,47 @@ func (i *clgIndex) SwapRightStringSlice(args ...interface{}) ([]interface{}, err
 	newStringSlice := append([]string{ss[len(ss)-1]}, ss[:len(ss)-1]...)
 
 	return []interface{}{newStringSlice}, nil
+}
+
+func symmetricDifferenceString(ss1, ss2 []string) []string {
+	var newSymmetricDifference []string
+
+	for _, s1 := range ss1 {
+		if !containsString(ss2, s1) {
+			newSymmetricDifference = append(newSymmetricDifference, s1)
+		}
+	}
+	for _, s2 := range ss2 {
+		if !containsString(ss1, s2) {
+			newSymmetricDifference = append(newSymmetricDifference, s2)
+		}
+	}
+
+	return newSymmetricDifference
+}
+
+func (i *clgIndex) SymmetricDifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
+	ss1, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	ss2, err := ArgToStringSlice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(ss1) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss1))
+	}
+	if len(ss2) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(ss2))
+	}
+
+	newSymmetricDifference := symmetricDifferenceString(ss1, ss2)
+
+	return []interface{}{newSymmetricDifference}, nil
 }
 
 func unionString(ss1, ss2 []string) []string {
