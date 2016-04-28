@@ -371,3 +371,27 @@ footer a:hover {
 
 /* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
 @media only screen and (max-width: 479px) { }
+
+/*
+*
+*
+*
+*/
+.stroke-shadow {
+  stroke: #9C27B0;
+  stroke-opacity: 1;
+  filter: url(#stroke-shadow);
+}
+.stroke {
+  stroke: #9C27B0;
+  stroke-opacity: 1;
+  stroke-width: 0.5;
+}
+.fill {
+  fill-opacity: 0.5;
+  fill: rgb(233, 30, 99);
+  filter: url(#inset-shadow);
+}
+.fill:hover {
+  fill-opacity: 0.7;
+}
