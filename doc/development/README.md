@@ -9,7 +9,7 @@ So this is how I am doing it.
 
 ###### requirements
 To develop and run the projects unit test suite there is only your favorite
-editor and `>=go1.5` required.
+editor and `>=go1.6` required.
 
 There is a redis storage implementation. Using this a running redis instance is
 required. For convenience this can be run in a docker container. Obviously then
