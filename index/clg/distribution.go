@@ -1,7 +1,7 @@
 package clg
 
 import (
-	"github.com/xh3b4sd/anna/clg/distribution"
+	"github.com/xh3b4sd/anna/index/clg/distribution"
 )
 
 func (i *clgIndex) CalculateDistribution(args ...interface{}) ([]interface{}, error) {

@@ -6,13 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	// TODO
-	_ "github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/file-system/os"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
+	_ "github.com/xh3b4sd/anna/index/clg" // TODO
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/net/char"
 	charexecnet "github.com/xh3b4sd/anna/net/char/net/exec"

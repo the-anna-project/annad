@@ -3,8 +3,8 @@ package featureset
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/clg/distribution"
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/index/clg/distribution"
 	"github.com/xh3b4sd/anna/spec"
 )
 

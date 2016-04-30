@@ -1,7 +1,7 @@
 package clg
 
 import (
-	"github.com/xh3b4sd/anna/clg/feature-set"
+	"github.com/xh3b4sd/anna/index/clg/feature-set"
 )
 
 func (i *clgIndex) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error) {
