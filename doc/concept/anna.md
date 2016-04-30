@@ -59,27 +59,37 @@ intelligence explosion happens.
 
 ### overview
 This is the ten thousand feet view of Anna. To understand how she looks like
-from the very top we consider the following 4 layers.
+from the very top we consider the following layers.
 
-1. The `i/o` layer describes a set of network protocols Anna understands. Data
-   can be written to and retrieved from her over network. I/O is flowing to and
-   coming from the server.
+- The `i/o` layer describes a set of network protocols Anna understands. Data
+  can be written to and retrieved from her over network. I/O is flowing to and
+  coming from the server.
 
-2. The `server` layer describes the actual server listening for traffic of
-   implemented network protocols. It provides so called `interfaces` that are
-   used to differentiate between different types of inputs that serve different
-   types of purposes. Interfaces dispatch information to and from gateways.
+- The `server` layer describes the actual server listening for traffic of
+  implemented network protocols. It provides so called `interfaces` that are
+  used to differentiate between different types of inputs that serve different
+  types of purposes. Interfaces dispatch information to and from gateways.
 
-3. The `gateway` layer describes a gateway where data is exchanged. The concept
-   of a separate gateway is important architectural wise to fully decouple the
-   server and the core.
+- The `gateway` layer describes a gateway where data is exchanged. The concept
+  of a separate gateway is important architectural wise to fully decouple the
+  server and the core.
 
-4. The `core` layer describes the implementation of Anna's most inner workings.
-   It bundles everything around data processing and intelligence. The core
-   network itself is able to contain multiple networks which itself can contain
-   multiple networks as well. That way a deeply nested neural network is
-   formed. Signals provided by the gateway are translated to impulses that pass
-   through the networks and magic happens.
+- The `network` layer describes the implementation of Anna's most inner
+  workings. It bundles everything around data processing and intelligence.  The
+  network itself is able to contain multiple networks which itself can contain
+  multiple networks as well. That way a deeply nested neural network is formed.
+  Signals provided by the gateway are translated to impulses that pass through
+  the networks and magic happens.
+
+- The `scheduler` layer describes processing of work that should be done by
+  jobs. A job can be any type of work. E.g. the processing of an incoming
+  impulse.
+
+- The `index` layer describes indizes that group entities of the same type.
+  E.g. the clg index provides all kinds of CLGs available to the networks.
+
+- The `storage` layer describes the data storage responsible for storing any
+  kind of data. E.g. this is Anna's memory.
 
 This is how it basically looks like. Note that the white pale boxes represent
 ideas that are not yet implemented. The strong grey boxes in fact represent
