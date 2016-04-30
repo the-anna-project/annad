@@ -21,8 +21,8 @@ type Distribution interface {
 	// that vectors within a distribution must have the same amount of dimensions.
 	GetDimensions() int
 
-	// GetHashMap returns the distribution's storable information as hash map.
-	GetHashMap() map[string]string
+	// GetStringMap returns the distribution's storable information as hash map.
+	GetStringMap() map[string]string
 
 	// GetName returns the distribution's name. Note this might be a sequence of
 	// a feature.

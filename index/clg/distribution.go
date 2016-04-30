@@ -56,7 +56,7 @@ func (c *clgCollection) GetDimensionsDistribution(args ...interface{}) ([]interf
 	return []interface{}{newDimensions}, nil
 }
 
-func (c *clgCollection) GetHashMapDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetStringMapDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -66,9 +66,9 @@ func (c *clgCollection) GetHashMapDistribution(args ...interface{}) ([]interface
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
 
-	newHashMap := d.GetHashMap()
+	newStringMap := d.GetStringMap()
 
-	return []interface{}{newHashMap}, nil
+	return []interface{}{newStringMap}, nil
 }
 
 func (c *clgCollection) GetNameDistribution(args ...interface{}) ([]interface{}, error) {
@@ -90,7 +90,7 @@ func (c *clgCollection) GetNewDistribution(args ...interface{}) ([]interface{}, 
 	var err error
 	newConfig := distribution.DefaultConfig()
 
-	newConfig.HashMap, err = ArgToStringStringMap(args, 0, newConfig.HashMap)
+	newConfig.StringMap, err = ArgToStringStringMap(args, 0, newConfig.StringMap)
 	if err != nil {
 		return nil, maskAny(err)
 	}

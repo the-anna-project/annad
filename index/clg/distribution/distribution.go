@@ -21,11 +21,11 @@ const (
 // Config represents the configuration used to create a new distribution
 // object.
 type Config struct {
-	// HashMap provides a way to create a new distribution object out of a given
+	// StringMap provides a way to create a new distribution object out of a given
 	// hash map containing bare distribution data. If this is nil or empty, a
 	// completely new distribution is created. Otherwise it is tried to create a
 	// new distribution using the information of the given hash map.
-	HashMap map[string]string
+	StringMap map[string]string
 
 	// Name represents the name of the distribution.
 	Name string
@@ -69,10 +69,10 @@ func DefaultConfig() Config {
 func NewDistribution(config Config) (spec.Distribution, error) {
 	var newDistribution *distribution
 
-	if config.HashMap != nil {
+	if config.StringMap != nil {
 		newDistribution = &distribution{}
 
-		for key, value := range config.HashMap {
+		for key, value := range config.StringMap {
 			if key == "name" {
 				newDistribution.Name = value
 			}
@@ -164,8 +164,8 @@ func (d *distribution) GetDimensions() int {
 	return len(d.Vectors[0])
 }
 
-func (d *distribution) GetHashMap() map[string]string {
-	newHashMap := map[string]string{
+func (d *distribution) GetStringMap() map[string]string {
+	newStringMap := map[string]string{
 		"name":            d.GetName(),
 		"id":              string(d.GetID()),
 		"static-channels": "",
@@ -179,7 +179,7 @@ func (d *distribution) GetHashMap() map[string]string {
 		}
 		staticChannels += strconv.FormatFloat(c, 'f', -1, 64)
 	}
-	newHashMap["static-channels"] = string(staticChannels)
+	newStringMap["static-channels"] = string(staticChannels)
 
 	var vectors string
 	for i, vector := range d.GetVectors() {
@@ -193,9 +193,9 @@ func (d *distribution) GetHashMap() map[string]string {
 			vectors += strconv.FormatFloat(d, 'f', -1, 64)
 		}
 	}
-	newHashMap["vectors"] = string(vectors)
+	newStringMap["vectors"] = string(vectors)
 
-	return newHashMap
+	return newStringMap
 }
 
 func (d *distribution) GetName() string {

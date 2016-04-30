@@ -298,8 +298,8 @@ func Test_Distribution_GetDimensions(t *testing.T) {
 	}
 }
 
-func Test_Distribution_GetHashMap_Success(t *testing.T) {
-	newHashMap := map[string]string{
+func Test_Distribution_GetStringMap_Success(t *testing.T) {
+	newStringMap := map[string]string{
 		"name":            "name",
 		"id":              "id",
 		"static-channels": "25,50,100",
@@ -307,7 +307,7 @@ func Test_Distribution_GetHashMap_Success(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newConfig.HashMap = newHashMap
+	newConfig.StringMap = newStringMap
 	newDistribution, err := NewDistribution(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -326,10 +326,10 @@ func Test_Distribution_GetHashMap_Success(t *testing.T) {
 		t.Fatal("expected", [][]float64{{2, 3}, {14, 15}, {38, 49}}, "got", newDistribution.GetVectors())
 	}
 
-	output := newDistribution.GetHashMap()
+	output := newDistribution.GetStringMap()
 
-	if len(output) != len(newHashMap) {
-		t.Fatal("expected", len(newHashMap), "got", len(output))
+	if len(output) != len(newStringMap) {
+		t.Fatal("expected", len(newStringMap), "got", len(output))
 	}
 	if output["name"] != "name" {
 		t.Fatal("expected", "name", "got", output["name"])
@@ -345,28 +345,28 @@ func Test_Distribution_GetHashMap_Success(t *testing.T) {
 	}
 }
 
-func Test_Distribution_GetHashMap_Error(t *testing.T) {
-	newHashMap := map[string]string{
+func Test_Distribution_GetStringMap_Error(t *testing.T) {
+	newStringMap := map[string]string{
 		"name":            "name",
 		"id":              "id",
 		"static-channels": "25,invalid,100",
 		"vectors":         "2,3|14,15|38,49",
 	}
 	newConfig := DefaultConfig()
-	newConfig.HashMap = newHashMap
+	newConfig.StringMap = newStringMap
 	_, err := NewDistribution(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 
-	newHashMap = map[string]string{
+	newStringMap = map[string]string{
 		"name":            "name",
 		"id":              "id",
 		"static-channels": "25,50,100",
 		"vectors":         "2,3|invalid|38,49",
 	}
 	newConfig = DefaultConfig()
-	newConfig.HashMap = newHashMap
+	newConfig.StringMap = newStringMap
 	_, err = NewDistribution(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)

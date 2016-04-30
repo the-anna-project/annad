@@ -5,7 +5,6 @@ package strategy
 import (
 	"crypto/rand"
 	"math/big"
-	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -20,14 +19,14 @@ const (
 
 // Config represents the configuration used to create a new strategy object.
 type Config struct {
-	// Actions represents a list of ordered action items, that are object types.
-	Actions []spec.ObjectType
+	// CLGNames represents a list of ordered action items, that are CLG names.
+	CLGNames []string
 
-	// HashMap provides a way to create a new strategy object out of a given hash
-	// map containing bare strategy data. If this is nil or empty, a completely
-	// new strategy is created. Otherwise it is tried to create a new strategy
-	// using the information of the given hash map.
-	HashMap map[string]string
+	// StringMap provides a way to create a new strategy object out of a given
+	// hash map containing bare strategy data. If this is nil or empty, a
+	// completely new strategy is created. Otherwise it is tried to create a new
+	// strategy using the information of the given hash map.
+	StringMap map[string]string
 
 	// Requestor represents the object requesting a strategy. E.g. when the
 	// character network requests a strategy to act on the given input, it will
@@ -38,12 +37,12 @@ type Config struct {
 }
 
 // DefaultConfig provides a default configuration to create a new strategy
-// object by best effort. Note that the list of actions is empty and needs to
+// object by best effort. Note that the list of CLG names is empty and needs to
 // be properly set before the strategy creation.
 func DefaultConfig() Config {
 	newConfig := Config{
-		Actions:   []spec.ObjectType{},
-		HashMap:   nil,
+		CLGNames:  []string{},
+		StringMap: nil,
 		Requestor: "",
 	}
 
@@ -53,36 +52,26 @@ func DefaultConfig() Config {
 // NewStrategy creates a new configured strategy object.
 func NewStrategy(config Config) (spec.Strategy, error) {
 	var newStrategy *strategy
+	var err error
 
-	if config.HashMap != nil {
-		newStrategy = &strategy{}
-
-		for key, value := range config.HashMap {
-			if key == "actions" {
-				var newActions []spec.ObjectType
-				for _, a := range strings.Split(value, ",") {
-					newActions = append(newActions, spec.ObjectType(a))
-				}
-				newStrategy.Actions = newActions
-			}
-			if key == "id" {
-				newStrategy.ID = spec.ObjectID(value)
-			}
-			if key == "requestor" {
-				newStrategy.Requestor = spec.ObjectType(value)
-			}
+	if config.StringMap != nil {
+		newStrategy, err = stringMapToStrategy(config.StringMap)
+		if err != nil {
+			return nil, maskAnyf(invalidConfigError, err.Error())
 		}
 	} else {
 		newStrategy = &strategy{
 			Config: config,
 			ID:     id.NewObjectID(id.Hex128),
+			Type:   ObjectTypeStrategy,
 		}
+		// TODO test that CLG names are only randomized on new creation. Given
+		// string maps MUST not be randomized again.
+		newStrategy.CLGNames = randomizeCLGNames(newStrategy.CLGNames)
 	}
 
-	newStrategy.Type = ObjectTypeStrategy
-
-	if len(newStrategy.Actions) == 0 {
-		return nil, maskAnyf(invalidConfigError, "actions must not be empty")
+	if len(newStrategy.CLGNames) == 0 {
+		return nil, maskAnyf(invalidConfigError, "CLG names must not be empty")
 	}
 	if newStrategy.ID == "" {
 		return nil, maskAnyf(invalidConfigError, "ID must not be empty")
@@ -90,8 +79,6 @@ func NewStrategy(config Config) (spec.Strategy, error) {
 	if newStrategy.Requestor == "" {
 		return nil, maskAnyf(invalidConfigError, "requestor not be empty")
 	}
-
-	newStrategy.Actions = randomizeActions(newStrategy.Actions)
 
 	return newStrategy, nil
 }
@@ -104,45 +91,30 @@ type strategy struct {
 	Type  spec.ObjectType
 }
 
-func (s *strategy) ActionsToString() string {
-	str := ""
-	actions := s.GetActions()
-
-	for i, action := range actions {
-		if i > 0 {
-			str += ","
-		}
-		str += string(action)
-	}
-
-	return str
-}
-
-func (s *strategy) GetActions() []spec.ObjectType {
-	return s.Actions
-}
-
-func (s *strategy) GetHashMap() map[string]string {
-	newHashMap := map[string]string{
-		"actions":   s.ActionsToString(),
-		"id":        string(s.GetID()),
-		"requestor": string(s.GetRequestor()),
-	}
-
-	return newHashMap
+func (s *strategy) GetCLGNames() []string {
+	return s.CLGNames
 }
 
 func (s *strategy) GetRequestor() spec.ObjectType {
 	return s.Requestor
 }
 
+func (s *strategy) GetStringMap() (map[string]string, error) {
+	newStringMap, err := strategyToStringMap(s)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return newStringMap, nil
+}
+
 const (
-	// objectTypeNone is simply a dummy object type injected during randomization
+	// clgNameDummy is simply a dummy CLG name injected during randomization
 	// of the action list. See documentations below for more information.
-	objectTypeNone spec.ObjectType = "none"
+	clgNameDummy = "dummy"
 )
 
-// randomizeActions generates a random sequence using the given action items.
+// randomizeCLGNames generates a random sequence using the given CLG names.
 // Note that randomizing a strategy's action items MUST only be done when
 // creating a new strategy. Further randomizations of existing strategies will
 // cause the algorhythms the strategy network implements to fail.
@@ -159,14 +131,20 @@ const (
 //   a,b,a
 //   d
 //
-func randomizeActions(actions []spec.ObjectType) []spec.ObjectType {
-	newActions := []spec.ObjectType{}
-	// The trick to randomize the given set of actions is to inject a well known
-	// item that can be chosen and then ignored.
-	options := append([]spec.ObjectType{objectTypeNone}, actions...)
+func randomizeCLGNames(clgNames []string) []string {
+	var newCLGNames []string
+	if len(clgNames) == 0 {
+		// In case there is no useful input given we simply return an empty list.
+		// This also prevents a dead lock in the loops below.
+		return newCLGNames
+	}
+
+	// The trick to randomize the given set of CLG names is to inject a well
+	// known item that can be chosen and then ignored.
+	options := append([]string{clgNameDummy}, clgNames...)
 
 	for {
-		for range actions {
+		for range clgNames {
 			max := big.NewInt(int64(len(options)))
 			i, err := rand.Int(rand.Reader, max)
 			if err != nil {
@@ -174,22 +152,22 @@ func randomizeActions(actions []spec.ObjectType) []spec.ObjectType {
 			}
 			newOption := options[i.Int64()]
 
-			if newOption == objectTypeNone {
+			if newOption == clgNameDummy {
 				// There was a random index that chose the item we want to ignore. Thus
 				// we do so. This results in combinations not necessarily having the same
-				// length as the original given list of actions.
+				// length as the original given list of CLG names.
 				continue
 			}
 
-			newActions = append(newActions, newOption)
+			newCLGNames = append(newCLGNames, newOption)
 		}
 
-		if len(newActions) == 0 {
+		if len(newCLGNames) == 0 {
 			continue
 		}
 
 		break
 	}
 
-	return newActions
+	return newCLGNames
 }

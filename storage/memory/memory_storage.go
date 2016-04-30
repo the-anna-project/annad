@@ -35,22 +35,22 @@ type scoredElements struct {
 // Config represents the configuration used to create a new memory storage
 // object.
 type Config struct {
-	KeyValue map[string]string
-	HashMap  map[string]map[string]string
-	Log      spec.Log
-	MathSet  map[string]map[string]struct{}
-	Weighted map[string]scoredElements
+	KeyValue  map[string]string
+	StringMap map[string]map[string]string
+	Log       spec.Log
+	MathSet   map[string]map[string]struct{}
+	Weighted  map[string]scoredElements
 }
 
 // DefaultConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		KeyValue: map[string]string{},
-		HashMap:  map[string]map[string]string{},
-		Log:      log.NewLog(log.DefaultConfig()),
-		MathSet:  map[string]map[string]struct{}{},
-		Weighted: map[string]scoredElements{},
+		KeyValue:  map[string]string{},
+		StringMap: map[string]map[string]string{},
+		Log:       log.NewLog(log.DefaultConfig()),
+		MathSet:   map[string]map[string]struct{}{},
+		Weighted:  map[string]scoredElements{},
 	}
 
 	return newConfig
@@ -110,11 +110,11 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return nil, nil
 }
 
-func (s *storage) GetHashMap(key string) (map[string]string, error) {
+func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	if value, ok := s.HashMap[key]; ok {
+	if value, ok := s.StringMap[key]; ok {
 		return value, nil
 	}
 
@@ -286,11 +286,11 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 	return nil
 }
 
-func (s *storage) SetHashMap(key string, hashMap map[string]string) error {
+func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	s.HashMap[key] = hashMap
+	s.StringMap[key] = stringMap
 
 	return nil
 }

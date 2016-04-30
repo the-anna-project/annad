@@ -41,10 +41,10 @@ func Test_MemoryStorage_KeyValue(t *testing.T) {
 	}
 }
 
-func Test_MemoryStorage_HashMap(t *testing.T) {
+func Test_MemoryStorage_StringMap(t *testing.T) {
 	newStorage := NewMemoryStorage(DefaultConfig())
 
-	value, err := newStorage.GetHashMap("foo")
+	value, err := newStorage.GetStringMap("foo")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -52,12 +52,12 @@ func Test_MemoryStorage_HashMap(t *testing.T) {
 		t.Fatal("expected", nil, "got", value)
 	}
 
-	err = newStorage.SetHashMap("foo", map[string]string{"bar": "baz"})
+	err = newStorage.SetStringMap("foo", map[string]string{"bar": "baz"})
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	value, err = newStorage.GetHashMap("foo")
+	value, err = newStorage.GetStringMap("foo")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

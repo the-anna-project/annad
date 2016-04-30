@@ -191,13 +191,13 @@ func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.St
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetStrategyByID")
 
 	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), ID)
-	hashMap, err := sn.Storage.GetHashMap(key)
+	stringMap, err := sn.Storage.GetStringMap(key)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
 	newConfig := strategy.DefaultConfig()
-	newConfig.HashMap = hashMap
+	newConfig.StringMap = stringMap
 	newStrategy, err := strategy.NewStrategy(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -306,7 +306,7 @@ func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) e
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
 	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), newStrategy.GetID())
-	err := sn.Storage.SetHashMap(key, newStrategy.GetHashMap())
+	err := sn.Storage.SetStringMap(key, newStrategy.GetStringMap())
 	if err != nil {
 		return maskAny(err)
 	}

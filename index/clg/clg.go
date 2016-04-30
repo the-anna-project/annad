@@ -80,6 +80,13 @@ func (i *clgIndex) Boot() {
 }
 
 func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
+	i.Mutex.Lock()
+	defer i.Mutex.Unlock()
+
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfiles")
+
+	// TODO
+
 	return nil
 }
 

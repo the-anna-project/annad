@@ -307,7 +307,7 @@ func Test_Distribution_GetDimensionsDistribution(t *testing.T) {
 	}
 }
 
-func Test_Distribution_GetHashMapDistribution(t *testing.T) {
+func Test_Distribution_GetStringMapDistribution(t *testing.T) {
 	testDistribution := func(name string, staticChannels []float64, vectors [][]float64) spec.Distribution {
 		newConfig := distribution.DefaultConfig()
 		newConfig.Name = name
@@ -362,12 +362,12 @@ func Test_Distribution_GetHashMapDistribution(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := testMaybeNewCLGCollection(t).GetHashMapDistribution(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetStringMapDistribution(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 		if testCase.ErrorMatcher == nil {
-			hashMap, err := ArgToStringStringMap(output, 0)
+			stringMap, err := ArgToStringStringMap(output, 0)
 			if err != nil {
 				t.Fatal("case", i+1, "expected", nil, "got", err)
 			}
@@ -375,8 +375,8 @@ func Test_Distribution_GetHashMapDistribution(t *testing.T) {
 				t.Fatal("case", i+1, "expected", 1, "got", len(output))
 			}
 			// Because the ID is random, we simply remove it here and only check the rest.
-			delete(hashMap, "id")
-			if !reflect.DeepEqual(hashMap, testCase.Expected) {
+			delete(stringMap, "id")
+			if !reflect.DeepEqual(stringMap, testCase.Expected) {
 				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
 			}
 		}

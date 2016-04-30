@@ -9,7 +9,7 @@ import (
 
 func Test_Strategy_NewStrategy_Success(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Actions = []spec.ObjectType{spec.ObjectType("action"), spec.ObjectType("action")}
+	newConfig.CLGNames = []string{"CLG", "CLG"}
 	newConfig.Requestor = spec.ObjectType("requestor")
 
 	_, err := NewStrategy(newConfig)
@@ -18,9 +18,9 @@ func Test_Strategy_NewStrategy_Success(t *testing.T) {
 	}
 }
 
-func Test_Strategy_NewStrategy_ActionsError(t *testing.T) {
+func Test_Strategy_NewStrategy_CLGNamesError(t *testing.T) {
 	newConfig := DefaultConfig()
-	// Action configuration is missing.
+	// CLGNames configuration is missing.
 	newConfig.Requestor = spec.ObjectType("requestor")
 
 	_, err := NewStrategy(newConfig)
@@ -30,14 +30,14 @@ func Test_Strategy_NewStrategy_ActionsError(t *testing.T) {
 }
 
 func Test_Strategy_NewStrategy_IDError(t *testing.T) {
-	newHashMap := map[string]string{
-		"actions": "action,action",
+	newStringMap := map[string]string{
+		"string:clg-names": "[]string:CLG,CLG",
 		// Note the ID configuration is missing.
-		"requestor": "requestor",
+		"string:requestor": "string:requestor",
 	}
 
 	newConfig := DefaultConfig()
-	newConfig.HashMap = newHashMap
+	newConfig.StringMap = newStringMap
 	_, err := NewStrategy(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -46,7 +46,7 @@ func Test_Strategy_NewStrategy_IDError(t *testing.T) {
 
 func Test_Strategy_NewStrategy_RequestorError(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Actions = []spec.ObjectType{spec.ObjectType("action"), spec.ObjectType("action")}
+	newConfig.CLGNames = []string{"CLG", "CLG"}
 	// Requestor configuration is missing.
 
 	_, err := NewStrategy(newConfig)
@@ -55,26 +55,27 @@ func Test_Strategy_NewStrategy_RequestorError(t *testing.T) {
 	}
 }
 
-func Test_Strategy_GetHashMap(t *testing.T) {
-	newHashMap := map[string]string{
-		"actions":   "action,action",
-		"id":        "id",
-		"requestor": "requestor",
+func Test_Strategy_GetStringMap(t *testing.T) {
+	newStringMap := map[string]string{
+		"string:clg-names": "[]string:CLG,CLG",
+		"string:id":        "string:id",
+		"string:requestor": "string:requestor",
+		"string:type":      "string:type",
 	}
 
 	newConfig := DefaultConfig()
-	newConfig.HashMap = newHashMap
+	newConfig.StringMap = newStringMap
 	newStrategy, err := NewStrategy(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Note that we only check for the first action since the actions are
-	// randomized on strategy creation. Having "action" given two times, should
-	// always result in the first action being "action". The second may be
+	// Note that we only check for the first CLG name since the CLG names are
+	// randomized on strategy creation. Having "CLG" given two times, should
+	// always result in the first CLG name being "CLG". The second may be
 	// omitted, dependening on the current randomization.
-	if newStrategy.GetActions()[0] != spec.ObjectType("action") {
-		t.Fatal("expected", spec.ObjectType("action"), "got", newStrategy.GetActions()[0])
+	if newStrategy.GetCLGNames()[0] != "CLG" {
+		t.Fatal("expected", "CLG", "got", newStrategy.GetCLGNames()[0])
 	}
 	if newStrategy.GetID() != spec.ObjectID("id") {
 		t.Fatal("expected", spec.ObjectID("id"), "got", newStrategy.GetID())
@@ -82,24 +83,33 @@ func Test_Strategy_GetHashMap(t *testing.T) {
 	if newStrategy.GetRequestor() != spec.ObjectType("requestor") {
 		t.Fatal("expected", spec.ObjectType("requestor"), "got", newStrategy.GetRequestor())
 	}
-
-	output := newStrategy.GetHashMap()
-
-	if len(output) != len(newHashMap) {
-		t.Fatal("expected", len(newHashMap), "got", len(output))
+	if newStrategy.GetType() != spec.ObjectType("type") {
+		t.Fatal("expected", spec.ObjectType("type"), "got", newStrategy.GetType())
 	}
-	// Note that we only check for the first action since the actions are
-	// randomized on strategy creation. Having "action" given two times, should
-	// always result in the first action being "action". The second may be
+
+	output, err := newStrategy.GetStringMap()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	if len(output) != len(newStringMap) {
+		t.Fatal("expected", len(newStringMap), "got", len(output))
+	}
+	// Note that we only check for the first CLG name since the actions are
+	// randomized on strategy creation. Having "CLG" given two times, should
+	// always result in the first CLG name being "CLG". The second may be
 	// omitted, dependening on the current randomization.
-	if !strings.Contains(output["actions"], "action") {
+	if !strings.Contains(output["string:clg-names"], "[]string:CLG") {
 		t.Fatal("expected", true, "got", false)
 	}
-	if output["id"] != "id" {
-		t.Fatal("expected", "id", "got", output["id"])
+	if output["string:id"] != "string:id" {
+		t.Fatal("expected", "string:id", "got", output["string:id"])
 	}
-	if output["requestor"] != "requestor" {
-		t.Fatal("expected", "requestor", "got", output["requestor"])
+	if output["string:requestor"] != "string:requestor" {
+		t.Fatal("expected", "string:requestor", "got", output["string:requestor"])
+	}
+	if output["string:type"] != "string:type" {
+		t.Fatal("expected", "string:type", "got", output["string:type"])
 	}
 }
 
@@ -117,7 +127,7 @@ func Test_Strategy_NewStrategy(t *testing.T) {
 	}
 
 	newConfig := DefaultConfig()
-	newConfig.Actions = []spec.ObjectType{spec.ObjectType("one"), spec.ObjectType("two")}
+	newConfig.CLGNames = []string{"one", "two"}
 	newConfig.Requestor = spec.ObjectType("requestor")
 
 	for i := 0; i < 10; i++ {
@@ -127,9 +137,9 @@ func Test_Strategy_NewStrategy(t *testing.T) {
 		}
 
 		var foundValid bool
-		s := newStrategy.ActionsToString()
+		clgNames := strings.Join(newStrategy.GetCLGNames(), ",")
 		for _, v := range valid {
-			if v == s {
+			if v == clgNames {
 				foundValid = true
 				break
 			}
