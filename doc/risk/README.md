@@ -10,7 +10,7 @@ Humans want to control things. Humans want to have the control. We could ask
 what control actually is and how well we are doing having it. Do we even have
 the control about something?
 
-Controling machines is currently what we do. We define what they should do.
+Controlling machines is currently what we do. We define what they should do.
 With Anna it is basically the same. The way what she is doing and how she is
 doing things makes a difference here. As I see it, AI needs to be free.
 
@@ -26,7 +26,7 @@ anything about all these bad things. We try to improve here and there. This is
 a good thing, but we are far from perfect. I think, the same applies to any
 other object within a certain environment, e.g. machines.
 
-### environemnt
+### environment
 The environment an object is living in is a critical part during the whole
 lifespan of some object. Be it humans or machines. The law of entropy causes
 objects to do everything that is possible within a certain environment. Having

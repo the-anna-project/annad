@@ -38,7 +38,7 @@ network will be able to calculate the sum of two numbers instantly, because it
 already knows how to do so.
 
 ### challenges
-Making the described concept successfull is a matter of challenges, their
+Making the described concept successful is a matter of challenges, their
 complexity and their order in which Anna learns from them. Having a shit load
 of CLGs and letting Anna backpropagate on problems that are way to complex at
 the beginning will lead to nowhere. It is important what types of challenges
