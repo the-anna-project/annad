@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (i *clgIndex) AppendIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) AppendIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -34,7 +34,7 @@ func containsInt(is []int, n int) bool {
 	return false
 }
 
-func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ContainsIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -52,7 +52,7 @@ func (i *clgIndex) ContainsIntSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{contains}, nil
 }
 
-func (i *clgIndex) CountIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CountIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -78,7 +78,7 @@ func differenceInt(is1, is2 []int) []int {
 	return newDifference
 }
 
-func (i *clgIndex) DifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) DifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
 	is1, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -102,7 +102,7 @@ func (i *clgIndex) DifferenceIntSlice(args ...interface{}) ([]interface{}, error
 	return []interface{}{newDifference}, nil
 }
 
-func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -128,7 +128,7 @@ func (i *clgIndex) EqualMatcherIntSlice(args ...interface{}) ([]interface{}, err
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -154,7 +154,7 @@ func (i *clgIndex) GlobMatcherIntSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IndexIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -190,7 +190,7 @@ func intersectionInt(is1, is2 []int) []int {
 	return newIntersection
 }
 
-func (i *clgIndex) IntersectionIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IntersectionIntSlice(args ...interface{}) ([]interface{}, error) {
 	is1, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -214,7 +214,7 @@ func (i *clgIndex) IntersectionIntSlice(args ...interface{}) ([]interface{}, err
 	return []interface{}{newIntersection}, nil
 }
 
-func (i *clgIndex) IsUniqueIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IsUniqueIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -239,7 +239,7 @@ func (i *clgIndex) IsUniqueIntSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{unique}, nil
 }
 
-func (i *clgIndex) JoinIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) JoinIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -276,7 +276,7 @@ func maxInt(list []int) int {
 	return max
 }
 
-func (i *clgIndex) MaxIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) MaxIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -309,7 +309,7 @@ func minInt(list []int) int {
 	return min
 }
 
-func (i *clgIndex) MinIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -326,7 +326,7 @@ func (i *clgIndex) MinIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{m}, nil
 }
 
-func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) NewIntSlice(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
@@ -336,7 +336,7 @@ func (i *clgIndex) NewIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
-func (i *clgIndex) ReverseIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ReverseIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -356,7 +356,7 @@ func (i *clgIndex) ReverseIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newIntSlice}, nil
 }
 
-func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -373,7 +373,7 @@ func (i *clgIndex) SortIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{is}, nil
 }
 
-func (i *clgIndex) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -390,7 +390,7 @@ func (i *clgIndex) SwapLeftIntSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newIntSlice}, nil
 }
 
-func (i *clgIndex) SwapRightIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapRightIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -424,7 +424,7 @@ func symmetricDifferenceInt(is1, is2 []int) []int {
 	return newSymmetricDifference
 }
 
-func (i *clgIndex) SymmetricDifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SymmetricDifferenceIntSlice(args ...interface{}) ([]interface{}, error) {
 	is1, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -461,7 +461,7 @@ func unionInt(is1, is2 []int) []int {
 	return newUnion
 }
 
-func (i *clgIndex) UnionIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UnionIntSlice(args ...interface{}) ([]interface{}, error) {
 	is1, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -485,7 +485,7 @@ func (i *clgIndex) UnionIntSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newUnion}, nil
 }
 
-func (i *clgIndex) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UniqueIntSlice(args ...interface{}) ([]interface{}, error) {
 	is, err := ArgToIntSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

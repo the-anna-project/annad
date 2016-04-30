@@ -90,14 +90,8 @@ func Test_String_ContainsString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ContainsString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ContainsString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -155,14 +149,8 @@ func Test_String_CountCharacterString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.CountCharacterString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).CountCharacterString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -268,14 +256,8 @@ func Test_String_EditDistanceString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.EditDistanceString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).EditDistanceString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -355,14 +337,8 @@ func Test_String_LongerString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.LongerString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).LongerString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -375,14 +351,13 @@ func Test_String_LongerString(t *testing.T) {
 }
 
 func Test_String_NewIDString(t *testing.T) {
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
+	newCLGCollection := testMaybeNewCLGCollection(t)
 
-	output1, err := newCLGIndex.NewIDString([]interface{}{}...)
+	output1, err := newCLGCollection.NewIDString([]interface{}{}...)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	output2, err := newCLGIndex.NewIDString([]interface{}{}...)
+	output2, err := newCLGCollection.NewIDString([]interface{}{}...)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -422,14 +397,8 @@ func Test_String_NewIDString_Error(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.NewIDString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).NewIDString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -521,14 +490,8 @@ func Test_String_RepeatString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.RepeatString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).RepeatString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -588,14 +551,8 @@ func Test_String_ReverseString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ReverseString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ReverseString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -675,14 +632,8 @@ func Test_String_ShorterString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ShorterString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ShorterString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -762,14 +713,8 @@ func Test_String_SplitString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SplitString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SplitString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -844,14 +789,8 @@ func Test_String_SplitEqualString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SplitEqualString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SplitEqualString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -911,14 +850,8 @@ func Test_String_ToLowerString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ToLowerString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ToLowerString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -978,14 +911,8 @@ func Test_String_ToUpperString(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ToUpperString(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ToUpperString(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

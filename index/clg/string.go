@@ -7,7 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/id"
 )
 
-func (i *clgIndex) ContainsString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ContainsString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -25,7 +25,7 @@ func (i *clgIndex) ContainsString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{contains}, nil
 }
 
-func (i *clgIndex) CountCharacterString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CountCharacterString(args ...interface{}) ([]interface{}, error) {
 	str, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -88,7 +88,7 @@ func editDistanceMin(a, b, c int) int {
 	return c
 }
 
-func (i *clgIndex) EditDistanceString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) EditDistanceString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -106,7 +106,7 @@ func (i *clgIndex) EditDistanceString(args ...interface{}) ([]interface{}, error
 	return []interface{}{newInt}, nil
 }
 
-func (i *clgIndex) LongerString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) LongerString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -124,7 +124,7 @@ func (i *clgIndex) LongerString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{longer}, nil
 }
 
-func (i *clgIndex) NewIDString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) NewIDString(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
@@ -134,7 +134,7 @@ func (i *clgIndex) NewIDString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newID}, nil
 }
 
-func (i *clgIndex) RepeatString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) RepeatString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -155,7 +155,7 @@ func (i *clgIndex) RepeatString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{repeated}, nil
 }
 
-func (i *clgIndex) ReverseString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ReverseString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -173,7 +173,7 @@ func (i *clgIndex) ReverseString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) ShorterString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ShorterString(args ...interface{}) ([]interface{}, error) {
 	s1, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -191,7 +191,7 @@ func (i *clgIndex) ShorterString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{shorter}, nil
 }
 
-func (i *clgIndex) SplitString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SplitString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -209,7 +209,7 @@ func (i *clgIndex) SplitString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *clgIndex) SplitEqualString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SplitEqualString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -230,10 +230,10 @@ func (i *clgIndex) SplitEqualString(args ...interface{}) ([]interface{}, error) 
 
 	l := float64(len(s))
 	size := l / float64(n)
-	c := math.Ceil(size)
-	isInt := c == size
+	cei := math.Ceil(size)
+	isInt := cei == size
 	if !isInt {
-		size = c
+		size = cei
 	}
 	var newStringSlice []string
 	start := float64(0)
@@ -253,7 +253,7 @@ func (i *clgIndex) SplitEqualString(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *clgIndex) ToLowerString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ToLowerString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -267,7 +267,7 @@ func (i *clgIndex) ToLowerString(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) ToUpperString(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ToUpperString(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

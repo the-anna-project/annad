@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/index/clg/distribution"
 )
 
-func (i *clgIndex) CalculateDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CalculateDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -19,7 +19,7 @@ func (i *clgIndex) CalculateDistribution(args ...interface{}) ([]interface{}, er
 	return []interface{}{newCalculation}, nil
 }
 
-func (i *clgIndex) DifferenceDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) DifferenceDistribution(args ...interface{}) ([]interface{}, error) {
 	d1, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -41,7 +41,7 @@ func (i *clgIndex) DifferenceDistribution(args ...interface{}) ([]interface{}, e
 	return []interface{}{newDifference}, nil
 }
 
-func (i *clgIndex) GetDimensionsDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetDimensionsDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -56,7 +56,7 @@ func (i *clgIndex) GetDimensionsDistribution(args ...interface{}) ([]interface{}
 	return []interface{}{newDimensions}, nil
 }
 
-func (i *clgIndex) GetHashMapDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetHashMapDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -71,7 +71,7 @@ func (i *clgIndex) GetHashMapDistribution(args ...interface{}) ([]interface{}, e
 	return []interface{}{newHashMap}, nil
 }
 
-func (i *clgIndex) GetNameDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNameDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -86,7 +86,7 @@ func (i *clgIndex) GetNameDistribution(args ...interface{}) ([]interface{}, erro
 	return []interface{}{newName}, nil
 }
 
-func (i *clgIndex) GetNewDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNewDistribution(args ...interface{}) ([]interface{}, error) {
 	var err error
 	newConfig := distribution.DefaultConfig()
 
@@ -119,7 +119,7 @@ func (i *clgIndex) GetNewDistribution(args ...interface{}) ([]interface{}, error
 	return []interface{}{newDistribution}, nil
 }
 
-func (i *clgIndex) GetStaticChannelsDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetStaticChannelsDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -134,7 +134,7 @@ func (i *clgIndex) GetStaticChannelsDistribution(args ...interface{}) ([]interfa
 	return []interface{}{newStaticChannels}, nil
 }
 
-func (i *clgIndex) GetVectorsDistribution(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetVectorsDistribution(args ...interface{}) ([]interface{}, error) {
 	d, err := ArgToDistribution(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

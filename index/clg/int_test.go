@@ -59,14 +59,8 @@ func Test_Int_DivideInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.DivideInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).DivideInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -136,14 +130,8 @@ func Test_Int_GreaterThanInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GreaterThanInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GreaterThanInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -213,14 +201,8 @@ func Test_Int_LesserThanInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.LesserThanInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).LesserThanInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -285,14 +267,8 @@ func Test_Int_MultiplyInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.MultiplyInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).MultiplyInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -352,14 +328,8 @@ func Test_Int_PowInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.PowInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).PowInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -425,14 +395,8 @@ func Test_Int_SqrtInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SqrtInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SqrtInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -509,14 +473,8 @@ func Test_Int_SubtractInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SubtractInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SubtractInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -581,14 +539,8 @@ func Test_Int_SumInt(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SumInt(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SumInt(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

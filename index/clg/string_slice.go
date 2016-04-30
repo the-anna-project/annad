@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (i *clgIndex) AppendStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) AppendStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -33,7 +33,7 @@ func containsString(ss []string, s string) bool {
 	return false
 }
 
-func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ContainsStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -51,7 +51,7 @@ func (i *clgIndex) ContainsStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{contains}, nil
 }
 
-func (i *clgIndex) CountCharacterStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CountCharacterStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -68,7 +68,7 @@ func (i *clgIndex) CountCharacterStringSlice(args ...interface{}) ([]interface{}
 	return []interface{}{newMap}, nil
 }
 
-func (i *clgIndex) CountStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CountStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -94,7 +94,7 @@ func differenceString(ss1, ss2 []string) []string {
 	return newDifference
 }
 
-func (i *clgIndex) DifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) DifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss1, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -118,7 +118,7 @@ func (i *clgIndex) DifferenceStringSlice(args ...interface{}) ([]interface{}, er
 	return []interface{}{newDifference}, nil
 }
 
-func (i *clgIndex) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -144,7 +144,7 @@ func (i *clgIndex) EqualMatcherStringSlice(args ...interface{}) ([]interface{}, 
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -170,7 +170,7 @@ func (i *clgIndex) GlobMatcherStringSlice(args ...interface{}) ([]interface{}, e
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IndexStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -206,7 +206,7 @@ func intersectionString(ss1, ss2 []string) []string {
 	return newIntersection
 }
 
-func (i *clgIndex) IntersectionStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IntersectionStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss1, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -230,7 +230,7 @@ func (i *clgIndex) IntersectionStringSlice(args ...interface{}) ([]interface{}, 
 	return []interface{}{newIntersection}, nil
 }
 
-func (i *clgIndex) IsUniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IsUniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -255,7 +255,7 @@ func (i *clgIndex) IsUniqueStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{unique}, nil
 }
 
-func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -276,7 +276,7 @@ func (i *clgIndex) JoinStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) NewStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) NewStringSlice(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
@@ -286,7 +286,7 @@ func (i *clgIndex) NewStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{ss}, nil
 }
 
-func (i *clgIndex) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ReverseStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -345,7 +345,7 @@ func stem(list []string) string {
 	return rm
 }
 
-func (i *clgIndex) StemStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) StemStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -362,7 +362,7 @@ func (i *clgIndex) StemStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -380,7 +380,7 @@ func (i *clgIndex) SortStringSlice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *clgIndex) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapLeftStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -397,7 +397,7 @@ func (i *clgIndex) SwapLeftStringSlice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{newStringSlice}, nil
 }
 
-func (i *clgIndex) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapRightStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -431,7 +431,7 @@ func symmetricDifferenceString(ss1, ss2 []string) []string {
 	return newSymmetricDifference
 }
 
-func (i *clgIndex) SymmetricDifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SymmetricDifferenceStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss1, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -468,7 +468,7 @@ func unionString(ss1, ss2 []string) []string {
 	return newUnion
 }
 
-func (i *clgIndex) UnionStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UnionStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss1, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -492,7 +492,7 @@ func (i *clgIndex) UnionStringSlice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newUnion}, nil
 }
 
-func (i *clgIndex) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UniqueStringSlice(args ...interface{}) ([]interface{}, error) {
 	ss, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

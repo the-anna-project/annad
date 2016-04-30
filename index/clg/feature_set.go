@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/index/clg/feature-set"
 )
 
-func (i *clgIndex) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -18,7 +18,7 @@ func (i *clgIndex) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, er
 	return []interface{}{features}, nil
 }
 
-func (i *clgIndex) GetFeaturesByCountFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetFeaturesByCountFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -36,7 +36,7 @@ func (i *clgIndex) GetFeaturesByCountFeatureSet(args ...interface{}) ([]interfac
 	return []interface{}{features}, nil
 }
 
-func (i *clgIndex) GetFeaturesByLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetFeaturesByLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -58,7 +58,7 @@ func (i *clgIndex) GetFeaturesByLengthFeatureSet(args ...interface{}) ([]interfa
 	return []interface{}{features}, nil
 }
 
-func (i *clgIndex) GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -76,7 +76,7 @@ func (i *clgIndex) GetFeaturesBySequenceFeatureSet(args ...interface{}) ([]inter
 	return []interface{}{features}, nil
 }
 
-func (i *clgIndex) GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -90,7 +90,7 @@ func (i *clgIndex) GetMaxLengthFeatureSet(args ...interface{}) ([]interface{}, e
 	return []interface{}{maxLength}, nil
 }
 
-func (i *clgIndex) GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -104,7 +104,7 @@ func (i *clgIndex) GetMinLengthFeatureSet(args ...interface{}) ([]interface{}, e
 	return []interface{}{minLength}, nil
 }
 
-func (i *clgIndex) GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetMinCountFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -118,7 +118,7 @@ func (i *clgIndex) GetMinCountFeatureSet(args ...interface{}) ([]interface{}, er
 	return []interface{}{minCount}, nil
 }
 
-func (i *clgIndex) GetNewFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNewFeatureSet(args ...interface{}) ([]interface{}, error) {
 	var err error
 	newConfig := featureset.DefaultConfig()
 
@@ -160,7 +160,7 @@ func (i *clgIndex) GetNewFeatureSet(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newFeatureSet}, nil
 }
 
-func (i *clgIndex) GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -174,7 +174,7 @@ func (i *clgIndex) GetSeparatorFeatureSet(args ...interface{}) ([]interface{}, e
 	return []interface{}{separator}, nil
 }
 
-func (i *clgIndex) GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetSequencesFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

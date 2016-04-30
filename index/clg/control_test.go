@@ -58,14 +58,8 @@ func Test_Control_ForControl(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ForControl(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ForControl(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -150,14 +144,8 @@ func Test_Control_IfControl(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IfControl(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IfControl(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -257,14 +245,8 @@ func Test_Control_IfElseControl(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IfElseControl(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IfElseControl(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (i *clgIndex) AppendFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) AppendFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -34,7 +34,7 @@ func containsFloat64(fs []float64, f float64) bool {
 	return false
 }
 
-func (i *clgIndex) ContainsFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ContainsFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -52,7 +52,7 @@ func (i *clgIndex) ContainsFloat64Slice(args ...interface{}) ([]interface{}, err
 	return []interface{}{contains}, nil
 }
 
-func (i *clgIndex) CountFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CountFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -78,7 +78,7 @@ func differenceFloat64(fs1, fs2 []float64) []float64 {
 	return newDifference
 }
 
-func (i *clgIndex) DifferenceFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) DifferenceFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs1, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -102,7 +102,7 @@ func (i *clgIndex) DifferenceFloat64Slice(args ...interface{}) ([]interface{}, e
 	return []interface{}{newDifference}, nil
 }
 
-func (i *clgIndex) EqualMatcherFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) EqualMatcherFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -128,7 +128,7 @@ func (i *clgIndex) EqualMatcherFloat64Slice(args ...interface{}) ([]interface{},
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) GlobMatcherFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GlobMatcherFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -154,7 +154,7 @@ func (i *clgIndex) GlobMatcherFloat64Slice(args ...interface{}) ([]interface{}, 
 	return []interface{}{m, u}, nil
 }
 
-func (i *clgIndex) IndexFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IndexFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -190,7 +190,7 @@ func intersectionFloat64(fs1, fs2 []float64) []float64 {
 	return newIntersection
 }
 
-func (i *clgIndex) IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IntersectionFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs1, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -214,7 +214,7 @@ func (i *clgIndex) IntersectionFloat64Slice(args ...interface{}) ([]interface{},
 	return []interface{}{newIntersection}, nil
 }
 
-func (i *clgIndex) IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IsUniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -255,7 +255,7 @@ func maxFloat64(list []float64) float64 {
 	return max
 }
 
-func (i *clgIndex) MaxFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) MaxFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -288,7 +288,7 @@ func minFloat64(list []float64) float64 {
 	return min
 }
 
-func (i *clgIndex) MinFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) MinFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -305,7 +305,7 @@ func (i *clgIndex) MinFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{m}, nil
 }
 
-func (i *clgIndex) NewFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) NewFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
@@ -315,7 +315,7 @@ func (i *clgIndex) NewFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{fs}, nil
 }
 
-func (i *clgIndex) ReverseFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ReverseFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -335,7 +335,7 @@ func (i *clgIndex) ReverseFloat64Slice(args ...interface{}) ([]interface{}, erro
 	return []interface{}{newFloat64Slice}, nil
 }
 
-func (i *clgIndex) SortFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SortFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -352,7 +352,7 @@ func (i *clgIndex) SortFloat64Slice(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{fs}, nil
 }
 
-func (i *clgIndex) SwapLeftFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapLeftFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -369,7 +369,7 @@ func (i *clgIndex) SwapLeftFloat64Slice(args ...interface{}) ([]interface{}, err
 	return []interface{}{newFloat64Slice}, nil
 }
 
-func (i *clgIndex) SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapRightFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -403,7 +403,7 @@ func symmetricDifferenceFloat64(fs1, fs2 []float64) []float64 {
 	return newSymmetricDifference
 }
 
-func (i *clgIndex) SymmetricDifferenceFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SymmetricDifferenceFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs1, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -440,7 +440,7 @@ func unionFloat64(fs1, fs2 []float64) []float64 {
 	return newUnion
 }
 
-func (i *clgIndex) UnionFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UnionFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs1, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -464,7 +464,7 @@ func (i *clgIndex) UnionFloat64Slice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newUnion}, nil
 }
 
-func (i *clgIndex) UniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) UniqueFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

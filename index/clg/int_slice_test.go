@@ -53,14 +53,8 @@ func Test_IntSlice_AppendIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.AppendIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).AppendIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -163,14 +157,8 @@ func Test_IntSlice_ContainsIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ContainsIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ContainsIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -220,14 +208,8 @@ func Test_IntSlice_CountIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.CountIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).CountIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -297,14 +279,8 @@ func Test_IntSlice_DifferenceIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.DifferenceIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).DifferenceIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -359,14 +335,8 @@ func Test_IntSlice_EqualMatcherIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.EqualMatcherIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).EqualMatcherIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -421,14 +391,8 @@ func Test_IntSlice_GlobMatcherIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GlobMatcherIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GlobMatcherIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -488,14 +452,8 @@ func Test_IntSlice_IndexIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IndexIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IndexIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -565,14 +523,8 @@ func Test_IntSlice_IntersectionIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IntersectionIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IntersectionIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -627,14 +579,8 @@ func Test_IntSlice_IsUniqueIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IsUniqueIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IsUniqueIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -689,14 +635,8 @@ func Test_IntSlice_JoinIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.JoinIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).JoinIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -772,14 +712,8 @@ func Test_IntSlice_MaxIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.MaxIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).MaxIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -855,14 +789,8 @@ func Test_IntSlice_MinIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.MinIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).MinIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -897,14 +825,8 @@ func Test_IntSlice_NewIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.NewIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).NewIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -964,14 +886,8 @@ func Test_IntSlice_ReverseIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ReverseIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ReverseIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1036,14 +952,8 @@ func Test_IntSlice_SortIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SortIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SortIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1098,14 +1008,8 @@ func Test_IntSlice_SwapLeftIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SwapLeftIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SwapLeftIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1160,14 +1064,8 @@ func Test_IntSlice_SwapRightIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SwapRightIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SwapRightIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1237,14 +1135,8 @@ func Test_IntSlice_SymmetricDifferenceIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SymmetricDifferenceIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SymmetricDifferenceIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1314,14 +1206,8 @@ func Test_IntSlice_UnionIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.UnionIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).UnionIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1371,14 +1257,8 @@ func Test_IntSlice_UniqueIntSlice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.UniqueIntSlice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).UniqueIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

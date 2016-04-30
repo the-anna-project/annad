@@ -53,14 +53,8 @@ func Test_Float64Slice_AppendFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.AppendFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).AppendFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -163,14 +157,8 @@ func Test_Float64Slice_ContainsFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ContainsFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ContainsFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -220,14 +208,8 @@ func Test_Float64Slice_CountFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.CountFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).CountFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -312,14 +294,8 @@ func Test_Float64Slice_DifferenceFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.DifferenceFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).DifferenceFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -374,14 +350,8 @@ func Test_Float64Slice_EqualMatcherFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.EqualMatcherFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).EqualMatcherFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -436,14 +406,8 @@ func Test_Float64Slice_GlobMatcherFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GlobMatcherFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GlobMatcherFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -503,14 +467,8 @@ func Test_Float64Slice_IndexFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IndexFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IndexFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -595,14 +553,8 @@ func Test_Float64Slice_IntersectionFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IntersectionFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IntersectionFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -657,14 +609,8 @@ func Test_Float64Slice_IsUniqueFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.IsUniqueFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).IsUniqueFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -740,14 +686,8 @@ func Test_Float64Slice_MaxFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.MaxFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).MaxFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -823,14 +763,8 @@ func Test_Float64Slice_MinFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.MinFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).MinFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -865,14 +799,8 @@ func Test_Float64Slice_NewFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.NewFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).NewFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -932,14 +860,8 @@ func Test_Float64Slice_ReverseFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.ReverseFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).ReverseFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1004,14 +926,8 @@ func Test_Float64Slice_SortFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SortFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SortFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1066,14 +982,8 @@ func Test_Float64Slice_SwapLeftFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SwapLeftFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SwapLeftFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1128,14 +1038,8 @@ func Test_Float64Slice_SwapRightFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SwapRightFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SwapRightFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1215,14 +1119,8 @@ func Test_Float64Slice_SymmetricDifferenceFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.SymmetricDifferenceFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).SymmetricDifferenceFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1292,14 +1190,8 @@ func Test_Float64Slice_UnionFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.UnionFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).UnionFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1349,14 +1241,8 @@ func Test_Float64Slice_UniqueFloat64Slice(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.UniqueFloat64Slice(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).UniqueFloat64Slice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

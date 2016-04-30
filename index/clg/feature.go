@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/index/clg/feature-set"
 )
 
-func (i *clgIndex) AddPositionFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) AddPositionFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -25,7 +25,7 @@ func (i *clgIndex) AddPositionFeature(args ...interface{}) ([]interface{}, error
 	return []interface{}{}, nil
 }
 
-func (i *clgIndex) GetCountFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetCountFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -39,7 +39,7 @@ func (i *clgIndex) GetCountFeature(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{count}, nil
 }
 
-func (i *clgIndex) GetDistributionFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetDistributionFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -53,7 +53,7 @@ func (i *clgIndex) GetDistributionFeature(args ...interface{}) ([]interface{}, e
 	return []interface{}{distribution}, nil
 }
 
-func (i *clgIndex) GetNewFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNewFeature(args ...interface{}) ([]interface{}, error) {
 	var err error
 	newConfig := featureset.DefaultFeatureConfig()
 
@@ -78,7 +78,7 @@ func (i *clgIndex) GetNewFeature(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{newFeature}, nil
 }
 
-func (i *clgIndex) GetPositionsFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetPositionsFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -92,7 +92,7 @@ func (i *clgIndex) GetPositionsFeature(args ...interface{}) ([]interface{}, erro
 	return []interface{}{positions}, nil
 }
 
-func (i *clgIndex) GetSequenceFeature(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetSequenceFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

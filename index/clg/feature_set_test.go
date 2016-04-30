@@ -50,14 +50,8 @@ func Test_FeatureSet_GetFeaturesFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -128,14 +122,8 @@ func Test_FeatureSet_GetFeaturesByCountFeatureSet_Expected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesByCountFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesByCountFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -206,14 +194,8 @@ func Test_FeatureSet_GetFeaturesByCountFeatureSet_Unexpected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesByCountFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesByCountFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -294,14 +276,8 @@ func Test_FeatureSet_GetFeaturesByLengthFeatureSet_Expected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesByLengthFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesByLengthFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -382,14 +358,8 @@ func Test_FeatureSet_GetFeaturesByLengthFeatureSet_Unexpected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesByLengthFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesByLengthFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -470,14 +440,8 @@ func Test_FeatureSet_GetFeaturesBySequenceFeatureSet_Expected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesBySequenceFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesBySequenceFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -558,14 +522,8 @@ func Test_FeatureSet_GetFeaturesBySequenceFeatureSet_Unexpected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetFeaturesBySequenceFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetFeaturesBySequenceFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -637,14 +595,8 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetMaxLengthFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetMaxLengthFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -700,14 +652,8 @@ func Test_FeatureSet_GetMinLengthFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetMinLengthFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetMinLengthFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -763,14 +709,8 @@ func Test_FeatureSet_GetMinCountFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetMinCountFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetMinCountFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -833,14 +773,8 @@ func Test_FeatureSet_NewFeatureSet_Error(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		_, err := newCLGIndex.GetNewFeatureSet(testCase.Input...)
+		_, err := testMaybeNewCLGCollection(t).GetNewFeatureSet(testCase.Input...)
 		if !testCase.ErrorMatcher(err) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -872,15 +806,9 @@ func Test_FeatureSet_NewFeatureSet_Success(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
 		// Test.
-		output, err := newCLGIndex.GetNewFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetNewFeatureSet(testCase.Input...)
 		if err != nil {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
@@ -975,14 +903,8 @@ func Test_FeatureSet_GetSeparatorFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetSeparatorFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetSeparatorFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -1042,14 +964,8 @@ func Test_FeatureSet_GetSequencesFeatureSet(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetSequencesFeatureSet(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetSequencesFeatureSet(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

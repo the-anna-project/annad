@@ -1,8 +1,8 @@
 package spec
 
-// CLGIndex represents the CLG index providing all CLGs that can be used. All
-// CLGs follow this signature, where the CLGs function name FuncScope describes
-// its CLG functionality Func and its CLG scope Scope.
+// CLGCollection represents a collection of all CLGs that can be used. All CLGs
+// follow this signature, where the CLGs function name FuncScope describes its
+// CLG functionality Func and its CLG scope Scope.
 //
 //     FuncScope(args ...interface{}) ([]interface{}, error)
 //
@@ -28,7 +28,7 @@ package spec
 // time this also allows to define arguments beyond certain default values.
 //
 // TODO add more CLGs.
-type CLGIndex interface {
+type CLGCollection interface {
 	CLGControl
 	CLGConvert
 	CLGDistribution
@@ -41,7 +41,6 @@ type CLGIndex interface {
 	CLGIntSlice
 	CLGMethod
 	// CLGNetwork
-	Object
 	CLGString
 	CLGStringSlice
 	// CLGOS

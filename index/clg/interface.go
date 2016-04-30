@@ -5,11 +5,11 @@ import (
 	"sort"
 )
 
-func (i *clgIndex) DiscardInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) DiscardInterface(args ...interface{}) ([]interface{}, error) {
 	return nil, nil
 }
 
-func (i *clgIndex) EqualInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) EqualInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 2 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
 	}
@@ -22,7 +22,7 @@ func (i *clgIndex) EqualInterface(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{t}, nil
 }
 
-func (i *clgIndex) InsertArgInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) InsertArgInterface(args ...interface{}) ([]interface{}, error) {
 	scopeArgs, err := ArgToArgs(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -61,11 +61,11 @@ func (i *clgIndex) InsertArgInterface(args ...interface{}) ([]interface{}, error
 	return []interface{}{newArgs}, nil
 }
 
-func (i *clgIndex) ReturnInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) ReturnInterface(args ...interface{}) ([]interface{}, error) {
 	return args, nil
 }
 
-func (i *clgIndex) SwapInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) SwapInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 2 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 2 got %d", len(args))
 	}
@@ -76,7 +76,7 @@ func (i *clgIndex) SwapInterface(args ...interface{}) ([]interface{}, error) {
 	return args, nil
 }
 
-func (i *clgIndex) TypeInterface(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) TypeInterface(args ...interface{}) ([]interface{}, error) {
 	if len(args) < 1 {
 		return nil, maskAnyf(notEnoughArgumentsError, "expected 1 got %d", len(args))
 	}

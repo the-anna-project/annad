@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-func (i *clgIndex) BoolStringConvert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) BoolStringConvert(args ...interface{}) ([]interface{}, error) {
 	t, err := ArgToBool(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -18,7 +18,7 @@ func (i *clgIndex) BoolStringConvert(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) Float64StringConvert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) Float64StringConvert(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -32,7 +32,7 @@ func (i *clgIndex) Float64StringConvert(args ...interface{}) ([]interface{}, err
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) IntStringConvert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) IntStringConvert(args ...interface{}) ([]interface{}, error) {
 	n, err := ArgToInt(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -46,7 +46,7 @@ func (i *clgIndex) IntStringConvert(args ...interface{}) ([]interface{}, error) 
 	return []interface{}{newString}, nil
 }
 
-func (i *clgIndex) StringBoolConvert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) StringBoolConvert(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -63,7 +63,7 @@ func (i *clgIndex) StringBoolConvert(args ...interface{}) ([]interface{}, error)
 	return []interface{}{newBool}, nil
 }
 
-func (i *clgIndex) StringFloat64Convert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) StringFloat64Convert(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -80,7 +80,7 @@ func (i *clgIndex) StringFloat64Convert(args ...interface{}) ([]interface{}, err
 	return []interface{}{newFloat64}, nil
 }
 
-func (i *clgIndex) StringIntConvert(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) StringIntConvert(args ...interface{}) ([]interface{}, error) {
 	s, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)

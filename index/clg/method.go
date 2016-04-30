@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-func (i *clgIndex) CallMethodByName(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CallMethodByName(args ...interface{}) ([]interface{}, error) {
 	methodName, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
 	inputValues := ArgsToValues(args[1:])
-	methodValue := reflect.ValueOf(i).MethodByName(methodName)
+	methodValue := reflect.ValueOf(c).MethodByName(methodName)
 	if !methodValue.IsValid() {
 		return nil, maskAnyf(methodNotFoundError, methodName)
 	}
@@ -26,7 +26,7 @@ func (i *clgIndex) CallMethodByName(args ...interface{}) ([]interface{}, error) 
 	return results, nil
 }
 
-func (i *clgIndex) GetMethodNames(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetMethodNames(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
@@ -41,7 +41,7 @@ func (i *clgIndex) GetMethodNames(args ...interface{}) ([]interface{}, error) {
 
 	var allMethodNames []string
 
-	t := reflect.TypeOf(i)
+	t := reflect.TypeOf(c)
 	for i := 0; i < t.NumMethod(); i++ {
 		methodName := t.Method(i).Name
 		if pattern != "" && !strings.Contains(methodName, pattern) {
@@ -53,12 +53,12 @@ func (i *clgIndex) GetMethodNames(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{allMethodNames}, nil
 }
 
-func (i *clgIndex) GetNumMethods(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNumMethods(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
 
-	t := reflect.TypeOf(i)
+	t := reflect.TypeOf(c)
 	num := t.NumMethod()
 
 	return []interface{}{num}, nil

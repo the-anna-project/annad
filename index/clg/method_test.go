@@ -43,14 +43,8 @@ func Test_Method_CallMethodByName(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.CallMethodByName(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).CallMethodByName(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -90,14 +84,8 @@ func Test_Method_GetMethodNames_Expected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetMethodNames(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetMethodNames(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -143,14 +131,8 @@ func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
 		},
 	}
 
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
 	for i, testCase := range testCases {
-		output, err := newCLGIndex.GetMethodNames(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetMethodNames(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -176,18 +158,12 @@ func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
 }
 
 func Test_Method_GetNumMethods(t *testing.T) {
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	_, err = newCLGIndex.GetNumMethods("foo")
+	_, err := testMaybeNewCLGCollection(t).GetNumMethods("foo")
 	if !IsTooManyArguments(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 
-	output, err := newCLGIndex.GetNumMethods()
+	output, err := testMaybeNewCLGCollection(t).GetNumMethods()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
