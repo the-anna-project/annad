@@ -24,7 +24,7 @@ type Config struct {
 	Log spec.Log
 
 	// Settings.
-	Actions    []spec.ObjectType
+	CLGNames   []string
 	Inputs     map[spec.ObjectID]string
 	Output     string
 	Requestor  spec.ObjectType
@@ -40,7 +40,7 @@ func DefaultConfig() Config {
 		Log: log.NewLog(log.DefaultConfig()),
 
 		// Settings.
-		Actions:    []spec.ObjectType{},
+		CLGNames:   []string{},
 		Inputs:     map[spec.ObjectID]string{},
 		Output:     "",
 		Requestor:  spec.ObjectType(""),
@@ -79,11 +79,11 @@ type impulse struct {
 	Type              spec.ObjectType
 }
 
-func (i *impulse) GetActions() []spec.ObjectType {
+func (i *impulse) GetCLGNames() []string {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	return i.Actions
+	return i.CLGNames
 }
 
 func (i *impulse) GetAllInputs() map[spec.ObjectID]string {
@@ -143,11 +143,11 @@ func (i *impulse) GetStrategy() spec.Strategy {
 	return i.OrderedStrategies[len(i.OrderedStrategies)-1]
 }
 
-func (i *impulse) SetActions(actions []spec.ObjectType) {
+func (i *impulse) SetCLGNames(clgNames []string) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	i.Actions = actions
+	i.CLGNames = clgNames
 }
 
 func (i *impulse) SetInputByImpulseID(impulseID spec.ObjectID, input string) {

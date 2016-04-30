@@ -5,6 +5,7 @@ package stratnet
 import (
 	"math/rand"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -31,12 +32,11 @@ type Config struct {
 
 	// Settings.
 
-	// Actions represents a list of action items, that are object types. These
-	// are used to find the best performing combination by ordering them in a
-	// certain way. Such a ordered list of actions is called a strategy
-	// maintained by a neuron. The best strategy is represented by the highest
-	// score.
-	Actions []spec.ObjectType
+	// CLGNames represents a list of action items, that are CLG names. These are
+	// used to find the best performing combination by ordering them in a certain
+	// way. Such a ordered list of CLG names is called a strategy. The best
+	// strategy is represented by the highest score.
+	CLGNames []string
 
 	// MaxElements representes the maximum number of elements to fetch from a
 	// list within one call. This prevents fetching too much data at once.
@@ -54,7 +54,7 @@ func DefaultConfig() Config {
 		PatNet: nil,
 
 		// Settings.
-		Actions:     []spec.ObjectType{},
+		CLGNames:    []string{},
 		MaxElements: 10,
 	}
 
@@ -252,7 +252,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call NewStrategy")
 
 	newConfig := strategy.Config{
-		Actions:   imp.GetActions(),
+		CLGNames:  imp.GetCLGNames(),
 		Requestor: imp.GetRequestor(),
 	}
 
@@ -268,7 +268,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		//
 		// TODO this needs to be improved. There are already ideas. See
 		// https://github.com/xh3b4sd/anna/issues/79.
-		key := sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
+		key := sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(newStrategy.GetCLGNames(), ","))
 		_, err := sn.Storage.Get(key)
 		if err != nil {
 			return nil, maskAny(err)
@@ -306,11 +306,15 @@ func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) e
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
 	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), newStrategy.GetID())
-	err := sn.Storage.SetStringMap(key, newStrategy.GetStringMap())
+	newStringMap, err := newStrategy.GetStringMap()
 	if err != nil {
 		return maskAny(err)
 	}
-	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
+	err = sn.Storage.SetStringMap(key, newStringMap)
+	if err != nil {
+		return maskAny(err)
+	}
+	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(newStrategy.GetCLGNames(), ","))
 	err = sn.Storage.Set(key, string(newStrategy.GetID()))
 	if err != nil {
 		return maskAny(err)
