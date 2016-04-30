@@ -5,7 +5,6 @@ describe my personal workflow and how the project is set up using the
 [makefile](makefile.md). Setup the project as you like so it fits your
 workflow. Anyway, this is how I am doing it.
 
-### directory structure
 In golang the `GOPATH` assumes that there is something like
 `src/github.com/xh3b4sd/anna/` within your workspace. See
 https://golang.org/doc/code.html. I am using the [makefile](makefile.md) to
@@ -26,8 +25,8 @@ the setup will be similar to this.
 ```
 
 ### clone repository
-Now I am creating the working directory and go into it. It holds the source
-code of the Anna project.
+To setup the project I am creating the working directory and go into it. It
+holds the source code of the Anna project.
 ```
 mkdir -p ~/projects/private/anna/
 cd ~/projects/private/anna/
