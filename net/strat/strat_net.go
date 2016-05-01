@@ -3,6 +3,7 @@
 package stratnet
 
 import (
+	"encoding/json"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -191,14 +192,17 @@ func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.St
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetStrategyByID")
 
 	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), ID)
-	stringMap, err := sn.Storage.GetStringMap(key)
+	value, err := sn.Storage.Get(key)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	newConfig := strategy.DefaultConfig()
-	newConfig.StringMap = stringMap
-	newStrategy, err := strategy.NewStrategy(newConfig)
+	if value == "" {
+		return nil, maskAny(strategyNotFoundError)
+	}
+
+	newStrategy := strategy.NewEmptyStrategy()
+	err = json.Unmarshal([]byte(value), newStrategy)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -302,20 +306,20 @@ func (sn *stratNet) Shutdown() {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call Shutdown")
 }
 
-func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) error {
+func (sn *stratNet) StoreStrategy(imp spec.Impulse, strat spec.Strategy) error {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
-	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), newStrategy.GetID())
-	newStringMap, err := newStrategy.GetStringMap()
+	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), strat.GetID())
+	raw, err := json.Marshal(strat)
 	if err != nil {
 		return maskAny(err)
 	}
-	err = sn.Storage.SetStringMap(key, newStringMap)
+	err = sn.Storage.Set(key, string(raw))
 	if err != nil {
 		return maskAny(err)
 	}
-	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(newStrategy.GetCLGNames(), ","))
-	err = sn.Storage.Set(key, string(newStrategy.GetID()))
+	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(strat.GetCLGNames(), ","))
+	err = sn.Storage.Set(key, string(strat.GetID()))
 	if err != nil {
 		return maskAny(err)
 	}

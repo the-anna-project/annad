@@ -100,6 +100,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 			} else {
 				// The other jobs should be replaced.
 				if !HasReplacedStatus(newJob) {
+					fmt.Printf("newJobs: %#v\n", newJobs)
 					t.Fatal("call", c, "expected", true, "got", false)
 				}
 				if HasSucceededStatus(newJob) {

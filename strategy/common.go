@@ -1,64 +1,71 @@
 package strategy
 
 import (
-	"github.com/xh3b4sd/anna/smart-map"
-	"github.com/xh3b4sd/anna/spec"
+	"crypto/rand"
+	"math/big"
 )
 
-func stringMapToStrategy(stringMap map[string]string) (*strategy, error) {
-	newConfig := smartmap.DefaultConfig()
-	newConfig.StringMap = stringMap
-	newSmartMap, err := smartmap.NewSmartMap(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
+const (
+	// clgNameDummy is simply a dummy CLG name injected during randomization
+	// of the action list. See documentations below for more information.
+	clgNameDummy = "dummy"
+)
+
+// randomizeCLGNames generates a random sequence using the given CLG names.
+// Note that randomizing a strategy's action items MUST only be done when
+// creating a new strategy. Further randomizations of existing strategies will
+// cause the algorhythms the strategy network implements to fail.
+//
+// The following algorhythm is implemented as follows. Consider this given list
+// of available action items.
+//
+//   a,b,c,d,e
+//
+// This are some possible combinations resulting out of the randomization.
+//
+//   c,e
+//   b,b,d
+//   a,b,a
+//   d
+//
+func randomizeCLGNames(clgNames []string) []string {
+	var newCLGNames []string
+
+	if len(clgNames) == 0 {
+		// In case there is no useful input given we simply return an empty list.
+		// This also prevents a dead lock in the loops below.
+		return newCLGNames
 	}
 
-	newStrategy := &strategy{}
-	newStrategy.CLGNames, err = newSmartMap.GetStringStringSlice("clg-names")
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newSmartMap.GetStringString("id")
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newStrategy.ID = spec.ObjectID(newID)
-	newRequestor, err := newSmartMap.GetStringString("requestor")
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newStrategy.Requestor = spec.ObjectType(newRequestor)
-	newType, err := newSmartMap.GetStringString("type")
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newStrategy.Type = spec.ObjectType(newType)
+	// The trick to randomize the given set of CLG names is to inject a well
+	// known item that can be chosen and then ignored.
+	options := append([]string{clgNameDummy}, clgNames...)
 
-	return newStrategy, nil
-}
+	for {
+		for range clgNames {
+			max := big.NewInt(int64(len(options)))
+			i, err := rand.Int(rand.Reader, max)
+			if err != nil {
+				panic(err)
+			}
+			newOption := options[i.Int64()]
 
-func strategyToStringMap(strat *strategy) (map[string]string, error) {
-	newSmartMap, err := smartmap.NewSmartMap(smartmap.DefaultConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
+			if newOption == clgNameDummy {
+				// There was a random index that chose the item we want to ignore. Thus
+				// we do so. This results in combinations not necessarily having the same
+				// length as the original given list of CLG names.
+				continue
+			}
 
-	err = newSmartMap.SetStringStringSlice("clg-names", strat.GetCLGNames())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err = newSmartMap.SetStringString("id", string(strat.GetID()))
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err = newSmartMap.SetStringString("requestor", string(strat.GetRequestor()))
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err = newSmartMap.SetStringString("type", string(strat.GetType()))
-	if err != nil {
-		return nil, maskAny(err)
+			newCLGNames = append(newCLGNames, newOption)
+		}
+
+		if len(newCLGNames) == 0 {
+			continue
+		}
+
+		break
 	}
 
-	return newSmartMap.GetStringMap(), nil
+	return newCLGNames
 }

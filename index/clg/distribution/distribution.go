@@ -21,12 +21,6 @@ const (
 // Config represents the configuration used to create a new distribution
 // object.
 type Config struct {
-	// StringMap provides a way to create a new distribution object out of a given
-	// hash map containing bare distribution data. If this is nil or empty, a
-	// completely new distribution is created. Otherwise it is tried to create a
-	// new distribution using the information of the given hash map.
-	StringMap map[string]string
-
 	// Name represents the name of the distribution.
 	Name string
 
@@ -67,40 +61,11 @@ func DefaultConfig() Config {
 //                 x
 //
 func NewDistribution(config Config) (spec.Distribution, error) {
-	var newDistribution *distribution
-
-	if config.StringMap != nil {
-		newDistribution = &distribution{}
-
-		for key, value := range config.StringMap {
-			if key == "name" {
-				newDistribution.Name = value
-			}
-			if key == "id" {
-				newDistribution.ID = spec.ObjectID(value)
-			}
-			if key == "static-channels" {
-				newStaticChannels, err := staticChannelsFromString(value)
-				if err != nil {
-					return nil, maskAnyf(invalidConfigError, err.Error())
-				}
-				newDistribution.StaticChannels = newStaticChannels
-			}
-			if key == "vectors" {
-				newVectors, err := vectorsFromString(value)
-				if err != nil {
-					return nil, maskAnyf(invalidConfigError, err.Error())
-				}
-				newDistribution.Vectors = newVectors
-			}
-		}
-	} else {
-		newDistribution = &distribution{
-			Config: config,
-			ID:     id.NewObjectID(id.Hex128),
-			Mutex:  sync.Mutex{},
-			Type:   ObjectTypeDistribution,
-		}
+	newDistribution := &distribution{
+		Config: config,
+		ID:     id.NewObjectID(id.Hex128),
+		Mutex:  sync.Mutex{},
+		Type:   ObjectTypeDistribution,
 	}
 
 	if newDistribution.Name == "" {
@@ -122,6 +87,12 @@ func NewDistribution(config Config) (spec.Distribution, error) {
 	sort.Float64s(newDistribution.StaticChannels)
 
 	return newDistribution, nil
+}
+
+// NewEmptyDistribution simply returns an empty, maybe invalid, job object.
+// This should only be used for things like unmarshaling.
+func NewEmptyDistribution() spec.Distribution {
+	return &distribution{}
 }
 
 // TODO find a way to find these patterns automatically

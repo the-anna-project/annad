@@ -173,13 +173,13 @@ func (s *scheduler) FetchJob(jobID spec.ObjectID) (spec.Job, error) {
 		return nil, maskAny(jobNotFoundError)
 	}
 
-	var newJob job
-	err = json.Unmarshal([]byte(value), &newJob)
+	newJob := NewEmptyJob()
+	err = json.Unmarshal([]byte(value), newJob)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return &newJob, nil
+	return newJob, nil
 }
 
 func (s *scheduler) MarkAsActive(job spec.Job) (spec.Job, error) {
@@ -279,7 +279,6 @@ func (s *scheduler) MarkAsSucceeded(job spec.Job) (spec.Job, error) {
 func (s *scheduler) PersistJob(job spec.Job) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call PersistJob")
 
-	// TODO we should store the job map instead a JSON string.
 	raw, err := json.Marshal(job)
 	if err != nil {
 		return maskAny(err)

@@ -1,5 +1,9 @@
 package spec
 
+import (
+	"encoding/json"
+)
+
 // Distribution is a calculation object that describes the distribution of
 // vectors. This vectors can be of arbitrary dimensions. That way
 // characteristics of features and their location in space can be represented.
@@ -37,5 +41,9 @@ type Distribution interface {
 	// weight of 1.
 	GetVectors() [][]float64
 
+	json.Marshaler
+
 	Object
+
+	json.Unmarshaler
 }

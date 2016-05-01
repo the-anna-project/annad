@@ -3,8 +3,6 @@ package distribution
 import (
 	"reflect"
 	"testing"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func Test_NewDistribution_Success(t *testing.T) {
@@ -295,81 +293,6 @@ func Test_Distribution_GetDimensions(t *testing.T) {
 		if output != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
 		}
-	}
-}
-
-func Test_Distribution_GetStringMap_Success(t *testing.T) {
-	newStringMap := map[string]string{
-		"name":            "name",
-		"id":              "id",
-		"static-channels": "25,50,100",
-		"vectors":         "2,3|14,15|38,49",
-	}
-
-	newConfig := DefaultConfig()
-	newConfig.StringMap = newStringMap
-	newDistribution, err := NewDistribution(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	if newDistribution.GetName() != "name" {
-		t.Fatal("expected", "name", "got", newDistribution.GetName())
-	}
-	if newDistribution.GetID() != spec.ObjectID("id") {
-		t.Fatal("expected", spec.ObjectID("id"), "got", newDistribution.GetID())
-	}
-	if !reflect.DeepEqual(newDistribution.GetStaticChannels(), []float64{25, 50, 100}) {
-		t.Fatal("expected", []float64{25, 50, 100}, "got", newDistribution.GetStaticChannels())
-	}
-	if !reflect.DeepEqual(newDistribution.GetVectors(), [][]float64{{2, 3}, {14, 15}, {38, 49}}) {
-		t.Fatal("expected", [][]float64{{2, 3}, {14, 15}, {38, 49}}, "got", newDistribution.GetVectors())
-	}
-
-	output := newDistribution.GetStringMap()
-
-	if len(output) != len(newStringMap) {
-		t.Fatal("expected", len(newStringMap), "got", len(output))
-	}
-	if output["name"] != "name" {
-		t.Fatal("expected", "name", "got", output["name"])
-	}
-	if output["id"] != "id" {
-		t.Fatal("expected", "id", "got", output["id"])
-	}
-	if output["static-channels"] != "25,50,100" {
-		t.Fatal("expected", "25,50,100", "got", output["static-channels"])
-	}
-	if output["vectors"] != "2,3|14,15|38,49" {
-		t.Fatal("expected", "2,3|14,15|38,49", "got", output["vectors"])
-	}
-}
-
-func Test_Distribution_GetStringMap_Error(t *testing.T) {
-	newStringMap := map[string]string{
-		"name":            "name",
-		"id":              "id",
-		"static-channels": "25,invalid,100",
-		"vectors":         "2,3|14,15|38,49",
-	}
-	newConfig := DefaultConfig()
-	newConfig.StringMap = newStringMap
-	_, err := NewDistribution(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-
-	newStringMap = map[string]string{
-		"name":            "name",
-		"id":              "id",
-		"static-channels": "25,50,100",
-		"vectors":         "2,3|invalid|38,49",
-	}
-	newConfig = DefaultConfig()
-	newConfig.StringMap = newStringMap
-	_, err = NewDistribution(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
 	}
 }
 

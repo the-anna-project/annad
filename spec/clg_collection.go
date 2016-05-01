@@ -110,10 +110,6 @@ type CLGDistribution interface {
 	// the vector {11, 22, 33} has a dimension of 3.
 	GetDimensionsDistribution(args ...interface{}) ([]interface{}, error)
 
-	// GetStringMapDistribution returns the configured StringMap of the given
-	// spec.Distribution.
-	GetStringMapDistribution(args ...interface{}) ([]interface{}, error)
-
 	// GetNameDistribution returns the configured Name of the given
 	// spec.Distribution.
 	GetNameDistribution(args ...interface{}) ([]interface{}, error)

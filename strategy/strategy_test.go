@@ -29,21 +29,6 @@ func Test_Strategy_NewStrategy_CLGNamesError(t *testing.T) {
 	}
 }
 
-func Test_Strategy_NewStrategy_IDError(t *testing.T) {
-	newStringMap := map[string]string{
-		"string:clg-names": "[]string:CLG,CLG",
-		// Note the ID configuration is missing.
-		"string:requestor": "string:requestor",
-	}
-
-	newConfig := DefaultConfig()
-	newConfig.StringMap = newStringMap
-	_, err := NewStrategy(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
 func Test_Strategy_NewStrategy_RequestorError(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.CLGNames = []string{"CLG", "CLG"}
@@ -52,64 +37,6 @@ func Test_Strategy_NewStrategy_RequestorError(t *testing.T) {
 	_, err := NewStrategy(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_Strategy_GetStringMap(t *testing.T) {
-	newStringMap := map[string]string{
-		"string:clg-names": "[]string:CLG,CLG",
-		"string:id":        "string:id",
-		"string:requestor": "string:requestor",
-		"string:type":      "string:type",
-	}
-
-	newConfig := DefaultConfig()
-	newConfig.StringMap = newStringMap
-	newStrategy, err := NewStrategy(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Note that we only check for the first CLG name since the CLG names are
-	// randomized on strategy creation. Having "CLG" given two times, should
-	// always result in the first CLG name being "CLG". The second may be
-	// omitted, dependening on the current randomization.
-	if newStrategy.GetCLGNames()[0] != "CLG" {
-		t.Fatal("expected", "CLG", "got", newStrategy.GetCLGNames()[0])
-	}
-	if newStrategy.GetID() != spec.ObjectID("id") {
-		t.Fatal("expected", spec.ObjectID("id"), "got", newStrategy.GetID())
-	}
-	if newStrategy.GetRequestor() != spec.ObjectType("requestor") {
-		t.Fatal("expected", spec.ObjectType("requestor"), "got", newStrategy.GetRequestor())
-	}
-	if newStrategy.GetType() != spec.ObjectType("type") {
-		t.Fatal("expected", spec.ObjectType("type"), "got", newStrategy.GetType())
-	}
-
-	output, err := newStrategy.GetStringMap()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	if len(output) != len(newStringMap) {
-		t.Fatal("expected", len(newStringMap), "got", len(output))
-	}
-	// Note that we only check for the first CLG name since the actions are
-	// randomized on strategy creation. Having "CLG" given two times, should
-	// always result in the first CLG name being "CLG". The second may be
-	// omitted, dependening on the current randomization.
-	if !strings.Contains(output["string:clg-names"], "[]string:CLG") {
-		t.Fatal("expected", true, "got", false)
-	}
-	if output["string:id"] != "string:id" {
-		t.Fatal("expected", "string:id", "got", output["string:id"])
-	}
-	if output["string:requestor"] != "string:requestor" {
-		t.Fatal("expected", "string:requestor", "got", output["string:requestor"])
-	}
-	if output["string:type"] != "string:type" {
-		t.Fatal("expected", "string:type", "got", output["string:type"])
 	}
 }
 
