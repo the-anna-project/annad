@@ -4,6 +4,7 @@ processes.
 
 ### table of contents
 - [CI](ci.md)
+- [cheat sheet](cheat_sheet.md)
 - [coverage](coverage.md)
 - [guidelines](guidelines.md)
 - [makefile](makefile.md)
