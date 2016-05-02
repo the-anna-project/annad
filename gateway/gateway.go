@@ -70,7 +70,7 @@ func (g *gateway) Close() {
 	defer g.Mutex.Unlock()
 
 	if !g.Closed {
-		g.Closer <- struct{}{}
+		close(g.Closer)
 		g.Closed = true
 	}
 }
@@ -115,6 +115,9 @@ func (g *gateway) Send(newSignal spec.Signal, closer <-chan struct{}) (spec.Sign
 	select {
 	case <-closer:
 		return nil, maskAny(signalCanceledError)
+	case <-g.Closer:
+		// TODO test that sending is canceled when the gateway is being closed.
+		return nil, maskAny(gatewayClosedError)
 	case newSignal = <-newResponder:
 		if newSignal.GetError() != nil {
 			return nil, maskAny(newSignal.GetError())
