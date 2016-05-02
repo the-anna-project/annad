@@ -5,8 +5,6 @@ package factoryserver
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/client"
-	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/impulse"
@@ -24,14 +22,9 @@ const (
 // object.
 type Config struct {
 	// Dependencies.
-	FactoryClient  spec.Factory
 	FactoryGateway spec.Gateway
-	FileSystem     spec.FileSystem
 	Log            spec.Log
 	TextGateway    spec.Gateway
-
-	// Settings.
-	RedisAddr string
 }
 
 // DefaultConfig provides a default configuration to create a new factory
@@ -39,14 +32,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FactoryClient:  factoryclient.NewFactory(factoryclient.DefaultConfig()),
 		FactoryGateway: gateway.NewGateway(gateway.DefaultConfig()),
-		FileSystem:     memoryfilesystem.NewFileSystem(),
 		Log:            log.NewLog(log.DefaultConfig()),
 		TextGateway:    gateway.NewGateway(gateway.DefaultConfig()),
-
-		// Settings.
-		RedisAddr: "127.0.0.1:6379",
 	}
 
 	return newConfig
@@ -55,13 +43,12 @@ func DefaultConfig() Config {
 // NewFactory creates a new configured factory server object.
 func NewFactory(config Config) spec.Factory {
 	newFactory := &factoryServer{
-		Booted: false,
-		Closed: false,
-		Closer: make(chan struct{}, 1),
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeFactoryServer,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeFactoryServer,
 	}
 
 	newFactory.Log.Register(newFactory.GetType())
@@ -72,26 +59,19 @@ func NewFactory(config Config) spec.Factory {
 type factoryServer struct {
 	Config
 
-	Booted bool
-	Closed bool
-	Closer chan struct{}
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (fs *factoryServer) Boot() {
-	fs.Mutex.Lock()
-	defer fs.Mutex.Unlock()
-
-	if fs.Booted {
-		return
-	}
-	fs.Booted = true
-
 	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call Boot")
 
-	go fs.FactoryGateway.Listen(fs.gatewayListener, fs.Closer)
+	fs.BootOnce.Do(func() {
+		go fs.FactoryGateway.Listen(fs.gatewayListener, nil)
+	})
 }
 
 func (fs *factoryServer) NewImpulse() (spec.Impulse, error) {
@@ -110,13 +90,8 @@ func (fs *factoryServer) NewImpulse() (spec.Impulse, error) {
 func (fs *factoryServer) Shutdown() {
 	fs.Log.WithTags(spec.Tags{L: "D", O: fs, T: nil, V: 15}, "call Shutdown")
 
-	fs.Mutex.Lock()
-	defer fs.Mutex.Unlock()
-
-	fs.TextGateway.Close()
-
-	if !fs.Closed {
-		fs.Closer <- struct{}{}
-		fs.Closed = true
-	}
+	fs.ShutdownOnce.Do(func() {
+		fs.FactoryGateway.Close()
+		fs.TextGateway.Close()
+	})
 }

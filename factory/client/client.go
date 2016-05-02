@@ -40,13 +40,12 @@ func DefaultConfig() Config {
 // NewFactory creates a new configured factory client object.
 func NewFactory(config Config) spec.Factory {
 	newFactory := &factoryClient{
-		Booted: false,
-		Closed: false,
-		Closer: make(chan struct{}, 1),
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeFactoryClient,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeFactoryClient,
 	}
 
 	newFactory.Log.Register(newFactory.GetType())
@@ -57,30 +56,24 @@ func NewFactory(config Config) spec.Factory {
 type factoryClient struct {
 	Config
 
-	Booted bool
-	Closed bool
-	Closer chan struct{}
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (fc *factoryClient) Boot() {
-	fc.Mutex.Lock()
-	defer fc.Mutex.Unlock()
-
-	if fc.Booted {
-		return
-	}
-	fc.Booted = true
-
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Boot")
+
+	fc.BootOnce.Do(func() {
+	})
 }
 
 func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call NewImpulse")
 
-	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeImpulse, fc.Closer)
+	output, err := forwardSignal(fc.FactoryGateway, common.ObjectTypeImpulse, nil)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -91,13 +84,7 @@ func (fc *factoryClient) NewImpulse() (spec.Impulse, error) {
 func (fc *factoryClient) Shutdown() {
 	fc.Log.WithTags(spec.Tags{L: "D", O: fc, T: nil, V: 15}, "call Shutdown")
 
-	fc.Mutex.Lock()
-	defer fc.Mutex.Unlock()
-
-	fc.FactoryGateway.Close()
-
-	if !fc.Closed {
-		fc.Closer <- struct{}{}
-		fc.Closed = true
-	}
+	fc.ShutdownOnce.Do(func() {
+		fc.FactoryGateway.Close()
+	})
 }
