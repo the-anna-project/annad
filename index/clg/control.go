@@ -18,7 +18,7 @@ func (c *clgCollection) ForControl(args ...interface{}) ([]interface{}, error) {
 
 	var allResults []interface{}
 	for _, as := range asl {
-		rs, err := c.CallMethodByName(append([]interface{}{action}, as...)...)
+		rs, err := c.CallByNameMethod(append([]interface{}{action}, as...)...)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -50,7 +50,7 @@ func (c *clgCollection) IfControl(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 4 got %d", len(args))
 	}
 
-	conditionResults, err := c.CallMethodByName(append([]interface{}{condition}, conditionArgs...)...)
+	conditionResults, err := c.CallByNameMethod(append([]interface{}{condition}, conditionArgs...)...)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -62,7 +62,7 @@ func (c *clgCollection) IfControl(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyResultsError, "expected 1 got %d", len(args))
 	}
 	if b {
-		actionResults, err := c.CallMethodByName(append([]interface{}{action}, actionArgs...)...)
+		actionResults, err := c.CallByNameMethod(append([]interface{}{action}, actionArgs...)...)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -101,7 +101,7 @@ func (c *clgCollection) IfElseControl(args ...interface{}) ([]interface{}, error
 		return nil, maskAnyf(tooManyArgumentsError, "expected 6 got %d", len(args))
 	}
 
-	conditionResults, err := c.CallMethodByName(append([]interface{}{condition}, conditionArgs...)...)
+	conditionResults, err := c.CallByNameMethod(append([]interface{}{condition}, conditionArgs...)...)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -113,14 +113,14 @@ func (c *clgCollection) IfElseControl(args ...interface{}) ([]interface{}, error
 		return nil, maskAnyf(tooManyResultsError, "expected 1 got %d", len(args))
 	}
 	if b {
-		actionResults, err := c.CallMethodByName(append([]interface{}{action}, actionArgs...)...)
+		actionResults, err := c.CallByNameMethod(append([]interface{}{action}, actionArgs...)...)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		return actionResults, nil
 	}
 
-	alternativeResults, err := c.CallMethodByName(append([]interface{}{alternative}, alternativeArgs...)...)
+	alternativeResults, err := c.CallByNameMethod(append([]interface{}{alternative}, alternativeArgs...)...)
 	if err != nil {
 		return nil, maskAny(err)
 	}

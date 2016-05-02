@@ -3,11 +3,13 @@
 package clg
 
 import (
+	"reflect"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/worker-pool"
 )
 
 const (
@@ -49,8 +51,10 @@ func DefaultConfig() Config {
 // NewCLGIndex creates a new configured CLG index object.
 func NewCLGIndex(config Config) (spec.CLGIndex, error) {
 	newCLGIndex := &clgIndex{
-		Config:       config,
+		Config: config,
+
 		BootOnce:     sync.Once{},
+		Closer:       make(chan struct{}, 1),
 		ID:           id.NewObjectID(id.Hex128),
 		Mutex:        sync.Mutex{},
 		Type:         ObjectTypeCLGIndex,
@@ -70,6 +74,7 @@ type clgIndex struct {
 	Config
 
 	BootOnce     sync.Once
+	Closer       chan struct{}
 	ID           spec.ObjectID
 	Mutex        sync.Mutex
 	Type         spec.ObjectType
@@ -89,31 +94,63 @@ func (i *clgIndex) Boot() {
 	})
 }
 
-// TODO
-func (i *clgIndex) createCLGProfile(clgCollection spec.CLGCollection, clgName string, closer chan struct{}) (spec.CLGProfile, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call createCLGProfile")
+func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName string, canceler <-chan struct{}) (spec.CLGProfile, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfile")
 
 	// Fill a queue.
-	clgNames, err := clgCollection.GetNamesMethod()
+	args, err := clgCollection.GetNamesMethod()
 	if err != nil {
-		return maskAny(err)
+		return nil, maskAny(err)
+	}
+	clgNames, err := ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 	queue := make(chan string, len(clgNames))
 	for _, clgName := range clgNames {
 		queue <- clgName
 	}
 
-	// range over channel
-	//     find argument types for given clg name
-	//     hash method body for given clg name
-	//     find right side neighbours for given clg name
-	//         if no profile for checked neighbour
-	//             push neighbour name back to channel
+	// Initialize the profile creation.
+	for {
+		select {
+		case <-canceler:
+			return nil, maskAny(workerCanceledError)
+		case clgName := <-queue:
+			methodValue := reflect.ValueOf(clgCollection).MethodByName(clgName)
+			if !i.isMethodValue(methodValue) {
+				return nil, maskAnyf(invalidCLGError, clgName)
+			}
 
-	return nil, nil
+			var err error
+			newCLGProfileConfig := DefaultCLGProfileConfig()
+			newCLGProfileConfig.MethodName = clgName
+			newCLGProfileConfig.MethodHash, err = i.getCLGMethodHash(methodValue)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfileConfig.InputTypes, err = i.getCLGInputTypes(methodValue)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfileConfig.InputExamples, err = i.getCLGInputExamples(methodValue)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfileConfig.RightSideNeighbours, err = i.getCLGRightSideNeighbours(clgCollection, clgName, methodValue, canceler)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfile, err := NewCLGProfile(newCLGProfileConfig)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+
+			return newCLGProfile, nil
+		}
+	}
 }
 
-// TODO
 func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
@@ -121,7 +158,11 @@ func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfiles")
 
 	// Fill a queue.
-	clgNames, err := clgCollection.GetNamesMethod()
+	args, err := clgCollection.GetNamesMethod()
+	if err != nil {
+		return maskAny(err)
+	}
+	clgNames, err := ArgToStringSlice(args, 0)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -134,66 +175,56 @@ func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 	// considered WIP. A CLG name must never be requeued.
 	close(queue)
 
-	// Prepare synchronization channels.
-	done := make(chan struct{}, 1)
-	fail := make(chan error, 1)
-
 	// Start N worker goroutines.
-	go func() {
-		var wg sync.Waitgroup
-		workerPoolCloser := make(chan struct{}, 1)
-
-		for n := 0; n < i.NumCLGProfileWorkers; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-
-				var err error
-				workerCloser := make(chan struct{}, 1)
-
-				for {
-					select {
-					case <-workerPoolCloser:
-						workerCloser <- struct{}{}
-						return
-					case clgName := <-queue:
-						clgProfile, createErr := i.createCLGProfile(clgCollection, clgName, workerCloser)
-						if createErr != nil {
-							err = createErr
-						}
-
-						if clgProfile.HasChanged() {
-							storeErr := i.StoreCLGProfile(clgProfile)
-							if storeErr != nil {
-								err = storeErr
-							}
-						}
-
-						if err != nil {
-							workerCloser <- struct{}{}
-
-							fail <- maskAny(err)
-						}
-					}
+	workerFunc := func(canceler <-chan struct{}) error {
+		for {
+			select {
+			case <-canceler:
+				return maskAny(workerCanceledError)
+			case clgName := <-queue:
+				// Try to fetch the CLG profile in advance.
+				currentCLGProfile, err := i.GetCLGProfileByName(clgName)
+				if IsCLGProfileNotFound(err) {
+					// In case the CLG profile cannot be found, we are going ahead to create
+					// one.
+				} else if err != nil {
+					return maskAny(err)
 				}
-			}()
+
+				newCLGProfile, err := i.CreateCLGProfile(clgCollection, clgName, canceler)
+				if err != nil {
+					return maskAny(err)
+				}
+
+				if currentCLGProfile.Equals(newCLGProfile) {
+					// The CLG profile has not changed. Thus nothing to do here.
+					continue
+				}
+
+				err = i.StoreCLGProfile(newCLGProfile)
+				if err != nil {
+					return maskAny(err)
+				}
+			}
 		}
-
-		wg.Wait()
-		done <- struct{}{}
-	}()
-
-	var err error
-	select {
-	case failErr := <-fail:
-		err = failErr
-	case <-done:
 	}
 
-	close(done)
-	close(fail)
+	// Prepare the worker pool.
+	newWorkerPoolConfig := workerpool.DefaultConfig()
+	newWorkerPoolConfig.WorkerFunc = workerFunc
+	newWorkerPoolConfig.Canceler = i.Closer
+	newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
+	if err != nil {
+		return maskAny(err)
+	}
 
-	return maskAny(err)
+	// Execute the worker pool and block until all work is done.
+	err = i.maybeReturnAndLogErrors(newWorkerPool.Execute())
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (i *clgIndex) GetCLGCollection() spec.CLGCollection {
@@ -206,19 +237,24 @@ func (i *clgIndex) GetCLGCollection() spec.CLGCollection {
 }
 
 // TODO
-func (i *clgIndex) isRightSideCLGNeighbour(clgCollection spec.CLGCollection, left, right CLGProfile) (bool, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call isRightSideNeighbour")
+func (i *clgIndex) GetCLGProfileByName(clgName string) (spec.CLGProfile, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreCLGProfile")
 
-	// run clg chain
-	// if error
-	//     return false
-
-	return false, nil
+	return nil, nil
 }
 
 func (i *clgIndex) Shutdown() {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call Shutdown")
 
 	i.ShutdownOnce.Do(func() {
+		// Simply closing the closer will broadcast the signal to each listener.
+		close(i.Closer)
 	})
+}
+
+// TODO
+func (i *clgIndex) StoreCLGProfile(clgProfile spec.CLGProfile) error {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreCLGProfile")
+
+	return nil
 }
