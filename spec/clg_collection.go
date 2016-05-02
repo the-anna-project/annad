@@ -431,17 +431,17 @@ type CLGIntSlice interface {
 
 // CLGMethod represents all CLGs that can be used to operate on CLG methods.
 type CLGMethod interface {
-	// CallMethodByName provides a way to dynamically execute any index's CLG by
+	// CallByNameMethod provides a way to dynamically execute any index's CLG by
 	// providing the method's name as string argument.
-	CallMethodByName(args ...interface{}) ([]interface{}, error)
+	CallByNameMethod(args ...interface{}) ([]interface{}, error)
 
-	// GetMethodNames provides a way to fetch all method names. Optionally a glob
+	// GetNamesMethod provides a way to fetch all method names. Optionally a glob
 	// pattern can be provided to limit the returned names.
-	GetMethodNames(args ...interface{}) ([]interface{}, error)
+	GetNamesMethod(args ...interface{}) ([]interface{}, error)
 
-	// GetNumMethods returns the number of available methods the CLG index
+	// GetNumMethod returns the number of available methods the CLG index
 	// provides.
-	GetNumMethods(args ...interface{}) ([]interface{}, error)
+	GetNumMethod(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGString represents all string compatible CLGs that can be used.

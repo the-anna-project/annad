@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (c *clgCollection) CallMethodByName(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) CallByNameMethod(args ...interface{}) ([]interface{}, error) {
 	methodName, err := ArgToString(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
@@ -26,7 +26,7 @@ func (c *clgCollection) CallMethodByName(args ...interface{}) ([]interface{}, er
 	return results, nil
 }
 
-func (c *clgCollection) GetMethodNames(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNamesMethod(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
@@ -53,7 +53,7 @@ func (c *clgCollection) GetMethodNames(args ...interface{}) ([]interface{}, erro
 	return []interface{}{allMethodNames}, nil
 }
 
-func (c *clgCollection) GetNumMethods(args ...interface{}) ([]interface{}, error) {
+func (c *clgCollection) GetNumMethod(args ...interface{}) ([]interface{}, error) {
 	if len(args) > 0 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}

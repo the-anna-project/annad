@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_Method_CallMethodByName(t *testing.T) {
+func Test_Method_CallByNameMethod(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}
 		Expected     []interface{}
@@ -44,7 +44,7 @@ func Test_Method_CallMethodByName(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := testMaybeNewCLGCollection(t).CallMethodByName(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).CallByNameMethod(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -56,7 +56,7 @@ func Test_Method_CallMethodByName(t *testing.T) {
 	}
 }
 
-func Test_Method_GetMethodNames_Expected(t *testing.T) {
+func Test_Method_GetNamesMethod_Expected(t *testing.T) {
 	testCases := []struct {
 		Input          []interface{}
 		ExpectedSubSet []string
@@ -64,12 +64,12 @@ func Test_Method_GetMethodNames_Expected(t *testing.T) {
 	}{
 		{
 			Input:          []interface{}{},
-			ExpectedSubSet: []string{"CallMethodByName", "GetMethodNames", "RepeatString"},
+			ExpectedSubSet: []string{"CallByNameMethod", "GetNamesMethod", "RepeatString"},
 			ErrorMatcher:   nil,
 		},
 		{
 			Input:          []interface{}{"Method"},
-			ExpectedSubSet: []string{"CallMethodByName", "GetMethodNames"},
+			ExpectedSubSet: []string{"CallByNameMethod", "GetNamesMethod"},
 			ErrorMatcher:   nil,
 		},
 		{
@@ -85,7 +85,7 @@ func Test_Method_GetMethodNames_Expected(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := testMaybeNewCLGCollection(t).GetMethodNames(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetNamesMethod(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -110,7 +110,7 @@ func Test_Method_GetMethodNames_Expected(t *testing.T) {
 	}
 }
 
-func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
+func Test_Method_GetNamesMethod_Unexpected(t *testing.T) {
 	testCases := []struct {
 		Input            []interface{}
 		UnexpectedSubSet []string
@@ -132,7 +132,7 @@ func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output, err := testMaybeNewCLGCollection(t).GetMethodNames(testCase.Input...)
+		output, err := testMaybeNewCLGCollection(t).GetNamesMethod(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -157,13 +157,13 @@ func Test_Method_GetMethodNames_Unexpected(t *testing.T) {
 	}
 }
 
-func Test_Method_GetNumMethods(t *testing.T) {
-	_, err := testMaybeNewCLGCollection(t).GetNumMethods("foo")
+func Test_Method_GetNumMethod(t *testing.T) {
+	_, err := testMaybeNewCLGCollection(t).GetNumMethod("foo")
 	if !IsTooManyArguments(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 
-	output, err := testMaybeNewCLGCollection(t).GetNumMethods()
+	output, err := testMaybeNewCLGCollection(t).GetNumMethod()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
