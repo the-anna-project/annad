@@ -100,11 +100,12 @@ func DefaultConfig() Config {
 //
 func NewStratNet(config Config) (spec.Network, error) {
 	newNetwork := &stratNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeStratNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeStratNet,
 	}
 
 	newNetwork.Log.Register(newNetwork.GetType())
@@ -115,22 +116,18 @@ func NewStratNet(config Config) (spec.Network, error) {
 type stratNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (sn *stratNet) Boot() {
-	sn.Mutex.Lock()
-	defer sn.Mutex.Unlock()
-
-	if sn.Booted {
-		return
-	}
-	sn.Booted = true
-
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call Boot")
+
+	sn.BootOnce.Do(func() {
+	})
 }
 
 func (sn *stratNet) GetBestStrategy(imp spec.Impulse) (spec.Strategy, error) {
@@ -304,6 +301,9 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 
 func (sn *stratNet) Shutdown() {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call Shutdown")
+
+	sn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (sn *stratNet) StoreStrategy(imp spec.Impulse, strat spec.Strategy) error {

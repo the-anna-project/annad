@@ -64,12 +64,12 @@ func DefaultConfig() Config {
 // NewCoreNet creates a new configured core network object.
 func NewCoreNet(config Config) (spec.Network, error) {
 	newNet := &coreNet{
-		Booted:             false,
-		Closer:             make(chan struct{}, 1),
 		Config:             config,
+		BootOnce:           sync.Once{},
 		ID:                 id.NewObjectID(id.Hex128),
 		ImpulsesInProgress: 0,
 		Mutex:              sync.Mutex{},
+		ShutdownOnce:       sync.Once{},
 		Type:               ObjectTypeCoreNet,
 	}
 
@@ -85,51 +85,46 @@ func NewCoreNet(config Config) (spec.Network, error) {
 type coreNet struct {
 	Config
 
-	Booted             bool
-	Closer             chan struct{}
+	BootOnce           sync.Once
 	ID                 spec.ObjectID
-	Mutex              sync.Mutex
 	ImpulsesInProgress int64
+	Mutex              sync.Mutex
+	ShutdownOnce       sync.Once
 	Type               spec.ObjectType
 }
 
 func (cn *coreNet) Boot() {
-	cn.Mutex.Lock()
-	defer cn.Mutex.Unlock()
-
-	if cn.Booted {
-		return
-	}
-	cn.Booted = true
-
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Boot")
 
-	go cn.bootObjectTree()
-	go cn.TextGateway.Listen(cn.gatewayListener, cn.Closer)
+	cn.BootOnce.Do(func() {
+		go cn.bootObjectTree()
+		go cn.TextGateway.Listen(cn.gatewayListener, nil)
+	})
 }
 
 func (cn *coreNet) Shutdown() {
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Shutdown")
 
-	cn.Closer <- struct{}{}
-	cn.TextGateway.Close()
-	cn.FactoryClient.Shutdown()
+	cn.ShutdownOnce.Do(func() {
+		cn.TextGateway.Close()
+		cn.FactoryClient.Shutdown()
 
-	for {
-		impulsesInProgress := atomic.LoadInt64(&cn.ImpulsesInProgress)
-		if impulsesInProgress == 0 {
-			// As soon as all impulses are processed we can go ahead to shutdown the
-			// core network.
-			break
+		for {
+			impulsesInProgress := atomic.LoadInt64(&cn.ImpulsesInProgress)
+			if impulsesInProgress == 0 {
+				// As soon as all impulses are processed we can go ahead to shutdown the
+				// core network.
+				break
+			}
+
+			time.Sleep(100 * time.Millisecond)
 		}
 
-		time.Sleep(100 * time.Millisecond)
-	}
-
-	cn.StratNet.Shutdown()
-	cn.PredNet.Shutdown()
-	cn.ExecNet.Shutdown()
-	cn.EvalNet.Shutdown()
+		cn.StratNet.Shutdown()
+		cn.PredNet.Shutdown()
+		cn.ExecNet.Shutdown()
+		cn.EvalNet.Shutdown()
+	})
 }
 
 func (cn *coreNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

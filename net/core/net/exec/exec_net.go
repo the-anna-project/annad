@@ -42,11 +42,12 @@ func DefaultConfig() Config {
 // NewExecNet creates a new configured core execution network object.
 func NewExecNet(config Config) (spec.Network, error) {
 	newNet := &execNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeCoreExecNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeCoreExecNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -57,26 +58,25 @@ func NewExecNet(config Config) (spec.Network, error) {
 type execNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (en *execNet) Boot() {
-	en.Mutex.Lock()
-	defer en.Mutex.Unlock()
-
-	if en.Booted {
-		return
-	}
-	en.Booted = true
-
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Boot")
+
+	en.BootOnce.Do(func() {
+	})
 }
 
 func (en *execNet) Shutdown() {
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Shutdown")
+
+	en.ShutdownOnce.Do(func() {
+	})
 }
 
 func (en *execNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

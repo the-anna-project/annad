@@ -42,11 +42,12 @@ func DefaultConfig() Config {
 // NewPatNet creates a new configured pattern network object.
 func NewPatNet(config Config) (spec.Network, error) {
 	newNet := &patNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypePatNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypePatNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -57,26 +58,25 @@ func NewPatNet(config Config) (spec.Network, error) {
 type patNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (pn *patNet) Boot() {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
-
-	if pn.Booted {
-		return
-	}
-	pn.Booted = true
-
 	pn.Log.WithTags(spec.Tags{L: "D", O: pn, T: nil, V: 13}, "call Boot")
+
+	pn.BootOnce.Do(func() {
+	})
 }
 
 func (pn *patNet) Shutdown() {
 	pn.Log.WithTags(spec.Tags{L: "D", O: pn, T: nil, V: 13}, "call Shutdown")
+
+	pn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (pn *patNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

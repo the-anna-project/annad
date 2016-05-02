@@ -42,11 +42,12 @@ func DefaultConfig() Config {
 // NewEvalNet creates a new configured evaluation network object.
 func NewEvalNet(config Config) (spec.Network, error) {
 	newNet := &evalNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeEvalNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeEvalNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -57,26 +58,25 @@ func NewEvalNet(config Config) (spec.Network, error) {
 type evalNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	Type         spec.ObjectType
+	ShutdownOnce sync.Once
 }
 
 func (en *evalNet) Boot() {
-	en.Mutex.Lock()
-	defer en.Mutex.Unlock()
-
-	if en.Booted {
-		return
-	}
-	en.Booted = true
-
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Boot")
+
+	en.BootOnce.Do(func() {
+	})
 }
 
 func (en *evalNet) Shutdown() {
 	en.Log.WithTags(spec.Tags{L: "D", O: en, T: nil, V: 13}, "call Shutdown")
+
+	en.ShutdownOnce.Do(func() {
+	})
 }
 
 func (en *evalNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

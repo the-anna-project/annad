@@ -53,11 +53,12 @@ func DefaultConfig() Config {
 // NewOutNet creates a new configured output network object.
 func NewOutNet(config Config) (spec.Network, error) {
 	newNet := &outNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeOutNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeOutNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -68,26 +69,25 @@ func NewOutNet(config Config) (spec.Network, error) {
 type outNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (on *outNet) Boot() {
-	on.Mutex.Lock()
-	defer on.Mutex.Unlock()
-
-	if on.Booted {
-		return
-	}
-	on.Booted = true
-
 	on.Log.WithTags(spec.Tags{L: "D", O: on, T: nil, V: 13}, "call Boot")
+
+	on.BootOnce.Do(func() {
+	})
 }
 
 func (on *outNet) Shutdown() {
 	on.Log.WithTags(spec.Tags{L: "D", O: on, T: nil, V: 13}, "call Shutdown")
+
+	on.ShutdownOnce.Do(func() {
+	})
 }
 
 func (on *outNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {
