@@ -13,7 +13,7 @@ func (s *scheduler) scheduleActiveJobs() {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call scheduleActiveJobs")
 
 	err := s.Storage.WalkScoredElements(s.key("jobs:active"), nil, func(element string, score float64) error {
-		newJob, err := s.FetchJob(spec.ObjectID(element))
+		newJob, err := s.GetJobByID(spec.ObjectID(element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -57,7 +57,7 @@ func (s *scheduler) preventDuplicates(job spec.Job) error {
 			continue
 		}
 
-		newJob, err := s.FetchJob(jobID)
+		newJob, err := s.GetJobByID(jobID)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -100,7 +100,7 @@ func (s *scheduler) waitForAction(job spec.Job, action spec.Action, closer <-cha
 		return maskAny(err)
 	}
 	// Refresh the job's state.
-	job, err = s.FetchJob(job.GetID())
+	job, err = s.GetJobByID(job.GetID())
 	if err != nil {
 		return maskAny(err)
 	}
@@ -110,7 +110,7 @@ func (s *scheduler) waitForAction(job spec.Job, action spec.Action, closer <-cha
 	case <-replacer:
 		// The current job was replaced. Only persist the job containing it's
 		// result.
-		err := s.PersistJob(job)
+		err := s.StoreJob(job)
 		if err != nil {
 			return maskAny(err)
 		}
