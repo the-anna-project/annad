@@ -3,11 +3,13 @@ package textinterface
 import (
 	"encoding/json"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 // fetch url
 
-func fetchURLDecoder(r *http.Request) (interface{}, error) {
+func fetchURLDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request FetchURLRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -15,7 +17,7 @@ func fetchURLDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func fetchURLEncoder(w http.ResponseWriter, response interface{}) error {
+func fetchURLEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -24,7 +26,7 @@ func fetchURLEncoder(w http.ResponseWriter, response interface{}) error {
 
 // read file
 
-func readFileDecoder(r *http.Request) (interface{}, error) {
+func readFileDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request ReadFileRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -32,7 +34,7 @@ func readFileDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func readFileEncoder(w http.ResponseWriter, response interface{}) error {
+func readFileEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -41,7 +43,7 @@ func readFileEncoder(w http.ResponseWriter, response interface{}) error {
 
 // read stream
 
-func readStreamDecoder(r *http.Request) (interface{}, error) {
+func readStreamDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request ReadStreamRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -49,7 +51,7 @@ func readStreamDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func readStreamEncoder(w http.ResponseWriter, response interface{}) error {
+func readStreamEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -58,7 +60,7 @@ func readStreamEncoder(w http.ResponseWriter, response interface{}) error {
 
 // read plain
 
-func readPlainDecoder(r *http.Request) (interface{}, error) {
+func readPlainDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request ReadPlainRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -66,7 +68,7 @@ func readPlainDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func readPlainEncoder(w http.ResponseWriter, response interface{}) error {
+func readPlainEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}

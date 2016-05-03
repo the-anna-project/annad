@@ -6,12 +6,14 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"golang.org/x/net/context"
+
 	"github.com/xh3b4sd/anna/server/interface/text"
 )
 
 // read plain
 
-func readPlainEncoder(r *http.Request, request interface{}) error {
+func readPlainEncoder(ctx context.Context, r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(request); err != nil {
 		return maskAny(err)
@@ -20,7 +22,7 @@ func readPlainEncoder(r *http.Request, request interface{}) error {
 	return nil
 }
 
-func readPlainDecoder(resp *http.Response) (interface{}, error) {
+func readPlainDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
 	var response textinterface.ReadPlainResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
