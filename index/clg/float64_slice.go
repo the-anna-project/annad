@@ -385,7 +385,7 @@ func modeFloat64(list []float64) []float64 {
 	}
 
 	// Collect the counts of all items and also find the maximum number of
-	// occurences.
+	// occurrences.
 	max := 1
 	counts := map[float64]int{}
 	for _, item := range list {
@@ -401,7 +401,7 @@ func modeFloat64(list []float64) []float64 {
 		}
 	}
 
-	// Collect the most occured items and sort the result.
+	// Collect the most occurred items and sort the result.
 	var mode []float64
 	for item, count := range counts {
 		if count == max {

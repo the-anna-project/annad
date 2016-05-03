@@ -406,7 +406,7 @@ func modeInt(list []int) []int {
 	}
 
 	// Collect the counts of all items and also find the maximum number of
-	// occurences.
+	// occurrences.
 	max := 1
 	counts := map[int]int{}
 	for _, item := range list {
@@ -422,7 +422,7 @@ func modeInt(list []int) []int {
 		}
 	}
 
-	// Collect the most occured items and sort the result.
+	// Collect the most occurred items and sort the result.
 	var mode []int
 	for item, count := range counts {
 		if count == max {

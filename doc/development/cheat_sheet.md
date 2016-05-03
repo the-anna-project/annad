@@ -2,6 +2,37 @@
 Here are we collect some useful snippets to ease some pains that may occur
 during development.
 
+### fix misspells
+There may be the project check failing like follows.
+```
+$ make projectcheck
+go vet    succeeded
+golint    succeeded
+misspell  failed
+make: *** [projectcheck] Error 1
+```
+
+The following snippet can be used to easily check misspells as reported by
+https://github.com/client9/misspell.
+```
+find . -not -path "./.git/*" -not -path "./.workspace/*" | xargs misspell
+```
+
+You will see output similar to the following depending on the current issues.
+```
+./index/clg/float64_slice.go:388:4:corrected "occurences." to "occurrences."
+./index/clg/float64_slice.go:404:21:corrected "occured" to "occurred"
+./index/clg/int_slice.go:409:4:corrected "occurences." to "occurrences."
+./index/clg/int_slice.go:425:21:corrected "occured" to "occurred"
+```
+
+The following snippet can be used to easily correct misspells. Simply add `-w`
+to the command we used to check the misspells. The output will be the same as
+already seen and the corrections will be written to the related files.
+```
+find . -not -path "./.git/*" -not -path "./.workspace/*" | xargs misspell -w
+```
+
 ### run single tests
 The following snippet can be used to easily run unit tests of single packages.
 This is unlike to the makefile target, that runs the tests of all packages.
