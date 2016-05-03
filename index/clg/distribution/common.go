@@ -1,10 +1,5 @@
 package distribution
 
-import (
-	"strconv"
-	"strings"
-)
-
 func equalDimensionLength(vectors [][]float64) bool {
 	if len(vectors) == 0 {
 		return false
@@ -126,36 +121,4 @@ func betweenFloat64(i, min, max float64) bool {
 		return false
 	}
 	return true
-}
-
-func staticChannelsFromString(value string) ([]float64, error) {
-	var newStaticChannels []float64
-
-	for _, c := range strings.Split(value, ",") {
-		f, err := strconv.ParseFloat(c, 64)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		newStaticChannels = append(newStaticChannels, f)
-	}
-
-	return newStaticChannels, nil
-}
-
-func vectorsFromString(value string) ([][]float64, error) {
-	var newVectors [][]float64
-
-	for _, v := range strings.Split(value, "|") {
-		var newVector []float64
-		for _, d := range strings.Split(v, ",") {
-			f, err := strconv.ParseFloat(d, 64)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newVector = append(newVector, f)
-		}
-		newVectors = append(newVectors, newVector)
-	}
-
-	return newVectors, nil
 }

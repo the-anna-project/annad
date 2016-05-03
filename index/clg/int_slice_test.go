@@ -1140,6 +1140,190 @@ func Test_IntSlice_NewIntSlice(t *testing.T) {
 	}
 }
 
+func Test_percentilesInt_ZeroValue(t *testing.T) {
+	testCases := []struct {
+		List        []int
+		Percentiles []float64
+	}{
+		{
+			List:        nil,
+			Percentiles: nil,
+		},
+		{
+			List:        []int{},
+			Percentiles: nil,
+		},
+		{
+			List:        nil,
+			Percentiles: []float64{},
+		},
+		{
+			List:        []int{},
+			Percentiles: []float64{},
+		},
+	}
+
+	for i, testCase := range testCases {
+		ps, err := percentilesInt(testCase.List, testCase.Percentiles)
+		if err != nil {
+			t.Fatal("case", i+1, "expected", nil, "got", err)
+		}
+		if ps != nil {
+			t.Fatal("case", i+1, "expected", nil, "got", ps)
+		}
+	}
+}
+
+// Test_percentilesInt_EnsureInputUnchanged verifies that the input
+// arguments stay unchanged after calculating the percentiles of it. This check
+// is necessary due to the fact that the input needs to be sorted in order to
+// being able of calculating the percentiles of it. Thus the check verifies
+// that internally a copy of the input is created before calculating the
+// percentiles.
+func Test_percentilesInt_EnsureInputUnchanged(t *testing.T) {
+	percentiles := []float64{50, 100}
+
+	list := []int{3, 2, 9, 5}
+	expected := list
+	percentilesInt(list, percentiles)
+	if !reflect.DeepEqual(list, expected) {
+		t.Fatal("expected", expected, "got", list)
+	}
+
+	list = []int{3, 4, 5, 6, 7, 8}
+	expected = list
+	percentilesInt(list, percentiles)
+	if !reflect.DeepEqual(list, expected) {
+		t.Fatal("expected", expected, "got", list)
+	}
+}
+
+func Test_IntSlice_PercentilesIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{50, 100}},
+			Expected:     []interface{}{[]float64{5, 9}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{3, 1, 2, 4, 8, 6, 9, 5, 7}, []float64{50, 100}},
+			Expected:     []interface{}{[]float64{5, 9}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{20, 40, 60, 80, 100}},
+			Expected:     []interface{}{[]float64{2.6, 4.2, 5.799999999999999, 7.4, 9}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{2, 1, 3, 9, 5, 8, 7, 6, 4}, []float64{20, 40, 60, 80, 100}},
+			Expected:     []interface{}{[]float64{2.6, 4.2, 5.799999999999999, 7.4, 9}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{75, 90, 95, 99, 99.999}},
+			Expected:     []interface{}{[]float64{7.5, 8.2, 9.099999999999998, 9.82, 9.99982}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{9, 2, 3, 4, 5, 6, 8, 7, 1}, []float64{75, 90, 95, 99, 99.999}},
+			Expected:     []interface{}{[]float64{7.5, 8.2, 9.099999999999998, 9.82, 9.99982}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{-0.001, 101}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{500, 1001}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{50, 101}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{50, -100}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{-0.0001, -100}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{-1, 100}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{1, 2, 3, 4, 5, 6, 7, 8, 9}, []float64{-0.001, 100}},
+			Expected:     nil,
+			ErrorMatcher: IsIndexOutOfRange,
+		},
+		{
+			Input:        []interface{}{[]int{3, 9}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3.2, []float64{50}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{3, 9}, []float64{50}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{3}, []float64{50}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{3}, []float64{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}, []float64{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	for i, testCase := range testCases {
+		output, err := testMaybeNewCLGCollection(t).PercentilesIntSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 func Test_IntSlice_ReverseIntSlice(t *testing.T) {
 	testCases := []struct {
 		Input        []interface{}

@@ -20,10 +20,10 @@ find . -not -path "./.git/*" -not -path "./.workspace/*" | xargs misspell
 
 You will see output similar to the following depending on the current issues.
 ```
-./index/clg/float64_slice.go:388:4:corrected "occurences." to "occurrences."
-./index/clg/float64_slice.go:404:21:corrected "occured" to "occurred"
-./index/clg/int_slice.go:409:4:corrected "occurences." to "occurrences."
-./index/clg/int_slice.go:425:21:corrected "occured" to "occurred"
+file:388:4:found "wrong." a misspelling of "right."
+file:404:21:found "wrong" a misspelling of "right"
+file:4:found "wrong." a misspelling of "right."
+file:21:found "wrong" a misspelling of "right"
 ```
 
 The following snippet can be used to easily correct misspells. Simply add `-w`

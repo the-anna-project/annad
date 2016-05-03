@@ -96,12 +96,21 @@ func (c *clgCollection) PowFloat64(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{s}, nil
 }
 
+func roundFloat64(f float64, p int) (float64, error) {
+	newFloat, err := strconv.ParseFloat(fmt.Sprintf(fmt.Sprintf("%%.%df", p), f), 64)
+	if err != nil {
+		return 0, maskAnyf(cannotParseError, "%s", err)
+	}
+
+	return newFloat, nil
+}
+
 func (c *clgCollection) RoundFloat64(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFloat64(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	n, err := ArgToInt(args, 1)
+	p, err := ArgToInt(args, 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -109,12 +118,12 @@ func (c *clgCollection) RoundFloat64(args ...interface{}) ([]interface{}, error)
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
 	}
 
-	newFloat, err := strconv.ParseFloat(fmt.Sprintf(fmt.Sprintf("%%.%df", n), f), 64)
+	newFloat64, err := roundFloat64(f, p)
 	if err != nil {
-		return nil, maskAnyf(cannotParseError, "%s", err)
+		return nil, maskAny(err)
 	}
 
-	return []interface{}{newFloat}, nil
+	return []interface{}{newFloat64}, nil
 }
 
 func (c *clgCollection) SqrtFloat64(args ...interface{}) ([]interface{}, error) {

@@ -287,6 +287,13 @@ type CLGFloat64Slice interface {
 	// NewFloat64Slice returns a new float64 slice.
 	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// TODO BetweenInt
+	// TODO BetweenFloat64
+
+	// PercentilesFloat64Slice returns the percentiles of the given list as
+	// configured.
+	PercentilesFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// ReverseFloat64Slice reverses the order of the given list.
 	ReverseFloat64Slice(args ...interface{}) ([]interface{}, error)
 
@@ -425,6 +432,10 @@ type CLGIntSlice interface {
 
 	// NewIntSlice returns a new int slice.
 	NewIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// PercentilesIntSlice returns the percentiles of the given list as
+	// configured.
+	PercentilesIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// ReverseIntSlice reverses the order of the given list.
 	ReverseIntSlice(args ...interface{}) ([]interface{}, error)

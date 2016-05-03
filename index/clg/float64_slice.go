@@ -440,6 +440,82 @@ func (c *clgCollection) NewFloat64Slice(args ...interface{}) ([]interface{}, err
 	return []interface{}{fs}, nil
 }
 
+func betweenFloat64(i, min, max float64) bool {
+	if i < min {
+		return false
+	}
+	if i > max {
+		return false
+	}
+	return true
+}
+
+func percentilesFloat64(fs, ps []float64) ([]float64, error) {
+	// Validate the input.
+	l := float64(len(fs))
+	if l == 0 || len(ps) == 0 {
+		return nil, nil
+	}
+	for _, p := range ps {
+		if !betweenFloat64(p, 0, 100) {
+			return nil, maskAnyf(indexOutOfRangeError, "percentiles must be between 0 and 100")
+		}
+	}
+
+	// The percentiles can only be calculated on a sorted list of numbers. Thus
+	// we create a copy first to keep the input as it is.
+	c := fs
+	sort.Float64s(c)
+
+	var percentiles []float64
+
+	for _, p := range ps {
+		var percentile float64
+
+		index := (p / 100) * l
+		i := int(index)
+
+		if index == float64(i) {
+			percentile = c[i-1]
+		} else {
+			pd := index - float64(i)
+			id := c[i] - c[i-1]
+			percentile = index + (pd * id / 1)
+		}
+
+		percentiles = append(percentiles, percentile)
+	}
+
+	return percentiles, nil
+}
+
+func (c *clgCollection) PercentilesFloat64Slice(args ...interface{}) ([]interface{}, error) {
+	fs, err := ArgToFloat64Slice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	ps, err := ArgToFloat64Slice(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 2 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
+	}
+	if len(fs) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(fs))
+	}
+	if len(ps) < 1 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 1 got %d", len(ps))
+	}
+
+	newPercentiles, err := percentilesFloat64(fs, ps)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return []interface{}{newPercentiles}, nil
+}
+
 func (c *clgCollection) ReverseFloat64Slice(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFloat64Slice(args, 0)
 	if err != nil {
