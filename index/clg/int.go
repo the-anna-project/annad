@@ -4,6 +4,38 @@ import (
 	"math"
 )
 
+func betweenInt(i, min, max int) bool {
+	if i < min {
+		return false
+	}
+	if i > max {
+		return false
+	}
+	return true
+}
+
+func (c *clgCollection) BetweenInt(args ...interface{}) ([]interface{}, error) {
+	num, err := ArgToInt(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	min, err := ArgToInt(args, 1)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	max, err := ArgToInt(args, 2)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 3 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 3 got %d", len(args))
+	}
+
+	isBetween := betweenInt(num, min, max)
+
+	return []interface{}{isBetween}, nil
+}
+
 func (c *clgCollection) DivideInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {

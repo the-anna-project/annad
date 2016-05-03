@@ -40,15 +40,13 @@ type CLGCollection interface {
 	CLGInterface
 	CLGIntSlice
 	CLGMethod
-	// CLGNetwork
+	// CLGNetwork (scan ports, resolve IPs, make requests)
 	CLGString
 	CLGStringSlice
-	// CLGOS
-	// CLGTime
+	// CLGOS (scan file system, CRUD operations on files and directories, append content to files)
+	// CLGTime (get current time, calculate times, parse and format)
 
-	// TODO Similarity. (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
-	// TODO Sets for all slice types. (union, intersect, difference)
-	// TODO Converting types (string to string slice, float to string, string to int, bool to int)
+	// Similarity (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
 }
 
 // CLGConvert represents all conversion CLGs that can be used.
@@ -198,6 +196,10 @@ type CLGFeature interface {
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
 type CLGFloat64 interface {
+	// BetweenFloat64 checks whether a given number lies between two given
+	// numbers.
+	BetweenFloat64(args ...interface{}) ([]interface{}, error)
+
 	// DivideFloat64 creates the difference of the given float64s.
 	DivideFloat64(args ...interface{}) ([]interface{}, error)
 
@@ -287,9 +289,6 @@ type CLGFloat64Slice interface {
 	// NewFloat64Slice returns a new float64 slice.
 	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
 
-	// TODO BetweenInt
-	// TODO BetweenFloat64
-
 	// PercentilesFloat64Slice returns the percentiles of the given list as
 	// configured.
 	PercentilesFloat64Slice(args ...interface{}) ([]interface{}, error)
@@ -322,6 +321,9 @@ type CLGFloat64Slice interface {
 
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
+	// BetweenInt checks whether a given number lies between two given numbers.
+	BetweenInt(args ...interface{}) ([]interface{}, error)
+
 	// DivideInt creates the difference of the given ints.
 	DivideInt(args ...interface{}) ([]interface{}, error)
 
