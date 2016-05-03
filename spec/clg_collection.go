@@ -269,8 +269,20 @@ type CLGFloat64Slice interface {
 	// MaxFloat64Slice returns the highest number of a list.
 	MaxFloat64Slice(args ...interface{}) ([]interface{}, error)
 
+	// MeanFloat64Slice returns the mathematical mean of all numbers of a list,
+	// that is the average.
+	MeanFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// MedianFloat64Slice returns the mathematical median of all numbers of a
+	// list.
+	MedianFloat64Slice(args ...interface{}) ([]interface{}, error)
+
 	// MinFloat64Slice returns the lowest number of a list.
 	MinFloat64Slice(args ...interface{}) ([]interface{}, error)
+
+	// ModeFloat64Slice returns the mathematical mode of all numbers of a list,
+	// that is the most frequent value(s).
+	ModeFloat64Slice(args ...interface{}) ([]interface{}, error)
 
 	// NewFloat64Slice returns a new float64 slice.
 	NewFloat64Slice(args ...interface{}) ([]interface{}, error)
@@ -397,8 +409,19 @@ type CLGIntSlice interface {
 	// MaxIntSlice returns the highest number of a list.
 	MaxIntSlice(args ...interface{}) ([]interface{}, error)
 
+	// MeanIntSlice returns the mathematical mean of all numbers of a list, that
+	// is the average.
+	MeanIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// MedianIntSlice returns the mathematical median of all numbers of a list.
+	MedianIntSlice(args ...interface{}) ([]interface{}, error)
+
 	// MinIntSlice returns the lowest number of a list.
 	MinIntSlice(args ...interface{}) ([]interface{}, error)
+
+	// ModeIntSlice returns the mathematical mode of all numbers of a list, that
+	// is the most frequent value(s).
+	ModeIntSlice(args ...interface{}) ([]interface{}, error)
 
 	// NewIntSlice returns a new int slice.
 	NewIntSlice(args ...interface{}) ([]interface{}, error)

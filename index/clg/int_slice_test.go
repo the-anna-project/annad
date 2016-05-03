@@ -701,6 +701,11 @@ func Test_IntSlice_MaxIntSlice(t *testing.T) {
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
+			Input:        []interface{}{[]int{5}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
 			Input:        []interface{}{[]int{}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
@@ -714,6 +719,211 @@ func Test_IntSlice_MaxIntSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := testMaybeNewCLGCollection(t).MaxIntSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_meanInt(t *testing.T) {
+	i := meanInt(nil)
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+	i = meanInt([]int{})
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+}
+
+func Test_IntSlice_MeanIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{4, 5, 6}},
+			Expected:     []interface{}{float64(5)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 5, 6, 7, 8}},
+			Expected:     []interface{}{float64(6)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 26, 12}},
+			Expected:     []interface{}{float64(44)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{5}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	for i, testCase := range testCases {
+		output, err := testMaybeNewCLGCollection(t).MeanIntSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_medianInt_ZeroValue(t *testing.T) {
+	i := medianInt(nil)
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+	i = medianInt([]int{})
+	if i != 0 {
+		t.Fatal("expected", 0, "got", i)
+	}
+}
+
+// Test_medianInt_EnsureInputUnchanged verifies that the input arguments
+// stay unchanged after calculating the median of it. This check is necessary
+// due to the fact that the input needs to be sorted in order to being able of
+// calculating the median of it. Thus the check verifies that internally a copy
+// of the input is created before calculating the median.
+func Test_medianInt_EnsureInputUnchanged(t *testing.T) {
+	input := []int{3, 2, 9, 5}
+	expected := input
+	medianInt(input)
+	if !reflect.DeepEqual(input, expected) {
+		t.Fatal("expected", expected, "got", input)
+	}
+
+	input = []int{3, 4, 5, 6, 7, 8}
+	expected = input
+	medianInt(input)
+	if !reflect.DeepEqual(input, expected) {
+		t.Fatal("expected", expected, "got", input)
+	}
+}
+
+func Test_IntSlice_MedianIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{4, 5, 6}},
+			Expected:     []interface{}{float64(5)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{0, 0, 1, 1, 1, 3, 4, 4, 55, 67}},
+			Expected:     []interface{}{float64(2)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 5, 6, 7, 8}},
+			Expected:     []interface{}{float64(6)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 5, 6, 6, 7, 8}},
+			Expected:     []interface{}{float64(6)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 5, 5, 7, 7, 8}},
+			Expected:     []interface{}{float64(6)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 13, 26, 12}},
+			Expected:     []interface{}{float64(19.5)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 25, 12}},
+			Expected:     []interface{}{float64(25)},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{5}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	for i, testCase := range testCases {
+		output, err := testMaybeNewCLGCollection(t).MedianIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -778,6 +988,11 @@ func Test_IntSlice_MinIntSlice(t *testing.T) {
 			ErrorMatcher: IsTooManyArguments,
 		},
 		{
+			Input:        []interface{}{[]int{5}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
 			Input:        []interface{}{[]int{}},
 			Expected:     nil,
 			ErrorMatcher: IsNotEnoughArguments,
@@ -791,6 +1006,93 @@ func Test_IntSlice_MinIntSlice(t *testing.T) {
 
 	for i, testCase := range testCases {
 		output, err := testMaybeNewCLGCollection(t).MinIntSlice(testCase.Input...)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
+func Test_modeInt(t *testing.T) {
+	is := modeInt(nil)
+	if is != nil {
+		t.Fatal("expected", nil, "got", is)
+	}
+	is = modeInt([]int{})
+	if is != nil {
+		t.Fatal("expected", nil, "got", is)
+	}
+}
+
+func Test_IntSlice_ModeIntSlice(t *testing.T) {
+	testCases := []struct {
+		Input        []interface{}
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        []interface{}{[]int{4, 5, 6}},
+			Expected:     []interface{}{[]int{4, 5, 6}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{4, 5, 5, 6, 7, 8}},
+			Expected:     []interface{}{[]int{5}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 94, 94, 26, 12, 3, 6, 3, 81, 3}},
+			Expected:     []interface{}{[]int{3, 94}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]int{94, 94, 26, 12, 3, 6, 3, 26, 6}},
+			Expected:     []interface{}{[]int{3, 6, 26, 94}},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        []interface{}{[]string{"a", "b", "c"}},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{3},
+			Expected:     nil,
+			ErrorMatcher: IsWrongArgumentType,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, "foo"},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{4, 26, 12}, 3},
+			Expected:     nil,
+			ErrorMatcher: IsTooManyArguments,
+		},
+		{
+			Input:        []interface{}{[]int{5}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{[]int{}},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Input:        []interface{}{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+	}
+
+	for i, testCase := range testCases {
+		output, err := testMaybeNewCLGCollection(t).ModeIntSlice(testCase.Input...)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

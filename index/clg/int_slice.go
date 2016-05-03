@@ -284,11 +284,85 @@ func (c *clgCollection) MaxIntSlice(args ...interface{}) ([]interface{}, error) 
 	if len(args) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
-	if len(is) < 1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 1 got %d", len(is))
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
 	}
 
 	m := maxInt(is)
+
+	return []interface{}{m}, nil
+}
+
+func meanInt(list []int) float64 {
+	l := len(list)
+	if l == 0 {
+		return 0
+	}
+
+	var sum int
+	for _, i := range list {
+		sum += i
+	}
+
+	mean := float64(sum) / float64(l)
+
+	return mean
+}
+
+func (c *clgCollection) MeanIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
+	}
+
+	m := meanInt(is)
+
+	return []interface{}{m}, nil
+}
+
+func medianInt(list []int) float64 {
+	l := len(list)
+	if l == 0 {
+		return 0
+	}
+
+	// The median can only be calculated on a sorted list of numbers. Thus we
+	// create a copy first to keep the input as it is.
+	c := list
+	sort.Ints(c)
+
+	var median float64
+	if l%2 == 0 {
+		// In case the amount of numbers is even, the median consists of the mean
+		// (average) of the two middle numbers.
+		median = float64(c[l/2-1]+c[l/2]) / 2
+	} else {
+		// In case the amount of numbers is odd, the median is the middle number.
+		median = float64(c[l/2])
+	}
+
+	return median
+}
+
+func (c *clgCollection) MedianIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
+	}
+
+	m := medianInt(is)
 
 	return []interface{}{m}, nil
 }
@@ -317,11 +391,62 @@ func (c *clgCollection) MinIntSlice(args ...interface{}) ([]interface{}, error) 
 	if len(args) > 1 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
-	if len(is) < 1 {
-		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 1 got %d", len(is))
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
 	}
 
 	m := minInt(is)
+
+	return []interface{}{m}, nil
+}
+
+func modeInt(list []int) []int {
+	if len(list) == 0 {
+		return nil
+	}
+
+	// Collect the counts of all items and also find the maximum number of
+	// occurences.
+	max := 1
+	counts := map[int]int{}
+	for _, item := range list {
+		if _, ok := counts[item]; !ok {
+			counts[item] = 1
+		} else {
+			counts[item]++
+
+			count := counts[item]
+			if count > max {
+				max = count
+			}
+		}
+	}
+
+	// Collect the most occured items and sort the result.
+	var mode []int
+	for item, count := range counts {
+		if count == max {
+			mode = append(mode, item)
+		}
+	}
+	sort.Ints(mode)
+
+	return mode
+}
+
+func (c *clgCollection) ModeIntSlice(args ...interface{}) ([]interface{}, error) {
+	is, err := ArgToIntSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	if len(args) > 1 {
+		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
+	}
+	if len(is) < 2 {
+		return nil, maskAnyf(notEnoughArgumentsError, "expected at least 2 got %d", len(is))
+	}
+
+	m := modeInt(is)
 
 	return []interface{}{m}, nil
 }
