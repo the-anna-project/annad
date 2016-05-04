@@ -43,10 +43,11 @@ type CLGCollection interface {
 	// CLGNetwork (scan ports, resolve IPs, make requests)
 	CLGString
 	CLGStringSlice
-	// CLGOS (scan file system, CRUD operations on files and directories, append content to files)
+	// CLGOS (scan file system, CRUD operations on files and directories, append content to files, execute commands on host)
 	// CLGTime (get current time, calculate times, parse and format)
 
 	// Similarity (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
+	// Cryptography (encrypt, decrypt)
 }
 
 // CLGConvert represents all conversion CLGs that can be used.
