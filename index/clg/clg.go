@@ -1,5 +1,16 @@
 // Package clg implementes fundamental actions used to create strategies that
 // allow to discover new behavior for problem solving.
+//
+// Note that this package defines a go generate statement to compile its own
+// source code into the AssetFileSystem implementation. That way the function
+// bodies of the implemented CLGs are available for inspection and hashing.
+// Hashes of CLGs are used to check whether they changed. A change of a CLG
+// affects its functionality, its profile and probably even its use case. Thus
+// changes of the CLGs function bodies need to be detected to trigger profile
+// updates.
+//
+//go:generate go-bindata -o ./asset.go -pkg clg .
+//
 package clg
 
 import (
