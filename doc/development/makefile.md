@@ -111,7 +111,10 @@ ok    _/home/vagrant/projects/private/anna/strategy 0.007s  coverage: 98.5% of s
 
 ### projectcheck
 This is to ensure some QA aspects like spelling, source code formatting and
-others. Check `.project.check.sh` for the details.
+others. Check `project.check.sh` for the details. It is recommended to make use
+of this during your development cycles. Checks done here are also done during
+CI builds. Using the following command every now and then prevents pushing
+faulty branches.
 ```
 make projectcheck
 ```
