@@ -9,7 +9,7 @@
 // changes of the CLGs function bodies need to be detected to trigger profile
 // updates.
 //
-//go:generate go-bindata -o ./asset.go -pkg clg .
+//go:generate loader generate -p clg
 //
 package clg
 
