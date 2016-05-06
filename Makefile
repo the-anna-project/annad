@@ -6,7 +6,6 @@ export GOPATH
 all: goget annactl anna
 
 anna: gogenerate
-	@go generate ./...
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
@@ -32,7 +31,7 @@ goget:
 	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@go get -d -v ./...
-	@go get -u github.com/jteeuwen/go-bindata/...
+	@go get github.com/xh3b4sd/loader
 	@# Install dev dependencies.
 	@go get github.com/client9/misspell/cmd/misspell
 	@go get github.com/fzipp/gocyclo
