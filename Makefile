@@ -27,9 +27,10 @@ gogenerate:
 	@go generate ./...
 
 goget:
-	@# Install project dependencies.
+	@# Setup workspace.
 	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@# Install project dependencies.
 	@go get -d -v ./...
 	@go get github.com/xh3b4sd/loader
 	@# Install dev dependencies.
