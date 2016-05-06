@@ -29,10 +29,13 @@ func (p *clgProfile) UnmarshalJSON(b []byte) error {
 		return maskAny(err)
 	}
 
-	p.MethodName = newCLGProfile.MethodName
-	p.MethodHash = newCLGProfile.MethodHash
+	p.Hash = newCLGProfile.Hash
 	p.InputTypes = newCLGProfile.InputTypes
 	p.InputExamples = newCLGProfile.InputExamples
+	p.MethodName = newCLGProfile.MethodName
+	p.MethodBody = newCLGProfile.MethodBody
+	p.OutputTypes = newCLGProfile.OutputTypes
+	p.OutputExamples = newCLGProfile.OutputExamples
 	p.RightSideNeighbours = newCLGProfile.RightSideNeighbours
 
 	return nil

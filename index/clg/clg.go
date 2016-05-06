@@ -105,29 +105,23 @@ func (i *clgIndex) Boot() {
 	})
 }
 
-func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName string, canceler <-chan struct{}) (spec.CLGProfile, error) {
+func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName, clgBody string, canceler <-chan struct{}) (spec.CLGProfile, error) {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfile")
 
-	// Fill a queue.
-	args, err := clgCollection.GetNamesMethod()
+	// Fetch CLG names.
+	clgNames, err := i.getCLGNames(clgCollection)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	clgNames, err := ArgToStringSlice(args, 0)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	queue := make(chan string, len(clgNames))
-	for _, clgName := range clgNames {
-		queue <- clgName
-	}
+	// Fill a queue with all CLG names.
+	clgNameQueue := i.getCLGNameQueue(clgNames)
 
 	// Initialize the profile creation.
 	for {
 		select {
 		case <-canceler:
 			return nil, maskAny(workerCanceledError)
-		case clgName := <-queue:
+		case clgName := <-clgNameQueue:
 			methodValue := reflect.ValueOf(clgCollection).MethodByName(clgName)
 			if !i.isMethodValue(methodValue) {
 				return nil, maskAnyf(invalidCLGError, clgName)
@@ -135,8 +129,7 @@ func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName st
 
 			var err error
 			newCLGProfileConfig := DefaultCLGProfileConfig()
-			newCLGProfileConfig.MethodName = clgName
-			newCLGProfileConfig.MethodHash, err = i.getCLGMethodHash(methodValue)
+			newCLGProfileConfig.Hash, err = i.getCLGMethodHash(clgName, clgBody)
 			if err != nil {
 				return nil, maskAny(err)
 			}
@@ -145,6 +138,16 @@ func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName st
 				return nil, maskAny(err)
 			}
 			newCLGProfileConfig.InputExamples, err = i.getCLGInputExamples(methodValue)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfileConfig.MethodName = clgName
+			newCLGProfileConfig.MethodBody = clgBody
+			newCLGProfileConfig.OutputTypes, err = i.getCLGOutputTypes(methodValue)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			newCLGProfileConfig.OutputExamples, err = i.getCLGOutputExamples(methodValue)
 			if err != nil {
 				return nil, maskAny(err)
 			}
@@ -168,57 +171,29 @@ func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfiles")
 
-	// Fill a queue.
-	args, err := clgCollection.GetNamesMethod()
+	// Fetch CLG names and fill a queue with them.
+	clgNames, err := i.getCLGNames(clgCollection)
 	if err != nil {
 		return maskAny(err)
 	}
-	clgNames, err := ArgToStringSlice(args, 0)
-	if err != nil {
-		return maskAny(err)
-	}
-	queue := make(chan string, len(clgNames))
-	for _, clgName := range clgNames {
-		queue <- clgName
-	}
+	clgNameQueue := i.getCLGNameQueue(clgNames)
 	// We can close the queue channel immediately, because it only provides a one
 	// way ticket. As soon as a CLG name was fetched from the queue it is
 	// considered WIP. A CLG name must never be requeued.
-	close(queue)
+	close(clgNameQueue)
 
-	// Start N worker goroutines.
-	workerFunc := func(canceler <-chan struct{}) error {
-		for {
-			select {
-			case <-canceler:
-				return maskAny(workerCanceledError)
-			case clgName := <-queue:
-				// Try to fetch the CLG profile in advance.
-				currentCLGProfile, err := i.GetCLGProfileByName(clgName)
-				if IsCLGProfileNotFound(err) {
-					// In case the CLG profile cannot be found, we are going ahead to create
-					// one.
-				} else if err != nil {
-					return maskAny(err)
-				}
-
-				newCLGProfile, err := i.CreateCLGProfile(clgCollection, clgName, canceler)
-				if err != nil {
-					return maskAny(err)
-				}
-
-				if currentCLGProfile.Equals(newCLGProfile) {
-					// The CLG profile has not changed. Thus nothing to do here.
-					continue
-				}
-
-				err = i.StoreCLGProfile(newCLGProfile)
-				if err != nil {
-					return maskAny(err)
-				}
-			}
-		}
+	// Fetch CLG package information and create a lookup table for CLG names and
+	// their corresponding function bodies.
+	packageInfos, err := i.getCLGPackageInfos()
+	if err != nil {
+		return maskAny(err)
 	}
+	lookupTable, err := i.getCLGLookupTable(clgNames, packageInfos)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	workerFunc := i.getWorkerFunc(clgCollection, clgNameQueue, lookupTable)
 
 	// Prepare the worker pool.
 	newWorkerPoolConfig := workerpool.DefaultConfig()

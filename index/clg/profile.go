@@ -17,12 +17,8 @@ const (
 type ProfileConfig struct {
 	// Settings.
 
-	// MethodName represents the CLG's implemented method name.
-	MethodName string
-
-	// MethodHash represents the hashed value of the CLG's implemented method
-	// body.
-	MethodHash string
+	// Hash represents the hashed value of the CLG's implemented method.
+	Hash string
 
 	// InputTypes represents the CLG's implemented method input parameter types.
 	InputTypes []reflect.Kind
@@ -30,6 +26,19 @@ type ProfileConfig struct {
 	// InputExamples represents the CLG's implemented method input parameter
 	// examples.
 	InputExamples []interface{}
+
+	// MethodName represents the CLG's implemented method name.
+	MethodName string
+
+	// MethodBody represents the CLG's implemented method body.
+	MethodBody string
+
+	// OutputTypes represents the CLG's implemented method output parameter types.
+	OutputTypes []reflect.Kind
+
+	// OutputExamples represents the CLG's implemented method output parameter
+	// examples.
+	OutputExamples []interface{}
 
 	// RightSideNeighbours represents the CLG's that can be used to combine it
 	// with the current CLG.
@@ -45,10 +54,13 @@ type ProfileConfig struct {
 func DefaultCLGProfileConfig() ProfileConfig {
 	newConfig := ProfileConfig{
 		// Settings.
-		MethodName:          "",
-		MethodHash:          "",
+		Hash:                "",
 		InputTypes:          nil,
 		InputExamples:       nil,
+		MethodName:          "",
+		MethodBody:          "",
+		OutputTypes:         nil,
+		OutputExamples:      nil,
 		RightSideNeighbours: nil,
 	}
 
@@ -63,11 +75,20 @@ func NewCLGProfile(config ProfileConfig) (spec.CLGProfile, error) {
 		Type: ObjectTypeCLGProfile,
 	}
 
+	if newCLGProfile.Hash == "" {
+		return nil, maskAnyf(invalidConfigError, "hash of CLG profile must not be empty")
+	}
 	if newCLGProfile.MethodName == "" {
 		return nil, maskAnyf(invalidConfigError, "method name of CLG profile must not be empty")
 	}
-	if newCLGProfile.MethodHash == "" {
-		return nil, maskAnyf(invalidConfigError, "method hash of CLG profile must not be empty")
+	if newCLGProfile.MethodBody == "" {
+		return nil, maskAnyf(invalidConfigError, "method body of CLG profile must not be empty")
+	}
+	if len(newCLGProfile.OutputTypes) == 0 {
+		return nil, maskAnyf(invalidConfigError, "output types of CLG profile must not be empty")
+	}
+	if len(newCLGProfile.OutputExamples) == 0 {
+		return nil, maskAnyf(invalidConfigError, "output examples of CLG profile must not be empty")
 	}
 
 	return newCLGProfile, nil
@@ -80,16 +101,25 @@ type clgProfile struct {
 }
 
 func (p *clgProfile) Equals(other spec.CLGProfile) bool {
-	if p.GetMethodName() != other.GetMethodName() {
-		return false
-	}
-	if p.GetMethodHash() != other.GetMethodHash() {
+	if p.GetHash() != other.GetHash() {
 		return false
 	}
 	if !reflect.DeepEqual(p.GetInputTypes(), other.GetInputTypes()) {
 		return false
 	}
 	if !reflect.DeepEqual(p.GetInputExamples(), other.GetInputExamples()) {
+		return false
+	}
+	if p.GetMethodName() != other.GetMethodName() {
+		return false
+	}
+	if p.GetMethodBody() != other.GetMethodBody() {
+		return false
+	}
+	if !reflect.DeepEqual(p.GetOutputTypes(), other.GetOutputTypes()) {
+		return false
+	}
+	if !reflect.DeepEqual(p.GetOutputExamples(), other.GetOutputExamples()) {
 		return false
 	}
 	if !reflect.DeepEqual(p.GetRightSideNeighbours(), other.GetRightSideNeighbours()) {
@@ -99,12 +129,8 @@ func (p *clgProfile) Equals(other spec.CLGProfile) bool {
 	return true
 }
 
-func (p *clgProfile) GetMethodName() string {
-	return p.MethodName
-}
-
-func (p *clgProfile) GetMethodHash() string {
-	return p.MethodHash
+func (p *clgProfile) GetHash() string {
+	return p.Hash
 }
 
 func (p *clgProfile) GetInputTypes() []reflect.Kind {
@@ -113,6 +139,22 @@ func (p *clgProfile) GetInputTypes() []reflect.Kind {
 
 func (p *clgProfile) GetInputExamples() []interface{} {
 	return p.InputExamples
+}
+
+func (p *clgProfile) GetMethodName() string {
+	return p.MethodName
+}
+
+func (p *clgProfile) GetMethodBody() string {
+	return p.MethodBody
+}
+
+func (p *clgProfile) GetOutputTypes() []reflect.Kind {
+	return p.OutputTypes
+}
+
+func (p *clgProfile) GetOutputExamples() []interface{} {
+	return p.OutputExamples
 }
 
 func (p *clgProfile) GetRightSideNeighbours() []string {

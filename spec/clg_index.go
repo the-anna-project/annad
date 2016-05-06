@@ -8,7 +8,7 @@ type CLGIndex interface {
 	// you might want to call it in a separate goroutine.
 	Boot()
 
-	CreateCLGProfile(clgCollection CLGCollection, clgName string, canceler <-chan struct{}) (CLGProfile, error)
+	CreateCLGProfile(clgCollection CLGCollection, clgName, clgBody string, canceler <-chan struct{}) (CLGProfile, error)
 
 	// CreateCLGProfiles checks all CLGs optained by the given collection,
 	// whether they have proper profiles. In case a proper profile exists, it

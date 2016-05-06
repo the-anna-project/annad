@@ -126,3 +126,10 @@ var clgProfileNotFoundError = errgo.New("clg profile not found")
 func IsCLGProfileNotFound(err error) bool {
 	return errgo.Cause(err) == clgProfileNotFoundError
 }
+
+var clgBodyNotFoundError = errgo.New("clg body not found")
+
+// IsCLGBodyNotFound asserts clgBodyNotFoundError.
+func IsCLGBodyNotFound(err error) bool {
+	return errgo.Cause(err) == clgBodyNotFoundError
+}
