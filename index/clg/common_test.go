@@ -2,7 +2,6 @@ package clg
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/xh3b4sd/anna/spec"
@@ -15,24 +14,21 @@ func testMaybeFatalCase(t *testing.T, index int, err error) {
 }
 
 func testMaybeNewCLGCollection(t *testing.T) spec.CLGCollection {
-	newConfig := DefaultConfig()
-	newCLGIndex, err := NewCLGIndex(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newCLGIndex.GetCLGCollection()
+	return testMaybeNewCLGIndex(t).GetCLGCollection()
 }
 
-func Test_CLGIndex_getCLGMethodHash(t *testing.T) {
+func testMaybeNewCLGIndex(t *testing.T) spec.CLGIndex {
 	newCLGIndex, err := NewCLGIndex(DefaultConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	v := reflect.ValueOf(newCLGIndex.GetCLGCollection())
+	return newCLGIndex
+}
 
-	hash, err := newCLGIndex.(*clgIndex).getCLGMethodHash(v)
+// TODO
+func Test_CLGIndex_getCLGMethodHash(t *testing.T) {
+	hash, err := testMaybeNewCLGIndex(t).(*clgIndex).getCLGMethodHash("clgName", "clgBody")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
