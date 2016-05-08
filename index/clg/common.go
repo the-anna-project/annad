@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"reflect"
 
+	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -71,7 +72,7 @@ func (i *clgIndex) getCLGNames(clgCollection spec.CLGCollection) ([]string, erro
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	newCLGNames, err := ArgToStringSlice(args, 0)
+	newCLGNames, err := collection.ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -145,7 +146,7 @@ func (i *clgIndex) getCLGRightSideNeighbours(clgCollection spec.CLGCollection, c
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	clgNames, err := ArgToStringSlice(args, 0)
+	clgNames, err := collection.ArgToStringSlice(args, 0)
 	if err != nil {
 		return nil, maskAny(err)
 	}

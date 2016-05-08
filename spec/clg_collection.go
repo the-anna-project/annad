@@ -48,6 +48,8 @@ type CLGCollection interface {
 
 	// Similarity (manhatten-distance, syntactic similarity, semantic similarity, combined similarity)
 	// Cryptography (encrypt, decrypt)
+
+	Object
 }
 
 // CLGConvert represents all conversion CLGs that can be used.

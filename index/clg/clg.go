@@ -1,15 +1,14 @@
 // Package clg implementes fundamental actions used to create strategies that
 // allow to discover new behavior for problem solving.
 //
-// Note that this package defines a go generate statement to compile its own
-// source code into the AssetFileSystem implementation. That way the function
-// bodies of the implemented CLGs are available for inspection and hashing.
-// Hashes of CLGs are used to check whether they changed. A change of a CLG
-// affects its functionality, its profile and probably even its use case. Thus
-// changes of the CLGs function bodies need to be detected to trigger profile
-// updates.
+// Note that this package defines a go generate statement to embed the CLG
+// collection's source code. That way the methods bodies of the implemented
+// CLGs are available for inspection and hashing. Hashes of CLG methods are
+// used to check whether they changed. A change of a CLG method affects its
+// functionality, its profile and probably even its use case. Thus changes of
+// the CLGs method bodies need to be detected to trigger profile updates.
 //
-//go:generate ${GOPATH}/bin/loader generate -p clg
+//go:generate ${GOPATH}/bin/loader generate -i ./collection/ -p clg
 //
 package clg
 
@@ -18,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
@@ -42,14 +42,14 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new CLG index
 // object by best effort.
 func DefaultConfig() Config {
-	newCLGCollection, err := NewCLGCollection(DefaultCLGCollectionConfig())
+	newCollection, err := collection.NewCollection(collection.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := Config{
 		// Dependencies.
-		Collection: newCLGCollection,
+		Collection: newCollection,
 		Log:        log.NewLog(log.DefaultConfig()),
 
 		// Settings.
@@ -183,7 +183,7 @@ func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 	close(clgNameQueue)
 
 	// Fetch CLG package information and create a lookup table for CLG names and
-	// their corresponding function bodies.
+	// their corresponding method bodies.
 	packageInfos, err := i.getCLGPackageInfos()
 	if err != nil {
 		return maskAny(err)
