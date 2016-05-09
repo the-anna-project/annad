@@ -44,17 +44,16 @@ func DefaultConfig() Config {
 func NewStrategy(config Config) (spec.Strategy, error) {
 	newStrategy := &strategy{
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Type:   ObjectTypeStrategy,
+
+		ID:    id.NewObjectID(id.Hex128),
+		Mutex: sync.Mutex{},
+		Type:  ObjectTypeStrategy,
 	}
 
 	newStrategy.CLGNames = randomizeCLGNames(newStrategy.CLGNames)
 
 	if len(newStrategy.CLGNames) == 0 {
 		return nil, maskAnyf(invalidConfigError, "CLG names must not be empty")
-	}
-	if newStrategy.ID == "" {
-		return nil, maskAnyf(invalidConfigError, "ID must not be empty")
 	}
 	if newStrategy.Requestor == "" {
 		return nil, maskAnyf(invalidConfigError, "requestor not be empty")

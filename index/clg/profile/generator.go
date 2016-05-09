@@ -1,9 +1,11 @@
 package profile
 
 import (
-	"reflect"
+	"sync"
 
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/index/clg/collection"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -20,22 +22,16 @@ type GeneratorConfig struct {
 	// Dependencies.
 	Collection spec.CLGCollection
 	Log        spec.Log
-	Mapper     spec.CLGMapper
-	Scanner    spec.CLGScanner
+
+	// Settings.
+	LoaderFileNames func() []string
+	LoaderReadFile  func(fileName string) ([]byte, error)
 }
 
-// DefaultConfig provides a default configuration to create a new CLG profile
-// generator object by best effort.
-func DefaultConfig() GeneratorConfig {
+// DefaultGeneratorConfig provides a default configuration to create a new CLG
+// profile generator object by best effort.
+func DefaultGeneratorConfig() GeneratorConfig {
 	newCollection, err := collection.New(collection.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-	newMapper, err := NewMapper(DefaultMapperConfig())
-	if err != nil {
-		panic(err)
-	}
-	newScanner, err := NewScanner(DefaultScannerConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -44,8 +40,10 @@ func DefaultConfig() GeneratorConfig {
 		// Dependencies.
 		Collection: newCollection,
 		Log:        log.NewLog(log.DefaultConfig()),
-		Mapper:     newMapper,
-		Scanner:    newScanner,
+
+		// Settings.
+		LoaderReadFile:  collection.LoaderReadFile,
+		LoaderFileNames: collection.LoaderFileNames,
 	}
 
 	return newConfig
@@ -57,10 +55,9 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 	newGenerator := &generator{
 		GeneratorConfig: config,
 
-		ID:           id.NewObjectID(id.Hex128),
-		Mutex:        sync.Mutex{},
-		ProfileNames: nil,
-		Type:         ObjectTypeCLGProfileGenerator,
+		ID:    id.NewObjectID(id.Hex128),
+		Mutex: sync.Mutex{},
+		Type:  ObjectTypeCLGProfileGenerator,
 	}
 
 	// Validate new object.
@@ -70,22 +67,9 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 	if newGenerator.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
-	if newGenerator.Mapper == nil {
-		return nil, maskAnyf(invalidConfigError, "CLG mapper must not be empty")
-	}
-	if newGenerator.Scanner == nil {
-		return nil, maskAnyf(invalidConfigError, "CLG scanner must not be empty")
-	}
 
 	// Register in logger.
 	newGenerator.Log.Register(newGenerator.GetType())
-
-	// Create CLG lookup table.
-	newLookupTable, err := createLookupTable()
-	if err != nil {
-		return nil, maskAnyf(invalidConfigError, err.Error())
-	}
-	newGenerator.LookupTable = lookupTable
 
 	return newGenerator, nil
 }
@@ -93,29 +77,12 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 type generator struct {
 	GeneratorConfig
 
-	ID           spec.ObjectID
-	Mutex        sync.Mutex
-	ProfileNames []string
-	Type         spec.ObjectType
+	ID    spec.ObjectID
+	Mutex sync.Mutex
+	Type  spec.ObjectType
 }
 
-func (g *generator) GetProfileNames() ([]string, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateNameQueue")
-
-	if g.ProfileNames != nil {
-		return g.ProfileNames, nil
-	}
-
-	profileNames, err := profileNamesFromCollection(g.Collection)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	g.ProfileNames = profileNames
-
-	return g.ProfileNames, nil
-}
-
-func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spec.CLGProfile, bool, error) {
+func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, bool, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateProfile")
 
 	// Fetch the CLG profile in advance.
@@ -128,23 +95,34 @@ func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spe
 	}
 
 	// Create mapper and scanner results for the current profile.
-	newMapResult, err = g.Mapper.CreateResult(clgName, canceler)
+	newBody, err := g.CreateBody(clgName)
 	if err != nil {
 		return nil, false, maskAny(err)
 	}
-	newScanResult, err = g.Scanner.CreateResult(clgName, canceler)
+	newHash, err := g.CreateHash(newBody)
+	if err != nil {
+		return nil, false, maskAny(err)
+	}
+	newInputs, err := g.CreateInputs(clgName)
+	if err != nil {
+		return nil, false, maskAny(err)
+	}
+	newName, err := g.CreateName(clgName)
+	if err != nil {
+		return nil, false, maskAny(err)
+	}
+	newOutputs, err := g.CreateOutputs(clgName)
 	if err != nil {
 		return nil, false, maskAny(err)
 	}
 
 	// Create the new CLG profile.
 	newConfig := DefaultConfig()
-	newConfig.Hash = newMapResult.Hash
-	newConfig.InputTypes = newMapResult.InputTypes
-	newConfig.MethodBody = newMapResult.MethodBody
-	newConfig.MethodName = newMapResult.MethodName
-	newConfig.OutputTypes = newMapResult.OutputTypes
-	newConfig.RightSideNeighbours = newScanResult.RightSideNeighbours
+	newConfig.Hash = newHash
+	newConfig.Inputs = newInputs
+	newConfig.Body = newBody
+	newConfig.Name = newName
+	newConfig.Outputs = newOutputs
 	newProfile, err := New(newConfig)
 	if err != nil {
 		return nil, false, maskAny(err)
@@ -155,14 +133,29 @@ func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spe
 		return currentProfile, false, nil
 	}
 
-	return newProfile, nil
+	return newProfile, true, nil
 }
 
 // TODO
 func (g *generator) GetProfileByName(clgName string) (spec.CLGProfile, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call StoreCLGProfile")
+	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call GetProfileByName")
 
 	return nil, nil
+}
+
+func (g *generator) GetProfileNames() ([]string, error) {
+	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call GetProfileNames")
+
+	args, err := g.Collection.GetNamesMethod()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	profileNames, err := collection.ArgToStringSlice(args, 0)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return profileNames, nil
 }
 
 // TODO

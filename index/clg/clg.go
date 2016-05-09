@@ -18,7 +18,7 @@ const (
 	ObjectTypeCLGIndex spec.ObjectType = "clg-index"
 )
 
-// ndexConfig represents the configuration used to create a new CLG index
+// IndexConfig represents the configuration used to create a new CLG index
 // object.
 type IndexConfig struct {
 	// Dependencies.
@@ -37,7 +37,7 @@ func DefaultIndexConfig() IndexConfig {
 		panic(err)
 	}
 
-	newConfig := CLGIndexConfig{
+	newConfig := IndexConfig{
 		// Dependencies.
 		Generator: newGenerator,
 		Log:       log.NewLog(log.DefaultConfig()),
@@ -62,10 +62,10 @@ func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
 		ShutdownOnce: sync.Once{},
 	}
 
-	if newIndex.NumCLGProfileGeneratorWorkers < 1 {
+	if newIndex.NumGeneratorWorkers < 1 {
 		return nil, maskAnyf(invalidConfigError, "number of CLG profile generator workers must be greater than 0")
 	}
-	if newIndex.GetCLGProfileGenerator() == nil {
+	if newIndex.Generator == nil {
 		return nil, maskAnyf(invalidConfigError, "CLG profile generator must not be empty")
 	}
 
@@ -91,7 +91,7 @@ func (i *index) Boot() {
 	i.BootOnce.Do(func() {
 		// Create and/or update CLG profiles.
 		go func() {
-			err := i.CreateCLGProfiles(i.GetGenerator())
+			err := i.CreateProfiles(i.GetGenerator())
 			if err != nil {
 				i.Log.WithTags(spec.Tags{L: "E", O: i, T: nil, V: 4}, "%#v", maskAny(err))
 			}
@@ -110,7 +110,7 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 	if err != nil {
 		return maskAny(err)
 	}
-	profileNameQueue := make(chan string, len(g.CLGNames))
+	profileNameQueue := make(chan string, len(profileNames))
 	for _, pn := range profileNames {
 		profileNameQueue <- pn
 	}
@@ -128,7 +128,7 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 			case <-canceler:
 				return maskAny(workerCanceledError)
 			case pn := <-profileNameQueue:
-				newProfile, hashChanged, err := generator.CreateProfile(pn, canceler)
+				newProfile, hashChanged, err := generator.CreateProfile(pn)
 				if err != nil {
 					return maskAny(err)
 				}
@@ -139,7 +139,7 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 					continue
 				}
 
-				err := generator.StoreProfile(newProfile)
+				err = generator.StoreProfile(newProfile)
 				if err != nil {
 					return maskAny(err)
 				}
@@ -153,13 +153,13 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 	newWorkerPoolConfig.Canceler = i.Closer
 	newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
 	if err != nil {
-		return nil, maskAny(err)
+		return maskAny(err)
 	}
 
 	// Execute the worker pool and block until all work is done.
 	err = i.maybeReturnAndLogErrors(newWorkerPool.Execute())
 	if err != nil {
-		return nil, maskAny(err)
+		return maskAny(err)
 	}
 
 	return nil

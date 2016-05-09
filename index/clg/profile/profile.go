@@ -3,7 +3,10 @@ package profile
 
 import (
 	"reflect"
+	"sync"
+	"time"
 
+	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -17,36 +20,20 @@ const (
 type Config struct {
 	// Settings.
 
+	// Body represents the CLG's implemented method body.
+	Body string
+
 	// Hash represents the hashed value of the CLG's implemented method.
 	Hash string
 
-	// InputTypes represents the CLG's implemented method input parameter types.
-	InputTypes []reflect.Kind
+	// Inputs represents the CLG's implemented method input parameter types.
+	Inputs []reflect.Kind
 
-	// InputExamples represents the CLG's implemented method input parameter
-	// examples.
-	InputExamples []interface{}
+	// Name represents the CLG's implemented method name.
+	Name string
 
-	// MethodName represents the CLG's implemented method name.
-	MethodName string
-
-	// MethodBody represents the CLG's implemented method body.
-	MethodBody string
-
-	// OutputTypes represents the CLG's implemented method output parameter types.
-	OutputTypes []reflect.Kind
-
-	// OutputExamples represents the CLG's implemented method output parameter
-	// examples.
-	OutputExamples []interface{}
-
-	// RightSideNeighbours represents the CLG's that can be used to combine it
-	// with the current CLG.
-	//
-	//     Input -> CurrentCLG -> Output
-	//                            Input -> RightSideNeighbourCLG -> Output
-	//
-	RightSideNeighbours []string
+	// Outputs represents the CLG's implemented method output parameter types.
+	Outputs []reflect.Kind
 }
 
 // DefaultConfig provides a default configuration to create a new CLG index
@@ -54,14 +41,11 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Hash:                "",
-		InputTypes:          nil,
-		InputExamples:       nil,
-		MethodName:          "",
-		MethodBody:          "",
-		OutputTypes:         nil,
-		OutputExamples:      nil,
-		RightSideNeighbours: nil,
+		Body:    "",
+		Hash:    "",
+		Inputs:  nil,
+		Name:    "",
+		Outputs: nil,
 	}
 
 	return newConfig
@@ -72,91 +56,100 @@ func New(config Config) (spec.CLGProfile, error) {
 	newProfile := &profile{
 		Config: config,
 
-		Type: ObjectTypeCLGProfile,
+		CreatedAt: time.Now(),
+		ID:        id.NewObjectID(id.Hex128),
+		Mutex:     sync.Mutex{},
+		Type:      ObjectTypeCLGProfile,
 	}
 
+	if newProfile.Body == "" {
+		return nil, maskAnyf(invalidConfigError, "method body of CLG profile must not be empty")
+	}
 	if newProfile.Hash == "" {
 		return nil, maskAnyf(invalidConfigError, "hash of CLG profile must not be empty")
 	}
-	if newProfile.MethodName == "" {
+	if newProfile.Name == "" {
 		return nil, maskAnyf(invalidConfigError, "method name of CLG profile must not be empty")
 	}
-	if newProfile.MethodBody == "" {
-		return nil, maskAnyf(invalidConfigError, "method body of CLG profile must not be empty")
-	}
-	if len(newProfile.OutputTypes) == 0 {
+	if len(newProfile.Outputs) == 0 {
 		return nil, maskAnyf(invalidConfigError, "output types of CLG profile must not be empty")
-	}
-	if len(newProfile.OutputExamples) == 0 {
-		return nil, maskAnyf(invalidConfigError, "output examples of CLG profile must not be empty")
 	}
 
 	return newProfile, nil
 }
 
+// NewEmptyProfile simply returns an empty, maybe invalid, profile object. This
+// should only be used for things like unmarshaling.
+func NewEmptyProfile() spec.CLGProfile {
+	return &profile{}
+}
+
 type profile struct {
 	Config
 
-	Type spec.ObjectType
+	// CreatedAt represents the creation time of the profile.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+
+	// ID represents the profile's identifier.
+	ID spec.ObjectID `json:"id,omitempty"`
+
+	Mutex sync.Mutex `json:"-"`
+
+	// Type represents the profile's object type.
+	Type spec.ObjectType `json:"type,omitempty"`
 }
 
 func (p *profile) Equals(other spec.CLGProfile) bool {
+	if p.GetBody() != other.GetBody() {
+		return false
+	}
 	if p.GetHash() != other.GetHash() {
 		return false
 	}
-	if !reflect.DeepEqual(p.GetInputTypes(), other.GetInputTypes()) {
+	if !reflect.DeepEqual(p.GetInputs(), other.GetInputs()) {
 		return false
 	}
-	if !reflect.DeepEqual(p.GetInputExamples(), other.GetInputExamples()) {
+	if p.GetName() != other.GetName() {
 		return false
 	}
-	if p.GetMethodName() != other.GetMethodName() {
-		return false
-	}
-	if p.GetMethodBody() != other.GetMethodBody() {
-		return false
-	}
-	if !reflect.DeepEqual(p.GetOutputTypes(), other.GetOutputTypes()) {
-		return false
-	}
-	if !reflect.DeepEqual(p.GetOutputExamples(), other.GetOutputExamples()) {
-		return false
-	}
-	if !reflect.DeepEqual(p.GetRightSideNeighbours(), other.GetRightSideNeighbours()) {
+	if !reflect.DeepEqual(p.GetOutputs(), other.GetOutputs()) {
 		return false
 	}
 
 	return true
 }
 
+func (p *profile) GetBody() string {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	return p.Body
+}
+
 func (p *profile) GetHash() string {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
 	return p.Hash
 }
 
-func (p *profile) GetInputTypes() []reflect.Kind {
-	return p.InputTypes
+func (p *profile) GetInputs() []reflect.Kind {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	return p.Inputs
 }
 
-func (p *profile) GetInputExamples() []interface{} {
-	return p.InputExamples
+func (p *profile) GetName() string {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	return p.Name
 }
 
-func (p *profile) GetMethodName() string {
-	return p.MethodName
-}
+func (p *profile) GetOutputs() []reflect.Kind {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
 
-func (p *profile) GetMethodBody() string {
-	return p.MethodBody
-}
-
-func (p *profile) GetOutputTypes() []reflect.Kind {
-	return p.OutputTypes
-}
-
-func (p *profile) GetOutputExamples() []interface{} {
-	return p.OutputExamples
-}
-
-func (p *profile) GetRightSideNeighbours() []string {
-	return p.RightSideNeighbours
+	return p.Outputs
 }

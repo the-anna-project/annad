@@ -13,7 +13,7 @@ func testMaybeFatalCase(t *testing.T, index int, err error) {
 }
 
 func testMaybeNewCollection(t *testing.T) spec.CLGCollection {
-	newCollection, err := NewCollection(DefaultConfig())
+	newCollection, err := New(DefaultConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

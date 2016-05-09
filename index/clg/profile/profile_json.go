@@ -11,9 +11,9 @@ import (
 type profileClone profile
 
 func (p *profile) MarshalJSON() ([]byte, error) {
-	newCLGProfile := profileClone(*p)
+	newProfile := profileClone(*p)
 
-	raw, err := json.Marshal(newCLGProfile)
+	raw, err := json.Marshal(newProfile)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -22,21 +22,21 @@ func (p *profile) MarshalJSON() ([]byte, error) {
 }
 
 func (p *profile) UnmarshalJSON(b []byte) error {
-	newCLGProfile := profileClone{}
+	newProfile := profileClone{}
 
-	err := json.Unmarshal(b, &newCLGProfile)
+	err := json.Unmarshal(b, &newProfile)
 	if err != nil {
 		return maskAny(err)
 	}
 
-	p.Hash = newCLGProfile.Hash
-	p.InputTypes = newCLGProfile.InputTypes
-	p.InputExamples = newCLGProfile.InputExamples
-	p.MethodName = newCLGProfile.MethodName
-	p.MethodBody = newCLGProfile.MethodBody
-	p.OutputTypes = newCLGProfile.OutputTypes
-	p.OutputExamples = newCLGProfile.OutputExamples
-	p.RightSideNeighbours = newCLGProfile.RightSideNeighbours
+	p.Body = newProfile.Body
+	p.CreatedAt = newProfile.CreatedAt
+	p.Hash = newProfile.Hash
+	p.ID = newProfile.ID
+	p.Inputs = newProfile.Inputs
+	p.Name = newProfile.Name
+	p.Outputs = newProfile.Outputs
+	p.Type = newProfile.Type
 
 	return nil
 }

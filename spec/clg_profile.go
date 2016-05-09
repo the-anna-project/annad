@@ -10,22 +10,23 @@ type CLGProfile interface {
 	// Equals checks whether the current CLG profile is equal to the given one.
 	Equals(CLGProfile) bool
 
+	// GetBody returns the profile's implemented CLG method body as string
+	// representation.
+	GetBody() string
+
+	// GetHash returns the checksum of the profile's body.
 	GetHash() string
 
-	GetInputTypes() []reflect.Kind
+	// GetInputs returns the profile's implemented CLG method input parameter
+	// types.
+	GetInputs() []reflect.Kind
 
-	GetInputExamples() []interface{}
+	// GetName returns the name of the CLG this profile is associated with.
+	GetName() string
 
-	GetMethodName() string
-
-	GetMethodBody() string
-
-	GetOutputTypes() []reflect.Kind
-
-	GetOutputExamples() []interface{}
-
-	// TODO comment
-	GetRightSideNeighbours() []string
+	// GetOutputs returns the profile's implemented CLG method output parameter
+	// types.
+	GetOutputs() []reflect.Kind
 
 	json.Marshaler
 
