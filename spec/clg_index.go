@@ -8,6 +8,9 @@ type CLGIndex interface {
 	// you might want to call it in a separate goroutine.
 	Boot()
 
+	// TODO comment
+	CreateCLGLookupTable(clgCollection spec.CLGCollection) (map[string]string, error)
+
 	CreateCLGProfile(clgCollection CLGCollection, clgName, clgBody string, canceler <-chan struct{}) (CLGProfile, error)
 
 	// CreateCLGProfiles checks all CLGs optained by the given collection,

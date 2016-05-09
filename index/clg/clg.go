@@ -1,23 +1,12 @@
 // Package clg implementes fundamental actions used to create strategies that
 // allow to discover new behavior for problem solving.
-//
-// Note that this package defines a go generate statement to embed the CLG
-// collection's source code. That way the methods bodies of the implemented
-// CLGs are available for inspection and hashing. Hashes of CLG methods are
-// used to check whether they changed. A change of a CLG method affects its
-// functionality, its profile and probably even its use case. Thus changes of
-// the CLGs method bodies need to be detected to trigger profile updates.
-//
-//go:generate ${GOPATH}/bin/loader generate -i ./collection/ -p clg
-//
 package clg
 
 import (
-	"reflect"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
-	"github.com/xh3b4sd/anna/index/clg/collection"
+	"github.com/xh3b4sd/anna/index/clg/profile"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
@@ -29,40 +18,41 @@ const (
 	ObjectTypeCLGIndex spec.ObjectType = "clg-index"
 )
 
-// Config represents the configuration used to create a new CLG index object.
-type Config struct {
+// ndexConfig represents the configuration used to create a new CLG index
+// object.
+type IndexConfig struct {
 	// Dependencies.
-	Collection spec.CLGCollection
-	Log        spec.Log
+	Generator spec.CLGProfileGenerator
+	Log       spec.Log
 
 	// Settings.
-	NumCLGProfileWorkers int
+	NumGeneratorWorkers int
 }
 
-// DefaultConfig provides a default configuration to create a new CLG index
-// object by best effort.
-func DefaultConfig() Config {
-	newCollection, err := collection.NewCollection(collection.DefaultConfig())
+// DefaultIndexConfig provides a default configuration to create a new CLG
+// index object by best effort.
+func DefaultIndexConfig() IndexConfig {
+	newGenerator, err := profile.NewGenerator(profile.DefaultGeneratorConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	newConfig := Config{
+	newConfig := CLGIndexConfig{
 		// Dependencies.
-		Collection: newCollection,
-		Log:        log.NewLog(log.DefaultConfig()),
+		Generator: newGenerator,
+		Log:       log.NewLog(log.DefaultConfig()),
 
 		// Settings.
-		NumCLGProfileWorkers: 10,
+		NumGeneratorWorkers: 10,
 	}
 
 	return newConfig
 }
 
-// NewCLGIndex creates a new configured CLG index object.
-func NewCLGIndex(config Config) (spec.CLGIndex, error) {
-	newCLGIndex := &clgIndex{
-		Config: config,
+// NewIndex creates a new configured CLG index object.
+func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
+	newIndex := &index{
+		IndexConfig: config,
 
 		BootOnce:     sync.Once{},
 		Closer:       make(chan struct{}, 1),
@@ -72,17 +62,20 @@ func NewCLGIndex(config Config) (spec.CLGIndex, error) {
 		ShutdownOnce: sync.Once{},
 	}
 
-	if newCLGIndex.NumCLGProfileWorkers < 1 {
-		return nil, maskAnyf(invalidConfigError, "number of CLG profile workers must be greater than 0")
+	if newIndex.NumCLGProfileGeneratorWorkers < 1 {
+		return nil, maskAnyf(invalidConfigError, "number of CLG profile generator workers must be greater than 0")
+	}
+	if newIndex.GetCLGProfileGenerator() == nil {
+		return nil, maskAnyf(invalidConfigError, "CLG profile generator must not be empty")
 	}
 
-	newCLGIndex.Log.Register(newCLGIndex.GetType())
+	newIndex.Log.Register(newIndex.GetType())
 
-	return newCLGIndex, nil
+	return newIndex, nil
 }
 
-type clgIndex struct {
-	Config
+type index struct {
+	IndexConfig
 
 	BootOnce     sync.Once
 	Closer       chan struct{}
@@ -92,108 +85,65 @@ type clgIndex struct {
 	ShutdownOnce sync.Once
 }
 
-func (i *clgIndex) Boot() {
+func (i *index) Boot() {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call Boot")
 
 	i.BootOnce.Do(func() {
+		// Create and/or update CLG profiles.
 		go func() {
-			err := i.CreateCLGProfiles(i.GetCLGCollection())
+			newCLGProfiles, err := i.CreateCLGProfiles(i.GetCLGProfileGenerator())
 			if err != nil {
 				i.Log.WithTags(spec.Tags{L: "E", O: i, T: nil, V: 4}, "%#v", maskAny(err))
+			}
+
+			for _, p := range newCLGProfiles {
+				err := i.StoreCLGProfile(p)
+				if err != nil {
+					i.Log.WithTags(spec.Tags{L: "E", O: i, T: nil, V: 4}, "%#v", maskAny(err))
+				}
 			}
 		}()
 	})
 }
 
-func (i *clgIndex) CreateCLGProfile(clgCollection spec.CLGCollection, clgName, clgBody string, canceler <-chan struct{}) (spec.CLGProfile, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfile")
-
-	// Fetch CLG names.
-	clgNames, err := i.getCLGNames(clgCollection)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	// Fill a queue with all CLG names.
-	clgNameQueue := i.getCLGNameQueue(clgNames)
-
-	// Initialize the profile creation.
-	for {
-		select {
-		case <-canceler:
-			return nil, maskAny(workerCanceledError)
-		case clgName := <-clgNameQueue:
-			methodValue := reflect.ValueOf(clgCollection).MethodByName(clgName)
-			if !i.isMethodValue(methodValue) {
-				return nil, maskAnyf(invalidCLGError, clgName)
-			}
-
-			var err error
-			newCLGProfileConfig := DefaultCLGProfileConfig()
-			newCLGProfileConfig.Hash, err = i.getCLGMethodHash(clgName, clgBody)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfileConfig.InputTypes, err = i.getCLGInputTypes(methodValue)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfileConfig.InputExamples, err = i.getCLGInputExamples(methodValue)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfileConfig.MethodName = clgName
-			newCLGProfileConfig.MethodBody = clgBody
-			newCLGProfileConfig.OutputTypes, err = i.getCLGOutputTypes(methodValue)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfileConfig.OutputExamples, err = i.getCLGOutputExamples(methodValue)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfileConfig.RightSideNeighbours, err = i.getCLGRightSideNeighbours(clgCollection, clgName, methodValue, canceler)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-			newCLGProfile, err := NewCLGProfile(newCLGProfileConfig)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-
-			return newCLGProfile, nil
-		}
-	}
-}
-
-func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
+func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) ([]spec.CLGProfile, error) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateCLGProfiles")
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateProfiles")
 
-	// Fetch CLG names and fill a queue with them.
-	clgNames, err := i.getCLGNames(clgCollection)
-	if err != nil {
-		return maskAny(err)
-	}
-	clgNameQueue := i.getCLGNameQueue(clgNames)
+	// Initialize queues we read from and write to.
+	nameQueue := generator.CreateNameQueue()
 	// We can close the queue channel immediately, because it only provides a one
-	// way ticket. As soon as a CLG name was fetched from the queue it is
-	// considered WIP. A CLG name must never be requeued.
-	close(clgNameQueue)
+	// way ticket and all writing is already done. As soon as a CLG name was
+	// fetched from the queue it is considered WIP. A CLG name must never be
+	// requeued.
+	close(nameQueue)
+	profileQueue := generator.CreateProfileQueue()
 
-	// Fetch CLG package information and create a lookup table for CLG names and
-	// their corresponding method bodies.
-	packageInfos, err := i.getCLGPackageInfos()
-	if err != nil {
-		return maskAny(err)
-	}
-	lookupTable, err := i.getCLGLookupTable(clgNames, packageInfos)
-	if err != nil {
-		return maskAny(err)
-	}
+	// Create worker function executed concurrently by all workers within the
+	// worker pool we are going to create.
+	workerFunc := func(canceler <-chan struct{}) error {
+		for {
+			select {
+			case <-canceler:
+				return maskAny(workerCanceledError)
+			case name := <-nameQueue:
+				newProfile, hashChanged, err := generator.CreateProfile(name, canceler)
+				if err != nil {
+					return maskAny(err)
+				}
+				if !hashChanged {
+					// The created CLG profile is already known and did not change yet.
+					// No need to update the stored version of it. Go ahead to create the
+					// next one.
+					continue
+				}
 
-	workerFunc := i.getWorkerFunc(clgCollection, clgNameQueue, lookupTable)
+				profileQueue <- newProfile
+			}
+		}
+	}
 
 	// Prepare the worker pool.
 	newWorkerPoolConfig := workerpool.DefaultConfig()
@@ -201,35 +151,33 @@ func (i *clgIndex) CreateCLGProfiles(clgCollection spec.CLGCollection) error {
 	newWorkerPoolConfig.Canceler = i.Closer
 	newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
 	if err != nil {
-		return maskAny(err)
+		return nil, maskAny(err)
 	}
 
 	// Execute the worker pool and block until all work is done.
 	err = i.maybeReturnAndLogErrors(newWorkerPool.Execute())
 	if err != nil {
-		return maskAny(err)
+		return nil, maskAny(err)
 	}
 
-	return nil
+	var newProfiles []spec.Profile
+	for p := range profileQueue {
+		newProfiles = append(newProfiles, p)
+	}
+
+	return newProfiles, nil
 }
 
-func (i *clgIndex) GetCLGCollection() spec.CLGCollection {
+func (i *index) GetGenerator() spec.CLGProfileGenerator {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call GetCLGCollection")
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call GetGenerator")
 
-	return i.Collection
+	return i.Generator
 }
 
-// TODO
-func (i *clgIndex) GetCLGProfileByName(clgName string) (spec.CLGProfile, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreCLGProfile")
-
-	return nil, nil
-}
-
-func (i *clgIndex) Shutdown() {
+func (i *index) Shutdown() {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call Shutdown")
 
 	i.ShutdownOnce.Do(func() {
@@ -239,8 +187,8 @@ func (i *clgIndex) Shutdown() {
 }
 
 // TODO
-func (i *clgIndex) StoreCLGProfile(clgProfile spec.CLGProfile) error {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreCLGProfile")
+func (i *index) StoreProfile(clgProfile spec.CLGProfile) error {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreProfile")
 
 	return nil
 }

@@ -1,4 +1,5 @@
-package clg
+// Package profile TODO
+package profile
 
 import (
 	"reflect"
@@ -12,9 +13,8 @@ const (
 	ObjectTypeCLGProfile spec.ObjectType = "clg-profile"
 )
 
-// ProfileConfig represents the configuration used to create a new CLG profile
-// object.
-type ProfileConfig struct {
+// Config represents the configuration used to create a new CLG profile object.
+type Config struct {
 	// Settings.
 
 	// Hash represents the hashed value of the CLG's implemented method.
@@ -49,10 +49,10 @@ type ProfileConfig struct {
 	RightSideNeighbours []string
 }
 
-// DefaultCLGProfileConfig provides a default configuration to create a new CLG
-// index object by best effort.
-func DefaultCLGProfileConfig() ProfileConfig {
-	newConfig := ProfileConfig{
+// DefaultConfig provides a default configuration to create a new CLG index
+// object by best effort.
+func DefaultConfig() Config {
+	newConfig := Config{
 		// Settings.
 		Hash:                "",
 		InputTypes:          nil,
@@ -67,40 +67,40 @@ func DefaultCLGProfileConfig() ProfileConfig {
 	return newConfig
 }
 
-// NewCLGProfile creates a new configured CLG index object.
-func NewCLGProfile(config ProfileConfig) (spec.CLGProfile, error) {
-	newCLGProfile := &clgProfile{
-		ProfileConfig: config,
+// New creates a new configured CLG profile object.
+func New(config Config) (spec.CLGProfile, error) {
+	newProfile := &profile{
+		Config: config,
 
 		Type: ObjectTypeCLGProfile,
 	}
 
-	if newCLGProfile.Hash == "" {
+	if newProfile.Hash == "" {
 		return nil, maskAnyf(invalidConfigError, "hash of CLG profile must not be empty")
 	}
-	if newCLGProfile.MethodName == "" {
+	if newProfile.MethodName == "" {
 		return nil, maskAnyf(invalidConfigError, "method name of CLG profile must not be empty")
 	}
-	if newCLGProfile.MethodBody == "" {
+	if newProfile.MethodBody == "" {
 		return nil, maskAnyf(invalidConfigError, "method body of CLG profile must not be empty")
 	}
-	if len(newCLGProfile.OutputTypes) == 0 {
+	if len(newProfile.OutputTypes) == 0 {
 		return nil, maskAnyf(invalidConfigError, "output types of CLG profile must not be empty")
 	}
-	if len(newCLGProfile.OutputExamples) == 0 {
+	if len(newProfile.OutputExamples) == 0 {
 		return nil, maskAnyf(invalidConfigError, "output examples of CLG profile must not be empty")
 	}
 
-	return newCLGProfile, nil
+	return newProfile, nil
 }
 
-type clgProfile struct {
-	ProfileConfig
+type profile struct {
+	Config
 
 	Type spec.ObjectType
 }
 
-func (p *clgProfile) Equals(other spec.CLGProfile) bool {
+func (p *profile) Equals(other spec.CLGProfile) bool {
 	if p.GetHash() != other.GetHash() {
 		return false
 	}
@@ -129,34 +129,34 @@ func (p *clgProfile) Equals(other spec.CLGProfile) bool {
 	return true
 }
 
-func (p *clgProfile) GetHash() string {
+func (p *profile) GetHash() string {
 	return p.Hash
 }
 
-func (p *clgProfile) GetInputTypes() []reflect.Kind {
+func (p *profile) GetInputTypes() []reflect.Kind {
 	return p.InputTypes
 }
 
-func (p *clgProfile) GetInputExamples() []interface{} {
+func (p *profile) GetInputExamples() []interface{} {
 	return p.InputExamples
 }
 
-func (p *clgProfile) GetMethodName() string {
+func (p *profile) GetMethodName() string {
 	return p.MethodName
 }
 
-func (p *clgProfile) GetMethodBody() string {
+func (p *profile) GetMethodBody() string {
 	return p.MethodBody
 }
 
-func (p *clgProfile) GetOutputTypes() []reflect.Kind {
+func (p *profile) GetOutputTypes() []reflect.Kind {
 	return p.OutputTypes
 }
 
-func (p *clgProfile) GetOutputExamples() []interface{} {
+func (p *profile) GetOutputExamples() []interface{} {
 	return p.OutputExamples
 }
 
-func (p *clgProfile) GetRightSideNeighbours() []string {
+func (p *profile) GetRightSideNeighbours() []string {
 	return p.RightSideNeighbours
 }

@@ -1,3 +1,15 @@
+// Package collection provides a collection of all CLGs that can be used.
+//
+// Note that this package defines a go generate statement to embed the CLG
+// collection's source code within the compiled binary. That way the method
+// bodies of the implemented CLGs are available for inspection and hashing.
+// Hashes of CLG methods are used to check whether they changed. A change of a
+// CLG method affects its functionality, its profile and probably even its use
+// case. Thus changes of the CLGs method bodies need to be detected to trigger
+// profile updates.
+//
+//go:generate ${GOPATH}/bin/loader generate -p collection
+//
 package collection
 
 import (
@@ -32,8 +44,8 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewCollection creates a new configured CLG collection object.
-func NewCollection(config Config) (spec.CLGCollection, error) {
+// New creates a new configured CLG collection object.
+func New(config Config) (spec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 

@@ -1,17 +1,17 @@
-package clg
+package profile
 
 import (
 	"encoding/json"
 )
 
-// clgProfileClone is for making use of the stdlib json implementation. The
-// clgProfile object implements its own marshaler and unmarshaler but only to
+// profileClone is for making use of the stdlib json implementation. The
+// profile object implements its own marshaler and unmarshaler but only to
 // provide json implementations for spec.CLGProfile. Note, not redirecting the
 // type will cause infinite recursion.
-type clgProfileClone clgProfile
+type profileClone profile
 
-func (p *clgProfile) MarshalJSON() ([]byte, error) {
-	newCLGProfile := clgProfileClone(*p)
+func (p *profile) MarshalJSON() ([]byte, error) {
+	newCLGProfile := profileClone(*p)
 
 	raw, err := json.Marshal(newCLGProfile)
 	if err != nil {
@@ -21,8 +21,8 @@ func (p *clgProfile) MarshalJSON() ([]byte, error) {
 	return raw, nil
 }
 
-func (p *clgProfile) UnmarshalJSON(b []byte) error {
-	newCLGProfile := clgProfileClone{}
+func (p *profile) UnmarshalJSON(b []byte) error {
+	newCLGProfile := profileClone{}
 
 	err := json.Unmarshal(b, &newCLGProfile)
 	if err != nil {
