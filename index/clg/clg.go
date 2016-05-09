@@ -91,35 +91,34 @@ func (i *index) Boot() {
 	i.BootOnce.Do(func() {
 		// Create and/or update CLG profiles.
 		go func() {
-			newCLGProfiles, err := i.CreateCLGProfiles(i.GetCLGProfileGenerator())
+			err := i.CreateCLGProfiles(i.GetGenerator())
 			if err != nil {
 				i.Log.WithTags(spec.Tags{L: "E", O: i, T: nil, V: 4}, "%#v", maskAny(err))
-			}
-
-			for _, p := range newCLGProfiles {
-				err := i.StoreCLGProfile(p)
-				if err != nil {
-					i.Log.WithTags(spec.Tags{L: "E", O: i, T: nil, V: 4}, "%#v", maskAny(err))
-				}
 			}
 		}()
 	})
 }
 
-func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) ([]spec.CLGProfile, error) {
+func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateProfiles")
 
 	// Initialize queues we read from and write to.
-	nameQueue := generator.CreateNameQueue()
+	profileNames, err := generator.GetProfileNames()
+	if err != nil {
+		return maskAny(err)
+	}
+	profileNameQueue := make(chan string, len(g.CLGNames))
+	for _, pn := range profileNames {
+		profileNameQueue <- pn
+	}
 	// We can close the queue channel immediately, because it only provides a one
 	// way ticket and all writing is already done. As soon as a CLG name was
 	// fetched from the queue it is considered WIP. A CLG name must never be
 	// requeued.
-	close(nameQueue)
-	profileQueue := generator.CreateProfileQueue()
+	close(profileNameQueue)
 
 	// Create worker function executed concurrently by all workers within the
 	// worker pool we are going to create.
@@ -128,8 +127,8 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) ([]spec.CLGPr
 			select {
 			case <-canceler:
 				return maskAny(workerCanceledError)
-			case name := <-nameQueue:
-				newProfile, hashChanged, err := generator.CreateProfile(name, canceler)
+			case pn := <-profileNameQueue:
+				newProfile, hashChanged, err := generator.CreateProfile(pn, canceler)
 				if err != nil {
 					return maskAny(err)
 				}
@@ -140,7 +139,10 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) ([]spec.CLGPr
 					continue
 				}
 
-				profileQueue <- newProfile
+				err := generator.StoreProfile(newProfile)
+				if err != nil {
+					return maskAny(err)
+				}
 			}
 		}
 	}
@@ -160,12 +162,7 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) ([]spec.CLGPr
 		return nil, maskAny(err)
 	}
 
-	var newProfiles []spec.Profile
-	for p := range profileQueue {
-		newProfiles = append(newProfiles, p)
-	}
-
-	return newProfiles, nil
+	return nil
 }
 
 func (i *index) GetGenerator() spec.CLGProfileGenerator {
@@ -184,11 +181,4 @@ func (i *index) Shutdown() {
 		// Simply closing the closer will broadcast the signal to each listener.
 		close(i.Closer)
 	})
-}
-
-// TODO
-func (i *index) StoreProfile(clgProfile spec.CLGProfile) error {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StoreProfile")
-
-	return nil
 }

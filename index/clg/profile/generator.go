@@ -18,9 +18,10 @@ const (
 // profile generator object.
 type GeneratorConfig struct {
 	// Dependencies.
-	Collection  spec.CLGCollection
-	Log         spec.Log
-	LookupTable spec.CLGLookupTable
+	Collection spec.CLGCollection
+	Log        spec.Log
+	Mapper     spec.CLGMapper
+	Scanner    spec.CLGScanner
 }
 
 // DefaultConfig provides a default configuration to create a new CLG profile
@@ -30,16 +31,21 @@ func DefaultConfig() GeneratorConfig {
 	if err != nil {
 		panic(err)
 	}
-	newLookupTable, err := NewLookupTable(DefaultLookupTableConfig())
+	newMapper, err := NewMapper(DefaultMapperConfig())
+	if err != nil {
+		panic(err)
+	}
+	newScanner, err := NewScanner(DefaultScannerConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := GeneratorConfig{
 		// Dependencies.
-		Collection:  newCollection,
-		Log:         log.NewLog(log.DefaultConfig()),
-		LookupTable: newLookupTable,
+		Collection: newCollection,
+		Log:        log.NewLog(log.DefaultConfig()),
+		Mapper:     newMapper,
+		Scanner:    newScanner,
 	}
 
 	return newConfig
@@ -51,9 +57,10 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 	newGenerator := &generator{
 		GeneratorConfig: config,
 
-		ID:    id.NewObjectID(id.Hex128),
-		Mutex: sync.Mutex{},
-		Type:  ObjectTypeCLGProfileGenerator,
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ProfileNames: nil,
+		Type:         ObjectTypeCLGProfileGenerator,
 	}
 
 	// Validate new object.
@@ -63,19 +70,15 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 	if newGenerator.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
-	if newGenerator.LookupTable == nil {
-		return nil, maskAnyf(invalidConfigError, "CLG lookup table must not be empty")
+	if newGenerator.Mapper == nil {
+		return nil, maskAnyf(invalidConfigError, "CLG mapper must not be empty")
+	}
+	if newGenerator.Scanner == nil {
+		return nil, maskAnyf(invalidConfigError, "CLG scanner must not be empty")
 	}
 
 	// Register in logger.
 	newGenerator.Log.Register(newGenerator.GetType())
-
-	// Fetch all CLG names.
-	newNames, err := namesFromCollection(newGenerator.Collection)
-	if err != nil {
-		return nil, maskAnyf(invalidConfigError, err.Error())
-	}
-	newGenerator.CLGNames = newNames
 
 	// Create CLG lookup table.
 	newLookupTable, err := createLookupTable()
@@ -90,30 +93,26 @@ func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
 type generator struct {
 	GeneratorConfig
 
-	CLGNames    []string
-	ID          spec.ObjectID
-	LookupTable map[string]string
-	Mutex       sync.Mutex
-	Type        spec.ObjectType
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ProfileNames []string
+	Type         spec.ObjectType
 }
 
-func (g *generator) CreateNameQueue() chan string {
+func (g *generator) GetProfileNames() ([]string, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateNameQueue")
 
-	newNameQueue := make(chan string, len(g.CLGNames))
-
-	for _, name := range g.CLGNames {
-		newNameQueue <- name
+	if g.ProfileNames != nil {
+		return g.ProfileNames, nil
 	}
 
-	return newNameQueue
-}
+	profileNames, err := profileNamesFromCollection(g.Collection)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	g.ProfileNames = profileNames
 
-func (g *generator) CreateProfileQueue() chan spec.CLGProfile {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateProfileQueue")
-
-	newProfileQueue := make(chan spec.CLGProfile, len(g.CLGNames))
-	return newProfileQueue
+	return g.ProfileNames, nil
 }
 
 func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spec.CLGProfile, bool, error) {
@@ -128,39 +127,24 @@ func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spe
 		return nil, false, maskAny(err)
 	}
 
+	// Create mapper and scanner results for the current profile.
+	newMapResult, err = g.Mapper.CreateResult(clgName, canceler)
+	if err != nil {
+		return nil, false, maskAny(err)
+	}
+	newScanResult, err = g.Scanner.CreateResult(clgName, canceler)
+	if err != nil {
+		return nil, false, maskAny(err)
+	}
+
 	// Create the new CLG profile.
-	var err error
 	newConfig := DefaultConfig()
-	newConfig.Hash, err = g.getCLGHash(clgName, clgBody)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
-	newConfig.InputTypes, err = g.getCLGInputTypes(methodValue)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
-	newConfig.InputExamples, err = g.getCLGInputExamples(methodValue)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
-	newConfig.MethodName = clgName
-	clgBody, ok := g.LookupTable[clgName]
-	if !ok {
-		return nil, false, maskAnyf(clgBodyNotFoundError, clgName)
-	}
-	newConfig.MethodBody = clgBody
-	newConfig.OutputTypes, err = g.getCLGOutputTypes(methodValue)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
-	newConfig.OutputExamples, err = g.getCLGOutputExamples(methodValue)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
-	newConfig.RightSideNeighbours, err = g.getCLGRightSideNeighbours(collection, clgName, methodValue, canceler)
-	if err != nil {
-		return nil, false, maskAny(err)
-	}
+	newConfig.Hash = newMapResult.Hash
+	newConfig.InputTypes = newMapResult.InputTypes
+	newConfig.MethodBody = newMapResult.MethodBody
+	newConfig.MethodName = newMapResult.MethodName
+	newConfig.OutputTypes = newMapResult.OutputTypes
+	newConfig.RightSideNeighbours = newScanResult.RightSideNeighbours
 	newProfile, err := New(newConfig)
 	if err != nil {
 		return nil, false, maskAny(err)
@@ -182,89 +166,8 @@ func (g *generator) GetProfileByName(clgName string) (spec.CLGProfile, error) {
 }
 
 // TODO
-func (g *generator) getCLGInputExamples(methodValue reflect.Value) ([]interface{}, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGInputExamples")
+func (g *generator) StoreProfile(clgProfile spec.CLGProfile) error {
+	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call StoreProfile")
 
-	return nil, nil
-}
-
-// TODO
-func (g *generator) getCLGInputTypes(methodValue reflect.Value) ([]reflect.Kind, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGInputTypes")
-
-	// TODO move to generator
-	methodValue := reflect.ValueOf(collection).MethodByName(clgName)
-	if !g.isMethodValue(methodValue) {
-		return nil, maskAnyf(invalidCLGError, clgName)
-	}
-
-	return nil, nil
-}
-
-// TODO
-func (g *generator) getCLGHash(clgName, clgBody string) (string, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGHash")
-
-	return "", nil
-}
-
-// TODO
-func (g *generator) getCLGOutputExamples(methodValue reflect.Value) ([]interface{}, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGOutputExamples")
-
-	return nil, nil
-}
-
-// TODO
-func (g *generator) getCLGOutputTypes(methodValue reflect.Value) ([]reflect.Kind, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGOutputTypes")
-
-	return nil, nil
-}
-
-// TODO
-func (g *generator) getCLGRightSideNeighbours(collection spec.CLGCollection, clgName string, methodValue reflect.Value, canceler <-chan struct{}) ([]string, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call getCLGRightSideNeighbours")
-
-	// TODO
-	// Fill a queue with all CLG names.
-	clgNameQueue := g.getCLGNameQueue(g.CLGNames)
-
-	// Initialize the profile creation.
-	for {
-		select {
-		case <-canceler:
-			return nil, maskAny(workerCanceledError)
-		case clgName := <-clgNameQueue:
-		}
-	}
-
-	//     find right side neighbours for given clg name
-	//         if no profile for checked neighbour
-	//             push neighbour name back to channel
-
-	return nil, nil
-}
-
-// TODO
-func (g *generator) isRightSideCLGNeighbour(collection spec.CLGCollection, left, right spec.CLGProfile) (bool, error) {
-	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call isRightSideNeighbour")
-
-	// run clg chain
-	// if error
-	//     return false
-
-	return false, nil
-}
-
-func (g *generator) isMethodValue(v reflect.Value) bool {
-	if !v.IsValid() {
-		return false
-	}
-
-	if v.Kind() != reflect.Func {
-		return false
-	}
-
-	return true
+	return nil
 }
