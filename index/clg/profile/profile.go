@@ -21,19 +21,23 @@ type Config struct {
 	// Settings.
 
 	// Body represents the CLG's implemented method body.
-	Body string
+	Body string `json:"body,omitempty"`
+
+	// HasChanged describes whether the CLG changed. A change might be a
+	// renaming, a signature modification or even a reimplementation or bugfix.
+	HasChanged bool `json:"hash_changed,omitempty"`
 
 	// Hash represents the hashed value of the CLG's implemented method.
-	Hash string
+	Hash string `json:"hash,omitempty"`
 
 	// Inputs represents the CLG's implemented method input parameter types.
-	Inputs []reflect.Kind
+	Inputs []reflect.Kind `json:"inputs,omitempty"`
 
 	// Name represents the CLG's implemented method name.
-	Name string
+	Name string `json:"name,omitempty"`
 
 	// Outputs represents the CLG's implemented method output parameter types.
-	Outputs []reflect.Kind
+	Outputs []reflect.Kind `json:"outputs,omitempty"`
 }
 
 // DefaultConfig provides a default configuration to create a new CLG index
@@ -41,11 +45,12 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Body:    "",
-		Hash:    "",
-		Inputs:  nil,
-		Name:    "",
-		Outputs: nil,
+		Body:       "",
+		HasChanged: false,
+		Hash:       "",
+		Inputs:     nil,
+		Name:       "",
+		Outputs:    nil,
 	}
 
 	return newConfig
@@ -126,6 +131,13 @@ func (p *profile) GetBody() string {
 	return p.Body
 }
 
+func (p *profile) GetHasChanged() bool {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	return p.HasChanged
+}
+
 func (p *profile) GetHash() string {
 	p.Mutex.Lock()
 	defer p.Mutex.Unlock()
@@ -152,4 +164,18 @@ func (p *profile) GetOutputs() []reflect.Kind {
 	defer p.Mutex.Unlock()
 
 	return p.Outputs
+}
+
+func (p *profile) SetHashChanged(hasChanged bool) {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	p.HasChanged = hasChanged
+}
+
+func (p *profile) SetID(id spec.ObjectID) {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
+	p.ID = id
 }

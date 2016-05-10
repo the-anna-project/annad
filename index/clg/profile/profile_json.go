@@ -31,6 +31,7 @@ func (p *profile) UnmarshalJSON(b []byte) error {
 
 	p.Body = newProfile.Body
 	p.CreatedAt = newProfile.CreatedAt
+	p.HasChanged = newProfile.HasChanged
 	p.Hash = newProfile.Hash
 	p.ID = newProfile.ID
 	p.Inputs = newProfile.Inputs

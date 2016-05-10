@@ -82,7 +82,7 @@ type generator struct {
 	Type  spec.ObjectType
 }
 
-func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, bool, error) {
+func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateProfile")
 
 	// Fetch the CLG profile in advance.
@@ -91,49 +91,59 @@ func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, bool, error)
 		// In case the CLG profile cannot be found, we are going ahead to create
 		// one.
 	} else if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 
 	// Create mapper and scanner results for the current profile.
 	newBody, err := g.CreateBody(clgName)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 	newHash, err := g.CreateHash(newBody)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 	newInputs, err := g.CreateInputs(clgName)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 	newName, err := g.CreateName(clgName)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 	newOutputs, err := g.CreateOutputs(clgName)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 
 	// Create the new CLG profile.
 	newConfig := DefaultConfig()
+	newConfig.Body = newBody
 	newConfig.Hash = newHash
 	newConfig.Inputs = newInputs
-	newConfig.Body = newBody
 	newConfig.Name = newName
 	newConfig.Outputs = newOutputs
 	newProfile, err := New(newConfig)
 	if err != nil {
-		return nil, false, maskAny(err)
+		return nil, maskAny(err)
 	}
 
-	if currentProfile != nil && currentProfile.Equals(newProfile) {
-		// The CLG profile has not changed. Thus nothing to do here.
-		return currentProfile, false, nil
+	if currentProfile != nil {
+		if !currentProfile.Equals(newProfile) {
+			// The new profile differs from the current one. Thus we mark it as
+			// having changed.
+			newProfile.SetHashChanged(true)
+		}
+
+		// There is already a profile known. No matter if it changed or not, to not
+		// change the ID we set it in all cases.
+		newProfile.SetID(currentProfile.GetID())
+	} else {
+		// There is no profile known yet. Thus we mark it as having changed.
+		newProfile.SetHashChanged(true)
 	}
 
-	return newProfile, true, nil
+	return newProfile, nil
 }
 
 // TODO

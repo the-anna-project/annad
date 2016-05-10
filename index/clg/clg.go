@@ -128,11 +128,11 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 			case <-canceler:
 				return maskAny(workerCanceledError)
 			case pn := <-profileNameQueue:
-				newProfile, hashChanged, err := generator.CreateProfile(pn)
+				newProfile, err := generator.CreateProfile(pn)
 				if err != nil {
 					return maskAny(err)
 				}
-				if !hashChanged {
+				if !newProfile.GetHasChanged() {
 					// The created CLG profile is already known and did not change yet.
 					// No need to update the stored version of it. Go ahead to create the
 					// next one.

@@ -3,9 +3,8 @@ package spec
 // CLGProfileGenerator represents a generator being able to create CLG
 // profiles.
 type CLGProfileGenerator interface {
-	// CreateProfile creates a CLG profile for the given CLG name. The returned
-	// bool describes whether the created profile has changed.
-	CreateProfile(clgName string) (CLGProfile, bool, error)
+	// CreateProfile creates a CLG profile for the given CLG name.
+	CreateProfile(clgName string) (CLGProfile, error)
 
 	// GetProfileByName fetches the profile from storage, that is associated with
 	// the given profile name.
