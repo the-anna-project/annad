@@ -7,6 +7,10 @@ coverage:
       default:
         target: auto
         threshold: 10
+    changes:
+      default: false
+    patch:
+      default: false
 
 comment:
   layout: header
