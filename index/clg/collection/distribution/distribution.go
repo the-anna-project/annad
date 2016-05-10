@@ -5,7 +5,6 @@ package distribution
 import (
 	"reflect"
 	"sort"
-	"strconv"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -133,40 +132,6 @@ func (d *distribution) GetDimensions() int {
 	defer d.Mutex.Unlock()
 
 	return len(d.Vectors[0])
-}
-
-func (d *distribution) GetStringMap() map[string]string {
-	newStringMap := map[string]string{
-		"name":            d.GetName(),
-		"id":              string(d.GetID()),
-		"static-channels": "",
-		"vectors":         "",
-	}
-
-	var staticChannels string
-	for i, c := range d.GetStaticChannels() {
-		if i > 0 {
-			staticChannels += ","
-		}
-		staticChannels += strconv.FormatFloat(c, 'f', -1, 64)
-	}
-	newStringMap["static-channels"] = string(staticChannels)
-
-	var vectors string
-	for i, vector := range d.GetVectors() {
-		if i > 0 {
-			vectors += "|"
-		}
-		for j, d := range vector {
-			if j > 0 {
-				vectors += ","
-			}
-			vectors += strconv.FormatFloat(d, 'f', -1, 64)
-		}
-	}
-	newStringMap["vectors"] = string(vectors)
-
-	return newStringMap
 }
 
 func (d *distribution) GetName() string {
