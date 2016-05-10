@@ -22,8 +22,6 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-// TODO cleanup errors for local package.
-
 var invalidConfigError = errgo.New("invalid config")
 
 // IsInvalidConfig asserts invalidConfigError.
@@ -106,32 +104,4 @@ var cannotConvertError = errgo.New("cannot convert")
 // IsCannotConvert asserts cannotConvertError.
 func IsCannotConvert(err error) bool {
 	return errgo.Cause(err) == cannotConvertError
-}
-
-var workerCanceledError = errgo.New("worker canceled")
-
-// IsWorkerCanceled asserts workerCanceledError.
-func IsWorkerCanceled(err error) bool {
-	return errgo.Cause(err) == workerCanceledError
-}
-
-var invalidCLGError = errgo.New("invalid clg")
-
-// IsInvalidCLG asserts invalidCLGError.
-func IsInvalidCLG(err error) bool {
-	return errgo.Cause(err) == invalidCLGError
-}
-
-var clgProfileNotFoundError = errgo.New("clg profile not found")
-
-// IsCLGProfileNotFound asserts clgProfileNotFoundError.
-func IsCLGProfileNotFound(err error) bool {
-	return errgo.Cause(err) == clgProfileNotFoundError
-}
-
-var clgBodyNotFoundError = errgo.New("clg body not found")
-
-// IsCLGBodyNotFound asserts clgBodyNotFoundError.
-func IsCLGBodyNotFound(err error) bool {
-	return errgo.Cause(err) == clgBodyNotFoundError
 }

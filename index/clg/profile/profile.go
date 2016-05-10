@@ -1,4 +1,4 @@
-// Package profile TODO
+// Package profile provides implementations to generate CLG profiles.
 package profile
 
 import (
