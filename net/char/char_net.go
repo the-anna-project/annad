@@ -53,11 +53,12 @@ func DefaultConfig() Config {
 // NewCharNet creates a new configured character network object.
 func NewCharNet(config Config) (spec.Network, error) {
 	newNet := &charNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeCharNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeCharNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -68,26 +69,25 @@ func NewCharNet(config Config) (spec.Network, error) {
 type charNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (cn *charNet) Boot() {
-	cn.Mutex.Lock()
-	defer cn.Mutex.Unlock()
-
-	if cn.Booted {
-		return
-	}
-	cn.Booted = true
-
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Boot")
+
+	cn.BootOnce.Do(func() {
+	})
 }
 
 func (cn *charNet) Shutdown() {
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Shutdown")
+
+	cn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (cn *charNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

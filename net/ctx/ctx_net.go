@@ -54,11 +54,12 @@ func DefaultConfig() Config {
 // NewCtxNet creates a new configured context network object.
 func NewCtxNet(config Config) (spec.Network, error) {
 	newNet := &ctxNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeCtxNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeCtxNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -69,26 +70,25 @@ func NewCtxNet(config Config) (spec.Network, error) {
 type ctxNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	Type         spec.ObjectType
+	ShutdownOnce sync.Once
 }
 
 func (cn *ctxNet) Boot() {
-	cn.Mutex.Lock()
-	defer cn.Mutex.Unlock()
-
-	if cn.Booted {
-		return
-	}
-	cn.Booted = true
-
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Boot")
+
+	cn.BootOnce.Do(func() {
+	})
 }
 
 func (cn *ctxNet) Shutdown() {
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Shutdown")
+
+	cn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (cn *ctxNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

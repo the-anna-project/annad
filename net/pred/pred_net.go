@@ -42,11 +42,12 @@ func DefaultConfig() Config {
 // NewPredNet creates a new configured prediction network object.
 func NewPredNet(config Config) (spec.Network, error) {
 	newNet := &predNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypePredNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypePredNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -57,26 +58,25 @@ func NewPredNet(config Config) (spec.Network, error) {
 type predNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (pn *predNet) Boot() {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
-
-	if pn.Booted {
-		return
-	}
-	pn.Booted = true
-
 	pn.Log.WithTags(spec.Tags{L: "D", O: pn, T: nil, V: 13}, "call Boot")
+
+	pn.BootOnce.Do(func() {
+	})
 }
 
 func (pn *predNet) Shutdown() {
 	pn.Log.WithTags(spec.Tags{L: "D", O: pn, T: nil, V: 13}, "call Shutdown")
+
+	pn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (pn *predNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

@@ -53,11 +53,12 @@ func DefaultConfig() Config {
 // NewInNet creates a new configured input network object.
 func NewInNet(config Config) (spec.Network, error) {
 	newNet := &inNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeInNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeInNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -68,26 +69,25 @@ func NewInNet(config Config) (spec.Network, error) {
 type inNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (in *inNet) Boot() {
-	in.Mutex.Lock()
-	defer in.Mutex.Unlock()
-
-	if in.Booted {
-		return
-	}
-	in.Booted = true
-
 	in.Log.WithTags(spec.Tags{L: "D", O: in, T: nil, V: 13}, "call Boot")
+
+	in.BootOnce.Do(func() {
+	})
 }
 
 func (in *inNet) Shutdown() {
 	in.Log.WithTags(spec.Tags{L: "D", O: in, T: nil, V: 13}, "call Shutdown")
+
+	in.ShutdownOnce.Do(func() {
+	})
 }
 
 func (in *inNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

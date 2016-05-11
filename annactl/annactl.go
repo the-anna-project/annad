@@ -48,7 +48,7 @@ type Config struct {
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		FileSystem:    memoryfilesystem.NewFileSystem(),
+		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
 		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
@@ -94,7 +94,7 @@ func NewAnnactl(config Config) spec.Annactl {
 			newAnnactl.Log.WithTags(spec.Tags{L: "D", O: newAnnactl, T: nil, V: 13}, "call InitCmd") // this is the first stage we can log
 
 			// file system
-			newFileSystem := osfilesystem.NewFileSystem()
+			newFileSystem := osfilesystem.NewFileSystem(osfilesystem.DefaultConfig())
 
 			// host and port
 			host, port, err := net.SplitHostPort(newAnnactl.Flags.Addr)

@@ -61,7 +61,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
-		err = newScheduler.PersistJob(newJob)
+		err = newScheduler.StoreJob(newJob)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -70,7 +70,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 
 	for _, newJob := range newJobs {
 		// Check if the job is really active.
-		newJob, err := newScheduler.FetchJob(newJob.GetID())
+		newJob, err := newScheduler.GetJobByID(newJob.GetID())
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -88,7 +88,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 
 		for i, newJob := range newJobs {
 			// Check if the job has successfully finished.
-			newJob, err := newScheduler.FetchJob(newJob.GetID())
+			newJob, err := newScheduler.GetJobByID(newJob.GetID())
 			if err != nil {
 				t.Fatal("call", c, "expected", nil, "got", err)
 			}
@@ -100,6 +100,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 			} else {
 				// The other jobs should be replaced.
 				if !HasReplacedStatus(newJob) {
+					fmt.Printf("newJobs: %#v\n", newJobs)
 					t.Fatal("call", c, "expected", true, "got", false)
 				}
 				if HasSucceededStatus(newJob) {
@@ -227,13 +228,13 @@ func Test_Scheduler_Execute_FetchState(t *testing.T) {
 	}
 
 	// Fetching invalid state should not work.
-	_, err = newScheduler.FetchJob("invalid")
+	_, err = newScheduler.GetJobByID("invalid")
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 
 	// Fetching valid state should work.
-	newJob, err = newScheduler.FetchJob(newJob.GetID())
+	newJob, err = newScheduler.GetJobByID(newJob.GetID())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -269,7 +270,7 @@ func Test_Scheduler_Execute_Wait(t *testing.T) {
 		t.Fatal("expected", nil, "got", newJob)
 	}
 
-	newJob, err = newScheduler.FetchJob(originalJob.GetID())
+	newJob, err = newScheduler.GetJobByID(originalJob.GetID())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

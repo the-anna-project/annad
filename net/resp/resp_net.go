@@ -54,11 +54,12 @@ func DefaultConfig() Config {
 // NewRespNet creates a new configured response network object.
 func NewRespNet(config Config) (spec.Network, error) {
 	newNet := &respNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeRespNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeRespNet,
 	}
 
 	newNet.Log.Register(newNet.GetType())
@@ -69,26 +70,25 @@ func NewRespNet(config Config) (spec.Network, error) {
 type respNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (rn *respNet) Boot() {
-	rn.Mutex.Lock()
-	defer rn.Mutex.Unlock()
-
-	if rn.Booted {
-		return
-	}
-	rn.Booted = true
-
 	rn.Log.WithTags(spec.Tags{L: "D", O: rn, T: nil, V: 13}, "call Boot")
+
+	rn.BootOnce.Do(func() {
+	})
 }
 
 func (rn *respNet) Shutdown() {
 	rn.Log.WithTags(spec.Tags{L: "D", O: rn, T: nil, V: 13}, "call Shutdown")
+
+	rn.ShutdownOnce.Do(func() {
+	})
 }
 
 func (rn *respNet) Trigger(imp spec.Impulse) (spec.Impulse, error) {

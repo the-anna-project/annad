@@ -3,15 +3,17 @@ package logcontrol
 import (
 	"encoding/json"
 	"net/http"
+
+	"golang.org/x/net/context"
 )
 
 // reset levels
 
-func resetLevelsDecoder(r *http.Request) (interface{}, error) {
+func resetLevelsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func resetLevelsEncoder(w http.ResponseWriter, response interface{}) error {
+func resetLevelsEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -20,11 +22,11 @@ func resetLevelsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // reset object types
 
-func resetObjectsDecoder(r *http.Request) (interface{}, error) {
+func resetObjectsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func resetObjectsEncoder(w http.ResponseWriter, response interface{}) error {
+func resetObjectsEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -33,11 +35,11 @@ func resetObjectsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // reset verbosity
 
-func resetVerbosityDecoder(r *http.Request) (interface{}, error) {
+func resetVerbosityDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func resetVerbosityEncoder(w http.ResponseWriter, response interface{}) error {
+func resetVerbosityEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -46,7 +48,7 @@ func resetVerbosityEncoder(w http.ResponseWriter, response interface{}) error {
 
 // set levels
 
-func setLevelsDecoder(r *http.Request) (interface{}, error) {
+func setLevelsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request SetLevelsRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -54,7 +56,7 @@ func setLevelsDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func setLevelsEncoder(w http.ResponseWriter, response interface{}) error {
+func setLevelsEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -63,7 +65,7 @@ func setLevelsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // set object types
 
-func setObjectsDecoder(r *http.Request) (interface{}, error) {
+func setObjectsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request SetObjectsRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -71,7 +73,7 @@ func setObjectsDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func setObjectsEncoder(w http.ResponseWriter, response interface{}) error {
+func setObjectsEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
@@ -80,7 +82,7 @@ func setObjectsEncoder(w http.ResponseWriter, response interface{}) error {
 
 // set verbosity
 
-func setVerbosityDecoder(r *http.Request) (interface{}, error) {
+func setVerbosityDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
 	var request SetVerbosityRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
@@ -88,7 +90,7 @@ func setVerbosityDecoder(r *http.Request) (interface{}, error) {
 	return request, nil
 }
 
-func setVerbosityEncoder(w http.ResponseWriter, response interface{}) error {
+func setVerbosityEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}

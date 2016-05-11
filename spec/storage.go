@@ -14,8 +14,8 @@ type Storage interface {
 	//
 	GetElementsByScore(key string, score float64, maxElements int) ([]string, error)
 
-	// GetHashMap returns the hash map stored under the given key.
-	GetHashMap(key string) (map[string]string, error)
+	// GetStringMap returns the hash map stored under the given key.
+	GetStringMap(key string) (map[string]string, error)
 
 	// GetHighestScoredElements searches a list that is ordered by their
 	// element's score, and returns the elements and their corresponding scores,
@@ -51,8 +51,8 @@ type Storage interface {
 	// identified by key with respect to the given score.
 	SetElementByScore(key, element string, score float64) error
 
-	// SetHashMap stores the given hashMap under the given key.
-	SetHashMap(key string, hashMap map[string]string) error
+	// SetStringMap stores the given stringMap under the given key.
+	SetStringMap(key string, stringMap map[string]string) error
 
 	// WalkScoredElements scans the scored set given by key and executes the
 	// callback for each found element. Note that the walk might ignores the

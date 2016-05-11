@@ -81,16 +81,16 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	}
 }
 
-// GetHashMap
+// GetStringMap
 
-func Test_RedisStorage_GetHashMap_Success(t *testing.T) {
+func Test_RedisStorage_GetStringMap_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HGETALL", "foo").Expect([]interface{}{[]byte("k1"), []byte("v1")})
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	value, err := newStorage.GetHashMap("foo")
+	value, err := newStorage.GetStringMap("foo")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -99,14 +99,14 @@ func Test_RedisStorage_GetHashMap_Success(t *testing.T) {
 	}
 }
 
-func Test_RedisStorage_GetHashMap_Error(t *testing.T) {
+func Test_RedisStorage_GetStringMap_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HGETALL", "foo").ExpectError(queryExecutionFailedError)
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	_, err := newStorage.GetHashMap("foo")
+	_, err := newStorage.GetStringMap("foo")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -308,42 +308,42 @@ func Test_RedisStorage_RemoveScoredElement_Error(t *testing.T) {
 	}
 }
 
-// SetHashMap
+// SetStringMap
 
-func Test_RedisStorage_SetHashMap_Success(t *testing.T) {
+func Test_RedisStorage_SetStringMap_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").Expect("OK")
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
-func Test_RedisStorage_SetHashMap_NotOK(t *testing.T) {
+func Test_RedisStorage_SetStringMap_NotOK(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").Expect("Not OK")
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_RedisStorage_SetHashMap_Error(t *testing.T) {
+func Test_RedisStorage_SetStringMap_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").ExpectError(queryExecutionFailedError)
 
 	newConfig := DefaultConfigWithConn(c)
 	newStorage := NewRedisStorage(newConfig)
 
-	err := newStorage.SetHashMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}

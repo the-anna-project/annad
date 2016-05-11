@@ -8,7 +8,7 @@ import (
 
 func Test_Strategy_GetID(t *testing.T) {
 	newFirstConfig := DefaultConfig()
-	newFirstConfig.Actions = []spec.ObjectType{spec.ObjectType("action")}
+	newFirstConfig.CLGNames = []string{"CLG"}
 	newFirstConfig.Requestor = spec.ObjectType("requestor")
 	firstStrategy, err := NewStrategy(newFirstConfig)
 	if err != nil {
@@ -16,7 +16,7 @@ func Test_Strategy_GetID(t *testing.T) {
 	}
 
 	newSecondConfig := DefaultConfig()
-	newSecondConfig.Actions = []spec.ObjectType{spec.ObjectType("action")}
+	newSecondConfig.CLGNames = []string{"CLG"}
 	newSecondConfig.Requestor = spec.ObjectType("requestor")
 	secondStrategy, err := NewStrategy(newSecondConfig)
 	if err != nil {
@@ -30,7 +30,7 @@ func Test_Strategy_GetID(t *testing.T) {
 
 func Test_Strategy_GetType(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Actions = []spec.ObjectType{spec.ObjectType("action")}
+	newConfig.CLGNames = []string{"CLG"}
 	newConfig.Requestor = spec.ObjectType("requestor")
 
 	newStrategy, err := NewStrategy(newConfig)

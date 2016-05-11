@@ -30,8 +30,8 @@ type Scheduler interface {
 	// registered to the scheduler.
 	Execute(job Job) error
 
-	// FetchJob fetches the job for the given job ID.
-	FetchJob(jobID ObjectID) (Job, error)
+	// GetJobByID fetches the job for the given job ID.
+	GetJobByID(jobID ObjectID) (Job, error)
 
 	// MarkAsActive marks the given job as active and persists the job's state.
 	// The returned job is actually the refreshed version of the provided one.
@@ -54,8 +54,8 @@ type Scheduler interface {
 
 	Object
 
-	// PersistJob writes the given job to the configured Storage.
-	PersistJob(job Job) error
+	// StoreJob writes the given job to the configured Storage.
+	StoreJob(job Job) error
 
 	// Register registers the given action using the given actionID.
 	Register(actionID string, action Action)

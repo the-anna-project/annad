@@ -4,25 +4,63 @@ package memoryfilesystem
 
 import (
 	"os"
+	"sync"
 
+	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	// ObjectTypeMemoryFileSystem represents the object type of the memory file
+	// system object. This is used e.g. to register itself to the logger.
+	ObjectTypeMemoryFileSystem spec.ObjectType = "memory-file-system"
+)
+
+// Config represents the configuration used to create a new memory file system
+// object.
+type Config struct {
+	// Dependencies.
+	Log spec.Log
+}
+
+// DefaultConfig provides a default configuration to create a new memory file
+// system object.
+func DefaultConfig() Config {
+	newConfig := Config{
+		// Dependencies.
+		Log: log.NewLog(log.DefaultConfig()),
+	}
+
+	return newConfig
+}
+
 // NewFileSystem creates a new configured memory file system.
-func NewFileSystem() spec.FileSystem {
-	newFileSystem := &memory{
+func NewFileSystem(config Config) spec.FileSystem {
+	newFileSystem := &memoryFileSystem{
+		Config:  config,
+		ID:      id.NewObjectID(id.Hex128),
+		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
+		Type:    ObjectTypeMemoryFileSystem,
 	}
 
 	return newFileSystem
 }
 
-type memory struct {
+type memoryFileSystem struct {
+	Config
+
+	ID      spec.ObjectID
+	Mutex   sync.Mutex
 	Storage map[string][]byte
+	Type    spec.ObjectType
 }
 
-func (m *memory) ReadFile(filename string) ([]byte, error) {
-	if bytes, ok := m.Storage[filename]; ok {
+func (mfs *memoryFileSystem) ReadFile(filename string) ([]byte, error) {
+	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call ReadFile")
+
+	if bytes, ok := mfs.Storage[filename]; ok {
 		return bytes, nil
 	}
 
@@ -35,7 +73,9 @@ func (m *memory) ReadFile(filename string) ([]byte, error) {
 	return nil, maskAny(pathErr)
 }
 
-func (m *memory) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	m.Storage[filename] = bytes
+func (mfs *memoryFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
+	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call WriteFile")
+
+	mfs.Storage[filename] = bytes
 	return nil
 }

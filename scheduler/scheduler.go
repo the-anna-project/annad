@@ -127,7 +127,7 @@ func (s *scheduler) Execute(job spec.Job) error {
 	if err != nil {
 		return maskAny(err)
 	}
-	err = s.PersistJob(job)
+	err = s.StoreJob(job)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -161,8 +161,8 @@ func (s *scheduler) Execute(job spec.Job) error {
 	return nil
 }
 
-func (s *scheduler) FetchJob(jobID spec.ObjectID) (spec.Job, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call FetchJob")
+func (s *scheduler) GetJobByID(jobID spec.ObjectID) (spec.Job, error) {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetJobByID")
 
 	value, err := s.Storage.Get(s.key("job:%s", string(jobID)))
 	if err != nil {
@@ -173,13 +173,13 @@ func (s *scheduler) FetchJob(jobID spec.ObjectID) (spec.Job, error) {
 		return nil, maskAny(jobNotFoundError)
 	}
 
-	var newJob job
-	err = json.Unmarshal([]byte(value), &newJob)
+	newJob := NewEmptyJob()
+	err = json.Unmarshal([]byte(value), newJob)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return &newJob, nil
+	return newJob, nil
 }
 
 func (s *scheduler) MarkAsActive(job spec.Job) (spec.Job, error) {
@@ -216,7 +216,7 @@ func (s *scheduler) MarkAsFailedWithError(job spec.Job, err error) (spec.Job, er
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = s.PersistJob(job)
+	err = s.StoreJob(job)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -251,7 +251,7 @@ func (s *scheduler) MarkAsReplaced(job spec.Job) (spec.Job, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = s.PersistJob(job)
+	err = s.StoreJob(job)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -268,7 +268,7 @@ func (s *scheduler) MarkAsSucceeded(job spec.Job) (spec.Job, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = s.PersistJob(job)
+	err = s.StoreJob(job)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -276,10 +276,9 @@ func (s *scheduler) MarkAsSucceeded(job spec.Job) (spec.Job, error) {
 	return job, nil
 }
 
-func (s *scheduler) PersistJob(job spec.Job) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call PersistJob")
+func (s *scheduler) StoreJob(job spec.Job) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call StoreJob")
 
-	// TODO we should store the job map instead a JSON string.
 	raw, err := json.Marshal(job)
 	if err != nil {
 		return maskAny(err)
@@ -313,7 +312,7 @@ func (s *scheduler) WaitForFinalStatus(jobID spec.ObjectID, closer <-chan struct
 		case <-closer:
 			return nil, nil
 		case <-time.After(s.WaitSleep):
-			job, err := s.FetchJob(jobID)
+			job, err := s.GetJobByID(jobID)
 			if err != nil {
 				return nil, maskAny(err)
 			}

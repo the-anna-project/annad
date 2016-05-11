@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -38,6 +39,8 @@ type Job interface {
 	// GetSessionID returns the job's session ID.
 	GetSessionID() string
 
+	json.Marshaler
+
 	Object
 
 	// SetActiveStatus sets the job's active status.
@@ -51,4 +54,6 @@ type Job interface {
 
 	// SetResult sets the given result to the current job.
 	SetResult(result string)
+
+	json.Unmarshaler
 }

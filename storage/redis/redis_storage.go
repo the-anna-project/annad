@@ -103,16 +103,16 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return newList, nil
 }
 
-func (s *storage) GetHashMap(key string) (map[string]string, error) {
+func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	conn := s.Pool.Get()
 	defer conn.Close()
 
-	hashMap, err := redis.StringMap(conn.Do("HGETALL", key))
+	stringMap, err := redis.StringMap(conn.Do("HGETALL", key))
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return hashMap, nil
+	return stringMap, nil
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
@@ -196,11 +196,11 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 	return nil
 }
 
-func (s *storage) SetHashMap(key string, hashMap map[string]string) error {
+func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 	conn := s.Pool.Get()
 	defer conn.Close()
 
-	reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(hashMap)...))
+	reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
 	if err != nil {
 		return maskAny(err)
 	}

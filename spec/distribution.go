@@ -1,5 +1,9 @@
 package spec
 
+import (
+	"encoding/json"
+)
+
 // Distribution is a calculation object that describes the distribution of
 // vectors. This vectors can be of arbitrary dimensions. That way
 // characteristics of features and their location in space can be represented.
@@ -21,9 +25,6 @@ type Distribution interface {
 	// that vectors within a distribution must have the same amount of dimensions.
 	GetDimensions() int
 
-	// GetHashMap returns the distribution's storable information as hash map.
-	GetHashMap() map[string]string
-
 	// GetName returns the distribution's name. Note this might be a sequence of
 	// a feature.
 	GetName() string
@@ -37,5 +38,9 @@ type Distribution interface {
 	// weight of 1.
 	GetVectors() [][]float64
 
+	json.Marshaler
+
 	Object
+
+	json.Unmarshaler
 }

@@ -1,5 +1,5 @@
 coverage:
-  precision: 0
+  precision: 2
   round: nearest
 
   status:
@@ -7,6 +7,10 @@ coverage:
       default:
         target: auto
         threshold: 10
+    changes:
+      false:
+    patch:
+      false:
 
 comment:
   layout: header

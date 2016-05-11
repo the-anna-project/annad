@@ -6,13 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	// TODO
-	_ "github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
-	"github.com/xh3b4sd/anna/file-system/os"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
+	_ "github.com/xh3b4sd/anna/index/clg" // TODO
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/net/char"
 	charexecnet "github.com/xh3b4sd/anna/net/char/net/exec"
@@ -102,11 +100,12 @@ func defaultAnnaConfig() annaConfig {
 
 func newAnna(config annaConfig) (spec.Anna, error) {
 	newAnna := &anna{
-		annaConfig: config,
-		Booted:     false,
-		ID:         id.NewObjectID(id.Hex128),
-		Mutex:      sync.Mutex{},
-		Type:       spec.ObjectType(objectTypeAnna),
+		annaConfig:   config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         spec.ObjectType(objectTypeAnna),
 	}
 
 	newAnna.Log.Register(newAnna.GetType())
@@ -114,7 +113,6 @@ func newAnna(config annaConfig) (spec.Anna, error) {
 	if newAnna.CoreNet == nil {
 		return nil, maskAnyf(invalidConfigError, "core network must not be empty")
 	}
-
 	if newAnna.Server == nil {
 		return nil, maskAnyf(invalidConfigError, "server must not be empty")
 	}
@@ -127,44 +125,43 @@ func newAnna(config annaConfig) (spec.Anna, error) {
 type anna struct {
 	annaConfig
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (a *anna) Boot() {
-	a.Mutex.Lock()
-	defer a.Mutex.Unlock()
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
 
-	if a.Booted {
-		return
-	}
-	a.Booted = true
+	a.BootOnce.Do(func() {
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "hello, I am Anna")
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "hello, I am Anna")
+		go a.listenToSignal()
+		go a.writeStateInfo()
 
-	go a.listenToSignal()
-	go a.writeStateInfo()
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
+		go a.FactoryServer.Boot()
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
-	go a.FactoryServer.Boot()
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting core-net")
+		go a.CoreNet.Boot()
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting core-net")
-	go a.CoreNet.Boot()
-
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting server")
-	a.Server.Boot()
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting server")
+		a.Server.Boot()
+	})
 }
 
 func (a *anna) Shutdown() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
 
-	go a.CoreNet.Shutdown()
-	go a.FactoryServer.Shutdown()
+	a.ShutdownOnce.Do(func() {
+		go a.CoreNet.Shutdown()
+		go a.FactoryServer.Shutdown()
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down")
-	os.Exit(0)
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down")
+		os.Exit(0)
+	})
 }
 
 func mainRun(cmd *cobra.Command, args []string) {
@@ -174,9 +171,6 @@ func mainRun(cmd *cobra.Command, args []string) {
 	}
 
 	var err error
-
-	// file system
-	newOSFileSystem := osfilesystem.NewFileSystem()
 
 	// log
 	newLog := log.NewLog(log.DefaultConfig())
@@ -203,9 +197,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newFactoryClientConfig.Log = newLog
 	newFactoryGatewayClient := factoryclient.NewFactory(newFactoryClientConfig)
 	newFactoryServerConfig := factoryserver.DefaultConfig()
-	newFactoryServerConfig.FactoryClient = newFactoryGatewayClient
 	newFactoryServerConfig.FactoryGateway = newFactoryGateway
-	newFactoryServerConfig.FileSystem = newOSFileSystem
 	newFactoryServerConfig.Log = newLog
 	newFactoryServerConfig.TextGateway = newTextGateway
 	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)

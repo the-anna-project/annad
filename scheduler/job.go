@@ -16,8 +16,13 @@ const (
 
 // JobConfig represents the configuration used to create a new job object.
 type JobConfig struct {
-	ActionID  string
-	Args      interface{}
+	// ActionID represents the action ID the job is registered with.
+	ActionID string
+
+	// Args represents the arguments used to execute the job.
+	Args interface{}
+
+	// SessionID represents the session ID the job is associated with.
 	SessionID string
 }
 
@@ -53,6 +58,12 @@ func NewJob(config JobConfig) (spec.Job, error) {
 	return newJob, nil
 }
 
+// NewEmptyJob simply returns an empty, maybe invalid, job object. This should
+// only be used for things like unmarshaling.
+func NewEmptyJob() spec.Job {
+	return &job{}
+}
+
 // Job represents a job that is executable.
 type job struct {
 	JobConfig
@@ -71,7 +82,7 @@ type job struct {
 	// will not change its status anymore.
 	FinalStatus spec.FinalStatus `json:"final_status,omitempty"`
 
-	// ID represents the job identifier.
+	// ID represents the job's identifier.
 	ID spec.ObjectID `json:"id,omitempty"`
 
 	Mutex sync.Mutex `json:"-"`

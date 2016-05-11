@@ -3,8 +3,10 @@
 package stratnet
 
 import (
+	"encoding/json"
 	"math/rand"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -31,12 +33,11 @@ type Config struct {
 
 	// Settings.
 
-	// Actions represents a list of action items, that are object types. These
-	// are used to find the best performing combination by ordering them in a
-	// certain way. Such a ordered list of actions is called a strategy
-	// maintained by a neuron. The best strategy is represented by the highest
-	// score.
-	Actions []spec.ObjectType
+	// CLGNames represents a list of action items, that are CLG names. These are
+	// used to find the best performing combination by ordering them in a certain
+	// way. Such a ordered list of CLG names is called a strategy. The best
+	// strategy is represented by the highest score.
+	CLGNames []string
 
 	// MaxElements representes the maximum number of elements to fetch from a
 	// list within one call. This prevents fetching too much data at once.
@@ -54,7 +55,7 @@ func DefaultConfig() Config {
 		PatNet: nil,
 
 		// Settings.
-		Actions:     []spec.ObjectType{},
+		CLGNames:    []string{},
 		MaxElements: 10,
 	}
 
@@ -99,11 +100,12 @@ func DefaultConfig() Config {
 //
 func NewStratNet(config Config) (spec.Network, error) {
 	newNetwork := &stratNet{
-		Booted: false,
-		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeStratNet,
+		Config:       config,
+		BootOnce:     sync.Once{},
+		ID:           id.NewObjectID(id.Hex128),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeStratNet,
 	}
 
 	newNetwork.Log.Register(newNetwork.GetType())
@@ -114,22 +116,18 @@ func NewStratNet(config Config) (spec.Network, error) {
 type stratNet struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (sn *stratNet) Boot() {
-	sn.Mutex.Lock()
-	defer sn.Mutex.Unlock()
-
-	if sn.Booted {
-		return
-	}
-	sn.Booted = true
-
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call Boot")
+
+	sn.BootOnce.Do(func() {
+	})
 }
 
 func (sn *stratNet) GetBestStrategy(imp spec.Impulse) (spec.Strategy, error) {
@@ -191,14 +189,17 @@ func (sn *stratNet) GetStrategyByID(imp spec.Impulse, ID spec.ObjectID) (spec.St
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call GetStrategyByID")
 
 	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), ID)
-	hashMap, err := sn.Storage.GetHashMap(key)
+	value, err := sn.Storage.Get(key)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	newConfig := strategy.DefaultConfig()
-	newConfig.HashMap = hashMap
-	newStrategy, err := strategy.NewStrategy(newConfig)
+	if value == "" {
+		return nil, maskAny(strategyNotFoundError)
+	}
+
+	newStrategy := strategy.NewEmptyStrategy()
+	err = json.Unmarshal([]byte(value), newStrategy)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -252,7 +253,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call NewStrategy")
 
 	newConfig := strategy.Config{
-		Actions:   imp.GetActions(),
+		CLGNames:  imp.GetCLGNames(),
 		Requestor: imp.GetRequestor(),
 	}
 
@@ -268,7 +269,7 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 		//
 		// TODO this needs to be improved. There are already ideas. See
 		// https://github.com/xh3b4sd/anna/issues/79.
-		key := sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
+		key := sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(newStrategy.GetCLGNames(), ","))
 		_, err := sn.Storage.Get(key)
 		if err != nil {
 			return nil, maskAny(err)
@@ -300,18 +301,25 @@ func (sn *stratNet) NewStrategy(imp spec.Impulse) (spec.Strategy, error) {
 
 func (sn *stratNet) Shutdown() {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call Shutdown")
+
+	sn.ShutdownOnce.Do(func() {
+	})
 }
 
-func (sn *stratNet) StoreStrategy(imp spec.Impulse, newStrategy spec.Strategy) error {
+func (sn *stratNet) StoreStrategy(imp spec.Impulse, strat spec.Strategy) error {
 	sn.Log.WithTags(spec.Tags{L: "D", O: sn, T: nil, V: 13}, "call StoreStrategy")
 
-	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), newStrategy.GetID())
-	err := sn.Storage.SetHashMap(key, newStrategy.GetHashMap())
+	key := sn.key("strategy:%s:data:%s", imp.GetRequestor(), strat.GetID())
+	raw, err := json.Marshal(strat)
 	if err != nil {
 		return maskAny(err)
 	}
-	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), newStrategy.ActionsToString())
-	err = sn.Storage.Set(key, string(newStrategy.GetID()))
+	err = sn.Storage.Set(key, string(raw))
+	if err != nil {
+		return maskAny(err)
+	}
+	key = sn.key("strategy:%s:actions:%s", imp.GetRequestor(), strings.Join(strat.GetCLGNames(), ","))
+	err = sn.Storage.Set(key, string(strat.GetID()))
 	if err != nil {
 		return maskAny(err)
 	}

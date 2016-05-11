@@ -56,3 +56,10 @@ var invalidStrategyError = errgo.New("invalid strategy")
 func IsInvalidStrategy(err error) bool {
 	return errgo.Cause(err) == invalidStrategyError
 }
+
+var strategyNotFoundError = errgo.New("strategy not found")
+
+// IsStrategyNotFound asserts strategyNotFoundError.
+func IsStrategyNotFound(err error) bool {
+	return errgo.Cause(err) == strategyNotFoundError
+}

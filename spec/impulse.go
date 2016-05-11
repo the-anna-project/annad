@@ -10,9 +10,9 @@ package spec
 //
 //
 type Impulse interface {
-	// GetActions returns the currently configured action items that are used to
+	// GetCLGNames returns the currently configured action items that are used to
 	// create a reasonable strategy.
-	GetActions() []ObjectType
+	GetCLGNames() []string
 
 	// GetAllInputs returns the key-value mapping of impulse IDs and their
 	// corresponding inputs for the current impulse, if any. Here we are able to
@@ -56,10 +56,10 @@ type Impulse interface {
 
 	Object
 
-	// SetActions stores the given actions to the impulse. This actions are used
-	// to create reasonable strategies. When setting new actions here, the
-	// formerly set actions will be overwritten.
-	SetActions(actions []ObjectType)
+	// SetCLGNames stores the given CLG names to the impulse. This CLG names are used
+	// to create reasonable strategies. When setting new CLG names here, the
+	// formerly set CLG names will be overwritten.
+	SetCLGNames(clgNames []string)
 
 	// SetInputByImpulseID causes the impulse to store the given input using the
 	// given impulse ID in memory.

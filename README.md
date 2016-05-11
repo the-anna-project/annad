@@ -58,6 +58,7 @@ with us for the following topics and more. Further see the
 - Integration in all kind of hardware and mobile devices.
 - Creating industrial use cases.
 - Networking (the human to human kind of network).
+- Web frontend specific things like web design, graphic design, animations and videos
 
 # license
 The Anna project is open source and license free software. This means I am

@@ -7,6 +7,8 @@ import (
 // FileSystem provides certain file system implementations for abstraction and
 // testing reasons.
 type FileSystem interface {
+	Object
+
 	// ReadFile is aligned to ioutil.ReadFile.
 	ReadFile(filename string) ([]byte, error)
 
