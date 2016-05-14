@@ -1,21 +1,35 @@
-.PHONY: all anna annactl goclean gofmt gogenerate goget gotest projectcheck
+.PHONY: all anna annactl dockerimage dockerpush goclean gofmt gogenerate goget gotest projectcheck
+
+
 
 GOPATH := ${PWD}/.workspace
 export GOPATH
+
+
+
+VERSION := $(shell git rev-parse --short HEAD)
+
+
 
 all: goget annactl anna
 
 anna: gogenerate
 	@go build \
 		-o .workspace/bin/anna \
-		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
+		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna
 
 annactl: gogenerate
 	@go build \
 		-o .workspace/bin/annactl \
-		-ldflags "-X main.version=$(shell git rev-parse --short HEAD)" \
+		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/annactl
+
+dockerimage: all
+	@docker build -t xh3b4sd/anna:${VERSION} .
+
+dockerpush:
+	docker push xh3b4sd/anna:${VERSION}
 
 goclean:
 	@rm -rf coverage.txt profile.out .workspace/
