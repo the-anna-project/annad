@@ -5,13 +5,9 @@ import (
 )
 
 func (s *scheduler) GetID() spec.ObjectID {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
 	return s.ID
 }
 
 func (s *scheduler) GetType() spec.ObjectType {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
 	return s.Type
 }

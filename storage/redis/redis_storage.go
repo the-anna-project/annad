@@ -110,6 +110,8 @@ type storage struct {
 }
 
 func (s *storage) Get(key string) (string, error) {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Get")
+
 	var value string
 	action := func() error {
 		conn := s.Pool.Get()
@@ -117,14 +119,15 @@ func (s *storage) Get(key string) (string, error) {
 
 		var err error
 		value, err = redis.String(conn.Do("GET", key))
-		if err != nil {
+		if !IsNil(err) {
 			return maskAny(err)
 		}
 
 		return nil
 	}
 
-	err := backoff.Retry(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory())
+	// TODO each method needs the retry and instrumentation
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -133,11 +136,13 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetElementsByScore")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", key, score, score, "LIMIT", 0, maxElements))
-	if err != nil {
+	if !IsNil(err) {
 		return nil, maskAny(err)
 	}
 
@@ -150,11 +155,13 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 }
 
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetStringMap")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	stringMap, err := redis.StringMap(conn.Do("HGETALL", key))
-	if err != nil {
+	if !IsNil(err) {
 		return nil, maskAny(err)
 	}
 
@@ -162,11 +169,13 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetHighestScoredElements")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
-	if err != nil {
+	if !IsNil(err) {
 		return nil, maskAny(err)
 	}
 
@@ -179,11 +188,13 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 }
 
 func (s *storage) PushToSet(key string, element string) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call PushToSet")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	_, err := redis.Int(conn.Do("SADD", key, element))
-	if err != nil {
+	if !IsNil(err) {
 		return maskAny(err)
 	}
 
@@ -191,11 +202,13 @@ func (s *storage) PushToSet(key string, element string) error {
 }
 
 func (s *storage) RemoveFromSet(key string, element string) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveFromSet")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	_, err := redis.Int(conn.Do("SREM", key, element))
-	if err != nil {
+	if !IsNil(err) {
 		return maskAny(err)
 	}
 
@@ -203,11 +216,13 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 }
 
 func (s *storage) RemoveScoredElement(key string, element string) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveScoredElement")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	_, err := redis.Int(conn.Do("ZREM", key, element))
-	if err != nil {
+	if !IsNil(err) {
 		return maskAny(err)
 	}
 
@@ -215,12 +230,14 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 }
 
 func (s *storage) Set(key, value string) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Set")
+
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
 		reply, err := redis.String(conn.Do("SET", key, value))
-		if err != nil {
+		if !IsNil(err) {
 			return maskAny(err)
 		}
 
@@ -240,11 +257,13 @@ func (s *storage) Set(key, value string) error {
 }
 
 func (s *storage) SetElementByScore(key, element string, score float64) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetElementByScore")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	_, err := redis.Int(conn.Do("ZADD", key, score, element))
-	if err != nil {
+	if !IsNil(err) {
 		return maskAny(err)
 	}
 
@@ -252,11 +271,13 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 }
 
 func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetStringMap")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
-	if err != nil {
+	if !IsNil(err) {
 		return maskAny(err)
 	}
 
@@ -268,6 +289,8 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 }
 
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkScoredElements")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
@@ -285,7 +308,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 		}
 
 		reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
-		if err != nil {
+		if !IsNil(err) {
 			return maskAny(err)
 		}
 
@@ -322,6 +345,8 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkSet")
+
 	conn := s.Pool.Get()
 	defer conn.Close()
 
@@ -339,7 +364,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 		}
 
 		reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
-		if err != nil {
+		if !IsNil(err) {
 			return maskAny(err)
 		}
 

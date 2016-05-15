@@ -183,9 +183,6 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 }
 
 func (i *index) GetGenerator() spec.CLGProfileGenerator {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call GetGenerator")
 
 	return i.Generator

@@ -2,7 +2,6 @@ package spec
 
 import (
 	"encoding/json"
-	"reflect"
 )
 
 // CLGProfile contains information of a certain CLG.
@@ -22,14 +21,14 @@ type CLGProfile interface {
 
 	// GetInputs returns the profile's implemented CLG method input parameter
 	// types.
-	GetInputs() []reflect.Kind
+	GetInputs() []string
 
 	// GetName returns the name of the CLG this profile is associated with.
 	GetName() string
 
 	// GetOutputs returns the profile's implemented CLG method output parameter
 	// types.
-	GetOutputs() []reflect.Kind
+	GetOutputs() []string
 
 	json.Marshaler
 

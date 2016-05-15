@@ -5,13 +5,9 @@ import (
 )
 
 func (en *execNet) GetID() spec.ObjectID {
-	en.Mutex.Lock()
-	defer en.Mutex.Unlock()
 	return en.ID
 }
 
 func (en *execNet) GetType() spec.ObjectType {
-	en.Mutex.Lock()
-	defer en.Mutex.Unlock()
 	return en.Type
 }

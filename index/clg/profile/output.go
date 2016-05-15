@@ -6,7 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (g *generator) CreateOutputs(clgName string) ([]reflect.Kind, error) {
+func (g *generator) CreateOutputs(clgName string) ([]string, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateOutputs")
 
 	methodValue := reflect.ValueOf(g.Collection).MethodByName(clgName)
@@ -15,10 +15,10 @@ func (g *generator) CreateOutputs(clgName string) ([]reflect.Kind, error) {
 	}
 	t := methodValue.Type()
 
-	var newOutputs []reflect.Kind
+	var newOutputs []string
 
 	for i := 0; i < t.NumOut(); i++ {
-		newOutputs = append(newOutputs, t.Out(i).Kind())
+		newOutputs = append(newOutputs, t.Out(i).String())
 	}
 
 	return newOutputs, nil

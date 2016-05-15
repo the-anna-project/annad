@@ -5,13 +5,9 @@ import (
 )
 
 func (c *collection) GetID() spec.ObjectID {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
 	return c.ID
 }
 
 func (c *collection) GetType() spec.ObjectType {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
 	return c.Type
 }

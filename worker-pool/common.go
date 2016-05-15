@@ -10,6 +10,7 @@ import (
 // spec.WorkerPool.Execute.
 func (wp *workerPool) executeOnce() chan error {
 	var wg sync.WaitGroup
+	var once sync.Once
 	var errors chan error
 
 	canceler := make(chan struct{}, 1)
@@ -19,8 +20,11 @@ func (wp *workerPool) executeOnce() chan error {
 		case <-wp.Canceler:
 			// Receiving a signal from the global canceler will forward the
 			// cancelation to all workers. Simply closing the workers canceler wil
-			// broadcast the signal to each listener.
-			close(canceler)
+			// broadcast the signal to each listener. Here we also make sure we do
+			// not close on a closed channel by only closing once.
+			once.Do(func() {
+				close(canceler)
+			})
 		}
 	}()
 
@@ -33,8 +37,11 @@ func (wp *workerPool) executeOnce() chan error {
 			if err != nil {
 				if wp.CancelOnError {
 					// Closing the canceler channel acts as broadcast to all workers that
-					// should listen to the canceler.
-					close(canceler)
+					// should listen to the canceler. Here we also make sure we do not
+					// close on a closed channel by only closing once.
+					once.Do(func() {
+						close(canceler)
+					})
 				}
 				errors <- err
 			}
@@ -48,7 +55,6 @@ func (wp *workerPool) executeOnce() chan error {
 	// uncollectable garbage. It is still save to read from the closed error
 	// channel.
 	close(errors)
-	close(wp.Canceler)
 
 	return errors
 }
