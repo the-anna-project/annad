@@ -4,12 +4,12 @@ package prometheus
 
 import (
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -195,7 +195,7 @@ func (p *prometheus) GetPrefixes() []string {
 }
 
 func (p *prometheus) NewKey(s ...string) string {
-	return strings.Join(append(p.Prefixes, s...), "_")
+	return key.NewPromKey(s...)
 }
 
 func (p *prometheus) WrapFunc(key string, action func() error) func() error {

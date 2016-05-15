@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/xh3b4sd/anna/id"
@@ -8,6 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage/memory"
 )
 
 const (
@@ -24,6 +26,7 @@ type GeneratorConfig struct {
 	Collection      spec.CLGCollection
 	Instrumentation spec.Instrumentation
 	Log             spec.Log
+	Storage         spec.Storage
 
 	// Settings.
 	LoaderFileNames func() []string
@@ -50,6 +53,7 @@ func DefaultGeneratorConfig() GeneratorConfig {
 		Collection:      newCollection,
 		Instrumentation: newInstrumentation,
 		Log:             log.NewLog(log.DefaultConfig()),
+		Storage:         memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		// Settings.
 		LoaderReadFile:  collection.LoaderReadFile,
@@ -169,9 +173,22 @@ func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
 func (g *generator) GetProfileByName(clgName string) (spec.CLGProfile, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call GetProfileByName")
 
-	// TODO
+	value, err := g.Storage.Get(g.key("profile:%s", string(clgName)))
+	if err != nil {
+		return nil, maskAny(err)
+	}
 
-	return nil, nil
+	if value == "" {
+		return nil, maskAny(clgProfileNotFoundError)
+	}
+
+	newProfile := NewEmptyProfile()
+	err = json.Unmarshal([]byte(value), newProfile)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return newProfile, nil
 }
 
 func (g *generator) GetProfileNames() ([]string, error) {
@@ -192,7 +209,15 @@ func (g *generator) GetProfileNames() ([]string, error) {
 func (g *generator) StoreProfile(clgProfile spec.CLGProfile) error {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call StoreProfile")
 
-	// TODO
+	raw, err := json.Marshal(clgProfile)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	err = g.Storage.Set(g.key("profile:%s", clgProfile.GetName()), string(raw))
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }
