@@ -1,4 +1,4 @@
-package redisstorage
+package prometheus
 
 import (
 	"fmt"
@@ -27,11 +27,4 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
-}
-
-var queryExecutionFailedError = errgo.New("query execution failed")
-
-// IsQueryExecutionFailed asserts queryExecutionFailedError.
-func IsQueryExecutionFailed(err error) bool {
-	return errgo.Cause(err) == queryExecutionFailedError
 }

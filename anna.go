@@ -10,7 +10,8 @@ import (
 	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
-	_ "github.com/xh3b4sd/anna/index/clg" // TODO
+	// TODO
+	_ "github.com/xh3b4sd/anna/index/clg"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/net/char"
 	charexecnet "github.com/xh3b4sd/anna/net/char/net/exec"
@@ -213,7 +214,8 @@ func mainRun(cmd *cobra.Command, args []string) {
 		newStorageConfig := redisstorage.DefaultConfig()
 		newStorageConfig.Log = newLog
 		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
-		newStorage = redisstorage.NewRedisStorage(newStorageConfig)
+		newStorage, err = redisstorage.NewRedisStorage(newStorageConfig)
+		panicOnError(err)
 	case "memory":
 		newStorage = memorystorage.NewMemoryStorage(memorystorage.DefaultConfig())
 	default:

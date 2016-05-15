@@ -6,9 +6,11 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
 
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -22,8 +24,16 @@ const (
 // Config represents the configuration used to create a new redis storage
 // object.
 type Config struct {
-	Log  spec.Log
-	Pool *redis.Pool
+	// Dependencies.
+	Instrumentation spec.Instrumentation
+	Log             spec.Log
+	Pool            *redis.Pool
+
+	// Settings.
+
+	// BackOffFactory is supposed to be able to create a new spec.BackOff. Retry
+	// implementations can make use of this to decide when to retry.
+	BackOffFactory func() spec.BackOff
 }
 
 // DefaultConfigWithConn provides a configuration that can be mocked using a
@@ -44,26 +54,51 @@ func DefaultConfigWithConn(redisConn redis.Conn) Config {
 // DefaultConfig provides a default configuration to create a new redis storage
 // object by best effort.
 func DefaultConfig() Config {
+	newPrometheusConfig := prometheus.DefaultConfig()
+	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "Storage", "Redis")
+	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
-		Log:  log.NewLog(log.DefaultConfig()),
-		Pool: NewRedisPool(DefaultRedisPoolConfig()),
+		// Dependencies.
+		Instrumentation: newInstrumentation,
+		Log:             log.NewLog(log.DefaultConfig()),
+		Pool:            NewRedisPool(DefaultRedisPoolConfig()),
+
+		// Settings.
+		BackOffFactory: func() spec.BackOff {
+			return backoff.NewExponentialBackOff()
+		},
 	}
 
 	return newConfig
 }
 
 // NewRedisStorage creates a new configured redis storage object.
-func NewRedisStorage(config Config) spec.Storage {
+func NewRedisStorage(config Config) (spec.Storage, error) {
 	newStorage := &storage{
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
 		Config: config,
-		Type:   ObjectTypeRedisStorage,
+
+		ID:    id.NewObjectID(id.Hex128),
+		Mutex: sync.Mutex{},
+		Type:  ObjectTypeRedisStorage,
+	}
+
+	if newStorage.BackOffFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
+	}
+	if newStorage.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newStorage.Pool == nil {
+		return nil, maskAnyf(invalidConfigError, "connection pool must not be empty")
 	}
 
 	newStorage.Log.Register(newStorage.GetType())
 
-	return newStorage
+	return newStorage, nil
 }
 
 type storage struct {
@@ -75,10 +110,21 @@ type storage struct {
 }
 
 func (s *storage) Get(key string) (string, error) {
-	conn := s.Pool.Get()
-	defer conn.Close()
+	var value string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	value, err := redis.String(conn.Do("GET", key))
+		var err error
+		value, err = redis.String(conn.Do("GET", key))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory())
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -169,16 +215,25 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 }
 
 func (s *storage) Set(key, value string) error {
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	reply, err := redis.String(conn.Do("SET", key, value))
-	if err != nil {
-		return maskAny(err)
+		reply, err := redis.String(conn.Do("SET", key, value))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		if reply != "OK" {
+			return maskAnyf(queryExecutionFailedError, "SET not executed correctly")
+		}
+
+		return nil
 	}
 
-	if reply != "OK" {
-		return maskAnyf(queryExecutionFailedError, "SET not executed correctly")
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Set", action), s.BackOffFactory())
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil

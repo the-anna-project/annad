@@ -53,7 +53,8 @@ func DefaultConfig() Config {
 // NewCharNet creates a new configured character network object.
 func NewCharNet(config Config) (spec.Network, error) {
 	newNet := &charNet{
-		Config:       config,
+		Config: config,
+
 		BootOnce:     sync.Once{},
 		ID:           id.NewObjectID(id.Hex128),
 		Mutex:        sync.Mutex{},

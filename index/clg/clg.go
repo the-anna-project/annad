@@ -7,6 +7,7 @@ import (
 
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/index/clg/profile"
+	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
@@ -22,8 +23,9 @@ const (
 // object.
 type IndexConfig struct {
 	// Dependencies.
-	Generator spec.CLGProfileGenerator
-	Log       spec.Log
+	Generator       spec.CLGProfileGenerator
+	Instrumentation spec.Instrumentation
+	Log             spec.Log
 
 	// Settings.
 	NumGeneratorWorkers int
@@ -37,10 +39,18 @@ func DefaultIndexConfig() IndexConfig {
 		panic(err)
 	}
 
+	newPrometheusConfig := prometheus.DefaultConfig()
+	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "CLGProfileGenerator")
+	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := IndexConfig{
 		// Dependencies.
-		Generator: newGenerator,
-		Log:       log.NewLog(log.DefaultConfig()),
+		Generator:       newGenerator,
+		Instrumentation: newInstrumentation,
+		Log:             log.NewLog(log.DefaultConfig()),
 
 		// Settings.
 		NumGeneratorWorkers: 10,
@@ -105,59 +115,68 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call CreateProfiles")
 
-	// Initialize queues we read from and write to.
-	profileNames, err := generator.GetProfileNames()
-	if err != nil {
-		return maskAny(err)
-	}
-	profileNameQueue := make(chan string, len(profileNames))
-	for _, pn := range profileNames {
-		profileNameQueue <- pn
-	}
-	// We can close the queue channel immediately, because it only provides a one
-	// way ticket and all writing is already done. As soon as a CLG name was
-	// fetched from the queue it is considered WIP. A CLG name must never be
-	// requeued.
-	close(profileNameQueue)
+	action := func() error {
+		// Initialize queues we read from and write to.
+		profileNames, err := generator.GetProfileNames()
+		if err != nil {
+			return maskAny(err)
+		}
+		profileNameQueue := make(chan string, len(profileNames))
+		for _, pn := range profileNames {
+			profileNameQueue <- pn
+		}
+		// We can close the queue channel immediately, because it only provides a one
+		// way ticket and all writing is already done. As soon as a CLG name was
+		// fetched from the queue it is considered WIP. A CLG name must never be
+		// requeued.
+		close(profileNameQueue)
 
-	// Create worker function executed concurrently by all workers within the
-	// worker pool we are going to create.
-	workerFunc := func(canceler <-chan struct{}) error {
-		for {
-			select {
-			case <-canceler:
-				return maskAny(workerCanceledError)
-			case pn := <-profileNameQueue:
-				newProfile, err := generator.CreateProfile(pn)
-				if err != nil {
-					return maskAny(err)
-				}
-				if !newProfile.GetHasChanged() {
-					// The created CLG profile is already known and did not change yet.
-					// No need to update the stored version of it. Go ahead to create the
-					// next one.
-					continue
-				}
+		// Create worker function executed concurrently by all workers within the
+		// worker pool we are going to create.
+		workerFunc := func(canceler <-chan struct{}) error {
+			for {
+				select {
+				case <-canceler:
+					return maskAny(workerCanceledError)
+				case pn := <-profileNameQueue:
+					newProfile, err := generator.CreateProfile(pn)
+					if err != nil {
+						return maskAny(err)
+					}
+					if !newProfile.GetHasChanged() {
+						// The created CLG profile is already known and did not change yet.
+						// No need to update the stored version of it. Go ahead to create the
+						// next one.
+						continue
+					}
 
-				err = generator.StoreProfile(newProfile)
-				if err != nil {
-					return maskAny(err)
+					err = generator.StoreProfile(newProfile)
+					if err != nil {
+						return maskAny(err)
+					}
 				}
 			}
 		}
+
+		// Prepare the worker pool.
+		newWorkerPoolConfig := workerpool.DefaultConfig()
+		newWorkerPoolConfig.WorkerFunc = workerFunc
+		newWorkerPoolConfig.Canceler = i.Closer
+		newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		// Execute the worker pool and block until all work is done.
+		err = i.maybeReturnAndLogErrors(newWorkerPool.Execute())
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
 	}
 
-	// Prepare the worker pool.
-	newWorkerPoolConfig := workerpool.DefaultConfig()
-	newWorkerPoolConfig.WorkerFunc = workerFunc
-	newWorkerPoolConfig.Canceler = i.Closer
-	newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	// Execute the worker pool and block until all work is done.
-	err = i.maybeReturnAndLogErrors(newWorkerPool.Execute())
+	err := i.Instrumentation.ExecFunc("CreateProfiles", action)
 	if err != nil {
 		return maskAny(err)
 	}

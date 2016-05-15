@@ -40,7 +40,7 @@ type Config struct {
 	Outputs []reflect.Kind `json:"outputs,omitempty"`
 }
 
-// DefaultConfig provides a default configuration to create a new CLG index
+// DefaultConfig provides a default configuration to create a new CLG profile
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
