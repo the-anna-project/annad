@@ -3,7 +3,6 @@
 package prometheus
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -124,7 +123,7 @@ func (p *prometheus) GetCounter(key string) (spec.Counter, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = prometheusclient.Register(newCounter.(*counter).ClientCounter)
+	_, err = prometheusclient.RegisterOrGet(newCounter.(*counter).ClientCounter)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -149,7 +148,7 @@ func (p *prometheus) GetGauge(key string) (spec.Gauge, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	err = prometheusclient.Register(newGauge.(*gauge).ClientGauge)
+	_, err = prometheusclient.RegisterOrGet(newGauge.(*gauge).ClientGauge)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -168,15 +167,13 @@ func (p *prometheus) GetHistogram(key string) (spec.Histogram, error) {
 
 	newConfig := DefaultHistogramConfig()
 	newConfig.Name = key
-	fmt.Printf("%#v\n", key)
 	// TODO configure help
 	newConfig.Help = "help"
 	newHistogram, err := NewHistogram(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	// TODO unregister ???
-	err = prometheusclient.Register(newHistogram.(*histogram).ClientHistogram)
+	_, err = prometheusclient.RegisterOrGet(newHistogram.(*histogram).ClientHistogram)
 	if err != nil {
 		return nil, maskAny(err)
 	}

@@ -1,7 +1,6 @@
 package redisstorage
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -61,7 +60,6 @@ func Test_RedisStorage_Get_Error(t *testing.T) {
 	}
 
 	_, err = newStorage.Get("foo")
-	fmt.Printf("%#v\n", err)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -235,6 +233,9 @@ func Test_RedisStorage_Set_Error(t *testing.T) {
 	c.Command("SET", "foo", "bar").ExpectError(queryExecutionFailedError)
 
 	newConfig := DefaultConfigWithConn(c)
+	newConfig.BackOffFactory = func() spec.BackOff {
+		return &backoff.StopBackOff{}
+	}
 	newStorage, err := NewRedisStorage(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
