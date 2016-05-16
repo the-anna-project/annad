@@ -7,12 +7,8 @@ coverage:
       default:
         target: auto
         threshold: 10
-    changes:
-      default:
-        branches: !*
-    patch:
-      default:
-        branches: !*
+    changes: false
+    patch: false
 
 comment:
   layout: header
