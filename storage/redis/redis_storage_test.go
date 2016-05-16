@@ -5,10 +5,24 @@ import (
 	"testing"
 
 	"github.com/cenk/backoff"
+	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
 	"github.com/xh3b4sd/anna/spec"
 )
+
+func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
+	newConfig := DefaultConfigWithConn(c)
+	newConfig.BackOffFactory = func() spec.BackOff {
+		return &backoff.StopBackOff{}
+	}
+	newStorage, err := NewRedisStorage(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	return newStorage
+}
 
 func Test_RedisStorage_GetID(t *testing.T) {
 	firstStorage, err := NewRedisStorage(DefaultConfig())
@@ -31,11 +45,7 @@ func Test_RedisStorage_Get_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("GET", "foo").Expect("bar")
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	value, err := newStorage.Get("foo")
 	if err != nil {
@@ -50,16 +60,9 @@ func Test_RedisStorage_Get_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("GET", "foo").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	_, err = newStorage.Get("foo")
+	_, err := newStorage.Get("foo")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -71,11 +74,7 @@ func Test_RedisStorage_GetElementsByScore_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGEBYSCORE", "foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{"bar"})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	values, err := newStorage.GetElementsByScore("foo", 0.8, 3)
 	if err != nil {
@@ -93,13 +92,9 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGEBYSCORE", "foo", 0.8, 0.8, "LIMIT", 0, 3).ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	_, err = newStorage.GetElementsByScore("foo", 0.8, 3)
+	_, err := newStorage.GetElementsByScore("foo", 0.8, 3)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -111,11 +106,7 @@ func Test_RedisStorage_GetStringMap_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HGETALL", "foo").Expect([]interface{}{[]byte("k1"), []byte("v1")})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	value, err := newStorage.GetStringMap("foo")
 	if err != nil {
@@ -130,13 +121,9 @@ func Test_RedisStorage_GetStringMap_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HGETALL", "foo").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	_, err = newStorage.GetStringMap("foo")
+	_, err := newStorage.GetStringMap("foo")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -148,11 +135,7 @@ func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGE", "foo", 0, 2, "WITHSCORES").Expect([]interface{}{"one", "0.8", "two", "0.5"})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	values, err := newStorage.GetHighestScoredElements("foo", 3)
 	if err != nil {
@@ -179,13 +162,9 @@ func Test_RedisStorage_GetHighestScoredElements_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREVRANGE", "foo", 0, 2, "WITHSCORES").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	_, err = newStorage.GetHighestScoredElements("foo", 3)
+	_, err := newStorage.GetHighestScoredElements("foo", 3)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -197,13 +176,9 @@ func Test_RedisStorage_Set_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").Expect("OK")
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.Set("foo", "bar")
+	err := newStorage.Set("foo", "bar")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -213,16 +188,9 @@ func Test_RedisStorage_Set_NoSuccess(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").Expect("invalid")
 
-	newConfig := DefaultConfigWithConn(c)
-	newConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.Set("foo", "bar")
+	err := newStorage.Set("foo", "bar")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -232,16 +200,9 @@ func Test_RedisStorage_Set_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SET", "foo", "bar").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.Set("foo", "bar")
+	err := newStorage.Set("foo", "bar")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -253,13 +214,9 @@ func Test_RedisStorage_SetElementByScore_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZADD", "key", 0.8, "element").Expect(int64(1))
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.SetElementByScore("key", "element", 0.8)
+	err := newStorage.SetElementByScore("key", "element", 0.8)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -269,13 +226,9 @@ func Test_RedisStorage_SetElementByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZADD", "key", 0.8, "element").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.SetElementByScore("key", "element", 0.8)
+	err := newStorage.SetElementByScore("key", "element", 0.8)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -287,13 +240,9 @@ func Test_RedisStorage_PushToSet(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SADD", "test-key", "test-element").Expect(int64(1))
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.PushToSet("test-key", "test-element")
+	err := newStorage.PushToSet("test-key", "test-element")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -303,13 +252,9 @@ func Test_RedisStorage_PushToSet_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SADD", "test-key", "test-element").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.PushToSet("test-key", "test-element")
+	err := newStorage.PushToSet("test-key", "test-element")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -321,13 +266,9 @@ func Test_RedisStorage_RemoveFromSet(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SREM", "test-key", "test-element").Expect(int64(1))
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.RemoveFromSet("test-key", "test-element")
+	err := newStorage.RemoveFromSet("test-key", "test-element")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -337,13 +278,9 @@ func Test_RedisStorage_RemoveFromSet_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SREM", "test-key", "test-element").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.RemoveFromSet("test-key", "test-element")
+	err := newStorage.RemoveFromSet("test-key", "test-element")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -355,13 +292,9 @@ func Test_RedisStorage_RemoveScoredElement(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREM", "test-key", "test-element").Expect(int64(1))
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.RemoveScoredElement("test-key", "test-element")
+	err := newStorage.RemoveScoredElement("test-key", "test-element")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -371,13 +304,9 @@ func Test_RedisStorage_RemoveScoredElement_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZREM", "test-key", "test-element").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.RemoveScoredElement("test-key", "test-element")
+	err := newStorage.RemoveScoredElement("test-key", "test-element")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -389,13 +318,9 @@ func Test_RedisStorage_SetStringMap_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").Expect("OK")
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -405,13 +330,9 @@ func Test_RedisStorage_SetStringMap_NotOK(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").Expect("Not OK")
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -421,13 +342,9 @@ func Test_RedisStorage_SetStringMap_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("HMSET", "foo", "k1", "v1").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
+	err := newStorage.SetStringMap("foo", map[string]string{"k1": "v1"})
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -442,14 +359,10 @@ func Test_RedisStorage_WalkScoredElements(t *testing.T) {
 		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	var values []interface{}
-	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
 		values = append(values, element, score)
 		return nil
 	})
@@ -468,18 +381,14 @@ func Test_RedisStorage_WalkScoredElements_CloseDirectly(t *testing.T) {
 		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	// Directly close and end walking.
 	closer := make(chan struct{}, 1)
 	closer <- struct{}{}
 
 	var values []interface{}
-	err = newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
 		values = append(values, element, score)
 		return nil
 	})
@@ -498,16 +407,12 @@ func Test_RedisStorage_WalkScoredElements_CloseAfterCallback(t *testing.T) {
 		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	var count int
 	closer := make(chan struct{}, 1)
 
-	err = newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
 		count++
 
 		// Close and end walking.
@@ -527,13 +432,9 @@ func Test_RedisStorage_WalkScoredElements_QueryError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.WalkScoredElements("test-key", nil, nil)
+	err := newStorage.WalkScoredElements("test-key", nil, nil)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -546,13 +447,9 @@ func Test_RedisStorage_WalkScoredElements_CallbackError(t *testing.T) {
 		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
 		return maskAny(queryExecutionFailedError)
 	})
 	if !IsQueryExecutionFailed(err) {
@@ -569,14 +466,10 @@ func Test_RedisStorage_WalkSet(t *testing.T) {
 		[]string{"test-value"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	var element1 string
-	err = newStorage.WalkSet("test-key", nil, func(element string) error {
+	err := newStorage.WalkSet("test-key", nil, func(element string) error {
 		element1 = element
 		return nil
 	})
@@ -595,18 +488,14 @@ func Test_RedisStorage_WalkSet_CloseDirectly(t *testing.T) {
 		[]string{"test-value-1", "test-value-2"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	// Directly close and end walking.
 	closer := make(chan struct{}, 1)
 	closer <- struct{}{}
 
 	var element1 string
-	err = newStorage.WalkSet("test-key", closer, func(element string) error {
+	err := newStorage.WalkSet("test-key", closer, func(element string) error {
 		element1 = element
 		return nil
 	})
@@ -625,16 +514,12 @@ func Test_RedisStorage_WalkSet_CloseAfterCallback(t *testing.T) {
 		[]string{"test-value-1", "test-value-2"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
 	var count int
 	closer := make(chan struct{}, 1)
 
-	err = newStorage.WalkSet("test-key", closer, func(element string) error {
+	err := newStorage.WalkSet("test-key", closer, func(element string) error {
 		count++
 
 		// Close and end walking.
@@ -654,13 +539,9 @@ func Test_RedisStorage_WalkSet_QueryError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SSCAN").ExpectError(queryExecutionFailedError)
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.WalkSet("test-key", nil, nil)
+	err := newStorage.WalkSet("test-key", nil, nil)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -673,13 +554,9 @@ func Test_RedisStorage_WalkSet_CallbackError(t *testing.T) {
 		[]string{"test-value-1", "test-value-2"},
 	})
 
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	err = newStorage.WalkSet("test-key", nil, func(element string) error {
+	err := newStorage.WalkSet("test-key", nil, func(element string) error {
 		return maskAny(queryExecutionFailedError)
 	})
 	if !IsQueryExecutionFailed(err) {

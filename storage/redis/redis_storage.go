@@ -112,13 +112,13 @@ type storage struct {
 func (s *storage) Get(key string) (string, error) {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Get")
 
-	var value string
+	var result string
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
 		var err error
-		value, err = redis.String(conn.Do("GET", key))
+		result, err = redis.String(conn.Do("GET", key))
 		if !IsNil(err) {
 			return maskAny(err)
 		}
@@ -126,75 +126,112 @@ func (s *storage) Get(key string) (string, error) {
 		return nil
 	}
 
-	// TODO each method needs the retry and instrumentation
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	return value, nil
+	return result, nil
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetElementsByScore")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	var result []string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", key, score, score, "LIMIT", 0, maxElements))
-	if !IsNil(err) {
+		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", key, score, score, "LIMIT", 0, maxElements))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		for _, v := range values {
+			result = append(result, v.(string))
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	newList := []string{}
-	for _, v := range values {
-		newList = append(newList, v.(string))
-	}
-
-	return newList, nil
+	return result, nil
 }
 
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetStringMap")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	var result map[string]string
+	var err error
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	stringMap, err := redis.StringMap(conn.Do("HGETALL", key))
-	if !IsNil(err) {
+		result, err = redis.StringMap(conn.Do("HGETALL", key))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return stringMap, nil
+	return result, nil
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetHighestScoredElements")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	var result []string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
-	if !IsNil(err) {
+		values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		for _, v := range values {
+			result = append(result, v.(string))
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	newList := []string{}
-	for _, v := range values {
-		newList = append(newList, v.(string))
-	}
-
-	return newList, nil
+	return result, nil
 }
 
 func (s *storage) PushToSet(key string, element string) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call PushToSet")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	_, err := redis.Int(conn.Do("SADD", key, element))
-	if !IsNil(err) {
+		_, err := redis.Int(conn.Do("SADD", key, element))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return maskAny(err)
 	}
 
@@ -204,11 +241,20 @@ func (s *storage) PushToSet(key string, element string) error {
 func (s *storage) RemoveFromSet(key string, element string) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveFromSet")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	_, err := redis.Int(conn.Do("SREM", key, element))
-	if !IsNil(err) {
+		_, err := redis.Int(conn.Do("SREM", key, element))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return maskAny(err)
 	}
 
@@ -218,11 +264,20 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 func (s *storage) RemoveScoredElement(key string, element string) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveScoredElement")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	_, err := redis.Int(conn.Do("ZREM", key, element))
-	if !IsNil(err) {
+		_, err := redis.Int(conn.Do("ZREM", key, element))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveScoredElement", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return maskAny(err)
 	}
 
@@ -259,11 +314,20 @@ func (s *storage) Set(key, value string) error {
 func (s *storage) SetElementByScore(key, element string, score float64) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetElementByScore")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	_, err := redis.Int(conn.Do("ZADD", key, score, element))
-	if !IsNil(err) {
+		_, err := redis.Int(conn.Do("ZADD", key, score, element))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetElementByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
 		return maskAny(err)
 	}
 
@@ -273,16 +337,25 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetStringMap")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
-	if !IsNil(err) {
-		return maskAny(err)
+		reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
+		if !IsNil(err) {
+			return maskAny(err)
+		}
+
+		if reply != "OK" {
+			return maskAnyf(queryExecutionFailedError, "HMSET not executed correctly")
+		}
+
+		return nil
 	}
 
-	if reply != "OK" {
-		return maskAnyf(queryExecutionFailedError, "HMSET not executed correctly")
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
@@ -291,54 +364,63 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkScoredElements")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	var cursor int64
+		var cursor int64
 
-	// Start to scan the set until the cursor is 0 again. Note that we check for
-	// the closer twice. At first we prevent scans in case the closer was
-	// triggered directly, and second before each callback execution. That way
-	// ending the walk immediately is guaranteed.
-	for {
-		select {
-		case <-closer:
-			return nil
-		default:
-		}
-
-		reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
-		if !IsNil(err) {
-			return maskAny(err)
-		}
-
-		cursor := reply[0].(int64)
-		values := reply[1].([]string)
-
-		for i := range values {
+		// Start to scan the set until the cursor is 0 again. Note that we check for
+		// the closer twice. At first we prevent scans in case the closer was
+		// triggered directly, and second before each callback execution. That way
+		// ending the walk immediately is guaranteed.
+		for {
 			select {
 			case <-closer:
 				return nil
 			default:
 			}
 
-			if i%2 != 0 {
-				continue
+			reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
+			if !IsNil(err) {
+				return maskAny(err)
 			}
 
-			score, err := strconv.ParseFloat(values[i+1], 64)
-			if err != nil {
-				return maskAny(err)
+			cursor := reply[0].(int64)
+			values := reply[1].([]string)
+
+			for i := range values {
+				select {
+				case <-closer:
+					return nil
+				default:
+				}
+
+				if i%2 != 0 {
+					continue
+				}
+
+				score, err := strconv.ParseFloat(values[i+1], 64)
+				if err != nil {
+					return maskAny(err)
+				}
+				err = cb(values[i], score)
+				if err != nil {
+					return maskAny(err)
+				}
 			}
-			err = cb(values[i], score)
-			if err != nil {
-				return maskAny(err)
+
+			if cursor == 0 {
+				break
 			}
 		}
 
-		if cursor == 0 {
-			break
-		}
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
@@ -347,46 +429,55 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkSet")
 
-	conn := s.Pool.Get()
-	defer conn.Close()
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
 
-	var cursor int64
+		var cursor int64
 
-	// Start to scan the set until the cursor is 0 again. Note that we check for
-	// the closer twice. At first we prevent scans in case the closer was
-	// triggered directly, and second before each callback execution. That way
-	// ending the walk immediately is guaranteed.
-	for {
-		select {
-		case <-closer:
-			return nil
-		default:
-		}
-
-		reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
-		if !IsNil(err) {
-			return maskAny(err)
-		}
-
-		cursor := reply[0].(int64)
-		values := reply[1].([]string)
-
-		for _, v := range values {
+		// Start to scan the set until the cursor is 0 again. Note that we check for
+		// the closer twice. At first we prevent scans in case the closer was
+		// triggered directly, and second before each callback execution. That way
+		// ending the walk immediately is guaranteed.
+		for {
 			select {
 			case <-closer:
 				return nil
 			default:
 			}
 
-			err := cb(v)
-			if err != nil {
+			reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
+			if !IsNil(err) {
 				return maskAny(err)
+			}
+
+			cursor := reply[0].(int64)
+			values := reply[1].([]string)
+
+			for _, v := range values {
+				select {
+				case <-closer:
+					return nil
+				default:
+				}
+
+				err := cb(v)
+				if err != nil {
+					return maskAny(err)
+				}
+			}
+
+			if cursor == 0 {
+				break
 			}
 		}
 
-		if cursor == 0 {
-			break
-		}
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
