@@ -6,6 +6,7 @@ processes.
 - [CI](ci.md)
 - [cheat sheet](cheat_sheet.md)
 - [coverage](coverage.md)
+- [docker](docker.md)
 - [guidelines](guidelines.md)
 - [makefile](makefile.md)
 - [requirements](requirements.md)

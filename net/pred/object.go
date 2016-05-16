@@ -5,13 +5,9 @@ import (
 )
 
 func (pn *predNet) GetID() spec.ObjectID {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
 	return pn.ID
 }
 
 func (pn *predNet) GetType() spec.ObjectType {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
 	return pn.Type
 }

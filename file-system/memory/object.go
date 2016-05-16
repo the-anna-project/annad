@@ -5,13 +5,9 @@ import (
 )
 
 func (mfs *memoryFileSystem) GetID() spec.ObjectID {
-	mfs.Mutex.Lock()
-	defer mfs.Mutex.Unlock()
 	return mfs.ID
 }
 
 func (mfs *memoryFileSystem) GetType() spec.ObjectType {
-	mfs.Mutex.Lock()
-	defer mfs.Mutex.Unlock()
 	return mfs.Type
 }

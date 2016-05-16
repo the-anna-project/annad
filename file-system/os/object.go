@@ -5,13 +5,9 @@ import (
 )
 
 func (osfs *osFileSystem) GetID() spec.ObjectID {
-	osfs.Mutex.Lock()
-	defer osfs.Mutex.Unlock()
 	return osfs.ID
 }
 
 func (osfs *osFileSystem) GetType() spec.ObjectType {
-	osfs.Mutex.Lock()
-	defer osfs.Mutex.Unlock()
 	return osfs.Type
 }

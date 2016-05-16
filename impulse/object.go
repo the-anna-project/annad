@@ -5,13 +5,9 @@ import (
 )
 
 func (i *impulse) GetID() spec.ObjectID {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
 	return i.ID
 }
 
 func (i *impulse) GetType() spec.ObjectType {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
 	return i.Type
 }

@@ -5,13 +5,9 @@ import (
 )
 
 func (pn *patNet) GetID() spec.ObjectID {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
 	return pn.ID
 }
 
 func (pn *patNet) GetType() spec.ObjectType {
-	pn.Mutex.Lock()
-	defer pn.Mutex.Unlock()
 	return pn.Type
 }

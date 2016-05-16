@@ -31,16 +31,16 @@ type Config struct {
 	Hash string `json:"hash,omitempty"`
 
 	// Inputs represents the CLG's implemented method input parameter types.
-	Inputs []reflect.Kind `json:"inputs,omitempty"`
+	Inputs []string `json:"inputs,omitempty"`
 
 	// Name represents the CLG's implemented method name.
 	Name string `json:"name,omitempty"`
 
 	// Outputs represents the CLG's implemented method output parameter types.
-	Outputs []reflect.Kind `json:"outputs,omitempty"`
+	Outputs []string `json:"outputs,omitempty"`
 }
 
-// DefaultConfig provides a default configuration to create a new CLG index
+// DefaultConfig provides a default configuration to create a new CLG profile
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
@@ -145,7 +145,7 @@ func (p *profile) GetHash() string {
 	return p.Hash
 }
 
-func (p *profile) GetInputs() []reflect.Kind {
+func (p *profile) GetInputs() []string {
 	p.Mutex.Lock()
 	defer p.Mutex.Unlock()
 
@@ -159,7 +159,7 @@ func (p *profile) GetName() string {
 	return p.Name
 }
 
-func (p *profile) GetOutputs() []reflect.Kind {
+func (p *profile) GetOutputs() []string {
 	p.Mutex.Lock()
 	defer p.Mutex.Unlock()
 

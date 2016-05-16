@@ -81,10 +81,11 @@ func DefaultConfig() Config {
 func NewScheduler(config Config) (spec.Scheduler, error) {
 	newScheduler := &scheduler{
 		Config: config,
-		Booted: false,
-		ID:     id.NewObjectID(id.Hex128),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeScheduler,
+
+		BootOnce: sync.Once{},
+		ID:       id.NewObjectID(id.Hex128),
+		Mutex:    sync.Mutex{},
+		Type:     ObjectTypeScheduler,
 	}
 
 	newScheduler.Log.Register(newScheduler.GetType())
@@ -95,25 +96,20 @@ func NewScheduler(config Config) (spec.Scheduler, error) {
 type scheduler struct {
 	Config
 
-	Booted bool
-	ID     spec.ObjectID
-	Mutex  sync.Mutex
-	Type   spec.ObjectType
+	BootOnce sync.Once
+	ID       spec.ObjectID
+	Mutex    sync.Mutex
+	Type     spec.ObjectType
 }
 
 func (s *scheduler) Boot() {
-	// TODO fix that everywhere
-	s.Mutex.Lock()
-	if s.Booted {
-		s.Mutex.Unlock()
-		return
-	}
-	s.Booted = true
-	s.Mutex.Unlock()
-
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Boot")
 
-	s.scheduleActiveJobs()
+	s.BootOnce.Do(func() {
+		go func() {
+			s.scheduleActiveJobs()
+		}()
+	})
 }
 
 func (s *scheduler) Execute(job spec.Job) error {

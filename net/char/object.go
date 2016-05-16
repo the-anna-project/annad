@@ -5,13 +5,9 @@ import (
 )
 
 func (cn *charNet) GetID() spec.ObjectID {
-	cn.Mutex.Lock()
-	defer cn.Mutex.Unlock()
 	return cn.ID
 }
 
 func (cn *charNet) GetType() spec.ObjectType {
-	cn.Mutex.Lock()
-	defer cn.Mutex.Unlock()
 	return cn.Type
 }

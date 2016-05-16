@@ -4,13 +4,16 @@ import (
 	"os"
 	"sync"
 
+	"github.com/cenk/backoff"
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/factory/server"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
-	_ "github.com/xh3b4sd/anna/index/clg" // TODO
+	"github.com/xh3b4sd/anna/index/clg"
+	"github.com/xh3b4sd/anna/index/clg/collection"
+	"github.com/xh3b4sd/anna/index/clg/profile"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/net/char"
 	charexecnet "github.com/xh3b4sd/anna/net/char/net/exec"
@@ -79,6 +82,7 @@ func init() {
 }
 
 type annaConfig struct {
+	CLGIndex      spec.CLGIndex
 	CoreNet       spec.Network
 	FactoryServer spec.Factory
 	Log           spec.Log
@@ -87,7 +91,13 @@ type annaConfig struct {
 }
 
 func defaultAnnaConfig() annaConfig {
+	newCLGIndex, err := clg.NewIndex(clg.DefaultIndexConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := annaConfig{
+		CLGIndex:      newCLGIndex,
 		CoreNet:       nil,
 		FactoryServer: factoryserver.NewFactory(factoryserver.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
@@ -100,7 +110,8 @@ func defaultAnnaConfig() annaConfig {
 
 func newAnna(config annaConfig) (spec.Anna, error) {
 	newAnna := &anna{
-		annaConfig:   config,
+		annaConfig: config,
+
 		BootOnce:     sync.Once{},
 		ID:           id.NewObjectID(id.Hex128),
 		Mutex:        sync.Mutex{},
@@ -108,14 +119,23 @@ func newAnna(config annaConfig) (spec.Anna, error) {
 		Type:         spec.ObjectType(objectTypeAnna),
 	}
 
-	newAnna.Log.Register(newAnna.GetType())
-
+	if newAnna.CLGIndex == nil {
+		return nil, maskAnyf(invalidConfigError, "CLG index must not be empty")
+	}
 	if newAnna.CoreNet == nil {
 		return nil, maskAnyf(invalidConfigError, "core network must not be empty")
+	}
+	if newAnna.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 	if newAnna.Server == nil {
 		return nil, maskAnyf(invalidConfigError, "server must not be empty")
 	}
+	if newAnna.Storage == nil {
+		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
+	}
+
+	newAnna.Log.Register(newAnna.GetType())
 
 	return newAnna, nil
 }
@@ -141,6 +161,9 @@ func (a *anna) Boot() {
 		go a.listenToSignal()
 		go a.writeStateInfo()
 
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting CLG index")
+		go a.CLGIndex.Boot()
+
 		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
 		go a.FactoryServer.Boot()
 
@@ -156,6 +179,7 @@ func (a *anna) Shutdown() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
+		go a.CLGIndex.Shutdown()
 		go a.CoreNet.Shutdown()
 		go a.FactoryServer.Shutdown()
 
@@ -211,9 +235,13 @@ func mainRun(cmd *cobra.Command, args []string) {
 		newPoolConfig := redisstorage.DefaultRedisPoolConfig()
 		newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
 		newStorageConfig := redisstorage.DefaultConfig()
+		newStorageConfig.BackOffFactory = func() spec.BackOff {
+			return backoff.NewExponentialBackOff()
+		}
 		newStorageConfig.Log = newLog
 		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
-		newStorage = redisstorage.NewRedisStorage(newStorageConfig)
+		newStorage, err = redisstorage.NewRedisStorage(newStorageConfig)
+		panicOnError(err)
 	case "memory":
 		newStorage = memorystorage.NewMemoryStorage(memorystorage.DefaultConfig())
 	default:
@@ -378,6 +406,32 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCoreNet, err := corenet.NewCoreNet(newCoreNetConfig)
 	panicOnError(err)
 
+	// CLG collection
+	newCollectionConfig := collection.DefaultConfig()
+	newCollectionConfig.Log = newLog
+	newCollection, err := collection.New(newCollectionConfig)
+	panicOnError(err)
+
+	// CLG profile generator
+	newGeneratorConfig := profile.DefaultGeneratorConfig()
+	newGeneratorConfig.Collection = newCollection
+	newGeneratorConfig.Log = newLog
+	newGeneratorConfig.Storage = newStorage
+	newGenerator, err := profile.NewGenerator(newGeneratorConfig)
+	panicOnError(err)
+
+	// CLG index
+	newCLGConfig := clg.DefaultIndexConfig()
+	newCLGConfig.Generator = newGenerator
+	newCLGConfig.Log = newLog
+	newCLGIndex, err := clg.NewIndex(newCLGConfig)
+	panicOnError(err)
+
+	// log control
+	newLogControlConfig := logcontrol.DefaultConfig()
+	newLogControlConfig.Log = newLog
+	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+
 	// text interface
 	newTextInterfaceConfig := textinterface.DefaultConfig()
 	newTextInterfaceConfig.Log = newLog
@@ -385,11 +439,6 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newTextInterfaceConfig.TextGateway = newTextGateway
 	newTextInterface, err := textinterface.NewTextInterface(newTextInterfaceConfig)
 	panicOnError(err)
-
-	// log control
-	newLogControlConfig := logcontrol.DefaultConfig()
-	newLogControlConfig.Log = newLog
-	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
 
 	// server
 	newServerConfig := server.DefaultConfig()
@@ -403,6 +452,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 
 	// anna
 	newAnnaConfig := defaultAnnaConfig()
+	newAnnaConfig.CLGIndex = newCLGIndex
 	newAnnaConfig.CoreNet = newCoreNet
 	newAnnaConfig.FactoryServer = newFactoryServer
 	newAnnaConfig.Log = newLog
