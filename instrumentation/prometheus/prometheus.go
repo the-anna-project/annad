@@ -195,7 +195,7 @@ func (p *prometheus) GetPrefixes() []string {
 }
 
 func (p *prometheus) NewKey(s ...string) string {
-	return key.NewPromKey(s...)
+	return key.NewPromKey(append(p.Prefixes, s...)...)
 }
 
 func (p *prometheus) WrapFunc(key string, action func() error) func() error {
