@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
