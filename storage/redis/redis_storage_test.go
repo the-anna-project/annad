@@ -13,9 +13,6 @@ import (
 
 func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
 	newConfig := DefaultConfigWithConn(c)
-	newConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
 	newStorage, err := NewRedisStorage(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

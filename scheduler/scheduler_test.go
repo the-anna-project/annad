@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cenk/backoff"
 	"github.com/rafaeljusto/redigomock"
 
 	"github.com/xh3b4sd/anna/spec"
@@ -172,9 +171,6 @@ func Test_Scheduler_Execute_StorageError(t *testing.T) {
 	// is only to verify the test.
 	c.Command("SET").ExpectError(jobNotFoundError)
 	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorageConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
 	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -300,9 +296,6 @@ func Test_Scheduler_WaitForFinalStatus_Error(t *testing.T) {
 	// is only to verify the test.
 	c.Command("GET").ExpectError(jobNotFoundError)
 	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorageConfig.BackOffFactory = func() spec.BackOff {
-		return &backoff.StopBackOff{}
-	}
 	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

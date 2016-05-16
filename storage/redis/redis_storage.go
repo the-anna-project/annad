@@ -69,7 +69,7 @@ func DefaultConfig() Config {
 
 		// Settings.
 		BackOffFactory: func() spec.BackOff {
-			return backoff.NewExponentialBackOff()
+			return &backoff.StopBackOff{}
 		},
 	}
 

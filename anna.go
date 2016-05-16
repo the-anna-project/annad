@@ -4,6 +4,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/cenk/backoff"
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/factory/client"
@@ -234,6 +235,9 @@ func mainRun(cmd *cobra.Command, args []string) {
 		newPoolConfig := redisstorage.DefaultRedisPoolConfig()
 		newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
 		newStorageConfig := redisstorage.DefaultConfig()
+		newStorageConfig.BackOffFactory = func() spec.BackOff {
+			return backoff.NewExponentialBackOff()
+		}
 		newStorageConfig.Log = newLog
 		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
 		newStorage, err = redisstorage.NewRedisStorage(newStorageConfig)
