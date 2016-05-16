@@ -117,8 +117,7 @@ func (p *prometheus) GetCounter(key string) (spec.Counter, error) {
 
 	newConfig := DefaultCounterConfig()
 	newConfig.Name = key
-	// TODO configure help
-	newConfig.Help = "help"
+	newConfig.Help = helpFor("Counter", key)
 	newCounter, err := NewCounter(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -142,8 +141,7 @@ func (p *prometheus) GetGauge(key string) (spec.Gauge, error) {
 
 	newConfig := DefaultGaugeConfig()
 	newConfig.Name = key
-	// TODO configure help
-	newConfig.Help = "help"
+	newConfig.Help = helpFor("Gauge", key)
 	newGauge, err := NewGauge(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -167,8 +165,7 @@ func (p *prometheus) GetHistogram(key string) (spec.Histogram, error) {
 
 	newConfig := DefaultHistogramConfig()
 	newConfig.Name = key
-	// TODO configure help
-	newConfig.Help = "help"
+	newConfig.Help = helpFor("Histogram", key)
 	newHistogram, err := NewHistogram(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
