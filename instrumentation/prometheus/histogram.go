@@ -36,7 +36,7 @@ type HistogramConfig struct {
 func DefaultHistogramConfig() HistogramConfig {
 	newConfig := HistogramConfig{
 		// Settings.
-		Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+		Buckets: []float64{.001, .002, .003, .004, .005, .01, .02, .03, .04, .05, .1, .2, .3, .4, .5, 1, 2, 3, 4, 5, 10},
 		Help:    "",
 		Name:    "",
 	}
