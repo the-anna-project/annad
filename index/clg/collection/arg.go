@@ -360,7 +360,7 @@ func ArgsToValues(args []interface{}) []reflect.Value {
 	return values
 }
 
-// ValuesToArgs converts the given reflect values to []interface{}.
+// ValuesToArgs converts the given []reflect.Value to []interface{}.
 func ValuesToArgs(values []reflect.Value) ([]interface{}, error) {
 	if len(values) > 2 {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(values))
