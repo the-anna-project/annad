@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/impulse"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -28,11 +28,10 @@ const (
 // Config represents the configuration used to create a new core network
 // object.
 type Config struct {
-	FactoryClient spec.Factory
-	Log           spec.Log
-	Storage       spec.Storage
-	TextGateway   spec.Gateway
-	Scheduler     spec.Scheduler
+	Log         spec.Log
+	Storage     spec.Storage
+	TextGateway spec.Gateway
+	Scheduler   spec.Scheduler
 
 	EvalNet  spec.Network
 	ExecNet  spec.Network
@@ -45,11 +44,10 @@ type Config struct {
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
-		Log:           log.NewLog(log.DefaultConfig()),
-		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
-		TextGateway:   gateway.NewGateway(gateway.DefaultConfig()),
-		Scheduler:     nil,
+		Log:         log.NewLog(log.DefaultConfig()),
+		Storage:     memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
+		Scheduler:   nil,
 
 		EvalNet:  nil,
 		ExecNet:  nil,
@@ -102,12 +100,24 @@ func (cn *coreNet) Boot() {
 	})
 }
 
+func (cn *coreNet) NewImpulse() (spec.Impulse, error) {
+	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 15}, "call NewImpulse")
+
+	newConfig := impulse.DefaultConfig()
+	newConfig.Log = cn.Log
+	newImpulse, err := impulse.NewImpulse(newConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return newImpulse, nil
+}
+
 func (cn *coreNet) Shutdown() {
 	cn.Log.WithTags(spec.Tags{L: "D", O: cn, T: nil, V: 13}, "call Shutdown")
 
 	cn.ShutdownOnce.Do(func() {
 		cn.TextGateway.Close()
-		cn.FactoryClient.Shutdown()
 
 		for {
 			impulsesInProgress := atomic.LoadInt64(&cn.ImpulsesInProgress)
