@@ -28,7 +28,7 @@ case "$state" in
     _values -s , 'levels' D E F I W
   ;;
   objects)
-    _values -s , 'objects' core impulse factory-client factory-server character-neuron first-neuron job-neuron log log-control main network none server state text-interface
+    _values -s , 'objects' core impulse character-neuron first-neuron job-neuron log log-control main network none server state text-interface
   ;;
   verbosity)
     _values 'verbosity' 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15

@@ -6,7 +6,6 @@ package ctxnet
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/client"
 	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -22,9 +21,8 @@ const (
 // Config represents the configuration used to create a new context network
 // object.
 type Config struct {
-	FactoryClient spec.Factory
-	Log           spec.Log
-	Storage       spec.Storage
+	Log     spec.Log
+	Storage spec.Storage
 
 	EvalNet  spec.Network
 	ExecNet  spec.Network
@@ -37,9 +35,8 @@ type Config struct {
 // network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
-		Log:           log.NewLog(log.DefaultConfig()),
-		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Log:     log.NewLog(log.DefaultConfig()),
+		Storage: memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		EvalNet:  nil,
 		ExecNet:  nil,
