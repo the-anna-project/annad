@@ -1,5 +1,9 @@
 // Package permutatation provides a simple permutation factory in which the
-// order of the members of a list is permuted.
+// order of the members of a list is permuted. Advantages of the permutation
+// factories are memory effiency and reproducability. It is memory efficient
+// because all possible combinations are not stored in memory, but created on
+// demand. It is reproducible because of the index used to represent a
+// permutation.
 //
 //     This is how the initial factory permutation looks like.
 //
