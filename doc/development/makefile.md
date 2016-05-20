@@ -32,6 +32,22 @@ to interact with Anna over network.
 make annactl
 ```
 
+### dockerimage
+This target builds a docker image using the [Dockerfile](/Dockerfile).
+Therefore docker as dev dependency is required.
+```
+make dockerimage
+```
+
+### dockerpush
+This target pushes a docker image to the docker repository under
+https://hub.docker.com/r/xh3b4sd/anna/.  Therefore docker as dev dependency is
+required as well as access to the docker repository. This might be only
+interesting for the maintainers.
+```
+make dockerpush
+```
+
 ### goclean
 This removes dependencies to cleanup the `.workspace/` directory.
 ```
