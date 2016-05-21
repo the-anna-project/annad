@@ -1,6 +1,7 @@
 package permutation
 
 import (
+	"github.com/xh3b4sd/anna/factory/argument"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -16,6 +17,9 @@ type ListConfig struct {
 	// MaxGrowth represents the maximum length Members is allowed to grow.
 	MaxGrowth int
 
+	// Type descibes the concrete type the permutation list represents.
+	Type spec.PermutationType
+
 	// Values represents the values being used to permute Members.
 	Values []interface{}
 }
@@ -26,7 +30,8 @@ func DefaultListConfig() ListConfig {
 	newConfig := ListConfig{
 		// Settings.
 		Indizes:   []int{},
-		MaxGrowth: 50,
+		MaxGrowth: 10,
+		Type:      argument.TypeNone,
 		Values:    []interface{}{},
 	}
 
@@ -71,6 +76,10 @@ func (l *list) GetMaxGrowth() int {
 
 func (l *list) GetMembers() []interface{} {
 	return l.Members
+}
+
+func (l *list) GetType() spec.PermutationType {
+	return l.Type
 }
 
 func (l *list) GetValues() []interface{} {

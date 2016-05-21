@@ -18,17 +18,17 @@ type PermutationFactory interface {
 	//         []interface{"a", "b"}
 	//
 	//     Here the index 0 translates to indizes []int{0} and causes the
-	//     following permutation.
+	//     following permutation on the members.
 	//
 	//         []interface{"a"}
 	//
 	//     Here the index 1 translates to indizes []int{1} and causes the
-	//     following permutation.
+	//     following permutation on the members..
 	//
 	//         []interface{"b"}
 	//
 	//     Here the index 00 translates to indizes []int{0, 0} and causes the
-	//     following permutation.
+	//     following permutation on the members..
 	//
 	//         []interface{"a", "a"}
 	//
