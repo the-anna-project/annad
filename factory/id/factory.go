@@ -8,7 +8,6 @@ import (
 
 	"github.com/cenk/backoff"
 
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -21,10 +20,6 @@ const (
 // FactoryConfig represents the configuration used to create a new ID factory
 // object.
 type FactoryConfig struct {
-	// Dependencies.
-	Instrumentation spec.Instrumentation
-	Log             spec.Log
-
 	// Settings.
 
 	// BackOffFactory is supposed to be able to create a new spec.BackOff. Retry
@@ -50,20 +45,7 @@ type FactoryConfig struct {
 // DefaultFactoryConfig provides a default configuration to create a new ID factory
 // object by best effort.
 func DefaultFactoryConfig() FactoryConfig {
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "Factory", "ID")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := FactoryConfig{
-		// Dependencies.
-		Instrumentation: newInstrumentation,
-		// Note we cannot set a default logger because this would lead to an import
-		// cycle.
-		Log: nil,
-
 		// Settings.
 		BackOffFactory: func() spec.BackOff {
 			return &backoff.StopBackOff{}
@@ -105,10 +87,6 @@ func NewFactory(config FactoryConfig) (spec.IDFactory, error) {
 	newFactory.ID, err = newFactory.WithType(Hex128)
 	if err != nil {
 		return nil, maskAny(err)
-	}
-
-	if newFactory.Log != nil {
-		newFactory.Log.Register(newFactory.GetType())
 	}
 
 	return newFactory, nil
@@ -156,8 +134,8 @@ func (f *factory) WithType(idType spec.IDType) (spec.ObjectID, error) {
 		}
 	}
 
-	// Execute the action. It is wrapped with instrumentation and a retrier.
-	err := backoff.RetryNotify(f.Instrumentation.WrapFunc("WithType", action), f.BackOffFactory(), f.retryErrorLogger)
+	// Execute the action wrapped with a retrier.
+	err := backoff.Retry(action, f.BackOffFactory())
 	if err != nil {
 		return "", maskAny(err)
 	}

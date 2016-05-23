@@ -41,10 +41,19 @@ func DefaultConfig() Config {
 
 // NewPatNet creates a new configured pattern network object.
 func NewPatNet(config Config) (spec.Network, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newNet := &patNet{
 		Config:       config,
 		BootOnce:     sync.Once{},
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectTypePatNet,

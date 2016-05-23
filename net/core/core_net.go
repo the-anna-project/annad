@@ -11,8 +11,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/impulse"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -61,10 +61,19 @@ func DefaultConfig() Config {
 
 // NewCoreNet creates a new configured core network object.
 func NewCoreNet(config Config) (spec.Network, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newNet := &coreNet{
 		Config:             config,
 		BootOnce:           sync.Once{},
-		ID:                 id.NewObjectID(id.Hex128),
+		ID:                 newID,
 		ImpulsesInProgress: 0,
 		Mutex:              sync.Mutex{},
 		ShutdownOnce:       sync.Once{},

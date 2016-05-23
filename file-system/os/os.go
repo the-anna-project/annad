@@ -38,9 +38,18 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured real OS file system.
 func NewFileSystem(config Config) spec.FileSystem {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newFileSystem := &osFileSystem{
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
+		ID:     newID,
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeOSFileSystem,
 	}

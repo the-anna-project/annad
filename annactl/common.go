@@ -36,7 +36,10 @@ func (a *annactl) GetSessionID() (string, error) {
 	}
 
 	// Create session ID.
-	newSessionID := id.NewObjectID(id.Hex128)
+	newSessionID, err := a.IDFactory.WithType(id.Hex128)
+	if err != nil {
+		return "", maskAny(err)
+	}
 	err = a.FileSystem.WriteFile(SessionFilePath, []byte(newSessionID), os.FileMode(0644))
 	if err != nil {
 		return "", maskAny(err)

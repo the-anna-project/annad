@@ -50,10 +50,19 @@ func DefaultConfig() Config {
 
 // NewRespNet creates a new configured response network object.
 func NewRespNet(config Config) (spec.Network, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newNet := &respNet{
 		Config:       config,
 		BootOnce:     sync.Once{},
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectTypeRespNet,

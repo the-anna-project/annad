@@ -7,8 +7,8 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/index/clg"
 	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/index/clg/profile"
