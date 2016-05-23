@@ -7,7 +7,7 @@ package impulse
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -53,9 +53,18 @@ func DefaultConfig() Config {
 
 // NewImpulse creates a new configured impulse object.
 func NewImpulse(config Config) (spec.Impulse, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newImpulse := &impulse{
 		Config:            config,
-		ID:                id.NewObjectID(id.Hex128),
+		ID:                newID,
 		Mutex:             sync.Mutex{},
 		OrderedStrategies: []spec.Strategy{},
 		Type:              ObjectTypeImpulse,

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -58,10 +58,19 @@ func DefaultConfig() Config {
 
 // NewMemoryStorage creates a new configured memory storage object.
 func NewMemoryStorage(config Config) spec.Storage {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newStorage := &storage{
 		Config: config,
 
-		ID:    id.NewObjectID(id.Hex128),
+		ID:    newID,
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeMemoryStorage,
 	}

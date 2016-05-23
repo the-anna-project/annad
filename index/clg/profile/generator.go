@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
@@ -65,11 +65,20 @@ func DefaultGeneratorConfig() GeneratorConfig {
 
 // NewGenerator creates a new configured CLG profile generator object.
 func NewGenerator(config GeneratorConfig) (spec.CLGProfileGenerator, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	// Create new object.
 	newGenerator := &generator{
 		GeneratorConfig: config,
 
-		ID:    id.NewObjectID(id.Hex128),
+		ID:    newID,
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeCLGProfileGenerator,
 	}

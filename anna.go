@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg"
 	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/index/clg/profile"
@@ -105,11 +105,20 @@ func defaultAnnaConfig() annaConfig {
 }
 
 func newAnna(config annaConfig) (spec.Anna, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newAnna := &anna{
 		annaConfig: config,
 
 		BootOnce:     sync.Once{},
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         spec.ObjectType(objectTypeAnna),

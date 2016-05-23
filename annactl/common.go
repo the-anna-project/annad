@@ -5,7 +5,7 @@ import (
 
 	"github.com/juju/errgo"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 

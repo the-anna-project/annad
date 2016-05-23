@@ -11,7 +11,7 @@ import (
 	"github.com/xh3b4sd/anna/client/interface/text"
 	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/file-system/os"
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -47,13 +47,22 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new command line
 // object by best effort.
 func DefaultConfig() Config {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		Log:           log.NewLog(log.DefaultConfig()),
 		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
 		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
 
-		SessionID: string(id.NewObjectID(id.Hex128)),
+		SessionID: string(newID),
 		Version:   version,
 	}
 

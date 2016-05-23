@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -29,10 +29,19 @@ type JobConfig struct {
 // DefaultJobConfig provides a default configuration to create a new job object
 // by best effort.
 func DefaultJobConfig() JobConfig {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := JobConfig{
 		ActionID:  "",
 		Args:      nil,
-		SessionID: string(id.NewObjectID(id.Hex128)),
+		SessionID: string(newID),
 	}
 
 	return newConfig
@@ -40,12 +49,21 @@ func DefaultJobConfig() JobConfig {
 
 // NewJob creates a new configured job object.
 func NewJob(config JobConfig) (spec.Job, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newJob := &job{
 		JobConfig: config,
 
 		ActiveStatus: "",
 		CreatedAt:    time.Now(),
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		FinalStatus:  "",
 		Type:         ObjectTypeJob,
