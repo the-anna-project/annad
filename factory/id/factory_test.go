@@ -61,6 +61,25 @@ func Test_IDFactory_NewFactory_Error_Timeout(t *testing.T) {
 	}
 }
 
+func Test_IDFactory_WithType_Error_RandReader(t *testing.T) {
+	newConfig := DefaultFactoryConfig()
+	newConfig.Timeout = 10 * time.Millisecond
+
+	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+		return nil, maskAny(invalidConfigError)
+	}
+
+	newFactory, err := NewFactory(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	_, err = newFactory.WithType(Hex128)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
 func Test_IDFactory_WithType_Error_Timeout(t *testing.T) {
 	newConfig := DefaultFactoryConfig()
 	newConfig.Timeout = 10 * time.Millisecond
