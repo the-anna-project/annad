@@ -11,12 +11,6 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-const (
-	// ObjectTypeIDFactory represents the object type of the ID factory object.
-	// This is used e.g. to register itself to the logger.
-	ObjectTypeIDFactory spec.ObjectType = "id-factory"
-)
-
 // FactoryConfig represents the configuration used to create a new ID factory
 // object.
 type FactoryConfig struct {
@@ -63,11 +57,6 @@ func DefaultFactoryConfig() FactoryConfig {
 func NewFactory(config FactoryConfig) (spec.IDFactory, error) {
 	newFactory := &factory{
 		FactoryConfig: config,
-
-		// Note the ID is assigned below, because the ID factory needs an ID
-		// factory to assign an ID. So this ID factory is going to assign its own
-		// ID by itself.
-		Type: ObjectTypeIDFactory,
 	}
 
 	if newFactory.HashChars == "" {
@@ -83,20 +72,11 @@ func NewFactory(config FactoryConfig) (spec.IDFactory, error) {
 		return nil, maskAnyf(invalidConfigError, "creation timeout must not be empty")
 	}
 
-	var err error
-	newFactory.ID, err = newFactory.WithType(Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	return newFactory, nil
 }
 
 type factory struct {
 	FactoryConfig
-
-	ID   spec.ObjectID
-	Type spec.ObjectType
 }
 
 func (f *factory) WithType(idType spec.IDType) (spec.ObjectID, error) {
