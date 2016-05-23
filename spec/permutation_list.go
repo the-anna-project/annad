@@ -1,16 +1,5 @@
 package spec
 
-// PermutationType describes the type that all joined members represent. A
-// permutation might be done to permute a concrete type. This concrete type is
-// then used to create a PermutationList. Here the concrete type represents the
-// PermutationType. Once permuted the member's of the list can be converted to
-// the concrete type.
-//
-// Note that the permutation type might be empty in case it is irrelevant for
-// the implementation.
-//
-type PermutationType string
-
 // PermutationList is supposed to be permuted by a permutation factory.
 type PermutationList interface {
 	// GetIndizes returns the list's current indizes.
@@ -23,9 +12,6 @@ type PermutationList interface {
 
 	// GetMembers returns the list's permuted members.
 	GetMembers() []interface{}
-
-	// GetType returns the list's permutation type.
-	GetType() PermutationType
 
 	// GetValues returns the list's current values.
 	GetValues() []interface{}

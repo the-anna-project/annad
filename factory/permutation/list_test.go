@@ -41,8 +41,8 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 	newIndizes = newList.GetIndizes()
-	if !reflect.DeepEqual(newIndizes, []int{1, 0}) {
-		t.Fatal("expected", []int{1, 0}, "got", newIndizes)
+	if !reflect.DeepEqual(newIndizes, []int{0, 1}) {
+		t.Fatal("expected", []int{1, 1}, "got", newIndizes)
 	}
 
 	// The 12th permutation (current index already is 10) in the binary system is
@@ -52,8 +52,8 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 	newIndizes = newList.GetIndizes()
-	if !reflect.DeepEqual(newIndizes, []int{1, 1, 0}) {
-		t.Fatal("expected", []int{1, 1, 0}, "got", newIndizes)
+	if !reflect.DeepEqual(newIndizes, []int{1, 0, 1}) {
+		t.Fatal("expected", []int{1, 0, 1}, "got", newIndizes)
 	}
 }
 

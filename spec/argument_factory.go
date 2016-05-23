@@ -1,11 +1,11 @@
 package spec
 
-// ArgumentFactory creates permutations of arguments as configured. It
-// implements PermutationFactory. Anyway the following notes should be
-// considered.
+// ArgumentFactory creates permutations of arguments as configured, like
+// PermutationFactory. Anyway the following notes should be considered.
 //
-// PermuteBy permutes the given argument list using delta. Permutation is
-// done in two dimensions.
+// PermuteBy permutes the given argument list using delta. Permutation is done
+// in two dimensions. Therefore all members of PermutationList's that
+// ArgumentFactory operates on must be of type PermutationList itself.
 //
 // The first dimension of permutation applies to the whole argument list.
 // Members of that list are permuted once. Then the second dimension of

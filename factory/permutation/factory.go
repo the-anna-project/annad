@@ -1,9 +1,6 @@
 package permutation
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -33,24 +30,23 @@ type factory struct {
 	FactoryConfig
 }
 
-func (f *factory) CreateIndex(list spec.PermutationList) string {
-	var converted []string
+func (f *factory) MapTo(list spec.PermutationList) error {
+	list.SetMembers(createMembers(list))
 
-	for _, i := range list.GetIndizes() {
-		converted = append(converted, strconv.Itoa(i))
-	}
-
-	return strings.Join(converted, "")
+	return nil
 }
 
 func (f *factory) PermuteBy(list spec.PermutationList, delta int) error {
+	if delta < 1 {
+		return nil
+	}
+
 	newIndizes, err := createIndizesWithDelta(list, delta)
 	if err != nil {
 		return maskAny(err)
 	}
 
 	list.SetIndizes(newIndizes)
-	list.SetMembers(createMembers(list))
 
 	return nil
 }

@@ -2,9 +2,10 @@ package spec
 
 // PermutationFactory creates permutations of arbitrary lists as configured.
 type PermutationFactory interface {
-	// CreateIndex transforms the indizes of the given list to their string
-	// representation.
-	CreateIndex(list PermutationList) string
+	// MapTo maps the given list's values to its indizes. After a successful call
+	// to MapTo, a call to GetMembers returns the permuted values based on the
+	// current indizes.
+	MapTo(list PermutationList) error
 
 	// PermuteBy permutes the configured values by applying the given delta to
 	// the currently configured indizes. Error might indicate that the configured
