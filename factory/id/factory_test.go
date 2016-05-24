@@ -82,10 +82,10 @@ func Test_IDFactory_WithType_Error_RandReader(t *testing.T) {
 
 func Test_IDFactory_WithType_Error_Timeout(t *testing.T) {
 	newConfig := DefaultFactoryConfig()
-	newConfig.Timeout = 10 * time.Millisecond
+	newConfig.Timeout = 20 * time.Millisecond
 
 	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 		return rand.Int(randReader, max)
 	}
 
