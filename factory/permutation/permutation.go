@@ -6,20 +6,29 @@
 // fast in case it is not too big. The factory is reproducible because of the
 // index used to represent a permutation.
 //
-//     This is how the initial factory permutation looks like.
+//     Imagine the following example.
+//
+//         []interface{"a", 7, []float64{2.88}}
+//
+//     This is how the initial factory permutation looks like. In fact, there
+//     is no permutation.
+//
+//         []interface{}
+//
+//     This is how the first factory permutation looks like.
 //
 //         []interface{"a"}
 //
 //     This is how the second factory permutation looks like.
 //
-//         []interface{"a", 7}
+//         []interface{7}
 //
 //     This is how the third factory permutation looks like.
 //
-//         []interface{"a", 7, []float64{2.88}}
+//         []interface{[]float64{2.88}}
 //
 //     This is how the Nth factory permutation looks like.
 //
-//         []interface{7, []float64{2.88}, "a"}
+//         []interface{[]float64{2.88}, "a"}
 //
 package permutation

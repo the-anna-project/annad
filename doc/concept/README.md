@@ -18,5 +18,5 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [interface](interface.md)
 - [logging](logging.md)
 - [network](network.md)
-- [permutation factory](permutation_factory.md) TODO
+- [permutation factory](permutation_factory.md)
 - [state](state.md)
