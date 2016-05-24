@@ -2,11 +2,14 @@
 The permutation factory permutes the order of the members of an arbitrary list.
 Advantages of the permutation factory is memory effiency and reproducability.
 It is memory efficient because all possible combinations are not stored in
-memory, but created on demand. Depending on the provided delta this can be
-quiet fast in case it is not too big. The factory is reproducible because of
-the index used to represent a permutation. So in case the given delta is way
-too big one might want to provide the indizes directly. Then the permutation is
-pretty fast because it is basically about looking up a map.
+memory, but created on demand. Depending on the provided delta the creation can
+be quiet fast in case the delta is not too big. The factory is reproducible
+because of the index used to represent a permutation. So in case the given
+delta is way too big one might want to provide the indizes directly. Then the
+permutation is pretty fast because it is basically about looking up some map
+entries.
+
+### example
 
 Imagine the following example.
 
@@ -44,6 +47,8 @@ This is how the Nth factory permutation looks like.
 ```
 []interface{[]float64{2.88}, "a"}
 ```
+
+### reference
 
 See the following code documentation for more information.
 
