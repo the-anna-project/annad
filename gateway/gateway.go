@@ -7,7 +7,7 @@ package gateway
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -35,11 +35,20 @@ func DefaultConfig() Config {
 
 // NewGateway creates a new configured gateway object.
 func NewGateway(config Config) spec.Gateway {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newGateway := &gateway{
 		Closed: false,
 		Closer: make(chan struct{}, 1),
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
+		ID:     newID,
 		Link:   make(chan spec.Signal, 1000),
 		Mutex:  sync.Mutex{},
 		Type:   spec.ObjectType(ObjectTypeGateway),

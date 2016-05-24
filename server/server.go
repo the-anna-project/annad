@@ -7,8 +7,8 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/control/log"
@@ -65,11 +65,20 @@ func DefaultConfig() Config {
 
 // NewServer creates a new configured server object.
 func NewServer(config Config) (spec.Server, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newServer := &server{
 		Config: config,
 
 		BootOnce: sync.Once{},
-		ID:       id.NewObjectID(id.Hex128),
+		ID:       newID,
 		Mutex:    sync.Mutex{},
 		Type:     spec.ObjectType(ObjectTypeServer),
 	}

@@ -32,6 +32,22 @@ to interact with Anna over network.
 make annactl
 ```
 
+### dockerimage
+This target builds a docker image using the [Dockerfile](/Dockerfile).
+Therefore docker as dev dependency is required.
+```
+make dockerimage
+```
+
+### dockerpush
+This target pushes a docker image to the docker repository under
+https://hub.docker.com/r/xh3b4sd/anna/. Therefore docker as dev dependency is
+required as well as access to the docker repository. This might be only
+interesting for the maintainers.
+```
+make dockerpush
+```
+
 ### goclean
 This removes dependencies to cleanup the `.workspace/` directory.
 ```
@@ -97,8 +113,6 @@ ok    _/home/vagrant/projects/private/anna/clg/distribution 0.008s  coverage: 10
 ok    _/home/vagrant/projects/private/anna/clg/feature-set  0.388s  coverage: 99.3% of statements
 ok    _/home/vagrant/projects/private/anna/client/control/log 0.026s  coverage: 96.0% of statements
 ok    _/home/vagrant/projects/private/anna/client/interface/text  0.020s  coverage: 98.1% of statements
-ok    _/home/vagrant/projects/private/anna/factory/client 0.006s  coverage: 100.0% of statements
-ok    _/home/vagrant/projects/private/anna/factory/server 0.010s  coverage: 96.1% of statements
 ok    _/home/vagrant/projects/private/anna/gateway  0.008s  coverage: 100.0% of statements
 ok    _/home/vagrant/projects/private/anna/id 0.043s  coverage: 87.5% of statements
 ok    _/home/vagrant/projects/private/anna/log  0.005s  coverage: 99.0% of statements

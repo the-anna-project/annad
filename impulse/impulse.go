@@ -7,7 +7,7 @@ package impulse
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -35,6 +35,15 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new impulse
 // object by best effort.
 func DefaultConfig() Config {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		// Dependencies.
 		Log: log.NewLog(log.DefaultConfig()),
@@ -44,7 +53,7 @@ func DefaultConfig() Config {
 		Inputs:     map[spec.ObjectID]string{},
 		Output:     "",
 		Requestor:  spec.ObjectType(""),
-		SessionID:  string(id.NewObjectID(id.Hex128)),
+		SessionID:  string(newID),
 		Strategies: map[spec.ObjectType]spec.Strategy{},
 	}
 
@@ -53,9 +62,18 @@ func DefaultConfig() Config {
 
 // NewImpulse creates a new configured impulse object.
 func NewImpulse(config Config) (spec.Impulse, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newImpulse := &impulse{
 		Config:            config,
-		ID:                id.NewObjectID(id.Hex128),
+		ID:                newID,
 		Mutex:             sync.Mutex{},
 		OrderedStrategies: []spec.Strategy{},
 		Type:              ObjectTypeImpulse,

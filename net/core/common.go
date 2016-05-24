@@ -19,7 +19,7 @@ func (cn *coreNet) bootObjectTree() {
 func (cn *coreNet) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	input := newSignal.GetInput()
 
-	newImpulse, err := cn.FactoryClient.NewImpulse()
+	newImpulse, err := cn.NewImpulse()
 	if err != nil {
 		return nil, maskAny(err)
 	}

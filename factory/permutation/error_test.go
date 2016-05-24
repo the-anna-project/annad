@@ -1,11 +1,11 @@
-package factoryserver
+package permutation
 
 import (
 	"fmt"
 	"testing"
 )
 
-func Test_FactoryServer_maskAnyf_001(t *testing.T) {
+func Test_Permutation_maskAnyf_001(t *testing.T) {
 	testCases := []struct {
 		InputError  error
 		InputFormat string

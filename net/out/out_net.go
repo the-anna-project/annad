@@ -5,8 +5,7 @@ package outnet
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/client"
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -21,9 +20,8 @@ const (
 // Config represents the configuration used to create a new output network
 // object.
 type Config struct {
-	FactoryClient spec.Factory
-	Log           spec.Log
-	Storage       spec.Storage
+	Log     spec.Log
+	Storage spec.Storage
 
 	EvalNet  spec.Network
 	ExecNet  spec.Network
@@ -36,9 +34,8 @@ type Config struct {
 // network object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		FactoryClient: factoryclient.NewFactory(factoryclient.DefaultConfig()),
-		Log:           log.NewLog(log.DefaultConfig()),
-		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Log:     log.NewLog(log.DefaultConfig()),
+		Storage: memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		EvalNet:  nil,
 		ExecNet:  nil,
@@ -52,10 +49,19 @@ func DefaultConfig() Config {
 
 // NewOutNet creates a new configured output network object.
 func NewOutNet(config Config) (spec.Network, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newNet := &outNet{
 		Config:       config,
 		BootOnce:     sync.Once{},
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectTypeOutNet,

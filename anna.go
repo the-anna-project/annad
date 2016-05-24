@@ -7,10 +7,8 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/factory/client"
-	"github.com/xh3b4sd/anna/factory/server"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/index/clg"
 	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/index/clg/profile"
@@ -82,12 +80,11 @@ func init() {
 }
 
 type annaConfig struct {
-	CLGIndex      spec.CLGIndex
-	CoreNet       spec.Network
-	FactoryServer spec.Factory
-	Log           spec.Log
-	Server        spec.Server
-	Storage       spec.Storage
+	CLGIndex spec.CLGIndex
+	CoreNet  spec.Network
+	Log      spec.Log
+	Server   spec.Server
+	Storage  spec.Storage
 }
 
 func defaultAnnaConfig() annaConfig {
@@ -97,23 +94,31 @@ func defaultAnnaConfig() annaConfig {
 	}
 
 	newConfig := annaConfig{
-		CLGIndex:      newCLGIndex,
-		CoreNet:       nil,
-		FactoryServer: factoryserver.NewFactory(factoryserver.DefaultConfig()),
-		Log:           log.NewLog(log.DefaultConfig()),
-		Server:        nil,
-		Storage:       memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		CLGIndex: newCLGIndex,
+		CoreNet:  nil,
+		Log:      log.NewLog(log.DefaultConfig()),
+		Server:   nil,
+		Storage:  memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 	}
 
 	return newConfig
 }
 
 func newAnna(config annaConfig) (spec.Anna, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newAnna := &anna{
 		annaConfig: config,
 
 		BootOnce:     sync.Once{},
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         spec.ObjectType(objectTypeAnna),
@@ -164,9 +169,6 @@ func (a *anna) Boot() {
 		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting CLG index")
 		go a.CLGIndex.Boot()
 
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting factory")
-		go a.FactoryServer.Boot()
-
 		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting core-net")
 		go a.CoreNet.Boot()
 
@@ -181,7 +183,6 @@ func (a *anna) Shutdown() {
 	a.ShutdownOnce.Do(func() {
 		go a.CLGIndex.Shutdown()
 		go a.CoreNet.Shutdown()
-		go a.FactoryServer.Shutdown()
 
 		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down")
 		os.Exit(0)
@@ -205,26 +206,10 @@ func mainRun(cmd *cobra.Command, args []string) {
 	err = newLog.SetVerbosity(globalFlags.ControlLogVerbosity)
 	panicOnError(err)
 
-	// factory gateway
-	newFactoryGatewayConfig := gateway.DefaultConfig()
-	newFactoryGatewayConfig.Log = newLog
-	newFactoryGateway := gateway.NewGateway(newFactoryGatewayConfig)
-
 	// text gateway
 	newTextGatewayConfig := gateway.DefaultConfig()
 	newTextGatewayConfig.Log = newLog
 	newTextGateway := gateway.NewGateway(newTextGatewayConfig)
-
-	// factory
-	newFactoryClientConfig := factoryclient.DefaultConfig()
-	newFactoryClientConfig.FactoryGateway = newFactoryGateway
-	newFactoryClientConfig.Log = newLog
-	newFactoryGatewayClient := factoryclient.NewFactory(newFactoryClientConfig)
-	newFactoryServerConfig := factoryserver.DefaultConfig()
-	newFactoryServerConfig.FactoryGateway = newFactoryGateway
-	newFactoryServerConfig.Log = newLog
-	newFactoryServerConfig.TextGateway = newTextGateway
-	newFactoryServer := factoryserver.NewFactory(newFactoryServerConfig)
 
 	// storage
 	var newStorage spec.Storage
@@ -394,7 +379,6 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCoreExecNet, err := coreexecnet.NewExecNet(newCoreExecNetConfig)
 	panicOnError(err)
 	newCoreNetConfig := corenet.DefaultConfig()
-	newCoreNetConfig.FactoryClient = newFactoryGatewayClient
 	newCoreNetConfig.Log = newLog
 	newCoreNetConfig.EvalNet = newEvalNet
 	newCoreNetConfig.ExecNet = newCoreExecNet
@@ -454,7 +438,6 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newAnnaConfig := defaultAnnaConfig()
 	newAnnaConfig.CLGIndex = newCLGIndex
 	newAnnaConfig.CoreNet = newCoreNet
-	newAnnaConfig.FactoryServer = newFactoryServer
 	newAnnaConfig.Log = newLog
 	newAnnaConfig.Server = newServer
 	newAnnaConfig.Storage = newStorage

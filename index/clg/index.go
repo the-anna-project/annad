@@ -3,7 +3,7 @@ package clg
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg/profile"
 	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
@@ -59,12 +59,21 @@ func DefaultIndexConfig() IndexConfig {
 
 // NewIndex creates a new configured CLG index object.
 func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newIndex := &index{
 		IndexConfig: config,
 
 		BootOnce:     sync.Once{},
 		Closer:       make(chan struct{}, 1),
-		ID:           id.NewObjectID(id.Hex128),
+		ID:           newID,
 		Mutex:        sync.Mutex{},
 		Type:         ObjectTypeCLGIndex,
 		ShutdownOnce: sync.Once{},

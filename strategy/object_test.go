@@ -39,6 +39,6 @@ func Test_Strategy_GetType(t *testing.T) {
 	}
 
 	if newStrategy.GetType() != ObjectTypeStrategy {
-		t.Fatalf("invalid object tyoe of factory client")
+		t.Fatalf("invalid object type for strategy")
 	}
 }
