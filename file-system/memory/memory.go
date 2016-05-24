@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -37,9 +37,18 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured memory file system.
 func NewFileSystem(config Config) spec.FileSystem {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newFileSystem := &memoryFileSystem{
 		Config:  config,
-		ID:      id.NewObjectID(id.Hex128),
+		ID:      newID,
 		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
 		Type:    ObjectTypeMemoryFileSystem,

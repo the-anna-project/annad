@@ -3,7 +3,7 @@ package gateway
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -18,8 +18,17 @@ type SignalConfig struct {
 // DefaultSignalConfig provides a default configuration to create a new gateway
 // signal by best effort.
 func DefaultSignalConfig() SignalConfig {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := SignalConfig{
-		ID:     string(id.NewObjectID(id.Hex128)),
+		ID:     string(newID),
 		Input:  nil,
 		Output: nil,
 	}

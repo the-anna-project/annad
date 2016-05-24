@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -33,9 +33,18 @@ func DefaultConfig() Config {
 
 // NewLogControl creates a new configured log control object.
 func NewLogControl(config Config) spec.LogControl {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newControl := &logControl{
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
+		ID:     newID,
 		Mutex:  sync.Mutex{},
 		Type:   spec.ObjectType(ObjectTypeLogControl),
 	}

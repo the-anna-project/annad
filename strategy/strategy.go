@@ -5,7 +5,7 @@ package strategy
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -42,10 +42,19 @@ func DefaultConfig() Config {
 
 // NewStrategy creates a new configured strategy object.
 func NewStrategy(config Config) (spec.Strategy, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newStrategy := &strategy{
 		Config: config,
 
-		ID:    id.NewObjectID(id.Hex128),
+		ID:    newID,
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeStrategy,
 	}
