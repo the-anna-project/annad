@@ -7,24 +7,46 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+func testMaybeNewList(t *testing.T, values []interface{}) spec.PermutationList {
+	newConfig := DefaultListConfig()
+	newConfig.MaxGrowth = 3
+	newConfig.Values = values
+
+	newList, err := NewList(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	return newList
+}
+
+func Test_Permutation_NewList_Error_MaxGrowth(t *testing.T) {
+	newConfig := DefaultListConfig()
+	newConfig.MaxGrowth = 0
+	newConfig.Values = []interface{}{"a", "b"}
+
+	_, err := NewList(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_Permutation_NewList_Error_Values(t *testing.T) {
+	newConfig := DefaultListConfig()
+	newConfig.MaxGrowth = 3
+	newConfig.Values = []interface{}{"a"}
+
+	_, err := NewList(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
 func Test_Permutation_List_GetIndizes(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	testMaybeNewList := func(t *testing.T) spec.PermutationList {
-		newConfig := DefaultListConfig()
-		newConfig.MaxGrowth = 3
-		newConfig.Values = testValues
-
-		newList, err := NewList(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		return newList
-	}
-
 	newFactory := testMaybeNewFactory(t)
-	newList := testMaybeNewList(t)
+	newList := testMaybeNewList(t, testValues)
 
 	// Make sure the initial index is empty.
 	newIndizes := newList.GetIndizes()
@@ -60,21 +82,8 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 func Test_Permutation_List_GetValues(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	testMaybeNewList := func(t *testing.T) spec.PermutationList {
-		newConfig := DefaultListConfig()
-		newConfig.MaxGrowth = 3
-		newConfig.Values = testValues
-
-		newList, err := NewList(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		return newList
-	}
-
 	newFactory := testMaybeNewFactory(t)
-	newList := testMaybeNewList(t)
+	newList := testMaybeNewList(t, testValues)
 
 	// Make sure the initial values are still obtained on the fresh factory.
 	newValues := newList.GetValues()
