@@ -11,7 +11,7 @@ import (
 
 	"github.com/mgutz/ansi"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -94,9 +94,18 @@ func DefaultConfig() Config {
 
 // NewLog creates a new configured log object.
 func NewLog(config Config) spec.Log {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newLog := log{
 		Config:            config,
-		ID:                id.NewObjectID(id.Hex128),
+		ID:                newID,
 		Mutex:             sync.Mutex{},
 		RegisteredObjects: []spec.ObjectType{},
 		Type:              spec.ObjectType(ObjectTypeLog),

@@ -9,9 +9,9 @@ import (
 
 	"github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/file-system/os"
-	"github.com/xh3b4sd/anna/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -33,6 +33,7 @@ var (
 type Config struct {
 	// Dependencies.
 	FileSystem    spec.FileSystem
+	IDFactory     spec.IDFactory
 	Log           spec.Log
 	LogControl    spec.LogControl
 	TextInterface spec.TextInterface
@@ -47,13 +48,23 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new command line
 // object by best effort.
 func DefaultConfig() Config {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
+		IDFactory:     newIDFactory,
 		Log:           log.NewLog(log.DefaultConfig()),
 		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
 		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
 
-		SessionID: string(id.NewObjectID(id.Hex128)),
+		SessionID: string(newID),
 		Version:   version,
 	}
 
@@ -61,12 +72,17 @@ func DefaultConfig() Config {
 }
 
 // NewAnnactl creates a new configured command line object.
-func NewAnnactl(config Config) spec.Annactl {
+func NewAnnactl(config Config) (spec.Annactl, error) {
 	// annactl
 	newAnnactl := &annactl{
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
 		Type:   spec.ObjectType(ObjectTypeAnnactl),
+	}
+
+	var err error
+	newAnnactl.ID, err = newAnnactl.IDFactory.WithType(id.Hex128)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
 	// command
@@ -127,7 +143,7 @@ func NewAnnactl(config Config) spec.Annactl {
 	newAnnactl.Cmd.PersistentFlags().StringVarP(&newAnnactl.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
 	newAnnactl.Cmd.PersistentFlags().IntVarP(&newAnnactl.Flags.ControlLogVerbosity, "control-log-verbosity", "v", 10, "set log verbosity for log control")
 
-	return newAnnactl
+	return newAnnactl, nil
 }
 
 func (a *annactl) Boot() {
@@ -150,6 +166,8 @@ type annactl struct {
 }
 
 func main() {
-	newAnnactl := NewAnnactl(DefaultConfig())
+	newAnnactl, err := NewAnnactl(DefaultConfig())
+	panicOnError(err)
+
 	newAnnactl.Boot()
 }

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -79,11 +79,20 @@ func DefaultConfig() Config {
 //         ID1,timestamp1,ID2,timestamp2,...
 //
 func NewScheduler(config Config) (spec.Scheduler, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newScheduler := &scheduler{
 		Config: config,
 
 		BootOnce: sync.Once{},
-		ID:       id.NewObjectID(id.Hex128),
+		ID:       newID,
 		Mutex:    sync.Mutex{},
 		Type:     ObjectTypeScheduler,
 	}

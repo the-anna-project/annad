@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -66,9 +66,18 @@ func DefaultConfig() Config {
 // NewFeatureSet creates a new configured feature set object. A feature set
 // tries to detect all patterns within the configured input sequences.
 func NewFeatureSet(config Config) (spec.FeatureSet, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		panic(err)
+	}
+
 	newFeatureSet := &featureSet{
 		Config: config,
-		ID:     id.NewObjectID(id.Hex128),
+		ID:     newID,
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeFeatureSet,
 	}
