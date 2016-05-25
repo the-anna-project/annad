@@ -19,6 +19,4 @@ notifications:
   email: false
 
 after_success:
-- pwd
-- ls -lah
 - goveralls -coverprofile=coverage.txt -service=travis-ci
