@@ -40,6 +40,15 @@ func (g *generator) getInputsOutputs(clgName string) (spec.InputsOutputs, error)
 	newInputsOutputs := spec.InputsOutputs{}
 
 	for {
+		if len(newInputsOutputs.InsOuts) >= 100 {
+			// There will always be some CLGs causing any input to be valid, like
+			// e.g. CLGCollection.DiscardInterface. In this case we want to limit the
+			// overall amount of collected inputs-outputs. Otherwise we will very
+			// easily crash the process because we would run out of memory very very
+			// fast.
+			return newInputsOutputs, nil
+		}
+
 		// Perform the permutations to fetch possible combinations of input
 		// arguments for the CLG execution.
 		err := g.PermutationFactory.PermuteBy(g.ArgumentList, 1)

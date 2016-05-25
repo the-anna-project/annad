@@ -5,7 +5,7 @@ import (
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg/profile"
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
+	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
@@ -31,17 +31,19 @@ type IndexConfig struct {
 
 // DefaultIndexConfig provides a default configuration to create a new CLG
 // index object by best effort.
-func DefaultIndexConfig() IndexConfig {
-	newGenerator, err := profile.NewGenerator(profile.DefaultGeneratorConfig())
+func DefaultIndexConfig() (IndexConfig, error) {
+	newGeneratorConfig, err := profile.DefaultGeneratorConfig()
 	if err != nil {
-		panic(err)
+		return IndexConfig{}, maskAny(err)
+	}
+	newGenerator, err := profile.NewGenerator(newGeneratorConfig)
+	if err != nil {
+		return IndexConfig{}, maskAny(err)
 	}
 
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "CLGProfileGenerator")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		panic(err)
+		return IndexConfig{}, maskAny(err)
 	}
 
 	newConfig := IndexConfig{
@@ -54,11 +56,11 @@ func DefaultIndexConfig() IndexConfig {
 		NumGeneratorWorkers: 10,
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 // NewIndex creates a new configured CLG index object.
-func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
+func NewIndex(config IndexConfig) (spec.CLGIndex, error) { // TODO the interface should be clean spec.Index
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)

@@ -10,9 +10,12 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
-	newConfig := DefaultConfigWithConn(c)
-	newStorage, err := NewRedisStorage(newConfig)
+func testMaybeNewStorage(t *testing.T) spec.Storage {
+	newStorageConfig, err := DefaultConfig()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	newStorage, err := NewRedisStorage(newStorageConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -20,18 +23,54 @@ func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
 	return newStorage
 }
 
-func Test_RedisStorage_GetID(t *testing.T) {
-	firstStorage, err := NewRedisStorage(DefaultConfig())
+func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
+	newStorageConfig, err := DefaultConfigWithConn(c)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	secondStorage, err := NewRedisStorage(DefaultConfig())
+	newStorage, err := NewRedisStorage(newStorageConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	if firstStorage.GetID() == secondStorage.GetID() {
-		t.Fatal("expected", "different IDs", "got", "equal IDs")
+	return newStorage
+}
+
+// NewRedisStorage
+
+func Test_Storage_NewRedisStorage_Error_BackOffFactory(t *testing.T) {
+	newStorageConfig, err := DefaultConfig()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	newStorageConfig.BackOffFactory = nil
+	_, err = NewRedisStorage(newStorageConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_Storage_NewRedisStorage_Error_Log(t *testing.T) {
+	newStorageConfig, err := DefaultConfig()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	newStorageConfig.Log = nil
+	_, err = NewRedisStorage(newStorageConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_Storage_NewRedisStorage_Error_Pool(t *testing.T) {
+	newStorageConfig, err := DefaultConfig()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	newStorageConfig.Pool = nil
+	_, err = NewRedisStorage(newStorageConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
 	}
 }
 

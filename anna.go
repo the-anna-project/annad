@@ -10,8 +10,6 @@ import (
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/index/clg"
-	"github.com/xh3b4sd/anna/index/clg/collection"
-	"github.com/xh3b4sd/anna/index/clg/profile"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/net/char"
 	charexecnet "github.com/xh3b4sd/anna/net/char/net/exec"
@@ -87,10 +85,14 @@ type annaConfig struct {
 	Storage  spec.Storage
 }
 
-func defaultAnnaConfig() annaConfig {
-	newCLGIndex, err := clg.NewIndex(clg.DefaultIndexConfig())
+func defaultAnnaConfig() (annaConfig, error) {
+	newCLGIndexConfig, err := clg.DefaultIndexConfig()
 	if err != nil {
-		panic(err)
+		return annaConfig{}, maskAny(err)
+	}
+	newCLGIndex, err := clg.NewIndex(newCLGIndexConfig)
+	if err != nil {
+		return annaConfig{}, maskAny(err)
 	}
 
 	newConfig := annaConfig{
@@ -101,7 +103,7 @@ func defaultAnnaConfig() annaConfig {
 		Storage:  memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 func newAnna(config annaConfig) (spec.Anna, error) {
@@ -218,12 +220,15 @@ func mainRun(cmd *cobra.Command, args []string) {
 		newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
 		newRedisDialConfig.Addr = globalFlags.StorageAddr
 		newPoolConfig := redisstorage.DefaultRedisPoolConfig()
-		newPoolConfig.Dial = redisstorage.NewRedisDial(newRedisDialConfig)
-		newStorageConfig := redisstorage.DefaultConfig()
+		newPoolConfig.Dial = redisstorage.NewDial(newRedisDialConfig)
+		newStorageConfig, err := redisstorage.DefaultConfig()
+		panicOnError(err)
 		newStorageConfig.BackOffFactory = func() spec.BackOff {
 			return backoff.NewExponentialBackOff()
 		}
 		newStorageConfig.Log = newLog
+		newStorageConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Storage", "Redis"})
+		panicOnError(err)
 		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
 		newStorage, err = redisstorage.NewRedisStorage(newStorageConfig)
 		panicOnError(err)
@@ -390,25 +395,8 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newCoreNet, err := corenet.NewCoreNet(newCoreNetConfig)
 	panicOnError(err)
 
-	// CLG collection
-	newCollectionConfig := collection.DefaultConfig()
-	newCollectionConfig.Log = newLog
-	newCollection, err := collection.New(newCollectionConfig)
-	panicOnError(err)
-
-	// CLG profile generator
-	newGeneratorConfig := profile.DefaultGeneratorConfig()
-	newGeneratorConfig.Collection = newCollection
-	newGeneratorConfig.Log = newLog
-	newGeneratorConfig.Storage = newStorage
-	newGenerator, err := profile.NewGenerator(newGeneratorConfig)
-	panicOnError(err)
-
 	// CLG index
-	newCLGConfig := clg.DefaultIndexConfig()
-	newCLGConfig.Generator = newGenerator
-	newCLGConfig.Log = newLog
-	newCLGIndex, err := clg.NewIndex(newCLGConfig)
+	newCLGIndex, err := createCLGIndex(newLog, newStorage)
 	panicOnError(err)
 
 	// log control
@@ -425,8 +413,11 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// server
-	newServerConfig := server.DefaultConfig()
+	newServerConfig, err := server.DefaultConfig()
+	panicOnError(err)
 	newServerConfig.Addr = globalFlags.Addr
+	newServerConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
+	panicOnError(err)
 	newServerConfig.Log = newLog
 	newServerConfig.LogControl = newLogControl
 	newServerConfig.TextGateway = newTextGateway
@@ -435,7 +426,8 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// anna
-	newAnnaConfig := defaultAnnaConfig()
+	newAnnaConfig, err := defaultAnnaConfig()
+	panicOnError(err)
 	newAnnaConfig.CLGIndex = newCLGIndex
 	newAnnaConfig.CoreNet = newCoreNet
 	newAnnaConfig.Log = newLog

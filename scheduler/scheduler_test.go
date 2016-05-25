@@ -6,13 +6,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-func newTestScheduler(storage spec.Storage) spec.Scheduler {
+func testMaybeNewSchedulerWithStorage(t *testing.T, storage spec.Storage) spec.Scheduler {
 	newConfig := DefaultConfig()
 	if storage != nil {
 		newConfig.Storage = storage
@@ -24,6 +25,19 @@ func newTestScheduler(storage spec.Storage) spec.Scheduler {
 	}
 
 	return newScheduler
+}
+
+func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
+	newStorageConfig, err := redisstorage.DefaultConfigWithConn(c)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	return newStorage
 }
 
 func newTestJob(args interface{}, sessionID string, actionID string) spec.Job {
@@ -40,7 +54,7 @@ func newTestJob(args interface{}, sessionID string, actionID string) spec.Job {
 }
 
 func Test_Scheduler_Boot_Reschedule(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	var sleep int
 	var m sync.Mutex
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
@@ -124,7 +138,7 @@ func Test_Scheduler_Boot_Reschedule(t *testing.T) {
 }
 
 func Test_Scheduler_Execute_Success(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		return "test-result", nil
 	})
@@ -154,7 +168,7 @@ func Test_Scheduler_Execute_Success(t *testing.T) {
 }
 
 func Test_Scheduler_Execute_ActionRegisterError(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 
 	newJob := newTestJob(nil, "test-session", "test-action")
 	err := newScheduler.Execute(newJob)
@@ -170,26 +184,22 @@ func Test_Scheduler_Execute_StorageError(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("SET").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		return "", nil
 	})
 
 	newJob := newTestJob(nil, "test-session", "test-action")
-	err = newScheduler.Execute(newJob)
+	err := newScheduler.Execute(newJob)
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
 func Test_Scheduler_Execute_Action_Error(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		return "", fmt.Errorf("test error")
 	})
@@ -215,7 +225,7 @@ func Test_Scheduler_Execute_Action_Error(t *testing.T) {
 }
 
 func Test_Scheduler_Execute_FetchState(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		return "", nil
 	})
@@ -253,7 +263,7 @@ func Test_Scheduler_Execute_FetchState(t *testing.T) {
 }
 
 func Test_Scheduler_Execute_Wait(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		// Just something to do, so the job blocks
 		time.Sleep(300 * time.Millisecond)
@@ -295,23 +305,19 @@ func Test_Scheduler_WaitForFinalStatus_Error(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("GET").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 
 	closer := make(chan struct{}, 1)
-	_, err = newScheduler.WaitForFinalStatus("some-id", closer)
+	_, err := newScheduler.WaitForFinalStatus("some-id", closer)
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
 func Test_Scheduler_Execute_Scheduler_Ends_Wait(t *testing.T) {
-	newScheduler := newTestScheduler(nil)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, nil)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		select {
 		case <-closer:
@@ -351,16 +357,12 @@ func Test_Scheduler_MarkAsReplaced(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("ZREM").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 
 	newJob := newTestJob(nil, "test-session", "test-action")
-	_, err = newScheduler.(*scheduler).MarkAsReplaced(newJob)
+	_, err := newScheduler.(*scheduler).MarkAsReplaced(newJob)
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -371,16 +373,12 @@ func Test_Scheduler_MarkAsSucceeded(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("ZREM").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 
 	newJob := newTestJob(nil, "test-session", "test-action")
-	_, err = newScheduler.(*scheduler).MarkAsSucceeded(newJob)
+	_, err := newScheduler.(*scheduler).MarkAsSucceeded(newJob)
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -391,16 +389,12 @@ func Test_Scheduler_MarkAsFailedWithError(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("ZREM").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 
 	newJob := newTestJob(nil, "test-session", "test-action")
-	_, err = newScheduler.(*scheduler).MarkAsFailedWithError(newJob, fmt.Errorf("test error"))
+	_, err := newScheduler.(*scheduler).MarkAsFailedWithError(newJob, fmt.Errorf("test error"))
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -411,19 +405,15 @@ func Test_Scheduler_Execute_MarkAsActiveError(t *testing.T) {
 	// Note returning this specific error here makes no sense business wise. It
 	// is only to verify the test.
 	c.Command("ZADD").ExpectError(jobNotFoundError)
-	newStorageConfig := redisstorage.DefaultConfigWithConn(c)
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMaybeNewStorageWithConn(t, c)
 
-	newScheduler := newTestScheduler(newStorage)
+	newScheduler := testMaybeNewSchedulerWithStorage(t, newStorage)
 	newScheduler.Register("test-action", func(args interface{}, closer <-chan struct{}) (string, error) {
 		return "", nil
 	})
 
 	newJob := newTestJob(nil, "test-session", "test-action")
-	err = newScheduler.(*scheduler).Execute(newJob)
+	err := newScheduler.(*scheduler).Execute(newJob)
 	if !IsJobNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}

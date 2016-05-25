@@ -8,7 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/index/clg/collection"
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
+	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -70,39 +70,37 @@ type GeneratorConfig struct {
 
 // DefaultGeneratorConfig provides a default configuration to create a new CLG
 // profile generator object by best effort.
-func DefaultGeneratorConfig() GeneratorConfig {
+func DefaultGeneratorConfig() (GeneratorConfig, error) {
 	newCollection, err := collection.New(collection.DefaultConfig())
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "CLGProfileGenerator")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 
 	newArgumentValues, err := createArgumentValues()
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 	newPermutationListConfig := permutation.DefaultListConfig()
 	newPermutationListConfig.MaxGrowth = maxArgs
 	newPermutationListConfig.Values = newArgumentValues
 	newPermutationList, err := permutation.NewList(newPermutationListConfig)
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 
 	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 
 	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return GeneratorConfig{}, maskAny(err)
 	}
 
 	newConfig := GeneratorConfig{
@@ -120,7 +118,7 @@ func DefaultGeneratorConfig() GeneratorConfig {
 		LoaderFileNames: collection.LoaderFileNames,
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 // NewGenerator creates a new configured CLG profile generator object.
