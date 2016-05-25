@@ -35,6 +35,7 @@ func (g *generator) CreateInputsOutputs(clgName string) (spec.InputsOutputs, err
 	return newInputsOutputs, nil
 }
 
+// TODO on index shutdown we need to store the indizes of the current list
 func (g *generator) getInputsOutputs(clgName string) (spec.InputsOutputs, error) {
 	newInputsOutputs := spec.InputsOutputs{}
 
