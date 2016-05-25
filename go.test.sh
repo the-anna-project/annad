@@ -17,5 +17,6 @@ done
 
 # The coverage output of the golang coverage contains the string "mode: <mode>"
 # as first statement. Coverage services uploader like the one of coveralls.io
-# do not like this. Thus we remove it.
-cat coverage.txt | grep -v "mode: count" > coverage.txt
+# do not like this. Thus we remove it. Note that we need "|| true" because grep
+# does not return 0 when it works as expected.
+cat coverage.txt | grep -v "mode: .*" > coverage.txt || true
