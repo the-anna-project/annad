@@ -5,6 +5,10 @@ sudo: false
 go:
 - 1.6
 
+before_install:
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
 install: make all
 
 script:
@@ -15,4 +19,4 @@ notifications:
   email: false
 
 after_success:
-- bash <(curl -s https://codecov.io/bash)
+- goveralls -coverprofile=coverage.txt -service=travis-ci
