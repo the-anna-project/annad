@@ -14,9 +14,3 @@ for d in $(find ./* -maxdepth 10 -type f -name '*test.go' -not -path "./.workspa
       rm profile.out
   fi
 done
-
-# The coverage output of the golang coverage contains the string "mode: <mode>"
-# as first statement. Coverage services uploader sometimes do not like this.
-# Thus we remove it. Note that we need "|| true" because grep does not return 0
-# when it works as expected.
-cat coverage.txt | grep -v "mode: .*" > coverage.txt || true
