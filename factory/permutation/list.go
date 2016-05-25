@@ -26,7 +26,7 @@ func DefaultListConfig() ListConfig {
 	newConfig := ListConfig{
 		// Settings.
 		Indizes:   []int{},
-		MaxGrowth: 10,
+		MaxGrowth: 5,
 		Values:    []interface{}{},
 	}
 

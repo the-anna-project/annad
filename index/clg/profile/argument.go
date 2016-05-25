@@ -5,7 +5,18 @@ import (
 	"github.com/xh3b4sd/anna/index/clg/collection/feature-set"
 )
 
-// TODO
+// createArgumentValues creates a list of opinionated input arguments. This
+// list contains less than 90 elements. Considering 100 elements we are able to
+// create more than 10 billion permutations of this list when capping each
+// permutation by maximum 5 members.
+//
+//     1+100^1+100^2+100^3+100^4+100^5 = 10.101.010.101
+//
+// Note that there should not be more than 100 elements in this list because
+// the time spent on the discovery process of CLG interfaces will increase
+// dramatically. Considering 1ms for each iteration would take way more than 3
+// years, and this is the time spent for only one CLG interface. Depending on
+// the CLG interface this numbers vary heavily, but you get the picture.
 func createArgumentValues() ([]interface{}, error) {
 	newDistributionConfig := distribution.DefaultConfig()
 	newDistributionConfig.Name = "generated for argument list"

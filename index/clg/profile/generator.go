@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/factory/permutation"
+	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/index/clg/collection"
 	"github.com/xh3b4sd/anna/instrumentation/prometheus"
 	"github.com/xh3b4sd/anna/log"
@@ -19,16 +21,49 @@ const (
 	ObjectTypeCLGProfileGenerator spec.ObjectType = "clg-profile-generator"
 )
 
+var (
+	// maxArgs represents the maximum number of arguments allowed used to find
+	// out how many input arguments a CLG expects. Usually CLGs do not expect
+	// more than 5 input arguments. In case a CLG expects 5 or more arguments, we
+	// assume it expects infinite arguments.
+	//
+	// The reason why we limit so strictly is the vast amount of possibilities.
+	// Imagine we have a list of about 100 different arguments that can be
+	// combined with each other. In case of creating permutations of up to 5
+	// arguments within one argument list, we can have more than 10 billion
+	// possible combinations.
+	//
+	//     1+100^1+100^2+100^3+100^4+100^5 = 10.101.010.101
+	//
+	// This would be the amount of iterations we would need to make to find all
+	// possible inputs of one single CLG. The goal is to have houndrets of CLGs.
+	// This is why the process of finding out how the interface of an CLG looks
+	// like needs to be optimized. The limitation of the number of input
+	// arguments is one thing.
+	//
+	// Another optimization is to stop the discovery process here in case an
+	// error is returned signaling too many arguments were used.
+	//
+	// Further, every now and then, Anna should try what else works out for a
+	// CLG. How such a discovery looks like in detail is to be defined.
+	//
+	// Note that this number is experimental and might change if necessary.
+	maxArgs = 5
+)
+
 // GeneratorConfig represents the configuration used to create a new CLG
 // profile generator object.
 type GeneratorConfig struct {
 	// Dependencies.
-	Collection      spec.CLGCollection
-	Instrumentation spec.Instrumentation
-	Log             spec.Log
-	Storage         spec.Storage
+	Collection         spec.CLGCollection
+	Instrumentation    spec.Instrumentation
+	Log                spec.Log
+	PermutationFactory spec.PermutationFactory
+	RandomFactory      spec.RandomFactory
+	Storage            spec.Storage
 
 	// Settings.
+	ArgumentList    spec.PermutationList
 	LoaderFileNames func() []string
 	LoaderReadFile  func(fileName string) ([]byte, error)
 }
@@ -48,14 +83,39 @@ func DefaultGeneratorConfig() GeneratorConfig {
 		panic(err)
 	}
 
+	newArgumentValues, err := createArgumentValues()
+	if err != nil {
+		panic(err)
+	}
+	newPermutationListConfig := permutation.DefaultListConfig()
+	newPermutationListConfig.MaxGrowth = maxArgs
+	newPermutationListConfig.Values = newArgumentValues
+	newPermutationList, err := permutation.NewList(newPermutationListConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := GeneratorConfig{
 		// Dependencies.
-		Collection:      newCollection,
-		Instrumentation: newInstrumentation,
-		Log:             log.NewLog(log.DefaultConfig()),
-		Storage:         memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Collection:         newCollection,
+		Instrumentation:    newInstrumentation,
+		Log:                log.NewLog(log.DefaultConfig()),
+		PermutationFactory: newPermutationFactory,
+		RandomFactory:      newRandomFactory,
+		Storage:            memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		// Settings.
+		ArgumentList:    newPermutationList,
 		LoaderReadFile:  collection.LoaderReadFile,
 		LoaderFileNames: collection.LoaderFileNames,
 	}
@@ -128,15 +188,11 @@ func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
 		if err != nil {
 			return maskAny(err)
 		}
-		newInputs, err := g.CreateInputs(clgName)
+		newInputsOutputs, err := g.CreateInputsOutputs(clgName)
 		if err != nil {
 			return maskAny(err)
 		}
 		newName, err := g.CreateName(clgName)
-		if err != nil {
-			return maskAny(err)
-		}
-		newOutputs, err := g.CreateOutputs(clgName)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -145,9 +201,8 @@ func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
 		newConfig := DefaultConfig()
 		newConfig.Body = newBody
 		newConfig.Hash = newHash
-		newConfig.Inputs = newInputs
+		newConfig.InputsOutputs = newInputsOutputs
 		newConfig.Name = newName
-		newConfig.Outputs = newOutputs
 		newProfile, err = New(newConfig)
 		if err != nil {
 			return maskAny(err)

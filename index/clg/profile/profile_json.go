@@ -34,9 +34,8 @@ func (p *profile) UnmarshalJSON(b []byte) error {
 	p.HasChanged = newProfile.HasChanged
 	p.Hash = newProfile.Hash
 	p.ID = newProfile.ID
-	p.Inputs = newProfile.Inputs
+	p.InputsOutputs = newProfile.InputsOutputs
 	p.Name = newProfile.Name
-	p.Outputs = newProfile.Outputs
 	p.Type = newProfile.Type
 
 	return nil

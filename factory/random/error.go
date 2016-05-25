@@ -1,4 +1,4 @@
-package id
+package random
 
 import (
 	"fmt"
@@ -27,4 +27,11 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
+}
+
+var timeoutError = errgo.New("timeout")
+
+// IsTimeout asserts timeoutError.
+func IsTimeout(err error) bool {
+	return errgo.Cause(err) == timeoutError
 }

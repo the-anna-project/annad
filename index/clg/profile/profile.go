@@ -30,14 +30,13 @@ type Config struct {
 	// Hash represents the hashed value of the CLG's implemented method.
 	Hash string `json:"hash,omitempty"`
 
-	// Inputs represents the CLG's implemented method input parameter types.
-	Inputs []string `json:"inputs,omitempty"`
+	// InputsOutputs represents the CLG's implemented method input-output
+	// argument pairs discovered during CLG profile creation. This list might
+	// only holds some samples and no complete list.
+	InputsOutputs spec.InputsOutputs `json:"inputs_outputs,omitempty"`
 
 	// Name represents the CLG's implemented method name.
 	Name string `json:"name,omitempty"`
-
-	// Outputs represents the CLG's implemented method output parameter types.
-	Outputs []string `json:"outputs,omitempty"`
 }
 
 // DefaultConfig provides a default configuration to create a new CLG profile
@@ -45,12 +44,11 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Body:       "",
-		HasChanged: false,
-		Hash:       "",
-		Inputs:     nil,
-		Name:       "",
-		Outputs:    nil,
+		Body:          "",
+		HasChanged:    false,
+		Hash:          "",
+		InputsOutputs: spec.InputsOutputs{},
+		Name:          "",
 	}
 
 	return newConfig
@@ -85,9 +83,6 @@ func New(config Config) (spec.CLGProfile, error) {
 	if newProfile.Name == "" {
 		return nil, maskAnyf(invalidConfigError, "method name of CLG profile must not be empty")
 	}
-	if len(newProfile.Outputs) == 0 {
-		return nil, maskAnyf(invalidConfigError, "output types of CLG profile must not be empty")
-	}
 
 	return newProfile, nil
 }
@@ -120,13 +115,10 @@ func (p *profile) Equals(other spec.CLGProfile) bool {
 	if p.GetHash() != other.GetHash() {
 		return false
 	}
-	if !reflect.DeepEqual(p.GetInputs(), other.GetInputs()) {
+	if !reflect.DeepEqual(p.GetInputsOutputs(), other.GetInputsOutputs()) {
 		return false
 	}
 	if p.GetName() != other.GetName() {
-		return false
-	}
-	if !reflect.DeepEqual(p.GetOutputs(), other.GetOutputs()) {
 		return false
 	}
 
@@ -154,11 +146,11 @@ func (p *profile) GetHash() string {
 	return p.Hash
 }
 
-func (p *profile) GetInputs() []string {
+func (p *profile) GetInputsOutputs() spec.InputsOutputs {
 	p.Mutex.Lock()
 	defer p.Mutex.Unlock()
 
-	return p.Inputs
+	return p.InputsOutputs
 }
 
 func (p *profile) GetName() string {
@@ -166,13 +158,6 @@ func (p *profile) GetName() string {
 	defer p.Mutex.Unlock()
 
 	return p.Name
-}
-
-func (p *profile) GetOutputs() []string {
-	p.Mutex.Lock()
-	defer p.Mutex.Unlock()
-
-	return p.Outputs
 }
 
 func (p *profile) SetHashChanged(hasChanged bool) {
