@@ -1,9 +1,31 @@
 package profile
 
 import (
+	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/index/clg/collection/distribution"
 	"github.com/xh3b4sd/anna/index/clg/collection/feature-set"
+	"github.com/xh3b4sd/anna/spec"
 )
+
+func createArgumentListFactory() func() (spec.PermutationList, error) {
+	newArgumentListFactory := func() (spec.PermutationList, error) {
+		newArgumentValues, err := createArgumentValues()
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		newPermutationListConfig := permutation.DefaultListConfig()
+		newPermutationListConfig.MaxGrowth = maxArgs
+		newPermutationListConfig.Values = newArgumentValues
+		newPermutationList, err := permutation.NewList(newPermutationListConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+
+		return newPermutationList, nil
+	}
+
+	return newArgumentListFactory
+}
 
 // createArgumentValues creates a list of opinionated input arguments. This
 // list contains less than 90 elements. Considering 100 elements we are able to
@@ -34,9 +56,6 @@ func createArgumentValues() ([]interface{}, error) {
 	}
 
 	newValues := []interface{}{
-		// nil
-		nil,
-
 		// bool
 		true,
 		false,
@@ -56,7 +75,6 @@ func createArgumentValues() ([]interface{}, error) {
 		int(33),
 
 		// interface{}
-		interface{}(nil),
 		interface{}(true),
 		interface{}(false),
 		interface{}(5.8),

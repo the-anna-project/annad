@@ -18,7 +18,6 @@ var (
 	maxSamples = 10
 )
 
-// TODO test
 func (g *generator) CreateInputsOutputs(clgName string) (spec.InputsOutputs, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateInputs")
 
@@ -39,6 +38,14 @@ func (g *generator) CreateInputsOutputs(clgName string) (spec.InputsOutputs, err
 func (g *generator) getInputsOutputs(clgName string) (spec.InputsOutputs, error) {
 	newInputsOutputs := spec.InputsOutputs{}
 
+	// We create a new permutation list containing argument values for each CLG
+	// profile creation. That way we do not share the permuted state across
+	// creation processes.
+	newArgumentList, err := g.ArgumentListFactory()
+	if err != nil {
+		return spec.InputsOutputs{}, maskAny(err)
+	}
+
 	for {
 		if len(newInputsOutputs.InsOuts) >= 100 {
 			// There will always be some CLGs causing any input to be valid, like
@@ -51,16 +58,22 @@ func (g *generator) getInputsOutputs(clgName string) (spec.InputsOutputs, error)
 
 		// Perform the permutations to fetch possible combinations of input
 		// arguments for the CLG execution.
-		err := g.PermutationFactory.PermuteBy(g.ArgumentList, 1)
+		err := g.PermutationFactory.PermuteBy(newArgumentList, 1)
 		if permutation.IsMaxGrowthReached(err) {
 			// We are through with all possible combinations. Thus return what we have so far.
 			return newInputsOutputs, nil
 		} else if err != nil {
 			return spec.InputsOutputs{}, maskAny(err)
 		}
+		// Once we permuted the indizes we need to create the permuted set of
+		// members by mapping the list values to the permuted indizes.
+		err = g.PermutationFactory.MapTo(newArgumentList)
+		if err != nil {
+			return spec.InputsOutputs{}, maskAny(err)
+		}
 
-		in := g.ArgumentList.GetMembers()
-		out, err := g.Collection.CallByNameMethod(in...)
+		in := newArgumentList.GetMembers()
+		out, err := g.Collection.CallByNameMethod(append([]interface{}{clgName}, in...)...)
 		if collection.IsNotEnoughArguments(err) {
 			// The number of input arguments is lesser than the CLG interface
 			// actually requires. Thus we go ahead to check the next permutation.

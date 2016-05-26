@@ -55,15 +55,15 @@ var (
 // profile generator object.
 type GeneratorConfig struct {
 	// Dependencies.
-	Collection         spec.CLGCollection
-	Instrumentation    spec.Instrumentation
-	Log                spec.Log
-	PermutationFactory spec.PermutationFactory
-	RandomFactory      spec.RandomFactory
-	Storage            spec.Storage
+	ArgumentListFactory func() (spec.PermutationList, error)
+	Collection          spec.CLGCollection
+	Instrumentation     spec.Instrumentation
+	Log                 spec.Log
+	PermutationFactory  spec.PermutationFactory
+	RandomFactory       spec.RandomFactory
+	Storage             spec.Storage
 
 	// Settings.
-	ArgumentList    spec.PermutationList
 	LoaderFileNames func() []string
 	LoaderReadFile  func(fileName string) ([]byte, error)
 }
@@ -81,18 +81,6 @@ func DefaultGeneratorConfig() (GeneratorConfig, error) {
 		return GeneratorConfig{}, maskAny(err)
 	}
 
-	newArgumentValues, err := createArgumentValues()
-	if err != nil {
-		return GeneratorConfig{}, maskAny(err)
-	}
-	newPermutationListConfig := permutation.DefaultListConfig()
-	newPermutationListConfig.MaxGrowth = maxArgs
-	newPermutationListConfig.Values = newArgumentValues
-	newPermutationList, err := permutation.NewList(newPermutationListConfig)
-	if err != nil {
-		return GeneratorConfig{}, maskAny(err)
-	}
-
 	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
 	if err != nil {
 		return GeneratorConfig{}, maskAny(err)
@@ -105,15 +93,15 @@ func DefaultGeneratorConfig() (GeneratorConfig, error) {
 
 	newConfig := GeneratorConfig{
 		// Dependencies.
-		Collection:         newCollection,
-		Instrumentation:    newInstrumentation,
-		Log:                log.NewLog(log.DefaultConfig()),
-		PermutationFactory: newPermutationFactory,
-		RandomFactory:      newRandomFactory,
-		Storage:            memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		ArgumentListFactory: createArgumentListFactory(),
+		Collection:          newCollection,
+		Instrumentation:     newInstrumentation,
+		Log:                 log.NewLog(log.DefaultConfig()),
+		PermutationFactory:  newPermutationFactory,
+		RandomFactory:       newRandomFactory,
+		Storage:             memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
 
 		// Settings.
-		ArgumentList:    newPermutationList,
 		LoaderReadFile:  collection.LoaderReadFile,
 		LoaderFileNames: collection.LoaderFileNames,
 	}
