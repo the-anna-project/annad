@@ -315,38 +315,6 @@ func ArgToStringSlice(args []interface{}, index int, def ...[]string) ([]string,
 	return nil, maskAnyf(wrongArgumentTypeError, "expected []string got %T", args[index])
 }
 
-// ArgToStringStringMap converts the argument under index to map[string]string,
-// if possible. Optionally it takes one default value that is returned in case
-// there is no argument available for the given index.
-func ArgToStringStringMap(args []interface{}, index int, def ...map[string]string) (map[string]string, error) {
-	// In any case we should make sure the defaults are validated. This causes a
-	// more strict usage and understanding of the argument helper APIs.
-	if len(def) > 1 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 1 default got %d", len(def))
-	}
-
-	if len(args) < index+1 {
-		if len(def) == 1 {
-			// There is no argument given, thus we use the default.
-			return def[0], nil
-		}
-		return nil, maskAnyf(notEnoughArgumentsError, "expected %d args(s) got %d", index+1, len(args))
-	}
-
-	if _, ok := args[index].(DefaultArg); ok {
-		if len(def) < 1 {
-			return nil, maskAnyf(notEnoughArgumentsError, "expected 1 default got 0")
-		}
-		// There is no argument given, thus we use the default.
-		return def[0], nil
-	}
-
-	if ss, ok := args[index].(map[string]string); ok {
-		return ss, nil
-	}
-	return nil, maskAnyf(wrongArgumentTypeError, "expected map[string]string got %T", args[index])
-}
-
 // Args
 
 // ArgsToValues converts the given arguments to reflect values.
