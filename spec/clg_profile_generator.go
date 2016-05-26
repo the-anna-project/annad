@@ -13,6 +13,8 @@ type CLGProfileGenerator interface {
 	// GetProfileNames returns all profile names to be checked and re/generated.
 	GetProfileNames() ([]string, error)
 
+	Object
+
 	// StoreProfile stores the given CLG profile in the configured storage.
 	StoreProfile(clgProfile CLGProfile) error
 }

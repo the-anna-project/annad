@@ -46,3 +46,36 @@ func Test_Profile_Generator_CreateProfile(t *testing.T) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
+
+func Test_Profile_Generator_GetProfileNames(t *testing.T) {
+	newGenerator := testMaybeNewGenerator(t)
+
+	expectedCLGNameSubset := []string{
+		"AddPositionFeature",
+		"AppendFloat64Slice",
+		"CallByNameMethod",
+		"ContainsString",
+		"DiscardInterface",
+		"SumInt",
+	}
+
+	newProfileNames, err := newGenerator.GetProfileNames()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	for i, e := range expectedCLGNameSubset {
+		var found bool
+
+		for _, pn := range newProfileNames {
+			if pn == e {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+	}
+}
