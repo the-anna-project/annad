@@ -73,12 +73,13 @@ func NewIndex(config IndexConfig) (spec.CLGIndex, error) { // TODO the interface
 	newIndex := &index{
 		IndexConfig: config,
 
-		BootOnce:     sync.Once{},
-		Closer:       make(chan struct{}, 1),
-		ID:           newID,
-		Mutex:        sync.Mutex{},
-		Type:         ObjectTypeCLGIndex,
-		ShutdownOnce: sync.Once{},
+		BootOnce:      sync.Once{},
+		Closer:        make(chan struct{}, 1),
+		WorkerDrained: make(chan struct{}, 1),
+		ID:            newID,
+		Mutex:         sync.Mutex{},
+		Type:          ObjectTypeCLGIndex,
+		ShutdownOnce:  sync.Once{},
 	}
 
 	if newIndex.NumGeneratorWorkers < 1 {
@@ -96,12 +97,13 @@ func NewIndex(config IndexConfig) (spec.CLGIndex, error) { // TODO the interface
 type index struct {
 	IndexConfig
 
-	BootOnce     sync.Once
-	Closer       chan struct{}
-	ID           spec.ObjectID
-	Mutex        sync.Mutex
-	Type         spec.ObjectType
-	ShutdownOnce sync.Once
+	BootOnce      sync.Once
+	Closer        chan struct{}
+	WorkerDrained chan struct{}
+	ID            spec.ObjectID
+	Mutex         sync.Mutex
+	Type          spec.ObjectType
+	ShutdownOnce  sync.Once
 }
 
 func (i *index) Boot() {
@@ -148,8 +150,10 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 				case <-canceler:
 					return maskAny(workerCanceledError)
 				case pn := <-profileNameQueue:
-					newProfile, err := generator.CreateProfile(pn)
-					if err != nil {
+					newProfile, err := generator.CreateProfile(pn, canceler)
+					if profile.IsProfileCreationCanceled(err) {
+						return maskAny(workerCanceledError)
+					} else if err != nil {
 						return maskAny(err)
 					}
 					if !newProfile.GetHasChanged() {
@@ -169,9 +173,10 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 
 		// Prepare the worker pool.
 		newWorkerPoolConfig := workerpool.DefaultConfig()
-		newWorkerPoolConfig.WorkerFunc = workerFunc
 		newWorkerPoolConfig.Canceler = i.Closer
-		newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
+		newWorkerPoolConfig.Drained = i.WorkerDrained
+		newWorkerPoolConfig.WorkerFunc = workerFunc
+		newWorkerPool, err := workerpool.New(newWorkerPoolConfig)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -205,5 +210,7 @@ func (i *index) Shutdown() {
 	i.ShutdownOnce.Do(func() {
 		// Simply closing the closer will broadcast the signal to each listener.
 		close(i.Closer)
+
+		<-i.WorkerDrained
 	})
 }

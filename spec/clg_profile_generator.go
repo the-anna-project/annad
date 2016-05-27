@@ -4,7 +4,7 @@ package spec
 // profiles.
 type CLGProfileGenerator interface {
 	// CreateProfile creates a CLG profile for the given CLG name.
-	CreateProfile(clgName string) (CLGProfile, error)
+	CreateProfile(clgName string, canceler <-chan struct{}) (CLGProfile, error)
 
 	// GetProfileByName fetches the profile from storage, that is associated with
 	// the given profile name.

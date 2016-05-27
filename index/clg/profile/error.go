@@ -49,3 +49,10 @@ var clgBodyNotFoundError = errgo.New("clg body not found")
 func IsCLGBodyNotFound(err error) bool {
 	return errgo.Cause(err) == clgBodyNotFoundError
 }
+
+var profileCreationCanceledError = errgo.New("profile creation canceled")
+
+// IsProfileCreationCanceled asserts profileCreationCanceledError.
+func IsProfileCreationCanceled(err error) bool {
+	return errgo.Cause(err) == profileCreationCanceledError
+}

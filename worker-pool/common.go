@@ -11,9 +11,9 @@ import (
 func (wp *workerPool) executeOnce() chan error {
 	var wg sync.WaitGroup
 	var once sync.Once
-	var errors chan error
 
 	canceler := make(chan struct{}, 1)
+	errors := make(chan error, wp.NumWorkers)
 
 	go func() {
 		select {
@@ -40,7 +40,7 @@ func (wp *workerPool) executeOnce() chan error {
 					// should listen to the canceler. Here we also make sure we do not
 					// close on a closed channel by only closing once.
 					once.Do(func() {
-						close(canceler)
+						close(wp.Canceler)
 					})
 				}
 				errors <- err
@@ -55,6 +55,8 @@ func (wp *workerPool) executeOnce() chan error {
 	// uncollectable garbage. It is still save to read from the closed error
 	// channel.
 	close(errors)
+
+	wp.Drained <- struct{}{}
 
 	return errors
 }

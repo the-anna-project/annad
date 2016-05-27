@@ -151,7 +151,7 @@ type generator struct {
 	Type  spec.ObjectType
 }
 
-func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
+func (g *generator) CreateProfile(clgName string, canceler <-chan struct{}) (spec.CLGProfile, error) {
 	g.Log.WithTags(spec.Tags{L: "D", O: g, T: nil, V: 13}, "call CreateProfile")
 
 	var newProfile spec.CLGProfile
@@ -174,7 +174,7 @@ func (g *generator) CreateProfile(clgName string) (spec.CLGProfile, error) {
 		if err != nil {
 			return maskAny(err)
 		}
-		newInputsOutputs, err := g.CreateInputsOutputs(clgName)
+		newInputsOutputs, err := g.CreateInputsOutputs(clgName, canceler)
 		if err != nil {
 			return maskAny(err)
 		}

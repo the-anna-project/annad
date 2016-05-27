@@ -24,10 +24,13 @@ type Config struct {
 
 	// Settings.
 
-	// Canceler can be used to end the worker pools processes. The signal
-	// received here will be redirected to the canceler provided to the worker
-	// functions.
+	// Canceler can be used to end the worker pool's processes pro-actively. The
+	// signal received here will be redirected to the canceler provided to the
+	// worker functions.
 	Canceler chan struct{}
+
+	// Drained can be used to wait until the worker is drained.
+	Drained chan struct{}
 
 	// CancelOnError defines whether to signal cancelation of worker processes in
 	// case one worker of the pool throws an error.
@@ -58,8 +61,8 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewWorkerPool creates a new configured worker pool object.
-func NewWorkerPool(config Config) (spec.WorkerPool, error) {
+// New creates a new configured worker pool object.
+func New(config Config) (spec.WorkerPool, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)

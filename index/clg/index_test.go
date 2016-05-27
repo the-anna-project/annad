@@ -31,7 +31,7 @@ func Test_Index_Index_BootShutdown(t *testing.T) {
 	go newIndex.Boot()
 	go newIndex.Boot()
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
 	newIndex.Shutdown()
 	newIndex.Shutdown()
