@@ -1,13 +1,12 @@
 package id
 
 import (
-	"crypto/rand"
 	"io"
 	"math/big"
 	"sync"
 	"testing"
-	"time"
 
+	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -33,7 +32,7 @@ func Test_IDFactory_NewFactory_Error_HashChars(t *testing.T) {
 
 func Test_IDFactory_NewFactory_Error_RandFactory(t *testing.T) {
 	newConfig := DefaultFactoryConfig()
-	newConfig.RandFactory = nil
+	newConfig.RandomFactory = nil
 
 	_, err := NewFactory(newConfig)
 	if !IsInvalidConfig(err) {
@@ -41,34 +40,19 @@ func Test_IDFactory_NewFactory_Error_RandFactory(t *testing.T) {
 	}
 }
 
-func Test_IDFactory_NewFactory_Error_RandReader(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newConfig.RandReader = nil
-
-	_, err := NewFactory(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_IDFactory_NewFactory_Error_Timeout(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newConfig.Timeout = 0
-
-	_, err := NewFactory(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_IDFactory_WithType_Error_RandReader(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newConfig.Timeout = 10 * time.Millisecond
-
-	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+func Test_IDFactory_WithType_Error(t *testing.T) {
+	// Create custom random factory with timeout config.
+	newRandomFactoryConfig := random.DefaultFactoryConfig()
+	newRandomFactoryConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		return nil, maskAny(invalidConfigError)
 	}
+	newRandomFactory, err := random.NewFactory(newRandomFactoryConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
 
+	newConfig := DefaultFactoryConfig()
+	newConfig.RandomFactory = newRandomFactory
 	newFactory, err := NewFactory(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -76,26 +60,6 @@ func Test_IDFactory_WithType_Error_RandReader(t *testing.T) {
 
 	_, err = newFactory.WithType(Hex128)
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_IDFactory_WithType_Error_Timeout(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newConfig.Timeout = 20 * time.Millisecond
-
-	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
-		time.Sleep(200 * time.Millisecond)
-		return rand.Int(randReader, max)
-	}
-
-	newFactory, err := NewFactory(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	_, err = newFactory.WithType(Hex128)
-	if !IsTimeout(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }

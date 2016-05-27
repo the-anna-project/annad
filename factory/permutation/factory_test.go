@@ -1,7 +1,6 @@
 package permutation
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -157,6 +156,68 @@ func Test_Permutation_Factory_PermuteBy_AbsoluteDelta(t *testing.T) {
 	}
 }
 
+// Test_Permutation_Factory_PermuteBy_Increment tests if increments by 1 always
+// work.
+func Test_Permutation_Factory_PermuteBy_Increment(t *testing.T) {
+	testMaybeNewList := func(t *testing.T) spec.PermutationList {
+		newConfig := DefaultListConfig()
+		newConfig.MaxGrowth = 3
+		newConfig.Values = []interface{}{"a", "b"}
+
+		newList, err := NewList(newConfig)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+
+		return newList
+	}
+
+	testCases := []struct {
+		Input        int
+		Expected     []interface{}
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Input:        1,
+			Expected:     []interface{}{"a"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        1,
+			Expected:     []interface{}{"b"},
+			ErrorMatcher: nil,
+		},
+		{
+			Input:        1,
+			Expected:     []interface{}{"a", "a"},
+			ErrorMatcher: nil,
+		},
+	}
+
+	// Note we use the same factory for all test cases.
+	newFactory := testMaybeNewFactory(t)
+	newList := testMaybeNewList(t)
+
+	for i, testCase := range testCases {
+		err := newFactory.PermuteBy(newList, testCase.Input)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+		err = newFactory.MapTo(newList)
+		if err != nil {
+			t.Fatal("expected", nil, "got", err)
+		}
+
+		output := newList.GetMembers()
+
+		if testCase.ErrorMatcher == nil {
+			if !reflect.DeepEqual(output, testCase.Expected) {
+				t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
+			}
+		}
+	}
+}
+
 // Test_Permutation_Factory_PermuteBy_RelativeDelta tests permutations by
 // providing deltas always to an already existing factory. That we we need to
 // provide relative deltas.
@@ -222,7 +283,6 @@ func Test_Permutation_Factory_PermuteBy_RelativeDelta(t *testing.T) {
 
 	for i, testCase := range testCases {
 		err := newFactory.PermuteBy(newList, testCase.Input)
-		fmt.Printf("%#v\n", err)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}

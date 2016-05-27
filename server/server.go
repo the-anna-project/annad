@@ -9,7 +9,7 @@ import (
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
+	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
@@ -40,12 +40,10 @@ type Config struct {
 
 // DefaultConfig provides a default configuration to create a new server object
 // by best effort.
-func DefaultConfig() Config {
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "Server")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+func DefaultConfig() (Config, error) {
+	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		panic(err)
+		return Config{}, maskAny(err)
 	}
 
 	newConfig := Config{
@@ -60,7 +58,7 @@ func DefaultConfig() Config {
 		Addr: "127.0.0.1:9119",
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 // NewServer creates a new configured server object.

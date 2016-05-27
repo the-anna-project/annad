@@ -34,7 +34,7 @@ func DefaultRedisPoolConfig() RedisPoolConfig {
 		MaxIdle:     100,
 		MaxActive:   100,
 		IdleTimeout: 5 * time.Minute,
-		Dial:        NewRedisDial(DefaultRedisDialConfig()),
+		Dial:        NewDial(DefaultRedisDialConfig()),
 	}
 
 	return newConfig

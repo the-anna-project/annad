@@ -5,7 +5,7 @@ import (
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg/profile"
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
+	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
@@ -31,17 +31,19 @@ type IndexConfig struct {
 
 // DefaultIndexConfig provides a default configuration to create a new CLG
 // index object by best effort.
-func DefaultIndexConfig() IndexConfig {
-	newGenerator, err := profile.NewGenerator(profile.DefaultGeneratorConfig())
+func DefaultIndexConfig() (IndexConfig, error) {
+	newGeneratorConfig, err := profile.DefaultGeneratorConfig()
 	if err != nil {
-		panic(err)
+		return IndexConfig{}, maskAny(err)
+	}
+	newGenerator, err := profile.NewGenerator(newGeneratorConfig)
+	if err != nil {
+		return IndexConfig{}, maskAny(err)
 	}
 
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "CLGProfileGenerator")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		panic(err)
+		return IndexConfig{}, maskAny(err)
 	}
 
 	newConfig := IndexConfig{
@@ -54,11 +56,11 @@ func DefaultIndexConfig() IndexConfig {
 		NumGeneratorWorkers: 10,
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 // NewIndex creates a new configured CLG index object.
-func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
+func NewIndex(config IndexConfig) (spec.CLGIndex, error) { // TODO the interface should be clean spec.Index
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)
@@ -71,12 +73,13 @@ func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
 	newIndex := &index{
 		IndexConfig: config,
 
-		BootOnce:     sync.Once{},
-		Closer:       make(chan struct{}, 1),
-		ID:           newID,
-		Mutex:        sync.Mutex{},
-		Type:         ObjectTypeCLGIndex,
-		ShutdownOnce: sync.Once{},
+		BootOnce:      sync.Once{},
+		Closer:        make(chan struct{}, 1),
+		WorkerDrained: make(chan struct{}, 1),
+		ID:            newID,
+		Mutex:         sync.Mutex{},
+		Type:          ObjectTypeCLGIndex,
+		ShutdownOnce:  sync.Once{},
 	}
 
 	if newIndex.NumGeneratorWorkers < 1 {
@@ -94,12 +97,13 @@ func NewIndex(config IndexConfig) (spec.CLGIndex, error) {
 type index struct {
 	IndexConfig
 
-	BootOnce     sync.Once
-	Closer       chan struct{}
-	ID           spec.ObjectID
-	Mutex        sync.Mutex
-	Type         spec.ObjectType
-	ShutdownOnce sync.Once
+	BootOnce      sync.Once
+	Closer        chan struct{}
+	WorkerDrained chan struct{}
+	ID            spec.ObjectID
+	Mutex         sync.Mutex
+	Type          spec.ObjectType
+	ShutdownOnce  sync.Once
 }
 
 func (i *index) Boot() {
@@ -146,8 +150,10 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 				case <-canceler:
 					return maskAny(workerCanceledError)
 				case pn := <-profileNameQueue:
-					newProfile, err := generator.CreateProfile(pn)
-					if err != nil {
+					newProfile, err := generator.CreateProfile(pn, canceler)
+					if profile.IsProfileCreationCanceled(err) {
+						return maskAny(workerCanceledError)
+					} else if err != nil {
 						return maskAny(err)
 					}
 					if !newProfile.GetHasChanged() {
@@ -167,9 +173,10 @@ func (i *index) CreateProfiles(generator spec.CLGProfileGenerator) error {
 
 		// Prepare the worker pool.
 		newWorkerPoolConfig := workerpool.DefaultConfig()
-		newWorkerPoolConfig.WorkerFunc = workerFunc
 		newWorkerPoolConfig.Canceler = i.Closer
-		newWorkerPool, err := workerpool.NewWorkerPool(newWorkerPoolConfig)
+		newWorkerPoolConfig.Drained = i.WorkerDrained
+		newWorkerPoolConfig.WorkerFunc = workerFunc
+		newWorkerPool, err := workerpool.New(newWorkerPoolConfig)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -203,5 +210,7 @@ func (i *index) Shutdown() {
 	i.ShutdownOnce.Do(func() {
 		// Simply closing the closer will broadcast the signal to each listener.
 		close(i.Closer)
+
+		<-i.WorkerDrained
 	})
 }

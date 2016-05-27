@@ -4,6 +4,19 @@ import (
 	"encoding/json"
 )
 
+// InOut represents one pair of input-output arguments that are seen together
+// during a CLG execution.
+type InOut struct {
+	In  []string
+	Out []string
+}
+
+// InputsOutputs represents the collection of possible input-output argument
+// pairs applied to CLG profiles.
+type InputsOutputs struct {
+	InsOuts []InOut
+}
+
 // CLGProfile contains information of a certain CLG.
 type CLGProfile interface {
 	// Equals checks whether the current CLG profile is equal to the given one.
@@ -19,16 +32,13 @@ type CLGProfile interface {
 	// GetHash returns the checksum of the profile's body.
 	GetHash() string
 
-	// GetInputs returns the profile's implemented CLG method input parameter
-	// types.
-	GetInputs() []string
+	// InputsOutputs represents the CLG's implemented method input-output
+	// argument pairs discovered during CLG profile creation. This list might
+	// only holds some samples and no complete list.
+	GetInputsOutputs() InputsOutputs
 
 	// GetName returns the name of the CLG this profile is associated with.
 	GetName() string
-
-	// GetOutputs returns the profile's implemented CLG method output parameter
-	// types.
-	GetOutputs() []string
 
 	json.Marshaler
 

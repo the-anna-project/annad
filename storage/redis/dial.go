@@ -24,8 +24,8 @@ func DefaultRedisDialConfig() RedisDialConfig {
 	return newConfig
 }
 
-// NewRedisDial creates a new configured redis dialer.
-func NewRedisDial(config RedisDialConfig) func() (redis.Conn, error) {
+// NewDial creates a new configured redis dialer.
+func NewDial(config RedisDialConfig) func() (redis.Conn, error) {
 	newDial := func() (redis.Conn, error) {
 		c, err := redis.Dial("tcp", config.Addr)
 		if err != nil {

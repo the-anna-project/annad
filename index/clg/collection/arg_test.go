@@ -439,11 +439,32 @@ func Test_Arg_ArgToStringSlice(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			Args:         []interface{}{DefaultArg{}, []string{"b"}},
+			Index:        0,
+			Def:          [][]string{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
+		},
+		{
+			Args:         []interface{}{DefaultArg{}, []string{"b"}},
+			Index:        0,
+			Def:          [][]string{{"c"}},
+			Expected:     []string{"c"},
+			ErrorMatcher: nil,
+		},
+		{
 			Args:         []interface{}{[]string{"a"}, []string{"b"}},
 			Index:        1,
 			Def:          [][]string{{"c"}},
 			Expected:     []string{"b"},
 			ErrorMatcher: nil,
+		},
+		{
+			Args:         []interface{}{[]string{"a"}, []string{"b"}},
+			Index:        2,
+			Def:          [][]string{},
+			Expected:     nil,
+			ErrorMatcher: IsNotEnoughArguments,
 		},
 		{
 			Args:         []interface{}{[]string{"a"}, []string{"b"}},

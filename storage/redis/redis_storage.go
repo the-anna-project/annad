@@ -10,7 +10,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 
 	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/instrumentation/prometheus"
+	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -38,27 +38,28 @@ type Config struct {
 
 // DefaultConfigWithConn provides a configuration that can be mocked using a
 // redis connection. This is used for testing.
-func DefaultConfigWithConn(redisConn redis.Conn) Config {
+func DefaultConfigWithConn(redisConn redis.Conn) (Config, error) {
 	newPoolConfig := DefaultRedisPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
 	newMockDialConfig.RedisConn = redisConn
 	newPoolConfig.Dial = newMockDial(newMockDialConfig)
 	newPool := NewRedisPool(newPoolConfig)
 
-	newStorageConfig := DefaultConfig()
+	newStorageConfig, err := DefaultConfig()
+	if err != nil {
+		return Config{}, maskAny(err)
+	}
 	newStorageConfig.Pool = newPool
 
-	return newStorageConfig
+	return newStorageConfig, nil
 }
 
 // DefaultConfig provides a default configuration to create a new redis storage
 // object by best effort.
-func DefaultConfig() Config {
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, "Storage", "Redis")
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+func DefaultConfig() (Config, error) {
+	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		panic(err)
+		return Config{}, maskAny(err)
 	}
 
 	newConfig := Config{
@@ -73,7 +74,7 @@ func DefaultConfig() Config {
 		},
 	}
 
-	return newConfig
+	return newConfig, nil
 }
 
 // NewRedisStorage creates a new configured redis storage object.
