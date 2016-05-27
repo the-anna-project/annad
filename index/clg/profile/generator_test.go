@@ -20,7 +20,8 @@ func testMaybeNewGenerator(t *testing.T) spec.CLGProfileGenerator {
 }
 
 func testMaybeNewProfileWithGenerator(t *testing.T, generator spec.CLGProfileGenerator, clgName string) spec.CLGProfile {
-	newProfile, err := generator.CreateProfile(clgName)
+	var canceler chan struct{} // We don't need a canceler here.
+	newProfile, err := generator.CreateProfile(clgName, canceler)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
