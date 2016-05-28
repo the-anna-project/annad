@@ -25,7 +25,8 @@ or other tricky things. This is way to complex to solve it ourselves. Once Anna
 is able to help us we will find these things out together and integrate them in
 her.
 
-Here is a list of incomplete steps necesarry to be done.
+Here is a incomplete list of more or less unordered milestones necesarry to be
+achieved at some point.
 
 ### make Anna able to recognize patterns
 An essential step to learn and to act is recognizing patterns. Here this is
@@ -51,6 +52,26 @@ the distribution of these currently is within the system. That way the state of
 an organism can be represented. Extremes of impulse occurrence cause the
 organism to die. Extremes can be seen as low or high. See the concept about
 [the balance system](/doc/evaluation/imagination.md#balance_system).
+
+---
+
+### make Anna able to operate on software tools
+This milestone is interesting because it can have tremendous effects on the art
+of automating software in general. Think about Anna as part of an operations
+team in an arbitrary company. Taking this idea one step further would mean to
+make Anna able to operate a whole software stack on her own. There is a way to
+go though.
+
+---
+
+### make Anna able to coordinate robotic extremities
+Anna is designed to perform arbitrary actions on arbitrary data. Depending on
+what she learned and how it is possible to make her coordinate robotic
+extremities. To achieve this goal we need a training unit and a clear path. All
+this is to be defined. Cases can be to make a robotic arm move, making drones
+fly, or whole roboters walk. In any case, computing on environmental data from
+the sorounding space makes no difference from processing natural language
+design wise.
 
 ---
 
@@ -95,3 +116,9 @@ Once capable of understanding human language and code, once Anna already
 created tools, it should be possible for her to understand her own code. With
 achieving this level Anna should be able to rewrite her own code and evolve
 mostly on her own.
+
+---
+
+### make Anna able to [all the fun stuff]
+In case Anna is able to operate on her own and modify herself the opportunities
+are endless. Think about that. You name it.
