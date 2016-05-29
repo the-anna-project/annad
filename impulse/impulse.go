@@ -60,15 +60,15 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewImpulse creates a new configured impulse object.
-func NewImpulse(config Config) (spec.Impulse, error) {
+// New creates a new configured impulse object.
+func New(config Config) (spec.Impulse, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newImpulse := &impulse{

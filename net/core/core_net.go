@@ -119,7 +119,7 @@ func (cn *coreNet) NewImpulse() (spec.Impulse, error) {
 
 	newConfig := impulse.DefaultConfig()
 	newConfig.Log = cn.Log
-	newImpulse, err := impulse.NewImpulse(newConfig)
+	newImpulse, err := impulse.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
