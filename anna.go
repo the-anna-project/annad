@@ -4,7 +4,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/cenk/backoff"
 	"github.com/spf13/cobra"
 
 	"github.com/xh3b4sd/anna/factory/id"
@@ -31,11 +30,8 @@ import (
 	"github.com/xh3b4sd/anna/net/strat"
 	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
-	"github.com/xh3b4sd/anna/server/control/log"
-	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
-	"github.com/xh3b4sd/anna/storage/redis"
 )
 
 const (
@@ -85,14 +81,15 @@ type annaConfig struct {
 	Storage  spec.Storage
 }
 
-func defaultAnnaConfig() (annaConfig, error) {
-	newCLGIndexConfig, err := clg.DefaultIndexConfig()
+func defaultAnnaConfig() annaConfig {
+	newCLGIndex, err := clg.NewIndex(clg.DefaultIndexConfig())
 	if err != nil {
-		return annaConfig{}, maskAny(err)
+		panic(err)
 	}
-	newCLGIndex, err := clg.NewIndex(newCLGIndexConfig)
+
+	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
 	if err != nil {
-		return annaConfig{}, maskAny(err)
+		panic(err)
 	}
 
 	newConfig := annaConfig{
@@ -100,10 +97,10 @@ func defaultAnnaConfig() (annaConfig, error) {
 		CoreNet:  nil,
 		Log:      log.NewLog(log.DefaultConfig()),
 		Server:   nil,
-		Storage:  memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Storage:  newStorage,
 	}
 
-	return newConfig, nil
+	return newConfig
 }
 
 func newAnna(config annaConfig) (spec.Anna, error) {
@@ -214,29 +211,8 @@ func mainRun(cmd *cobra.Command, args []string) {
 	newTextGateway := gateway.NewGateway(newTextGatewayConfig)
 
 	// storage
-	var newStorage spec.Storage
-	switch globalFlags.Storage {
-	case "redis":
-		newRedisDialConfig := redisstorage.DefaultRedisDialConfig()
-		newRedisDialConfig.Addr = globalFlags.StorageAddr
-		newPoolConfig := redisstorage.DefaultRedisPoolConfig()
-		newPoolConfig.Dial = redisstorage.NewDial(newRedisDialConfig)
-		newStorageConfig, err := redisstorage.DefaultConfig()
-		panicOnError(err)
-		newStorageConfig.BackOffFactory = func() spec.BackOff {
-			return backoff.NewExponentialBackOff()
-		}
-		newStorageConfig.Log = newLog
-		newStorageConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Storage", "Redis"})
-		panicOnError(err)
-		newStorageConfig.Pool = redisstorage.NewRedisPool(newPoolConfig)
-		newStorage, err = redisstorage.NewRedisStorage(newStorageConfig)
-		panicOnError(err)
-	case "memory":
-		newStorage = memorystorage.NewMemoryStorage(memorystorage.DefaultConfig())
-	default:
-		panic("invalid storage flag")
-	}
+	newStorage, err := createStorage(newLog)
+	panicOnError(err)
 
 	// scheduler
 	newSchedulerConfig := scheduler.DefaultConfig()
@@ -400,21 +376,15 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// log control
-	newLogControlConfig := logcontrol.DefaultConfig()
-	newLogControlConfig.Log = newLog
-	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+	newLogControl, err := createLogControl(newLog)
+	panicOnError(err)
 
 	// text interface
-	newTextInterfaceConfig := textinterface.DefaultConfig()
-	newTextInterfaceConfig.Log = newLog
-	newTextInterfaceConfig.Scheduler = newScheduler
-	newTextInterfaceConfig.TextGateway = newTextGateway
-	newTextInterface, err := textinterface.NewTextInterface(newTextInterfaceConfig)
+	newTextInterface, err := createTextInterface(newLog, newScheduler, newTextGateway)
 	panicOnError(err)
 
 	// server
-	newServerConfig, err := server.DefaultConfig()
-	panicOnError(err)
+	newServerConfig := server.DefaultConfig()
 	newServerConfig.Addr = globalFlags.Addr
 	newServerConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
 	panicOnError(err)
@@ -426,8 +396,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// anna
-	newAnnaConfig, err := defaultAnnaConfig()
-	panicOnError(err)
+	newAnnaConfig := defaultAnnaConfig()
 	newAnnaConfig.CLGIndex = newCLGIndex
 	newAnnaConfig.CoreNet = newCoreNet
 	newAnnaConfig.Log = newLog

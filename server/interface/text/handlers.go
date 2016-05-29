@@ -1,4 +1,4 @@
-package textinterface
+package text
 
 import (
 	httptransport "github.com/go-kit/kit/transport/http"

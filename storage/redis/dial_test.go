@@ -1,4 +1,4 @@
-package redisstorage
+package redis
 
 import (
 	"net"
@@ -6,7 +6,7 @@ import (
 )
 
 func Test_Storage_NewDial_Error_Addr(t *testing.T) {
-	newDialConfig := DefaultRedisDialConfig()
+	newDialConfig := DefaultDialConfig()
 	newDialConfig.Addr = "foo"
 	newDial := NewDial(newDialConfig)
 

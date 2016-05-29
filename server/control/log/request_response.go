@@ -1,4 +1,4 @@
-package logcontrol
+package log
 
 import (
 	"github.com/xh3b4sd/anna/api"

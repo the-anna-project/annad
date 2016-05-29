@@ -1,4 +1,4 @@
-package redisstorage
+package redis
 
 import (
 	"reflect"
@@ -11,11 +11,7 @@ import (
 )
 
 func testMaybeNewStorage(t *testing.T) spec.Storage {
-	newStorageConfig, err := DefaultConfig()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	newStorage, err := NewRedisStorage(newStorageConfig)
+	newStorage, err := NewStorage(DefaultStorageConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -24,11 +20,7 @@ func testMaybeNewStorage(t *testing.T) spec.Storage {
 }
 
 func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
-	newStorageConfig, err := DefaultConfigWithConn(c)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	newStorage, err := NewRedisStorage(newStorageConfig)
+	newStorage, err := NewStorage(DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -36,39 +28,35 @@ func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
 	return newStorage
 }
 
-// NewRedisStorage
+// NewStorage
 
 func Test_Storage_NewRedisStorage_Error_BackOffFactory(t *testing.T) {
-	newStorageConfig, err := DefaultConfig()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorageConfig := DefaultStorageConfig()
 	newStorageConfig.BackOffFactory = nil
-	_, err = NewRedisStorage(newStorageConfig)
+	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
 func Test_Storage_NewRedisStorage_Error_Log(t *testing.T) {
-	newStorageConfig, err := DefaultConfig()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorageConfig := DefaultStorageConfig()
 	newStorageConfig.Log = nil
-	_, err = NewRedisStorage(newStorageConfig)
+	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
 func Test_Storage_NewRedisStorage_Error_Pool(t *testing.T) {
-	newStorageConfig, err := DefaultConfig()
-	if err != nil {
+	newStorageConfig := DefaultStorageConfig()
+	newStorageConfig.Log = nil
+	_, err := NewStorage(newStorageConfig)
+	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 	newStorageConfig.Pool = nil
-	_, err = NewRedisStorage(newStorageConfig)
+	_, err = NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}

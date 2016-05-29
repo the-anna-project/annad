@@ -28,3 +28,10 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
+
+var invalidStorageFlagError = errgo.New("invalid storage flag")
+
+// IsInvalidStorageFlag asserts invalidStorageFlagError.
+func IsInvalidStorageFlag(err error) bool {
+	return errgo.Cause(err) == invalidStorageFlagError
+}

@@ -31,19 +31,15 @@ type IndexConfig struct {
 
 // DefaultIndexConfig provides a default configuration to create a new CLG
 // index object by best effort.
-func DefaultIndexConfig() (IndexConfig, error) {
-	newGeneratorConfig, err := profile.DefaultGeneratorConfig()
+func DefaultIndexConfig() IndexConfig {
+	newGenerator, err := profile.NewGenerator(profile.DefaultGeneratorConfig())
 	if err != nil {
-		return IndexConfig{}, maskAny(err)
-	}
-	newGenerator, err := profile.NewGenerator(newGeneratorConfig)
-	if err != nil {
-		return IndexConfig{}, maskAny(err)
+		panic(err)
 	}
 
 	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		return IndexConfig{}, maskAny(err)
+		panic(err)
 	}
 
 	newConfig := IndexConfig{
@@ -56,7 +52,7 @@ func DefaultIndexConfig() (IndexConfig, error) {
 		NumGeneratorWorkers: 10,
 	}
 
-	return newConfig, nil
+	return newConfig
 }
 
 // NewIndex creates a new configured CLG index object.

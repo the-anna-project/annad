@@ -43,9 +43,14 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new core network
 // object by best effort.
 func DefaultConfig() Config {
+	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		Log:         log.NewLog(log.DefaultConfig()),
-		Storage:     memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Storage:     newStorage,
 		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 		Scheduler:   nil,
 
@@ -63,11 +68,11 @@ func DefaultConfig() Config {
 func NewCoreNet(config Config) (spec.Network, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newNet := &coreNet{
@@ -114,7 +119,7 @@ func (cn *coreNet) NewImpulse() (spec.Impulse, error) {
 
 	newConfig := impulse.DefaultConfig()
 	newConfig.Log = cn.Log
-	newImpulse, err := impulse.NewImpulse(newConfig)
+	newImpulse, err := impulse.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

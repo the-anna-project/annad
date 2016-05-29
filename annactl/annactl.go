@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/client/control/log"
+	logcontrol "github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/file-system/memory"
@@ -57,12 +57,22 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
+	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	newTextInterface, err := text.NewInterface(text.DefaultInterfaceConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		IDFactory:     newIDFactory,
 		Log:           log.NewLog(log.DefaultConfig()),
-		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
-		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
+		LogControl:    newLogControl,
+		TextInterface: newTextInterface,
 
 		SessionID: string(newID),
 		Version:   version,
@@ -118,14 +128,16 @@ func NewAnnactl(config Config) (spec.Annactl, error) {
 			hostport := net.JoinHostPort(host, port)
 
 			// log control
-			newLogControlConfig := logcontrol.DefaultConfig()
+			newLogControlConfig := logcontrol.DefaultControlConfig()
 			newLogControlConfig.URL.Host = hostport
-			newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+			newLogControl, err := logcontrol.NewControl(newLogControlConfig)
+			panicOnError(err)
 
 			// text interface
-			newTextInterfaceConfig := textinterface.DefaultConfig()
+			newTextInterfaceConfig := text.DefaultInterfaceConfig()
 			newTextInterfaceConfig.URL.Host = hostport
-			newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
+			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
+			panicOnError(err)
 
 			// annactl
 			newAnnactl.FileSystem = newFileSystem

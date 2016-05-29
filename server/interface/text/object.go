@@ -1,13 +1,13 @@
-package textinterface
+package text
 
 import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (ti *textInterface) GetID() spec.ObjectID {
-	return ti.ID
+func (i *tinterface) GetID() spec.ObjectID {
+	return i.ID
 }
 
-func (ti *textInterface) GetType() spec.ObjectType {
-	return ti.Type
+func (i *tinterface) GetType() spec.ObjectType {
+	return i.Type
 }

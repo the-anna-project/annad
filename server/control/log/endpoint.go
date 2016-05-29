@@ -1,4 +1,4 @@
-package logcontrol
+package log
 
 import (
 	"github.com/go-kit/kit/endpoint"

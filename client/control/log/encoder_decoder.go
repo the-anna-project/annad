@@ -1,4 +1,4 @@
-package logcontrol
+package log
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ func resetLevelsEncoder(ctx context.Context, r *http.Request, request interface{
 }
 
 func resetLevelsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.ResetLevelsResponse
+	var response log.ResetLevelsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -40,7 +40,7 @@ func resetObjectsEncoder(ctx context.Context, r *http.Request, request interface
 }
 
 func resetObjectsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.ResetObjectsResponse
+	var response log.ResetObjectsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -57,7 +57,7 @@ func resetVerbosityEncoder(ctx context.Context, r *http.Request, request interfa
 }
 
 func resetVerbosityDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.ResetVerbosityResponse
+	var response log.ResetVerbosityResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -74,7 +74,7 @@ func setLevelsEncoder(ctx context.Context, r *http.Request, request interface{})
 }
 
 func setLevelsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.SetLevelsResponse
+	var response log.SetLevelsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -91,7 +91,7 @@ func setObjectsEncoder(ctx context.Context, r *http.Request, request interface{}
 }
 
 func setObjectsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.SetObjectsResponse
+	var response log.SetObjectsResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -108,7 +108,7 @@ func setVerbosityEncoder(ctx context.Context, r *http.Request, request interface
 }
 
 func setVerbosityDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response logcontrol.SetVerbosityResponse
+	var response log.SetVerbosityResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }

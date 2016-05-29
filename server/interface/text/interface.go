@@ -1,7 +1,4 @@
-// Package textinterface implements spec.TextInterface and provides a way to
-// feed neural networks with text input. To make Anna consume text, there is
-// the text interface implemented through the network API.
-package textinterface
+package text
 
 import (
 	"sync"
@@ -23,40 +20,40 @@ const (
 	ObjectTypeTextInterface spec.ObjectType = "text-interface"
 )
 
-// Config represents the configuration used to create a new text interface
-// object.
-type Config struct {
+// InterfaceConfig represents the configuration used to create a new text
+// interface object.
+type InterfaceConfig struct {
 	Log         spec.Log
 	Scheduler   spec.Scheduler
 	TextGateway spec.Gateway
 }
 
-// DefaultConfig provides a default configuration to create a new text
+// DefaultInterfaceConfig provides a default configuration to create a new text
 // interface object by best effort.
-func DefaultConfig() Config {
-	return Config{
+func DefaultInterfaceConfig() InterfaceConfig {
+	return InterfaceConfig{
 		Log:         log.NewLog(log.DefaultConfig()),
 		Scheduler:   nil,
 		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
 }
 
-// NewTextInterface creates a new configured text interface object.
-func NewTextInterface(config Config) (spec.TextInterface, error) {
+// NewInterface creates a new configured text interface object.
+func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
-	newInterface := &textInterface{
-		Config: config,
-		ID:     newID,
-		Mutex:  sync.Mutex{},
-		Type:   spec.ObjectType(ObjectTypeTextInterface),
+	newInterface := &tinterface{
+		InterfaceConfig: config,
+		ID:              newID,
+		Mutex:           sync.Mutex{},
+		Type:            spec.ObjectType(ObjectTypeTextInterface),
 	}
 
 	newInterface.Log.Register(newInterface.GetType())
@@ -69,8 +66,8 @@ func NewTextInterface(config Config) (spec.TextInterface, error) {
 	return newInterface, nil
 }
 
-type textInterface struct {
-	Config
+type tinterface struct {
+	InterfaceConfig
 
 	ID    spec.ObjectID
 	Mutex sync.Mutex
@@ -78,25 +75,25 @@ type textInterface struct {
 }
 
 // TODO this should actually fetch a url from the web
-func (ti *textInterface) FetchURL(url string) ([]byte, error) {
+func (i *tinterface) FetchURL(url string) ([]byte, error) {
 	return nil, nil
 }
 
 // TODO this should actually read a file from file system
-func (ti *textInterface) ReadFile(file string) ([]byte, error) {
+func (i *tinterface) ReadFile(file string) ([]byte, error) {
 	return nil, nil
 }
 
 // TODO this should actually be streamed
-func (ti *textInterface) ReadStream(stream string) ([]byte, error) {
+func (i *tinterface) ReadStream(stream string) ([]byte, error) {
 	return nil, nil
 }
 
 // return response
-func (ti *textInterface) ReadPlainWithID(ctx context.Context, jobID string) (string, error) {
-	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithID")
+func (i *tinterface) ReadPlainWithID(ctx context.Context, jobID string) (string, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call ReadPlainWithID")
 
-	job, err := ti.Scheduler.WaitForFinalStatus(spec.ObjectID(jobID), ctx.Done())
+	job, err := i.Scheduler.WaitForFinalStatus(spec.ObjectID(jobID), ctx.Done())
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -111,8 +108,8 @@ func (ti *textInterface) ReadPlainWithID(ctx context.Context, jobID string) (str
 }
 
 // return jobID
-func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	ti.Log.WithTags(spec.Tags{L: "D", O: ti, T: nil, V: 13}, "call ReadPlainWithInput")
+func (i *tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call ReadPlainWithInput")
 
 	newJobConfig := scheduler.DefaultJobConfig()
 	newJobConfig.ActionID = "ReadPlainWithInputAction"
@@ -126,7 +123,7 @@ func (ti *textInterface) ReadPlainWithInput(ctx context.Context, input, expected
 		return "", maskAny(err)
 	}
 
-	err = ti.Scheduler.Execute(newJob)
+	err = i.Scheduler.Execute(newJob)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -147,7 +144,7 @@ type readPlainWithInputArgs struct {
 // passed to this action method. closer represents a notification channel
 // signaling the cancelation of the current job. Thus it informs the action to
 // stop.
-func (ti *textInterface) ReadPlainWithInputAction(args interface{}, closer <-chan struct{}) (string, error) {
+func (i *tinterface) ReadPlainWithInputAction(args interface{}, closer <-chan struct{}) (string, error) {
 	input := args.(readPlainWithInputArgs).Input
 	expected := args.(readPlainWithInputArgs).Expected
 
@@ -161,7 +158,7 @@ func (ti *textInterface) ReadPlainWithInputAction(args interface{}, closer <-cha
 	// end the work being done here in case the input was processed by the neural
 	// networks at least one time.
 	for {
-		newSignal, err := ti.TextGateway.Send(newSignal, nil)
+		newSignal, err := i.TextGateway.Send(newSignal, nil)
 		if err != nil {
 			return "", maskAny(err)
 		}

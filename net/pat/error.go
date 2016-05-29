@@ -1,4 +1,4 @@
-package memory
+package patnet
 
 import (
 	"github.com/juju/errgo"

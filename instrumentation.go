@@ -6,9 +6,9 @@ import (
 )
 
 func createPrometheusInstrumentation(prefixes []string) (spec.Instrumentation, error) {
-	newPrometheusConfig := prometheus.DefaultConfig()
-	newPrometheusConfig.Prefixes = append(newPrometheusConfig.Prefixes, prefixes...)
-	newInstrumentation, err := prometheus.New(newPrometheusConfig)
+	newInstrumentationConfig := prometheus.DefaultInstrumentationConfig()
+	newInstrumentationConfig.Prefixes = append(newInstrumentationConfig.Prefixes, prefixes...)
+	newInstrumentation, err := prometheus.NewInstrumentation(newInstrumentationConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

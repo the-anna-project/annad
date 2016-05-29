@@ -11,7 +11,7 @@ import (
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/server/control/log"
+	logcontrol "github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -40,17 +40,22 @@ type Config struct {
 
 // DefaultConfig provides a default configuration to create a new server object
 // by best effort.
-func DefaultConfig() (Config, error) {
+func DefaultConfig() Config {
 	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		return Config{}, maskAny(err)
+		panic(err)
+	}
+
+	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
+	if err != nil {
+		panic(err)
 	}
 
 	newConfig := Config{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
 		Log:             log.NewLog(log.DefaultConfig()),
-		LogControl:      logcontrol.NewLogControl(logcontrol.DefaultConfig()),
+		LogControl:      newLogControl,
 		TextGateway:     gateway.NewGateway(gateway.DefaultConfig()),
 		TextInterface:   nil,
 
@@ -58,7 +63,7 @@ func DefaultConfig() (Config, error) {
 		Addr: "127.0.0.1:9119",
 	}
 
-	return newConfig, nil
+	return newConfig
 }
 
 // NewServer creates a new configured server object.
@@ -118,7 +123,7 @@ func (s *server) Boot() {
 		http.Handle(s.Instrumentation.GetHTTPEndpoint(), s.Instrumentation.GetHTTPHandler())
 
 		// Text interface.
-		newTextInterfaceHandlers := textinterface.NewHandlers(ctx, s.TextInterface)
+		newTextInterfaceHandlers := text.NewHandlers(ctx, s.TextInterface)
 		for url, handler := range newTextInterfaceHandlers {
 			http.Handle(url, handler)
 		}

@@ -39,11 +39,11 @@ func DefaultConfig() Config {
 func NewExecNet(config Config) (spec.Network, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newNet := &execNet{
