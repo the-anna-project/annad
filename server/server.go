@@ -4,7 +4,9 @@ package server
 import (
 	"net/http"
 	"sync"
+	"time"
 
+	"github.com/tylerb/graceful"
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/factory/id"
@@ -83,7 +85,15 @@ func NewServer(config Config) (spec.Server, error) {
 		BootOnce: sync.Once{},
 		ID:       newID,
 		Mutex:    sync.Mutex{},
-		Type:     spec.ObjectType(ObjectTypeServer),
+		Server: &graceful.Server{
+			NoSignalHandling: true,
+			Server: &http.Server{
+				Addr: config.Addr,
+			},
+			Timeout: 3 * time.Second,
+		},
+		ShutdownOnce: sync.Once{},
+		Type:         spec.ObjectType(ObjectTypeServer),
 	}
 
 	newServer.Log.Register(newServer.GetType())
@@ -101,10 +111,12 @@ func NewServer(config Config) (spec.Server, error) {
 type server struct {
 	Config
 
-	BootOnce sync.Once
-	ID       spec.ObjectID
-	Mutex    sync.Mutex
-	Type     spec.ObjectType
+	BootOnce     sync.Once
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	Server       *graceful.Server
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (s *server) Boot() {
@@ -128,10 +140,23 @@ func (s *server) Boot() {
 			http.Handle(url, handler)
 		}
 
-		s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Addr)
-		err := http.ListenAndServe(s.Addr, nil)
-		if err != nil {
-			s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
-		}
+		// Server.
+		go func() {
+			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "server starts to listen on '%s'", s.Addr)
+			err := s.Server.ListenAndServe()
+			if err != nil {
+				s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
+			}
+		}()
+	})
+}
+
+func (s *server) Shutdown() {
+	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Shutdown")
+
+	s.ShutdownOnce.Do(func() {
+		// Stop the server and wait for it to be stopped.
+		s.Server.Stop(s.Server.Timeout)
+		<-s.Server.StopChan()
 	})
 }

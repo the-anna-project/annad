@@ -160,7 +160,7 @@ func (a *anna) Boot() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "hello, I am Anna")
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting Anna")
 
 		go a.listenToSignal()
 		go a.writeStateInfo()
@@ -180,10 +180,32 @@ func (a *anna) Shutdown() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
-		go a.CLGIndex.Shutdown()
-		go a.CoreNet.Shutdown()
+		var wg sync.WaitGroup
 
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down")
+		wg.Add(1)
+		go func() {
+			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down CLG index")
+			a.CLGIndex.Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
+			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down core net")
+			a.CoreNet.Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
+			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down server")
+			a.Server.Shutdown()
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down Anna")
 		os.Exit(0)
 	})
 }
@@ -406,6 +428,10 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	a.Boot()
+
+	// Block the main goroutine forever. The process is only supposed to be ended
+	// by a call to Shutdown.
+	select {}
 }
 
 func main() {
