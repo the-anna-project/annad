@@ -30,7 +30,6 @@ import (
 	"github.com/xh3b4sd/anna/net/strat"
 	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
-	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -378,9 +377,8 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// log control
-	newLogControlConfig := logcontrol.DefaultConfig()
-	newLogControlConfig.Log = newLog
-	newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+	newLogControl, err := createLogControl(newLog)
+	panicOnError(err)
 
 	// text interface
 	newTextInterfaceConfig := textinterface.DefaultConfig()
@@ -391,8 +389,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// server
-	newServerConfig, err := server.DefaultConfig()
-	panicOnError(err)
+	newServerConfig := server.DefaultConfig()
 	newServerConfig.Addr = globalFlags.Addr
 	newServerConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
 	panicOnError(err)

@@ -1,13 +1,13 @@
-package logcontrol
+package log
 
 import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (lc *logControl) GetID() spec.ObjectID {
-	return lc.ID
+func (c *control) GetID() spec.ObjectID {
+	return c.ID
 }
 
-func (lc *logControl) GetType() spec.ObjectType {
-	return lc.Type
+func (c *control) GetType() spec.ObjectType {
+	return c.Type
 }

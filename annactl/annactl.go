@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/client/control/log"
+	logcontrol "github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/file-system/memory"
@@ -61,7 +61,7 @@ func DefaultConfig() Config {
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		IDFactory:     newIDFactory,
 		Log:           log.NewLog(log.DefaultConfig()),
-		LogControl:    logcontrol.NewLogControl(logcontrol.DefaultConfig()),
+		LogControl:    logcontrol.NewControl(logcontrol.DefaultControlConfig()),
 		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
 
 		SessionID: string(newID),
@@ -118,9 +118,9 @@ func NewAnnactl(config Config) (spec.Annactl, error) {
 			hostport := net.JoinHostPort(host, port)
 
 			// log control
-			newLogControlConfig := logcontrol.DefaultConfig()
+			newLogControlConfig := logcontrol.DefaultControlConfig()
 			newLogControlConfig.URL.Host = hostport
-			newLogControl := logcontrol.NewLogControl(newLogControlConfig)
+			newLogControl := logcontrol.NewControl(newLogControlConfig)
 
 			// text interface
 			newTextInterfaceConfig := textinterface.DefaultConfig()

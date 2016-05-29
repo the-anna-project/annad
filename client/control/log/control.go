@@ -1,6 +1,4 @@
-// Package logcontrol provides functionality to interact with Anna's log
-// control network API.
-package logcontrol
+package log
 
 import (
 	"net/url"
@@ -13,16 +11,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// Config represents the configuration used to create a new log control object.
-type Config struct {
+// ControlConfig represents the configuration used to create a new log control
+// object.
+type ControlConfig struct {
 	// URL represents the API route to call.
 	URL *url.URL
 }
 
-// DefaultConfig provides a default configuration to create a new log control
-// object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
+// DefaultControlConfig provides a default configuration to create a new log
+// control object by best effort.
+func DefaultControlConfig() ControlConfig {
+	newConfig := ControlConfig{
 		URL: &url.URL{
 			Host:   "127.0.0.1:9119",
 			Scheme: "http",
@@ -32,10 +31,10 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewLogControl creates a new configured log control object.
-func NewLogControl(config Config) spec.LogControl {
-	newLogControl := &logControl{
-		Config: config,
+// NewControl creates a new configured log control object.
+func NewControl(config ControlConfig) (spec.LogControl, error) {
+	newControl := &control{
+		ControlConfig: config,
 
 		resetLevels:    newResetLevelsEndpoint(*config.URL, "/control/log/reset/levels"),
 		resetObjects:   newResetObjectsEndpoint(*config.URL, "/control/log/reset/objects"),
@@ -45,11 +44,11 @@ func NewLogControl(config Config) spec.LogControl {
 		setVerbosity:   newSetVerbosityEndpoint(*config.URL, "/control/log/set/verbosity"),
 	}
 
-	return newLogControl
+	return newControl, nil
 }
 
-type logControl struct {
-	Config
+type control struct {
+	ControlConfig
 
 	resetLevels    endpoint.Endpoint
 	resetObjects   endpoint.Endpoint
@@ -59,13 +58,13 @@ type logControl struct {
 	setVerbosity   endpoint.Endpoint
 }
 
-func (l logControl) ResetLevels(ctx context.Context) error {
-	response, err := l.resetLevels(ctx, nil)
+func (c *control) ResetLevels(ctx context.Context) error {
+	response, err := c.resetLevels(ctx, nil)
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.ResetLevelsResponse)
+	apiResponse := response.(log.ResetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -86,13 +85,13 @@ func (l logControl) ResetLevels(ctx context.Context) error {
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (l logControl) ResetObjects(ctx context.Context) error {
-	response, err := l.resetObjects(ctx, nil)
+func (c *control) ResetObjects(ctx context.Context) error {
+	response, err := c.resetObjects(ctx, nil)
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.ResetObjectsResponse)
+	apiResponse := response.(log.ResetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -113,13 +112,13 @@ func (l logControl) ResetObjects(ctx context.Context) error {
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (l logControl) ResetVerbosity(ctx context.Context) error {
-	response, err := l.resetVerbosity(ctx, nil)
+func (c *control) ResetVerbosity(ctx context.Context) error {
+	response, err := c.resetVerbosity(ctx, nil)
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.ResetVerbosityResponse)
+	apiResponse := response.(log.ResetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -140,13 +139,13 @@ func (l logControl) ResetVerbosity(ctx context.Context) error {
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (l logControl) SetLevels(ctx context.Context, levels string) error {
-	response, err := l.setLevels(ctx, logcontrol.SetLevelsRequest{Levels: levels})
+func (c *control) SetLevels(ctx context.Context, levels string) error {
+	response, err := c.setLevels(ctx, log.SetLevelsRequest{Levels: levels})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.SetLevelsResponse)
+	apiResponse := response.(log.SetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -167,13 +166,13 @@ func (l logControl) SetLevels(ctx context.Context, levels string) error {
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (l logControl) SetObjects(ctx context.Context, objects string) error {
-	response, err := l.setObjects(ctx, logcontrol.SetObjectsRequest{Objects: objects})
+func (c *control) SetObjects(ctx context.Context, objects string) error {
+	response, err := c.setObjects(ctx, log.SetObjectsRequest{Objects: objects})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.SetObjectsResponse)
+	apiResponse := response.(log.SetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -194,13 +193,13 @@ func (l logControl) SetObjects(ctx context.Context, objects string) error {
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (l logControl) SetVerbosity(ctx context.Context, verbosity int) error {
-	response, err := l.setVerbosity(ctx, logcontrol.SetVerbosityRequest{Verbosity: verbosity})
+func (c *control) SetVerbosity(ctx context.Context, verbosity int) error {
+	response, err := c.setVerbosity(ctx, log.SetVerbosityRequest{Verbosity: verbosity})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(logcontrol.SetVerbosityResponse)
+	apiResponse := response.(log.SetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
