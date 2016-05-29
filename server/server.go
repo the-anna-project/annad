@@ -123,7 +123,7 @@ func (s *server) Boot() {
 		http.Handle(s.Instrumentation.GetHTTPEndpoint(), s.Instrumentation.GetHTTPHandler())
 
 		// Text interface.
-		newTextInterfaceHandlers := textinterface.NewHandlers(ctx, s.TextInterface)
+		newTextInterfaceHandlers := text.NewHandlers(ctx, s.TextInterface)
 		for url, handler := range newTextInterfaceHandlers {
 			http.Handle(url, handler)
 		}

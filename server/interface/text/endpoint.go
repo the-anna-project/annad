@@ -1,4 +1,4 @@
-package textinterface
+package text
 
 import (
 	"github.com/go-kit/kit/endpoint"

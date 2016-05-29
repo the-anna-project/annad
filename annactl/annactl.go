@@ -57,12 +57,22 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
+	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	newTextInterface, err := text.NewInterface(text.DefaultInterfaceConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		IDFactory:     newIDFactory,
 		Log:           log.NewLog(log.DefaultConfig()),
-		LogControl:    logcontrol.NewControl(logcontrol.DefaultControlConfig()),
-		TextInterface: textinterface.NewTextInterface(textinterface.DefaultConfig()),
+		LogControl:    newLogControl,
+		TextInterface: newTextInterface,
 
 		SessionID: string(newID),
 		Version:   version,
@@ -120,12 +130,14 @@ func NewAnnactl(config Config) (spec.Annactl, error) {
 			// log control
 			newLogControlConfig := logcontrol.DefaultControlConfig()
 			newLogControlConfig.URL.Host = hostport
-			newLogControl := logcontrol.NewControl(newLogControlConfig)
+			newLogControl, err := logcontrol.NewControl(newLogControlConfig)
+			panicOnError(err)
 
 			// text interface
-			newTextInterfaceConfig := textinterface.DefaultConfig()
+			newTextInterfaceConfig := text.DefaultInterfaceConfig()
 			newTextInterfaceConfig.URL.Host = hostport
-			newTextInterface := textinterface.NewTextInterface(newTextInterfaceConfig)
+			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
+			panicOnError(err)
 
 			// annactl
 			newAnnactl.FileSystem = newFileSystem

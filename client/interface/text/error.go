@@ -1,4 +1,4 @@
-package textinterface
+package text
 
 import (
 	"fmt"

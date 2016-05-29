@@ -1,4 +1,4 @@
-package textinterface
+package text
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ func readPlainEncoder(ctx context.Context, r *http.Request, request interface{})
 }
 
 func readPlainDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response textinterface.ReadPlainResponse
+	var response text.ReadPlainResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }

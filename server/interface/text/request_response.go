@@ -1,4 +1,4 @@
-package textinterface
+package text
 
 import (
 	"github.com/xh3b4sd/anna/api"

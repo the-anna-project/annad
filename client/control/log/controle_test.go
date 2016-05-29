@@ -22,14 +22,14 @@ func testMaybeNewLogControlAndServer(t *testing.T, handler http.Handler) (spec.L
 
 	URL, err := url.Parse(ts.URL)
 	if err != nil {
-		t.Fatalf("expected", nil, "got", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 
 	newControlConfig := DefaultControlConfig()
 	newControlConfig.URL = URL
 	newControl, err := NewControl(newControlConfig)
 	if err != nil {
-		t.Fatalf("expected", nil, "got", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 
 	return newControl, ts

@@ -1,6 +1,4 @@
-// Package textinterface provides functionality to interact with Anna's text
-// interface network API.
-package textinterface
+package text
 
 import (
 	"net/url"
@@ -13,17 +11,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// Config represents the configuration used to create a new text interface
+// InterfaceConfig represents the configuration used to create a new text interface
 // object.
-type Config struct {
+type InterfaceConfig struct {
 	// URL represents the API route to call.
 	URL *url.URL
 }
 
-// DefaultConfig provides a default configuration to create a new text
+// DefaultInterfaceConfig provides a default configuration to create a new text
 // interface object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
+func DefaultInterfaceConfig() InterfaceConfig {
+	newConfig := InterfaceConfig{
 		URL: &url.URL{
 			Host:   "127.0.0.1:9119",
 			Scheme: "http",
@@ -33,47 +31,47 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewTextInterface creates a new configured text interface object.
-func NewTextInterface(config Config) spec.TextInterface {
-	newTextInterface := &textInterface{
-		Config: config,
+// NewInterface creates a new configured text interface object.
+func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
+	newInterface := &tinterface{
+		InterfaceConfig: config,
 
 		readPlainWithID:    newReadPlainWithIDEndpoint(*config.URL, "/interface/text/action/readplain"),
 		readPlainWithPlain: newReadPlainWithPlainEndpoint(*config.URL, "/interface/text/action/readplain"),
 	}
 
-	return newTextInterface
+	return newInterface, nil
 }
 
-type textInterface struct {
-	Config
+type tinterface struct {
+	InterfaceConfig
 
 	readPlainWithID    endpoint.Endpoint
 	readPlainWithPlain endpoint.Endpoint
 }
 
-func (ti textInterface) FetchURL(url string) ([]byte, error) {
+func (i tinterface) FetchURL(url string) ([]byte, error) {
 	// TODO
 	return nil, nil
 }
 
-func (ti textInterface) ReadFile(file string) ([]byte, error) {
+func (i tinterface) ReadFile(file string) ([]byte, error) {
 	// TODO
 	return nil, nil
 }
 
-func (ti textInterface) ReadStream(stream string) ([]byte, error) {
+func (i tinterface) ReadStream(stream string) ([]byte, error) {
 	// TODO
 	return nil, nil
 }
 
-func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
-	response, err := ti.readPlainWithID(ctx, textinterface.ReadPlainRequest{ID: ID})
+func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
+	response, err := i.readPlainWithID(ctx, text.ReadPlainRequest{ID: ID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(textinterface.ReadPlainResponse)
+	apiResponse := response.(text.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -93,13 +91,13 @@ func (ti textInterface) ReadPlainWithID(ctx context.Context, ID string) (string,
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (ti textInterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	response, err := ti.readPlainWithPlain(ctx, textinterface.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
+func (i tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
+	response, err := i.readPlainWithPlain(ctx, text.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(textinterface.ReadPlainResponse)
+	apiResponse := response.(text.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {

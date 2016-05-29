@@ -30,7 +30,6 @@ import (
 	"github.com/xh3b4sd/anna/net/strat"
 	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
-	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
 )
@@ -381,11 +380,7 @@ func mainRun(cmd *cobra.Command, args []string) {
 	panicOnError(err)
 
 	// text interface
-	newTextInterfaceConfig := textinterface.DefaultConfig()
-	newTextInterfaceConfig.Log = newLog
-	newTextInterfaceConfig.Scheduler = newScheduler
-	newTextInterfaceConfig.TextGateway = newTextGateway
-	newTextInterface, err := textinterface.NewTextInterface(newTextInterfaceConfig)
+	newTextInterface, err := createTextInterface(newLog, newScheduler, newTextGateway)
 	panicOnError(err)
 
 	// server
