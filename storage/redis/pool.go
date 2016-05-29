@@ -1,4 +1,4 @@
-package redisstorage
+package redis
 
 import (
 	"time"
@@ -6,9 +6,9 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-// RedisPoolConfig represents the configuration used to create a new redis
+// PoolConfig represents the configuration used to create a new redis
 // pool.
-type RedisPoolConfig struct {
+type PoolConfig struct {
 	// MaxIdle is the allowed maximum number of idle connections in the pool.
 	MaxIdle int
 
@@ -27,21 +27,21 @@ type RedisPoolConfig struct {
 	Dial func() (redis.Conn, error)
 }
 
-// DefaultRedisPoolConfig provides a default configuration to create a new
+// DefaultPoolConfig provides a default configuration to create a new
 // redis pool by best effort.
-func DefaultRedisPoolConfig() RedisPoolConfig {
-	newConfig := RedisPoolConfig{
+func DefaultPoolConfig() PoolConfig {
+	newConfig := PoolConfig{
 		MaxIdle:     100,
 		MaxActive:   100,
 		IdleTimeout: 5 * time.Minute,
-		Dial:        NewDial(DefaultRedisDialConfig()),
+		Dial:        NewDial(DefaultDialConfig()),
 	}
 
 	return newConfig
 }
 
-// NewRedisPool creates a new configured redis pool.
-func NewRedisPool(config RedisPoolConfig) *redis.Pool {
+// NewPool creates a new configured redis pool.
+func NewPool(config PoolConfig) *redis.Pool {
 	newPool := &redis.Pool{
 		MaxIdle:     config.MaxIdle,
 		MaxActive:   config.MaxActive,

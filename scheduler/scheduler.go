@@ -40,10 +40,15 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new scheduler
 // object by best effort.
 func DefaultConfig() Config {
+	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		// Dependencies.
 		Log:     log.NewLog(log.DefaultConfig()),
-		Storage: memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Storage: newStorage,
 
 		// Settings.
 		Actions:   map[string]spec.Action{},
@@ -81,11 +86,11 @@ func DefaultConfig() Config {
 func NewScheduler(config Config) (spec.Scheduler, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newScheduler := &scheduler{

@@ -1,4 +1,4 @@
-package memorystorage
+package memory
 
 import (
 	"github.com/xh3b4sd/anna/spec"

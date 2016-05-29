@@ -1,6 +1,4 @@
-// Package memorystorage implements spec.Storage and provides functionality to
-// persist data in memory.
-package memorystorage
+package memory
 
 import (
 	"sort"
@@ -32,9 +30,9 @@ type scoredElements struct {
 	Scores []float64
 }
 
-// Config represents the configuration used to create a new memory storage
+// StorageConfig represents the configuration used to create a new memory storage
 // object.
-type Config struct {
+type StorageConfig struct {
 	KeyValue  map[string]string
 	StringMap map[string]map[string]string
 	Log       spec.Log
@@ -42,10 +40,10 @@ type Config struct {
 	Weighted  map[string]scoredElements
 }
 
-// DefaultConfig provides a default configuration to create a new memory
+// DefaultStorageConfig provides a default configuration to create a new memory
 // storage object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
+func DefaultStorageConfig() StorageConfig {
+	newConfig := StorageConfig{
 		KeyValue:  map[string]string{},
 		StringMap: map[string]map[string]string{},
 		Log:       log.NewLog(log.DefaultConfig()),
@@ -56,19 +54,19 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewMemoryStorage creates a new configured memory storage object.
-func NewMemoryStorage(config Config) spec.Storage {
+// NewStorage creates a new configured memory storage object.
+func NewStorage(config StorageConfig) (spec.Storage, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newStorage := &storage{
-		Config: config,
+		StorageConfig: config,
 
 		ID:    newID,
 		Mutex: sync.Mutex{},
@@ -77,11 +75,11 @@ func NewMemoryStorage(config Config) spec.Storage {
 
 	newStorage.Log.Register(newStorage.GetType())
 
-	return newStorage
+	return newStorage, nil
 }
 
 type storage struct {
-	Config
+	StorageConfig
 
 	ID    spec.ObjectID
 	Mutex sync.Mutex

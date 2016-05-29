@@ -33,9 +33,14 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new character
 // network object by best effort.
 func DefaultConfig() Config {
+	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		Log:     log.NewLog(log.DefaultConfig()),
-		Storage: memorystorage.NewMemoryStorage(memorystorage.DefaultConfig()),
+		Storage: newStorage,
 
 		EvalNet:  nil,
 		ExecNet:  nil,
@@ -51,11 +56,11 @@ func DefaultConfig() Config {
 func NewCharNet(config Config) (spec.Network, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newNet := &charNet{

@@ -10,7 +10,7 @@ import (
 	"github.com/rafaeljusto/redigomock"
 
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/redis"
+	redisstorage "github.com/xh3b4sd/anna/storage/redis"
 )
 
 func testMaybeNewSchedulerWithStorage(t *testing.T, storage spec.Storage) spec.Scheduler {
@@ -28,11 +28,7 @@ func testMaybeNewSchedulerWithStorage(t *testing.T, storage spec.Storage) spec.S
 }
 
 func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
-	newStorageConfig, err := redisstorage.DefaultConfigWithConn(c)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	newStorage, err := redisstorage.NewRedisStorage(newStorageConfig)
+	newStorage, err := redisstorage.NewStorage(redisstorage.DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

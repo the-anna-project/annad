@@ -7,11 +7,7 @@ import (
 )
 
 func testMaybeNewGenerator(t *testing.T) spec.CLGProfileGenerator {
-	newGeneratorConfig, err := DefaultGeneratorConfig()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	newGenerator, err := NewGenerator(newGeneratorConfig)
+	newGenerator, err := NewGenerator(DefaultGeneratorConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

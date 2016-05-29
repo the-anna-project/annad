@@ -1,6 +1,4 @@
-// Package redisstorage implements spec.Storage and provides functionality to
-// persist data in redis.
-package redisstorage
+package redis
 
 import (
 	"strconv"
@@ -21,9 +19,9 @@ const (
 	ObjectTypeRedisStorage spec.ObjectType = "redis-storage"
 )
 
-// Config represents the configuration used to create a new redis storage
-// object.
-type Config struct {
+// StorageConfig represents the configuration used to create a new redis
+// storage object.
+type StorageConfig struct {
 	// Dependencies.
 	Instrumentation spec.Instrumentation
 	Log             spec.Log
@@ -36,37 +34,34 @@ type Config struct {
 	BackOffFactory func() spec.BackOff
 }
 
-// DefaultConfigWithConn provides a configuration that can be mocked using a
-// redis connection. This is used for testing.
-func DefaultConfigWithConn(redisConn redis.Conn) (Config, error) {
-	newPoolConfig := DefaultRedisPoolConfig()
+// DefaultStorageConfigWithConn provides a configuration that can be mocked
+// using a redis connection. This is used for testing.
+func DefaultStorageConfigWithConn(redisConn redis.Conn) StorageConfig {
+	newPoolConfig := DefaultPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
 	newMockDialConfig.RedisConn = redisConn
 	newPoolConfig.Dial = newMockDial(newMockDialConfig)
-	newPool := NewRedisPool(newPoolConfig)
+	newPool := NewPool(newPoolConfig)
 
-	newStorageConfig, err := DefaultConfig()
-	if err != nil {
-		return Config{}, maskAny(err)
-	}
+	newStorageConfig := DefaultStorageConfig()
 	newStorageConfig.Pool = newPool
 
-	return newStorageConfig, nil
+	return newStorageConfig
 }
 
-// DefaultConfig provides a default configuration to create a new redis storage
-// object by best effort.
-func DefaultConfig() (Config, error) {
+// DefaultStorageConfig provides a default configuration to create a new redis
+// storage object by best effort.
+func DefaultStorageConfig() StorageConfig {
 	newInstrumentation, err := memory.NewInstrumentation(memory.DefaultInstrumentationConfig())
 	if err != nil {
-		return Config{}, maskAny(err)
+		panic(err)
 	}
 
-	newConfig := Config{
+	newConfig := StorageConfig{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
 		Log:             log.NewLog(log.DefaultConfig()),
-		Pool:            NewRedisPool(DefaultRedisPoolConfig()),
+		Pool:            NewPool(DefaultPoolConfig()),
 
 		// Settings.
 		BackOffFactory: func() spec.BackOff {
@@ -74,22 +69,22 @@ func DefaultConfig() (Config, error) {
 		},
 	}
 
-	return newConfig, nil
+	return newConfig
 }
 
-// NewRedisStorage creates a new configured redis storage object.
-func NewRedisStorage(config Config) (spec.Storage, error) {
+// NewStorage creates a new configured redis storage object.
+func NewStorage(config StorageConfig) (spec.Storage, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 	newID, err := newIDFactory.WithType(id.Hex128)
 	if err != nil {
-		panic(err)
+		return nil, maskAny(err)
 	}
 
 	newStorage := &storage{
-		Config: config,
+		StorageConfig: config,
 
 		ID:    newID,
 		Mutex: sync.Mutex{},
@@ -112,7 +107,7 @@ func NewRedisStorage(config Config) (spec.Storage, error) {
 }
 
 type storage struct {
-	Config
+	StorageConfig
 
 	ID    spec.ObjectID
 	Mutex sync.Mutex

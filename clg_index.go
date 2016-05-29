@@ -17,10 +17,7 @@ func createCLGIndex(newLog spec.Log, newStorage spec.Storage) (spec.CLGIndex, er
 	}
 
 	// CLG profile generator
-	newGeneratorConfig, err := profile.DefaultGeneratorConfig()
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	newGeneratorConfig := profile.DefaultGeneratorConfig()
 	newGeneratorConfig.Collection = newCLGCollection
 	newGeneratorConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"CLGProfileGenerator"})
 	if err != nil {
@@ -34,10 +31,7 @@ func createCLGIndex(newLog spec.Log, newStorage spec.Storage) (spec.CLGIndex, er
 	}
 
 	// CLG index
-	newCLGIndexConfig, err := clg.DefaultIndexConfig()
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	newCLGIndexConfig := clg.DefaultIndexConfig()
 	newCLGIndexConfig.Generator = newGenerator
 	newCLGIndexConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"CLGIndex"})
 	if err != nil {
