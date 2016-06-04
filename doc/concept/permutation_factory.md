@@ -1,13 +1,13 @@
 # permutation factory
-The permutation factory permutes the order of the members of an arbitrary list.
-Advantages of the permutation factory is memory effiency and reproducability.
-It is memory efficient because all possible combinations are not stored in
-memory, but created on demand. Depending on the provided delta the creation can
-be quiet fast in case the delta is not too big. The factory is reproducible
-because of the index used to represent a permutation. So in case the given
-delta is way too big one might want to provide the indizes directly. Then the
-permutation is pretty fast because it is basically about looking up some map
-entries.
+The permutation factory permutes the order of the members of an arbitrary list
+that implements the interface of a permutation list. Advantages of the
+permutation factory is memory effiency and reproducability. It is memory
+efficient because all possible combinations are not stored in memory, but
+created on demand. Depending on the provided delta the creation can be quiet
+fast in case the delta is not too big. The factory is reproducible because of
+the index used to represent a permutation. So in case the given delta is way
+too big one might want to provide the indizes directly. Then the permutation is
+pretty fast because it is basically about looking up some map entries.
 
 ### example
 
