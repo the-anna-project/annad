@@ -53,7 +53,7 @@ goget:
 	@go get github.com/golang/lint/golint
 
 gotest: gogenerate
-	@./go.test.sh \
+	@./go.test.sh
 
 projectcheck:
 	@./project.check.sh
