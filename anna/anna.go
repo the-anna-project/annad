@@ -221,7 +221,6 @@ func New(config Config) (spec.Anna, error) {
 			// Anna.
 			newAnna.CLGIndex = newCLGIndex
 			newAnna.CoreNetwork = newCoreNetwork
-			newAnna.Log = newAnna.Log
 			newAnna.Server = newServer
 			newAnna.Storage = newStorage
 		},
