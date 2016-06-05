@@ -1,5 +1,9 @@
 package spec
 
+import (
+	"github.com/spf13/cobra"
+)
+
 // Anna represents the main object, the programm root. It contains all further
 // objects and manages the whole control flow around Anna's implementations.
 type Anna interface {
@@ -7,6 +11,12 @@ type Anna interface {
 	// blocks until Anna is completely initialized, so you might want to call it
 	// in a separate goroutine.
 	Boot()
+
+	// ExecVersionCmd executes the version command.
+	ExecVersionCmd(cmd *cobra.Command, args []string)
+
+	// InitVersionCmd initializes the version command.
+	InitVersionCmd() *cobra.Command
 
 	Object
 

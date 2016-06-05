@@ -60,6 +60,13 @@ func NewNetwork(config NetworkConfig) (spec.Network, error) {
 		Type:         ObjectTypeKnowledgeNetwork,
 	}
 
+	if newNetwork.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newNetwork.Storage == nil {
+		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
+	}
+
 	newNetwork.Log.Register(newNetwork.GetType())
 
 	return newNetwork, nil

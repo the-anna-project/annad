@@ -9,6 +9,8 @@ import (
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/impulse"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/network/knowledge"
+	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
 )
@@ -23,25 +25,37 @@ const (
 // object.
 type NetworkConfig struct {
 	// Dependencies.
-	Log         spec.Log
-	Storage     spec.Storage
-	TextGateway spec.Gateway
-	Scheduler   spec.Scheduler
+	KnowledgeNetwork spec.Network
+	Log              spec.Log
+	Scheduler        spec.Scheduler
+	Storage          spec.Storage
+	TextGateway      spec.Gateway
 }
 
 // DefaultNetworkConfig provides a default configuration to create a new core
 // network object by best effort.
 func DefaultNetworkConfig() NetworkConfig {
+	newKnowledgeNetwork, err := knowledge.NewNetwork(knowledge.DefaultNetworkConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	newScheduler, err := scheduler.NewScheduler(scheduler.DefaultConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := NetworkConfig{
-		Log:         log.NewLog(log.DefaultConfig()),
-		Storage:     newStorage,
-		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
-		Scheduler:   nil, // TODO initialize
+		KnowledgeNetwork: newKnowledgeNetwork,
+		Log:              log.NewLog(log.DefaultConfig()),
+		Scheduler:        newScheduler,
+		Storage:          newStorage,
+		TextGateway:      gateway.NewGateway(gateway.DefaultConfig()),
 	}
 
 	return newConfig
@@ -69,11 +83,23 @@ func NewNetwork(config NetworkConfig) (spec.Network, error) {
 		Type:               ObjectTypeCoreNetwork,
 	}
 
-	newNetwork.Log.Register(newNetwork.GetType())
-
+	if newNetwork.KnowledgeNetwork == nil {
+		return nil, maskAnyf(invalidConfigError, "knowledge network must not be empty")
+	}
+	if newNetwork.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
 	if newNetwork.Scheduler == nil {
 		return nil, maskAnyf(invalidConfigError, "scheduler must not be empty")
 	}
+	if newNetwork.Storage == nil {
+		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
+	}
+	if newNetwork.TextGateway == nil {
+		return nil, maskAnyf(invalidConfigError, "text gateway must not be empty")
+	}
+
+	newNetwork.Log.Register(newNetwork.GetType())
 
 	return newNetwork, nil
 }

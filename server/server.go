@@ -53,13 +53,18 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
+	newTextInterface, err := text.NewInterface(text.DefaultInterfaceConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := Config{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
 		Log:             log.NewLog(log.DefaultConfig()),
 		LogControl:      newLogControl,
 		TextGateway:     gateway.NewGateway(gateway.DefaultConfig()),
-		TextInterface:   nil,
+		TextInterface:   newTextInterface,
 
 		// Settings.
 		Addr: "127.0.0.1:9119",
@@ -68,8 +73,8 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewServer creates a new configured server object.
-func NewServer(config Config) (spec.Server, error) {
+// New creates a new configured server object.
+func New(config Config) (spec.Server, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)

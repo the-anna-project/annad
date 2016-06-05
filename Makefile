@@ -17,7 +17,7 @@ anna: gogenerate
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
-		github.com/xh3b4sd/anna
+		github.com/xh3b4sd/anna/anna
 
 annactl: gogenerate
 	@go build \

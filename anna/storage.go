@@ -8,15 +8,15 @@ import (
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-func createStorage(newLog spec.Log) (spec.Storage, error) {
+func (a *anna) createStorage(newLog spec.Log) (spec.Storage, error) {
 	var newStorage spec.Storage
 	var err error
 
-	switch globalFlags.Storage {
+	switch a.Flags.Storage {
 	case "redis":
 		// dial
 		newDialConfig := redis.DefaultDialConfig()
-		newDialConfig.Addr = globalFlags.StorageAddr
+		newDialConfig.Addr = a.Flags.StorageAddr
 		// pool
 		newPoolConfig := redis.DefaultPoolConfig()
 		newPoolConfig.Dial = redis.NewDial(newDialConfig)
@@ -41,7 +41,7 @@ func createStorage(newLog spec.Log) (spec.Storage, error) {
 			return nil, maskAny(err)
 		}
 	default:
-		return nil, maskAnyf(invalidStorageFlagError, "%s", globalFlags.Storage)
+		return nil, maskAnyf(invalidStorageFlagError, "%s", a.Flags.Storage)
 	}
 
 	return newStorage, nil

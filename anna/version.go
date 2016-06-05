@@ -4,17 +4,25 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
-var (
-	versionCmd = &cobra.Command{
+func (a *anna) InitVersionCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitVersionCmd")
+
+	newCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Show current version of the binary.",
 		Long:  "Show current version of the binary.",
-		Run:   versionRun,
+		Run:   a.ExecVersionCmd,
 	}
-)
 
-func versionRun(cmd *cobra.Command, args []string) {
-	fmt.Printf("%s\n", version)
+	return newCmd
+}
+
+func (a *anna) ExecVersionCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecVersionCmd")
+
+	fmt.Printf("%s\n", a.Version)
 }

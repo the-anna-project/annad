@@ -31,11 +31,18 @@ type InterfaceConfig struct {
 // DefaultInterfaceConfig provides a default configuration to create a new text
 // interface object by best effort.
 func DefaultInterfaceConfig() InterfaceConfig {
-	return InterfaceConfig{
+	newScheduler, err := scheduler.NewScheduler(scheduler.DefaultConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	newConfig := InterfaceConfig{
 		Log:         log.NewLog(log.DefaultConfig()),
-		Scheduler:   nil,
+		Scheduler:   newScheduler,
 		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
+
+	return newConfig
 }
 
 // NewInterface creates a new configured text interface object.
