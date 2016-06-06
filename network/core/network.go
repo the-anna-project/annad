@@ -158,5 +158,59 @@ func (n *network) Shutdown() {
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
+	// TODO
+
+	// peers, err := n.KnowledgeNetwork.GetPeers(imp.GetInput())
+	// if err != nil {
+	// 	return nil, maskAny(err)
+	// }
+
+	// strategyChannel := n.getStrategyChannel(peers)
+
+	// for {
+	// 	select {
+	// 	case s := <-strategyChannel:
+	// 		// Execute the current strategy.
+	// 		output, err := s.Excute(imp.GetInput())
+	// 		if err != nil {
+	// 			return nil, maskAny(err)
+	// 		}
+
+	// 		// Match output against expectation, if any.
+	// 		e := imp.GetExpectation()
+	// 		if e == nil {
+	// 			imp.SetOutput(output)
+	// 			return imp, nil
+	// 		}
+
+	// 		matched, err := output.Match(e)
+	// 		if err != nil {
+	// 			return nil, maskAny(err)
+	// 		}
+
+	// 		if matched {
+	// 			imp.SetOutput(output)
+	// 			return imp, nil
+	// 		}
+
+	// 		// Output did not match expectation. Go ahead.
+	// 		continue
+	// 	default:
+	// 		// There is no strategy available. Thus we create a new one. Here we have
+	// 		// the entry point of strategy creation. There can be very sophisticated
+	// 		// mechanisms for that. For now we make use of a permutation factory.
+	// 		err = n.StrategyFactory.PermuteBy(strategyList, delta)
+	// 		if err != nil {
+	// 			return nil, maskAny(err)
+	// 		}
+	// 		err = n.StrategyFactory.MapTo(strategyList)
+	// 		if err != nil {
+	// 			return nil, maskAny(err)
+	// 		}
+
+	// 		strategyChannel <- n.membersToStrategy(strategyList.GetMembers())
+	// 	}
+	// }
+
 	return nil, nil
 }

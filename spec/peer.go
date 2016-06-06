@@ -22,4 +22,6 @@ type Peer interface {
 	json.Marshaler
 
 	json.Unmarshaler
+
+	Object
 }
