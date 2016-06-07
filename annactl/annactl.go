@@ -1,9 +1,10 @@
-// Package annactl implements a command line client for Anna. Cobra CLI is used
-// as framework. The commands are simple wrappers around the client package.
+// Package main implements a command line client for Anna. Cobra CLI is used as
+// framework. The commands are simple wrappers around the client package.
 package main
 
 import (
 	"net"
+	"sync"
 
 	"github.com/spf13/cobra"
 
@@ -39,7 +40,6 @@ type Config struct {
 	TextInterface spec.TextInterface
 
 	// Settings.
-	Cmd       *cobra.Command
 	Flags     Flags
 	SessionID string
 	Version   string
@@ -81,18 +81,28 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewAnnactl creates a new configured command line object.
-func NewAnnactl(config Config) (spec.Annactl, error) {
+// New creates a new configured command line object.
+func New(config Config) (spec.Annactl, error) {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newID, err := newIDFactory.WithType(id.Hex128)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
 	// annactl
 	newAnnactl := &annactl{
 		Config: config,
-		Type:   spec.ObjectType(ObjectTypeAnnactl),
+
+		BootOnce: sync.Once{},
+		ID:       newID,
+		Type:     spec.ObjectType(ObjectTypeAnnactl),
 	}
 
-	var err error
-	newAnnactl.ID, err = newAnnactl.IDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
+	if newAnnactl.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 
 	// command
@@ -102,54 +112,48 @@ func NewAnnactl(config Config) (spec.Annactl, error) {
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			newAnnactl.Log.WithTags(spec.Tags{L: "D", O: newAnnactl, T: nil, V: 13}, "call ExecCmd") // this is the first stage we can log
-
 			cmd.Help()
 		},
 
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 
-			// log
-			newLog := log.NewLog(log.DefaultConfig())
-			err = newLog.SetLevels(newAnnactl.Flags.ControlLogLevels)
+			// Log.
+			err = newAnnactl.Log.SetLevels(newAnnactl.Flags.ControlLogLevels)
 			panicOnError(err)
-			err = newLog.SetVerbosity(newAnnactl.Flags.ControlLogVerbosity)
+			err = newAnnactl.Log.SetVerbosity(newAnnactl.Flags.ControlLogVerbosity)
 			panicOnError(err)
 
-			newAnnactl.Log.WithTags(spec.Tags{L: "D", O: newAnnactl, T: nil, V: 13}, "call InitCmd") // this is the first stage we can log
+			newAnnactl.Log.Register(newAnnactl.GetType())
 
-			// file system
+			// File system.
 			newFileSystem := osfilesystem.NewFileSystem(osfilesystem.DefaultConfig())
 
-			// host and port
+			// host and port.
 			host, port, err := net.SplitHostPort(newAnnactl.Flags.Addr)
 			panicOnError(err)
 			hostport := net.JoinHostPort(host, port)
 
-			// log control
+			// Log control.
 			newLogControlConfig := logcontrol.DefaultControlConfig()
 			newLogControlConfig.URL.Host = hostport
 			newLogControl, err := logcontrol.NewControl(newLogControlConfig)
 			panicOnError(err)
 
-			// text interface
+			// Text interface.
 			newTextInterfaceConfig := text.DefaultInterfaceConfig()
 			newTextInterfaceConfig.URL.Host = hostport
 			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
 			panicOnError(err)
 
-			// annactl
+			// Annactl.
 			newAnnactl.FileSystem = newFileSystem
-			newAnnactl.Log = newLog
 			newAnnactl.LogControl = newLogControl
 			newAnnactl.TextInterface = newTextInterface
-
-			newAnnactl.Log.Register(newAnnactl.GetType())
 		},
 	}
 
-	// flags
+	// Flags.
 	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
 
 	newAnnactl.Cmd.PersistentFlags().StringVarP(&newAnnactl.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
@@ -158,27 +162,31 @@ func NewAnnactl(config Config) (spec.Annactl, error) {
 	return newAnnactl, nil
 }
 
-func (a *annactl) Boot() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
-
-	// init
-	a.Cmd.AddCommand(a.InitControlCmd())
-	a.Cmd.AddCommand(a.InitInterfaceCmd())
-	a.Cmd.AddCommand(a.InitVersionCmd())
-
-	// execute
-	a.Cmd.Execute()
-}
-
 type annactl struct {
 	Config
 
-	ID   spec.ObjectID
-	Type spec.ObjectType
+	Cmd      *cobra.Command
+	BootOnce sync.Once
+	ID       spec.ObjectID
+	Type     spec.ObjectType
+}
+
+func (a *annactl) Boot() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+
+	a.BootOnce.Do(func() {
+		// init
+		a.Cmd.AddCommand(a.InitControlCmd())
+		a.Cmd.AddCommand(a.InitInterfaceCmd())
+		a.Cmd.AddCommand(a.InitVersionCmd())
+
+		// execute
+		a.Cmd.Execute()
+	})
 }
 
 func main() {
-	newAnnactl, err := NewAnnactl(DefaultConfig())
+	newAnnactl, err := New(DefaultConfig())
 	panicOnError(err)
 
 	newAnnactl.Boot()

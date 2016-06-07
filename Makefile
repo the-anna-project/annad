@@ -17,7 +17,7 @@ anna: gogenerate
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
-		github.com/xh3b4sd/anna
+		github.com/xh3b4sd/anna/anna
 
 annactl: gogenerate
 	@go build \
@@ -53,7 +53,7 @@ goget:
 	@go get github.com/golang/lint/golint
 
 gotest: gogenerate
-	@./go.test.sh \
+	@./go.test.sh
 
 projectcheck:
 	@./project.check.sh
