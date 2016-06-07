@@ -6,7 +6,9 @@ This document provides some ideas about possible challenges Anna should be able
 to accomplish at some point. Further the following is also about corresponding
 solutions.
 
+
 ### ideas
+- [brainstorming](https://drive.google.com/open?id=0B-ehyYkjukxeNDVLdDUzY0R5MjQ) (google drive)
 - [guidance](guidance.md)
 - [character tree](character_tree.md)
 - [pattern recognition](pattern_recognition.md)
