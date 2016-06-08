@@ -226,9 +226,6 @@ type CLGFloat64 interface {
 
 	// SubtractFloat64 creates the difference of the given float64s.
 	SubtractFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SumFloat64 creates the sum of the given float64s.
-	SumFloat64(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64Slice represents all float64 slice compatible CLGs that can be used.
@@ -347,9 +344,6 @@ type CLGInt interface {
 
 	// SubtractInt creates the difference of the given ints.
 	SubtractInt(args ...interface{}) ([]interface{}, error)
-
-	// SumInt creates the sum of the given ints.
-	SumInt(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGInterface represents all interface compatible CLGs that can be used.
