@@ -2,18 +2,16 @@ package clg
 
 import (
 	"reflect"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
-// argsToValues converts the given []interface{} to reflect values. The given
-// args can be the output of a node. That is, the output of a strategy
-// execution. The converted list of reflect values can be used to provide it as
-// input of a CLG.
-func argsToValues(args []interface{}) []reflect.Value {
-	values := make([]reflect.Value, len(args))
-
-	for i := range args {
-		values[i] = reflect.ValueOf(args[i])
+func getMethodValue(name spec.CLG) (reflect.Value, error) {
+	n := string(name)
+	v := reflect.ValueOf(collection).MethodByName(n)
+	if !v.IsValid() {
+		return reflect.Value{}, maskAnyf(methodNotFoundError, n)
 	}
 
-	return values
+	return v, nil
 }

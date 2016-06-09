@@ -20,10 +20,9 @@ var (
 // Execute is convenient to call CLGs by their method name and abstracted input
 // values.
 func Execute(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
-	n := string(name)
-	v := reflect.ValueOf(collection).MethodByName(n)
-	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, n)
+	v, err := getMethodValue(name)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
 	outputs := v.Call(inputs)
@@ -33,14 +32,14 @@ func Execute(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
 
 // Inputs returns the input types of the CLG identified by name.
 func Inputs(name spec.CLG) ([]reflect.Type, error) {
-	n := string(name)
-	v := reflect.ValueOf(collection).MethodByName(n)
-	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, n)
+	v, err := getMethodValue(name)
+	if err != nil {
+		return nil, maskAny(err)
 	}
-	t := v.Type()
+
 	var inputs []reflect.Type
 
+	t := v.Type()
 	for i := 0; i < t.NumIn(); i++ {
 		inputs = append(inputs, t.In(i))
 	}
@@ -50,14 +49,14 @@ func Inputs(name spec.CLG) ([]reflect.Type, error) {
 
 // Outputs returns the output types of the CLG identified by name.
 func Outputs(name spec.CLG) ([]reflect.Type, error) {
-	n := string(name)
-	v := reflect.ValueOf(collection).MethodByName(n)
-	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, n)
+	v, err := getMethodValue(name)
+	if err != nil {
+		return nil, maskAny(err)
 	}
-	t := v.Type()
+
 	var outputs []reflect.Type
 
+	t := v.Type()
 	for i := 0; i < t.NumOut(); i++ {
 		outputs = append(outputs, t.Out(i))
 	}
