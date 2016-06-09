@@ -53,7 +53,6 @@ func Test_Profile_Generator_GetProfileNames(t *testing.T) {
 		"CallByNameMethod",
 		"ContainsString",
 		"DiscardInterface",
-		"SumInt",
 	}
 
 	newProfileNames, err := newGenerator.GetProfileNames()
