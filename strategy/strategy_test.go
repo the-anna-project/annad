@@ -7,73 +7,29 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func Test_Strategy_NewStrategy_Success(t *testing.T) {
+func testMaybeNewStrategy(t *testing.T) spec.Strategy {
 	newConfig := DefaultConfig()
-	newConfig.CLGNames = []string{"CLG", "CLG"}
-	newConfig.Requestor = spec.ObjectType("requestor")
-
-	_, err := NewStrategy(newConfig)
+	newConfig.Root = spec.CLG("Sum")
+	newStrategy, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
+
+	return newStrategy
 }
 
-func Test_Strategy_NewStrategy_CLGNamesError(t *testing.T) {
+func Test_Strategy_New_Success(t *testing.T) {
+	// When this does not panic, the test is successfull.
+	testMaybeNewStrategy(t)
+}
+
+func Test_Strategy_New_RootError(t *testing.T) {
 	newConfig := DefaultConfig()
-	// CLGNames configuration is missing.
-	newConfig.Requestor = spec.ObjectType("requestor")
+	// Root configuration is missing.
+	newConfig.Root = ""
 
 	_, err := NewStrategy(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_Strategy_NewStrategy_RequestorError(t *testing.T) {
-	newConfig := DefaultConfig()
-	newConfig.CLGNames = []string{"CLG", "CLG"}
-	// Requestor configuration is missing.
-
-	_, err := NewStrategy(newConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-// Test_Strategy_NewStrategy ensures that a specific combination of a strategy
-// is created on a given seed. This test also checks that the string
-// representation works as expected.
-func Test_Strategy_NewStrategy(t *testing.T) {
-	valid := []string{
-		"one",
-		"two",
-		"one,one",
-		"two,two",
-		"one,two",
-		"two,one",
-	}
-
-	newConfig := DefaultConfig()
-	newConfig.CLGNames = []string{"one", "two"}
-	newConfig.Requestor = spec.ObjectType("requestor")
-
-	for i := 0; i < 10; i++ {
-		newStrategy, err := NewStrategy(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		var foundValid bool
-		clgNames := strings.Join(newStrategy.GetCLGNames(), ",")
-		for _, v := range valid {
-			if v == clgNames {
-				foundValid = true
-				break
-			}
-		}
-
-		if !foundValid {
-			t.Fatal("expected", true, "got", false)
-		}
 	}
 }

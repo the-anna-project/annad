@@ -2,20 +2,24 @@ package spec
 
 import (
 	"encoding/json"
+	"reflect"
 )
 
-// Strategy implements a container for a sequence of CLG names to be carried
-// around, e.g. by an impulse.
+// Strategy represents an executable and permutable CLG tree structure.
 type Strategy interface {
-	// GetCLGNames returns the ordered list of the strategy's CLG names.
-	GetCLGNames() []string
+	Execute() ([]reflect.Value, error)
 
-	// GetRequestor returns the object type of the strategies requestor.
-	GetRequestor() ObjectType
+	GetRoot() CLG
+
+	GetNodes() []Strategy
 
 	json.Marshaler
 
 	Object
 
 	json.Unmarshaler
+
+	SetNode(indizes []int, node Strategy) error
+
+	Validate() error
 }

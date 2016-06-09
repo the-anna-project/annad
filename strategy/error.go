@@ -28,3 +28,10 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
+
+var invalidStrategyError = errgo.New("invalid strategy")
+
+// IsInvalidStrategy asserts invalidStrategyError.
+func IsInvalidStrategy(err error) bool {
+	return errgo.Cause(err) == invalidStrategyError
+}
