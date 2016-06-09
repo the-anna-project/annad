@@ -29,9 +29,9 @@ func (s *strategy) UnmarshalJSON(b []byte) error {
 		return maskAny(err)
 	}
 
-	s.CLGNames = newStrategy.CLGNames
 	s.ID = newStrategy.ID
-	s.Requestor = newStrategy.Requestor
+	s.Nodes = newStrategy.Nodes
+	s.Root = newStrategy.Root
 	s.Type = newStrategy.Type
 
 	return nil

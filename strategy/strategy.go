@@ -3,6 +3,7 @@
 package strategy
 
 import (
+	"reflect"
 	"sync"
 
 	"github.com/xh3b4sd/anna/clg"
@@ -36,7 +37,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		Nodes: nil,
-		Root:  nil,
+		Root:  "",
 	}
 
 	return newConfig
@@ -68,9 +69,9 @@ func New(config Config) (spec.Strategy, error) {
 	return newStrategy, nil
 }
 
-// NewEmptyStrategy simply returns an empty, maybe invalid, strategy object.
-// This should only be used for things like unmarshaling.
-func NewEmptyStrategy() spec.Strategy {
+// NewEmpty simply returns an empty, maybe invalid, strategy object. This
+// should only be used for things like unmarshaling.
+func NewEmpty() spec.Strategy {
 	return &strategy{}
 }
 
@@ -106,7 +107,7 @@ func (s *strategy) Execute() ([]reflect.Value, error) {
 }
 
 func (s *strategy) GetRoot() spec.CLG {
-	return s.CLG
+	return s.Root
 }
 
 func (s *strategy) GetNodes() []spec.Strategy {

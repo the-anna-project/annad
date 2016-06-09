@@ -35,3 +35,10 @@ var invalidStrategyError = errgo.New("invalid strategy")
 func IsInvalidStrategy(err error) bool {
 	return errgo.Cause(err) == invalidStrategyError
 }
+
+var indexOutOfRangeError = errgo.New("index out of range")
+
+// IsIndexOutOfRange asserts indexOutOfRangeError.
+func IsIndexOutOfRange(err error) bool {
+	return errgo.Cause(err) == indexOutOfRangeError
+}

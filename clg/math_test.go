@@ -53,7 +53,7 @@ func Test_CLG_Sum(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		output := Sum(testCase.A, testCase.B)
+		output := testMaybeNewCollection(t).Sum(testCase.A, testCase.B)
 
 		if output != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)

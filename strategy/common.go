@@ -3,6 +3,7 @@ package strategy
 import (
 	"reflect"
 
+	"github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -23,7 +24,7 @@ func filterError(values []reflect.Value) ([]reflect.Value, error) {
 			if i != len(values)-1 {
 				// In golang we expect the error to be the last element of the output.
 				// If this is not the case, we throw an error.
-				return nil, maskAny(clgInterfaceError)
+				return nil, maskAny(invalidStrategyError)
 			}
 			if err != nil {
 				// There was an error in the CLG output.
@@ -45,7 +46,7 @@ func isValidInterface(root spec.CLG, nodes []spec.Strategy) (bool, error) {
 	}
 
 	// Collect the combined output interface of the strategy's Nodes.
-	var outputs []reflect.Value
+	var outputs []reflect.Type
 	for _, n := range nodes {
 		outs, err := clg.Outputs(n.GetRoot())
 		if err != nil {
@@ -54,7 +55,7 @@ func isValidInterface(root spec.CLG, nodes []spec.Strategy) (bool, error) {
 		outputs = append(outputs, outs...)
 	}
 
-	if !reflect.Equal(inputs, outputs) {
+	if !reflect.DeepEqual(inputs, outputs) {
 		// The strategy's Root interface does not match the combined interface of
 		// the strategy's Nodes.
 		return false, nil

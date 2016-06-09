@@ -1,7 +1,6 @@
 package strategy
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/xh3b4sd/anna/spec"
@@ -28,7 +27,7 @@ func Test_Strategy_New_RootError(t *testing.T) {
 	// Root configuration is missing.
 	newConfig.Root = ""
 
-	_, err := NewStrategy(newConfig)
+	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}

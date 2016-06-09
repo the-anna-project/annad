@@ -3,6 +3,8 @@ package clg
 
 import (
 	"reflect"
+
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // Collection represents the object holding all available CLGs. This is only
@@ -17,22 +19,24 @@ var (
 
 // Execute is convenient to call CLGs by their method name and abstracted input
 // values.
-func Execute(name string, inputs []reflect.Value) ([]reflect.Value, error) {
-	v := reflect.ValueOf(collection).MethodByName(name)
+func Execute(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
+	n := string(name)
+	v := reflect.ValueOf(collection).MethodByName(n)
 	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, name)
+		return nil, maskAnyf(methodNotFoundError, n)
 	}
 
-	outputs := v.Call(inputValues)
+	outputs := v.Call(inputs)
 
 	return outputs, nil
 }
 
 // Inputs returns the input types of the CLG identified by name.
-func Inputs(name string) ([]reflect.Type, error) {
-	v := reflect.ValueOf(collection).MethodByName(name)
+func Inputs(name spec.CLG) ([]reflect.Type, error) {
+	n := string(name)
+	v := reflect.ValueOf(collection).MethodByName(n)
 	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, name)
+		return nil, maskAnyf(methodNotFoundError, n)
 	}
 	t := v.Type()
 	var inputs []reflect.Type
@@ -41,14 +45,15 @@ func Inputs(name string) ([]reflect.Type, error) {
 		inputs = append(inputs, t.In(i))
 	}
 
-	return inputs
+	return inputs, nil
 }
 
 // Outputs returns the output types of the CLG identified by name.
-func Outputs(name string) ([]reflect.Type, error) {
-	v := reflect.ValueOf(collection).MethodByName(name)
+func Outputs(name spec.CLG) ([]reflect.Type, error) {
+	n := string(name)
+	v := reflect.ValueOf(collection).MethodByName(n)
 	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, name)
+		return nil, maskAnyf(methodNotFoundError, n)
 	}
 	t := v.Type()
 	var outputs []reflect.Type
@@ -57,16 +62,16 @@ func Outputs(name string) ([]reflect.Type, error) {
 		outputs = append(outputs, t.Out(i))
 	}
 
-	return outputs
+	return outputs, nil
 }
 
 // Names returns all available CLG method names.
-func Names() []string {
+func Names() []spec.CLG {
 	t := reflect.TypeOf(collection)
-	var names []string
+	var names []spec.CLG
 
 	for i := 0; i < t.NumMethod(); i++ {
-		names = append(names, t.Method(i).Name)
+		names = append(names, spec.CLG(t.Method(i).Name))
 	}
 
 	return names

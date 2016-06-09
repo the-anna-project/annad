@@ -2,9 +2,6 @@ package strategy
 
 import (
 	"testing"
-
-	"github.com/xh3b4sd/anna/clg"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func Test_Strategy_GetID(t *testing.T) {
