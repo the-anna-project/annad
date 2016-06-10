@@ -28,3 +28,31 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
+
+var invalidStrategyError = errgo.New("invalid strategy")
+
+// IsInvalidStrategy asserts invalidStrategyError.
+func IsInvalidStrategy(err error) bool {
+	return errgo.Cause(err) == invalidStrategyError
+}
+
+var indexOutOfRangeError = errgo.New("index out of range")
+
+// IsIndexOutOfRange asserts indexOutOfRangeError.
+func IsIndexOutOfRange(err error) bool {
+	return errgo.Cause(err) == indexOutOfRangeError
+}
+
+var notRemovableError = errgo.New("not removable")
+
+// IsNotRemovable asserts notRemovableError.
+func IsNotRemovable(err error) bool {
+	return errgo.Cause(err) == notRemovableError
+}
+
+var notSettableError = errgo.New("not settable")
+
+// IsNotSettable asserts notSettableError.
+func IsNotSettable(err error) bool {
+	return errgo.Cause(err) == notSettableError
+}

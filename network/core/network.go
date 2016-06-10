@@ -158,7 +158,7 @@ func (n *network) Shutdown() {
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
-	// TODO
+	// TODO remove strategy permutation
 
 	// peers, err := n.KnowledgeNetwork.GetPeers(imp.GetInput())
 	// if err != nil {
