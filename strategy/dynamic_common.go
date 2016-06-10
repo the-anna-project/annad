@@ -38,6 +38,16 @@ func filterError(values []reflect.Value) ([]reflect.Value, error) {
 	return outputs, nil
 }
 
+func isCircular(id spec.ObjectID, nodes []spec.Strategy) bool {
+	for _, n := range nodes {
+		if n.GetID() == id {
+			return true
+		}
+	}
+
+	return false
+}
+
 func isValidInterface(root spec.CLG, nodes []spec.Strategy) (bool, error) {
 	// Collect the input interface of the strategy's Root.
 	inputs, err := clg.Inputs(root)
@@ -62,14 +72,4 @@ func isValidInterface(root spec.CLG, nodes []spec.Strategy) (bool, error) {
 	}
 
 	return true, nil
-}
-
-func isCircular(id spec.ObjectID, nodes []spec.Strategy) bool {
-	for _, n := range nodes {
-		if n.GetID() == id {
-			return true
-		}
-	}
-
-	return false
 }

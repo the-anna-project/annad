@@ -8,17 +8,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func Test_Strategy_JSON_overwrite(t *testing.T) {
-	firstStrategy := testMaybeNewStrategy(t)
+func Test_Strategy_Dynamic_JSON_overwrite(t *testing.T) {
+	firstStrategy := testMaybeNewDynamic(t)
 
 	b, err := json.Marshal(firstStrategy)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	newConfig := DefaultConfig()
-	newConfig.Root = spec.CLG("other")
-	secondStrategy, err := New(newConfig)
+	newConfig := DefaultDynamicConfig()
+	newConfig.Root = "other"
+	secondStrategy, err := NewDynamic(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -32,15 +32,15 @@ func Test_Strategy_JSON_overwrite(t *testing.T) {
 	}
 }
 
-func Test_Strategy_JSON_empty(t *testing.T) {
-	firstStrategy := testMaybeNewStrategy(t)
+func Test_Strategy_Dynamic_JSON_empty(t *testing.T) {
+	firstStrategy := testMaybeNewDynamic(t)
 
 	b, err := json.Marshal(firstStrategy)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	secondStrategy := NewEmpty()
+	secondStrategy := NewEmptyDynamic()
 	err = json.Unmarshal(b, secondStrategy)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

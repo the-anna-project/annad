@@ -42,3 +42,17 @@ var indexOutOfRangeError = errgo.New("index out of range")
 func IsIndexOutOfRange(err error) bool {
 	return errgo.Cause(err) == indexOutOfRangeError
 }
+
+var notRemovableError = errgo.New("not removable")
+
+// IsNotRemovable asserts notRemovableError.
+func IsNotRemovable(err error) bool {
+	return errgo.Cause(err) == notRemovableError
+}
+
+var notSetableError = errgo.New("not settable")
+
+// IsNotSetable asserts notSetableError.
+func IsNotSetable(err error) bool {
+	return errgo.Cause(err) == notSetableError
+}
