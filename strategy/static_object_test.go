@@ -5,8 +5,8 @@ import (
 )
 
 func Test_Strategy_Static_GetID(t *testing.T) {
-	firstStrategy := testMaybeNewStatic(t)
-	secondStrategy := testMaybeNewStatic(t)
+	firstStrategy := testMaybeNewStatic(t, nil)
+	secondStrategy := testMaybeNewStatic(t, nil)
 
 	if firstStrategy.GetID() == secondStrategy.GetID() {
 		t.Fatal("expected", "different IDs", "got", "equal IDs")
@@ -14,9 +14,9 @@ func Test_Strategy_Static_GetID(t *testing.T) {
 }
 
 func Test_Strategy_Static_GetType(t *testing.T) {
-	newStrategy := testMaybeNewStatic(t)
+	newStrategy := testMaybeNewStatic(t, nil)
 
-	if newStrategy.GetType() != ObjectTypeStrategy {
+	if newStrategy.GetType() != ObjectTypeStaticStrategy {
 		t.Fatalf("invalid object type for strategy")
 	}
 }

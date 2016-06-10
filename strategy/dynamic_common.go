@@ -58,7 +58,7 @@ func isValidInterface(root spec.CLG, nodes []spec.Strategy) (bool, error) {
 	// Collect the combined output interface of the strategy's Nodes.
 	var outputs []reflect.Type
 	for _, n := range nodes {
-		outs, err := clg.Outputs(n.GetRoot())
+		outs, err := n.GetOutputs()
 		if err != nil {
 			return false, maskAny(err)
 		}

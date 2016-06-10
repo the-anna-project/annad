@@ -14,20 +14,9 @@ type Strategy interface {
 	// can only be executed in case it is valid.
 	Execute() ([]reflect.Value, error)
 
-	// Get Argument returns the strategy's configured argument. This can be any
-	// arbitrary value. Note when the returned argument is not nil, the current
-	// strategy is considered static. Thus IsStatic returns true.
-	GetArgument() interface{}
-
-	// GetRoot returnes the strategies configured Root. This in turn is a CLG. In
-	// case the returned Root is not empty, the current strategy is not
-	// considered static. Thus IsStatic returns false.
-	GetRoot() CLG
-
-	// GetNodes returnes the strategies configured Nodes. These are in turn
-	// strategies themself. Note that Nodes can only be configured in case the
-	// strategy is not static.
-	GetNodes() []Strategy
+	// GetOutputs returns the strategies output interface. That is a list of
+	// types the strategy's Root CLG implements.
+	GetOutputs() ([]reflect.Type, error)
 
 	// IsStatic describes whether the strategy has an Root configured or not.
 	// Note a Root here is an CLG. A static strategy has no Root configured. Thus

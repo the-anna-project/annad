@@ -50,9 +50,9 @@ func IsNotRemovable(err error) bool {
 	return errgo.Cause(err) == notRemovableError
 }
 
-var notSetableError = errgo.New("not settable")
+var notSettableError = errgo.New("not settable")
 
-// IsNotSetable asserts notSetableError.
-func IsNotSetable(err error) bool {
-	return errgo.Cause(err) == notSetableError
+// IsNotSettable asserts notSettableError.
+func IsNotSettable(err error) bool {
+	return errgo.Cause(err) == notSettableError
 }

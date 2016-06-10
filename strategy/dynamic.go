@@ -9,6 +9,12 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	// ObjectTypeDynamicStrategy represents the object type of the dynamic
+	// strategy object. This is used e.g. to register itself to the logger.
+	ObjectTypeDynamicStrategy = "dynamic-strategy"
+)
+
 // DynamicConfig represents the configuration used to create a new dynamic
 // strategy object.
 type DynamicConfig struct {
@@ -56,7 +62,7 @@ func NewDynamic(config DynamicConfig) (spec.Strategy, error) {
 
 		ID:    newID,
 		Mutex: sync.Mutex{},
-		Type:  ObjectTypeStrategy,
+		Type:  ObjectTypeDynamicStrategy,
 	}
 
 	if newStrategy.Root == "" {
@@ -73,7 +79,7 @@ func NewEmptyDynamic() spec.Strategy {
 }
 
 type dynamic struct {
-	Config
+	DynamicConfig
 
 	ID    spec.ObjectID
 	Mutex sync.Mutex
@@ -88,7 +94,7 @@ func (d *dynamic) Execute() ([]reflect.Value, error) {
 
 	var inputs []reflect.Value
 
-	for _, n := range d.GetNodes() {
+	for _, n := range d.Nodes {
 		outputs, err := n.Execute()
 		if err != nil {
 			return nil, maskAny(err)
@@ -96,7 +102,7 @@ func (d *dynamic) Execute() ([]reflect.Value, error) {
 		inputs = append(inputs, outputs...)
 	}
 
-	outputs, err := clg.Execute(d.GetRoot(), inputs)
+	outputs, err := clg.Execute(d.Root, inputs)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -108,16 +114,17 @@ func (d *dynamic) Execute() ([]reflect.Value, error) {
 	return filtered, nil
 }
 
-func (d *dynamic) GetArgument() interface{} {
-	return nil
+func (d *dynamic) GetOutputs() ([]reflect.Type, error) {
+	outputs, err := clg.Outputs(d.Root)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return outputs, nil
 }
 
-func (d *dynamic) GetRoot() spec.CLG {
-	return d.Root
-}
-
-func (d *dynamic) GetNodes() []spec.Strategy {
-	return d.Nodes
+func (d *dynamic) IsStatic() bool {
+	return false
 }
 
 func (d *dynamic) RemoveNode(indizes []int) error {
@@ -148,7 +155,7 @@ func (d *dynamic) RemoveNode(indizes []int) error {
 	index := indizes[0]
 	newIndizes := indizes[1:]
 
-	err := d.Nodes[index].RemoveNode(newIndizes, node)
+	err := d.Nodes[index].RemoveNode(newIndizes)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -196,27 +203,22 @@ func (d *dynamic) SetNode(indizes []int, node spec.Strategy) error {
 }
 
 func (d *dynamic) Validate() error {
-	root := d.GetRoot()
-	nodes := d.GetNodes()
-
-	if isExecutable(root) {
-		// Check if interfaces of the current strategy'd Root and Nodes match.
-		validInterfaces, err := isValidInterface(root, nodes)
-		if err != nil {
-			return maskAny(err)
-		}
-		if !validInterfaces {
-			return maskAnyf(invalidStrategyError, "invalid interface")
-		}
+	// Check if interfaces of the current strategy'd Root and Nodes match.
+	validInterfaces, err := isValidInterface(d.Root, d.Nodes)
+	if err != nil {
+		return maskAny(err)
+	}
+	if !validInterfaces {
+		return maskAnyf(invalidStrategyError, "invalid interface")
 	}
 
 	// Check if current strategy is circular.
-	if isCircular(d.GetID(), nodes) {
+	if isCircular(d.GetID(), d.Nodes) {
 		return maskAnyf(invalidStrategyError, "circular strategy")
 	}
 
 	// Validate Nodes recursively.
-	for _, n := range nodes {
+	for _, n := range d.Nodes {
 		err := n.Validate()
 		if err != nil {
 			return maskAny(err)

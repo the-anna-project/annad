@@ -4,14 +4,19 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	// ObjectTypeStaticStrategy represents the object type of the dynamic
+	// strategy object. This is used e.g. to register itself to the logger.
+	ObjectTypeStaticStrategy = "static-strategy"
+)
+
 // StaticConfig represents the configuration used to create a new static
 // strategy object.
-type Config struct {
+type StaticConfig struct {
 	// Settings.
 
 	// Argument represents an arbitrary argument returned on strategy execution.
@@ -30,7 +35,7 @@ func DefaultStaticConfig() StaticConfig {
 }
 
 // NewStatic creates a new configured static strategy object.
-func New(config StaticConfig) (spec.Strategy, error) {
+func NewStatic(config StaticConfig) (spec.Strategy, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)
@@ -45,11 +50,7 @@ func New(config StaticConfig) (spec.Strategy, error) {
 
 		ID:    newID,
 		Mutex: sync.Mutex{},
-		Type:  ObjectTypeStrategy,
-	}
-
-	if newStrategy.Argument == nil {
-		return nil, maskAnyf(invalidConfigError, "argument must not be empty")
+		Type:  ObjectTypeStaticStrategy,
 	}
 
 	return newStrategy, nil
@@ -70,29 +71,26 @@ type static struct {
 }
 
 func (s *static) Execute() ([]reflect.Value, error) {
-	outputs := []reflect.Value(reflect.ValueOf(s.GetArgument()))
+	outputs := []reflect.Value{reflect.ValueOf(s.Argument)}
 
 	return outputs, nil
 }
 
-func (s *static) GetArgument() interface{} {
-	return s.Argument
+func (s *static) GetOutputs() ([]reflect.Type, error) {
+	outputs := []reflect.Type{reflect.TypeOf(s.Argument)}
+	return outputs, nil
 }
 
-func (s *static) GetRoot() spec.CLG {
-	return ""
+func (s *static) IsStatic() bool {
+	return true
 }
 
-func (s *static) GetNodes() []spec.Strategy {
-	return nil
-}
-
-func (s *static) RemoveNode(indizes []int, node spec.Strategy) error {
+func (s *static) RemoveNode(indizes []int) error {
 	return maskAnyf(notRemovableError, "static strategy")
 }
 
 func (s *static) SetNode(indizes []int, node spec.Strategy) error {
-	return maskAnyf(notSetableError, "static strategy")
+	return maskAnyf(notSettableError, "static strategy")
 }
 
 func (s *static) Validate() error {

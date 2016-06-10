@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func Test_Strategy_Dynamic_JSON_overwrite(t *testing.T) {
-	firstStrategy := testMaybeNewDynamic(t)
+	firstStrategy := testMaybeNewDynamic(t, "Sum", nil)
 
 	b, err := json.Marshal(firstStrategy)
 	if err != nil {
@@ -33,7 +31,7 @@ func Test_Strategy_Dynamic_JSON_overwrite(t *testing.T) {
 }
 
 func Test_Strategy_Dynamic_JSON_empty(t *testing.T) {
-	firstStrategy := testMaybeNewDynamic(t)
+	firstStrategy := testMaybeNewDynamic(t, "Sum", nil)
 
 	b, err := json.Marshal(firstStrategy)
 	if err != nil {
