@@ -43,7 +43,7 @@ func resetVerbosityEndpoint(lc spec.LogControl) endpoint.Endpoint {
 
 func setLevelsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(SetLevelsRequest)
+		req := request.(api.SetLevelsRequest)
 
 		err := lc.SetLevels(ctx, req.Levels)
 		if err != nil {
@@ -56,7 +56,7 @@ func setLevelsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 
 func setObjectsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(SetObjectsRequest)
+		req := request.(api.SetObjectsRequest)
 
 		err := lc.SetObjects(ctx, req.Objects)
 		if err != nil {
@@ -69,7 +69,7 @@ func setObjectsEndpoint(lc spec.LogControl) endpoint.Endpoint {
 
 func setVerbosityEndpoint(lc spec.LogControl) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(SetVerbosityRequest)
+		req := request.(api.SetVerbosityRequest)
 
 		err := lc.SetVerbosity(ctx, req.Verbosity)
 		if err != nil {

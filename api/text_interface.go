@@ -1,8 +1,4 @@
-package text
-
-import (
-	"github.com/xh3b4sd/anna/api"
-)
+package api
 
 // fetch url
 
@@ -16,7 +12,7 @@ type FetchURLRequest struct {
 // FetchURLResponse represents the response's payload of the route used to fetch
 // URLs. This payload by convention follows the same schema as all other API
 // responses.
-type FetchURLResponse api.Response
+type FetchURLResponse Response
 
 // read file
 
@@ -30,7 +26,7 @@ type ReadFileRequest struct {
 // ReadFileResponse represents the response's payload of the route used to read
 // files. This payload by convention follows the same schema as all other API
 // responses.
-type ReadFileResponse api.Response
+type ReadFileResponse Response
 
 // read stream
 
@@ -44,7 +40,7 @@ type ReadStreamRequest struct {
 // ReadStreamResponse represents the response's payload of the route used to
 // read streams. This payload by convention follows the same schema as all
 // other API responses.
-type ReadStreamResponse api.Response
+type ReadStreamResponse Response
 
 // read plain
 
@@ -60,4 +56,4 @@ type ReadPlainRequest struct {
 // ReadPlainResponse represents the response's payload of the route used to read
 // plain input. This payload by convention follows the same schema as all other
 // API responses.
-type ReadPlainResponse api.Response
+type ReadPlainResponse Response

@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/api"
 )
 
 // reset levels
@@ -49,7 +51,7 @@ func resetVerbosityEncoder(ctx context.Context, w http.ResponseWriter, response 
 // set levels
 
 func setLevelsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request SetLevelsRequest
+	var request api.SetLevelsRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -66,7 +68,7 @@ func setLevelsEncoder(ctx context.Context, w http.ResponseWriter, response inter
 // set object types
 
 func setObjectsDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request SetObjectsRequest
+	var request api.SetObjectsRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -83,7 +85,7 @@ func setObjectsEncoder(ctx context.Context, w http.ResponseWriter, response inte
 // set verbosity
 
 func setVerbosityDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request SetVerbosityRequest
+	var request api.SetVerbosityRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
