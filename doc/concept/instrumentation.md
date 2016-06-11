@@ -6,6 +6,6 @@ library](https://godoc.org/github.com/prometheus/client_golang/prometheus).
 This client is abstracted by the [instrumentation
 package](https://godoc.org/github.com/xh3b4sd/anna/instrumentation), which can
 be used to emit metrics to your likes. Note there is a memory implementation
-that does basically nothin. To actually emit metrics there need to be the
+that does basically nothing. To actually emit metrics there need to be the
 configured prometheus implementation used. For graph visualization
 [grafana](http://grafana.org) can be used.
