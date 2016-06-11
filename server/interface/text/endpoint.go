@@ -10,7 +10,7 @@ import (
 
 func fetchURLEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(FetchURLRequest)
+		req := request.(api.FetchURLRequest)
 
 		response, err := ti.FetchURL(req.URL)
 		if err != nil {
@@ -23,7 +23,7 @@ func fetchURLEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 
 func readFileEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ReadFileRequest)
+		req := request.(api.ReadFileRequest)
 
 		response, err := ti.ReadFile(req.File)
 		if err != nil {
@@ -36,7 +36,7 @@ func readFileEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 
 func readStreamEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ReadStreamRequest)
+		req := request.(api.ReadStreamRequest)
 
 		response, err := ti.ReadStream(req.Stream)
 		if err != nil {
@@ -49,7 +49,7 @@ func readStreamEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 
 func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(ReadPlainRequest)
+		req := request.(api.ReadPlainRequest)
 
 		var err error
 		var ID string

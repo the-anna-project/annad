@@ -1,29 +1,25 @@
-package log
-
-import (
-	"github.com/xh3b4sd/anna/api"
-)
+package api
 
 // reset levels
 
 // ResetLevelsResponse represents the response's payload of the route used to
 // reset log levels. This payload by convention follows the same schema as all
 // other API responses.
-type ResetLevelsResponse api.Response
+type ResetLevelsResponse Response
 
 // reset object types
 
 // ResetObjectsResponse represents the response's payload of the route used to
 // reset log objects. This payload by convention follows the same schema as all
 // other API responses.
-type ResetObjectsResponse api.Response
+type ResetObjectsResponse Response
 
 // reset verbosity
 
 // ResetVerbosityResponse represents the response's payload of the route used to
 // reset log verbosity. This payload by convention follows the same schema as
 // all other API responses.
-type ResetVerbosityResponse api.Response
+type ResetVerbosityResponse Response
 
 // set levels
 
@@ -36,7 +32,7 @@ type SetLevelsRequest struct {
 // SetLevelsResponse represents the response's payload of the route used to set
 // log levels. This payload by convention follows the same schema as all other
 // API responses.
-type SetLevelsResponse api.Response
+type SetLevelsResponse Response
 
 // set object types
 
@@ -49,7 +45,7 @@ type SetObjectsRequest struct {
 // SetObjectsResponse represents the response's payload of the route used to set
 // log objects. This payload by convention follows the same schema as all
 // other API responses.
-type SetObjectsResponse api.Response
+type SetObjectsResponse Response
 
 // set verbosity types
 
@@ -62,4 +58,4 @@ type SetVerbosityRequest struct {
 // SetVerbosityResponse represents the response's payload of the route used to
 // set log verbosity. This payload by convention follows the same schema as
 // all other API responses.
-type SetVerbosityResponse api.Response
+type SetVerbosityResponse Response

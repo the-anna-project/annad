@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/server/interface/text"
+	"github.com/xh3b4sd/anna/api"
 )
 
 // read plain
@@ -23,7 +23,7 @@ func readPlainEncoder(ctx context.Context, r *http.Request, request interface{})
 }
 
 func readPlainDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response text.ReadPlainResponse
+	var response api.ReadPlainResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
