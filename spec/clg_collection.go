@@ -223,9 +223,6 @@ type CLGFloat64 interface {
 
 	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
 	SqrtFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SubtractFloat64 creates the difference of the given float64s.
-	SubtractFloat64(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64Slice represents all float64 slice compatible CLGs that can be used.
@@ -341,9 +338,6 @@ type CLGInt interface {
 
 	// SqrtInt provides functionality of math.Sqrt, but for ints.
 	SqrtInt(args ...interface{}) ([]interface{}, error)
-
-	// SubtractInt creates the difference of the given ints.
-	SubtractInt(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGInterface represents all interface compatible CLGs that can be used.
