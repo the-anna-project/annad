@@ -18,6 +18,7 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [gateway](gateway.md)
 - [impulse](impulse.md)
 - [input](input.md)
+- [instrumentation](instrumentation.md)
 - [interface](interface.md)
 - [knowledge network](knowledge_network.md)
 - [logging](logging.md)
