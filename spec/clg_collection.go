@@ -199,10 +199,6 @@ type CLGFeature interface {
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
 type CLGFloat64 interface {
-	// BetweenFloat64 checks whether a given number lies between two given
-	// numbers.
-	BetweenFloat64(args ...interface{}) ([]interface{}, error)
-
 	// GreaterThanFloat64 returns the int that is greater than the other.
 	GreaterThanFloat64(args ...interface{}) ([]interface{}, error)
 
@@ -312,9 +308,6 @@ type CLGFloat64Slice interface {
 
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
-	// BetweenInt checks whether a given number lies between two given numbers.
-	BetweenInt(args ...interface{}) ([]interface{}, error)
-
 	// GreaterThanInt returns the int that is greater than the other.
 	GreaterThanInt(args ...interface{}) ([]interface{}, error)
 

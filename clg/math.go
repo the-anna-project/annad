@@ -1,5 +1,16 @@
 package clg
 
+// Between checks whether a given number lies between two given numbers.
+func (c Collection) Between(n, min, max float64) bool {
+	if n < min {
+		return false
+	}
+	if n > max {
+		return false
+	}
+	return true
+}
+
 // Difference creates the difference of the given float64s.
 func (c Collection) Difference(a, b float64) float64 {
 	return a - b

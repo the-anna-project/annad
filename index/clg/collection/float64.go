@@ -6,38 +6,6 @@ import (
 	"strconv"
 )
 
-func betweenFloat64(i, min, max float64) bool {
-	if i < min {
-		return false
-	}
-	if i > max {
-		return false
-	}
-	return true
-}
-
-func (c *collection) BetweenFloat64(args ...interface{}) ([]interface{}, error) {
-	num, err := ArgToFloat64(args, 0)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	min, err := ArgToFloat64(args, 1)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	max, err := ArgToFloat64(args, 2)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	if len(args) > 3 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 3 got %d", len(args))
-	}
-
-	isBetween := betweenFloat64(num, min, max)
-
-	return []interface{}{isBetween}, nil
-}
-
 func (c *collection) GreaterThanFloat64(args ...interface{}) ([]interface{}, error) {
 	f1, err := ArgToFloat64(args, 0)
 	if err != nil {
