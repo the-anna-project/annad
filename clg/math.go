@@ -14,3 +14,8 @@ func (c Collection) Product(a, b float64) float64 {
 func (c Collection) Sum(a, b float64) float64 {
 	return a + b
 }
+
+// Quotient creates the quotient of the given float64s.
+func (c Collection) Quotient(a, b float64) float64 {
+	return a / b
+}

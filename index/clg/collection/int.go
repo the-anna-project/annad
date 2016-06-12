@@ -36,24 +36,6 @@ func (c *collection) BetweenInt(args ...interface{}) ([]interface{}, error) {
 	return []interface{}{isBetween}, nil
 }
 
-func (c *collection) DivideInt(args ...interface{}) ([]interface{}, error) {
-	i1, err := ArgToInt(args, 0)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	i2, err := ArgToInt(args, 1)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	if len(args) > 2 {
-		return nil, maskAnyf(tooManyArgumentsError, "expected 2 got %d", len(args))
-	}
-
-	s := i1 / i2
-
-	return []interface{}{s}, nil
-}
-
 func (c *collection) GreaterThanInt(args ...interface{}) ([]interface{}, error) {
 	i1, err := ArgToInt(args, 0)
 	if err != nil {
