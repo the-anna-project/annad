@@ -1,5 +1,5 @@
 # debugging
-Debugging is an important topic and sometimes extremly critical when it comes
+Debugging is an important topic and sometimes extremely critical when it comes
 to tackle nasty bugs. Here we document some debugging techniques that should
 help in certain situations.
 
@@ -14,7 +14,7 @@ CPU profile.
 GOPATH=$(pwd)/.workspace/ go generate ./... && GOPATH=$(pwd)/.workspace/ go test ./index/clg/collection -v -run Test_FeatureSet_GetFeaturesByCountFeatureSet_Expected -cpuprofile cpu.out -memprofile mem.out
 ```
 
-Having the binary and profiles in place we can visualize the programms memory
+Having the binary and profiles in place we can visualize the programs memory
 and CPU usage like that. The created PDFs in this case can simply be viewed in
 your browser.
 ```
