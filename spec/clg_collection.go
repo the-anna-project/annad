@@ -199,9 +199,6 @@ type CLGFeature interface {
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
 type CLGFloat64 interface {
-	// GreaterThanFloat64 returns the int that is greater than the other.
-	GreaterThanFloat64(args ...interface{}) ([]interface{}, error)
-
 	// LesserThanFloat64 returns the int that is lesser than the other.
 	LesserThanFloat64(args ...interface{}) ([]interface{}, error)
 
@@ -308,9 +305,6 @@ type CLGFloat64Slice interface {
 
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
-	// GreaterThanInt returns the int that is greater than the other.
-	GreaterThanInt(args ...interface{}) ([]interface{}, error)
-
 	// LesserThanInt returns the int that is lesser than the other.
 	LesserThanInt(args ...interface{}) ([]interface{}, error)
 
