@@ -49,13 +49,13 @@ Thus it is important how we teach Anna.
 
 ### modification
 To reach the AI level of intelligence a lot of modifications in the code base
-need to happen. In the first place this modifications need to be done by
-humans. It is very very unlikely that all modifications necessary to reach the
-AI level can be done by humans. The necessary work is way to complex and time
-consuming. Only the coordination of humans might be an issue here. Thus the
-overall goal to make AI happen is to make Anna be able to modify herself. In
-case this is done, it is then only a matter of a very small time span until the
-intelligence explosion happens.
+need to happen. In the first place this modifications need to be done by humans
+within ones lifestime. It is very very unlikely that all modifications
+necessary to reach the AI level can be done by humans. The necessary work is
+way to complex and time consuming. Only the coordination of humans might be an
+issue here. Thus the overall goal to make AI happen is to make Anna be able to
+modify herself. In case this is done, it is then only a matter of a rather
+small time span until the intelligence explosion happens.
 
 ### overview
 This is the ten thousand feet view of Anna. To understand how she looks like
