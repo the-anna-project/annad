@@ -11,6 +11,10 @@ This builtin functionality should be the only hard coded logic. All other
 behavior must result out of the combination of learned data, CLGs and
 connections between these two.
 
+A CLG creates behavior when having information provided during execution. This
+is how information is translated into behavior. Using soem function
+implementing some functionality.
+
 Random fact: currently Anna is capable of more than 130 CLG implementations.
 This number is expected to to be raised even further. For now manually, later
 on automatically. See https://godoc.org/github.com/xh3b4sd/anna/spec#CLGIndex.
@@ -38,25 +42,13 @@ our environment using our inborn senses. So some sort of BB a machine needs to
 have to learn in a guided fashion and later autonomously.
 
 ### The Intelligence Gap
-Lets get a little bit more strange. Think about `E = mc²`. Energy equals mass
-times velocity squared. This equation seems to describe a lot of physical
-concepts around us. As I am seeing it, the theory of relativity also leans
-towards the solution of artificial intelligence, all failures reserved.
+We can write the following formular to express how intelligence is created: `I
+= ibⁿ`. Intelligence equals information times exponential behavior. Simply put,
+one piece of information, combined with multiple pieces of behaviour, creates
+some sort of intelligence.
 
-Taking the mass-energy equivalence for granted and seeing it as abstract
-description for intelligence we can write the following, slightly modified,
-formular to express how intelligence is created: `I = ibⁿ`. Intelligence equals
-information times exponential behavior. Simply put, one piece of information,
-combined with a lot of pieces of behaviour, creates some sort of intelligence.
-
-We made a lot of crazy assumptions, that do not feel that crazy as they might
-sound in the first place, when thinking about it for some time. Anyway, there
-is a technical issue that needs to be solved to fix the intelligence gap, to
-make artificial intelligence work. The intelligence gap describes the gap
-between information and behavior. This gap needs to be filled to make the
-intelligence equation work. This technical issue is solved by the concept of
-CLGs. A CLG creates behavior when having information provided during execution.
-The information provided here are given by [connections](connection.md). CLGs
-combined to [strategies](strategy.md), executed in different
-[stages](stage.md), create complex behavior. Such complex behavior is able to
-solve any problem.
+Anyway, there is a technical issue that needs to be solved to fix the
+intelligence gap, to make artificial intelligence work. The intelligence gap
+describes the gap between information and behavior. This gap needs to be filled
+to make the intelligence equation work. This technical issue is solved by the
+concept of CLGs.
