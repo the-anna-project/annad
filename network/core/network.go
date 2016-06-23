@@ -1,6 +1,7 @@
 package core
 
 import (
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -158,59 +159,74 @@ func (n *network) Shutdown() {
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
-	// TODO remove strategy permutation
+	var input []reflect.Value
+	var err error
+	var stage int
 
-	// peers, err := n.KnowledgeNetwork.GetPeers(imp.GetInput())
-	// if err != nil {
-	// 	return nil, maskAny(err)
-	// }
+	for {
+		// Execute the current stage. Therefore contextual relevant connections are
+		// looked up. The context is provided by the given input. In the first
+		// stage this the input is provided by the incoming impulse. In all
+		// following stages the input will be output of the preceding strategy.
+		if stage == 0 {
+			input = prepareInput(stage, imp.GetInput())
+		} else {
+			input = prepareInput(stage, imp.GetOutput())
+		}
+		connections, err := n.Collection.Execute(spec.CLG("GetConnections"), input)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		// Having all necessary connections in place enables to create a strategy
+		// based on peer relationships.
+		strategy, err := n.Collection.Execute(spec.CLG("CreateStrategy"), connections)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		// Finally the created strategy can simply be executed.
+		output, err := n.Collection.Execute(spec.CLG("ExecuteStrategy"), strategy)
+		if err != nil {
+			return nil, maskAny(err)
+		}
 
-	// strategyChannel := n.getStrategyChannel(peers)
+		// The iteration of this stage is over. We need to increment the stage and
+		// set the calculated output to the current impulse.
+		stage++
+		imp.SetOutput(prepareOutput(output))
+		// TODO we probably want to also track connections and strategies.
 
-	// for {
-	// 	select {
-	// 	case s := <-strategyChannel:
-	// 		// Execute the current strategy.
-	// 		output, err := s.Excute(imp.GetInput())
-	// 		if err != nil {
-	// 			return nil, maskAny(err)
-	// 		}
+		// TODO check if there were enough stages iterated. The eventual decent
+		// number of required stages could be calculated by the number of stages
+		// that were required in the past.
+		//
+		//     // TODO this should be a CLG/strategy as well.
+		//     numStages := mean(mean(len(connections.Stages)), mean(len(strategy.Stages)))
+		//
+		//     if stage < numStages {
+		//       continue
+		//     }
+		//
 
-	// 		// Match output against expectation, if any.
-	// 		e := imp.GetExpectation()
-	// 		if e == nil {
-	// 			imp.SetOutput(output)
-	// 			return imp, nil
-	// 		}
+		// Check the calculated output aganst the provided expectation, if any.
+		expectation := imp.GetExpectation()
+		if expectation == nil {
+			// There is no expectation provided. We simply go with what we
+			// calculated.
+			break
+		}
 
-	// 		matched, err := output.Match(e)
-	// 		if err != nil {
-	// 			return nil, maskAny(err)
-	// 		}
+		// There is an expectation provided. Thus we are going to check the
+		// calculated output against it.
+		match, err := expectation.Match(imp)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		if match {
+			// The provided expectation did match the calculated result. We apply the
+			// information as output to the current impulse and return it.
+			break
+		}
+	}
 
-	// 		if matched {
-	// 			imp.SetOutput(output)
-	// 			return imp, nil
-	// 		}
-
-	// 		// Output did not match expectation. Go ahead.
-	// 		continue
-	// 	default:
-	// 		// There is no strategy available. Thus we create a new one. Here we have
-	// 		// the entry point of strategy creation. There can be very sophisticated
-	// 		// mechanisms for that. For now we make use of a permutation factory.
-	// 		err = n.StrategyFactory.PermuteBy(strategyList, delta)
-	// 		if err != nil {
-	// 			return nil, maskAny(err)
-	// 		}
-	// 		err = n.StrategyFactory.MapTo(strategyList)
-	// 		if err != nil {
-	// 			return nil, maskAny(err)
-	// 		}
-
-	// 		strategyChannel <- n.membersToStrategy(strategyList.GetMembers())
-	// 	}
-	// }
-
-	return nil, nil
+	return imp, nil
 }
