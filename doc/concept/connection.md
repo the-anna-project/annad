@@ -1,7 +1,7 @@
 # connection
-A connection is the most important concept of the Anna project. It can be seen
-as a neural connection. Many connections joined to [strategies](strategy.md)
-form Anna's neural network.
+The connection model is the most important concept of the Anna project. It can
+be seen as a neural connection. Many connections joined to
+[strategies](strategy.md) form Anna's neural network.
 
 ### data structure
 Designing a data structure is quiet important. Smart systems need to store
@@ -16,22 +16,29 @@ the key, on the right is the value described. `<prefix>` represents some
 internal storage prefix.
 
 ###### strategy
-Storing the raw strategy objects is done using the following key-value pair.
-`<strategy-id>` represents the ID of a [strategy](strategy.md). It holds the
-`<strategy-object>`, that represents the storable data of [the strategy
-object](https://godoc.org/github.com/xh3b4sd/anna/spec#Strategy).
+Storing the raw strategy objects is done using the following key-value pair,
+where the key represents the ID of a [strategy](strategy.md), and the value
+holds the `<strategy-object>`, that represents the storable data of [the
+strategy object](https://godoc.org/github.com/xh3b4sd/anna/spec#Strategy).
 
 ```
-<prefix>:<strategy-id>   <strategy-object>
+<prefix>:<strategy-id>    <strategy-object>
 ```
 
 ###### stage
 Storing the [stage](stage.md) related data structures is done using the
 following key-value pairs. Note the values described here are weighted lists.
-`<stage>` represents the incrementable number of a stage in which a
-[strategy](strategy.md) is created and executed. `<strategy-id>` represents
-the ID of a [strategy](strategy.md). `<weight>` represents the numerical
-strength of the connection between a stage and a strategy.
+
+The following keys represent
+- the incrementable number of a stage in which a strategy is created and executed
+- the data type of some input
+- the data value of some input
+
+The following values represent lists of weighted strategy IDs, in which the
+numerical strength of the connection between a the key and a strategy is
+described. Purpose of this key-value pairs is to store the importance and the
+relation between a stages, input types, input values and strategy. This
+information is required for strategy creation.
 
 ```
 <prefix>:<stage>                   <strategy-id>:<weight>, <strategy-id>:<weight>, ...
@@ -40,10 +47,16 @@ strength of the connection between a stage and a strategy.
 ```
 
 ###### path
+Storing the strategy path related data structures is done using the following
+key-value pair. Note the value described here is a weighted list. The following
+key represents the ID of some strategy. The following value represents a list
+of weighted strategy IDs, in which the numerical strength of the connection
+between a the key and a strategy is described. Purpose of this key-value pair
+is to store the importance and the relation between strategies. This
+information is required for strategy creation.
+
 ```
-<prefix>:<strategy-id>             <strategy-id>:<weight>, <strategy-id>:<weight>, ...
+<prefix>:<strategy-id>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
 ```
 
-
-
-![anna](image/anna.png)
+![connection](image/connection.png)

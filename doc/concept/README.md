@@ -21,7 +21,7 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [input](input.md)
 - [instrumentation](instrumentation.md)
 - [interface](interface.md)
-- [knowledge network](knowledge_network.md)
+- [knowledge network](knowledge_network.md) TODO remove
 - [logging](logging.md)
 - [network](network.md)
 - [output](output.md)

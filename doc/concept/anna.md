@@ -9,7 +9,7 @@ intelligence, it is worth considering it. Note that the artificial neural
 network described here does not align with the commonly implemented neural
 networks. [Perceptron](https://en.wikipedia.org/wiki/Perceptron) like neural
 networks are manually layered and only provide quiet dumb activation functions
-to connect to other neurons. The network being created by connections described
+to "connect" to other neurons. The network being created by connections described
 here is way more advanced and dynamic. Layers are not hard coded. Instead there
 are dynamic [stages](stage.md) in which dynamic [strategies](strategy.md) are
 executed. There is no static [activation
@@ -18,18 +18,10 @@ connections are considered based on contextual relevance with respect to their
 weight within the current context. The problems being able to be solved are not
 limited due to static implementation. Instead the implementation provides
 general purpose intelligence using exendable [CLGs](clg.md). Anyway, the
-following two concepts, basically describe the main idea behind Anna's inner
-workings.
+concepts described in this documentation, draw pictures about the ideas behind
+Anna's inner workings.
 
-TODO
-
-The information provided here are given by
-[connections](connection.md).    TODO    CLGs combined to [strategies](strategy.md),
-executed in different [stages](stage.md), create complex behavior. Such complex
-behavior is able to solve any problem. Strategy also depends on connections
-between information and behavior.
-
-###### CLG
+### CLG
 A [CLG](clg.md), a complex logic gate, provides an implementation of a
 fundamental functionality. This can be anything. E.g. summing up two numbers,
 concatenating two strings and so on. You get the idea. CLGs solce some very
@@ -38,7 +30,7 @@ combining CLGs, to form more complex strategies that are capable of solving
 more complex problems. The theory is, that at some point, having enough proper
 CLGs available, an intelligence explosion takes place.
 
-###### backpropagation
+### backpropagation
 Backpropagation is a term originating from the scientific field of machine
 learning. It is used in neural networks to propagate results back to the layer
 that initialized a computation. This allows information to flow back and to

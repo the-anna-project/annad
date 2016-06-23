@@ -6,3 +6,5 @@ forms dynamic [strategies](strategy.md) that way. How the strategy then looks
 like is determined by the [knowledge network](knowledge_network.md). Is there
 no information available in the knowledge network, a strategy is cerated using
 an implementation of a [permutation factory](permutation_factory).
+
+TODO remove?
