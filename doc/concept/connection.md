@@ -59,4 +59,12 @@ information is required for strategy creation.
 <prefix>:<strategy-id>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
 ```
 
+The following picture illustrates the neural network of information. The white
+circles represent peers that are not connected. The red circles represent
+information being connected into a certain direction. The direction is
+visualized by black arrows. The dotted arrow shows a new connection being made
+to extend an already existing strategy path. Creating connections is a process
+that itself can be driven by strategies. That way the neural network improves
+itself.
+
 ![connection](image/connection.png)
