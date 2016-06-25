@@ -10,12 +10,13 @@ import (
 func (n *network) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	input := newSignal.GetInput()
 
-	newImpulse, err := n.NewImpulse()
+	newImpulse, err := n.NewImpulse(input.(spec.CoreRequest))
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	newImpulse.SetInputByImpulseID(newImpulse.GetID(), input.(string))
 
+	// TODO ImpulsesInProgress should be an exposed metric.
+	//
 	// Increment the impulse count to track how many impulses are processed
 	// inside the core network.
 	atomic.AddInt64(&n.ImpulsesInProgress, 1)

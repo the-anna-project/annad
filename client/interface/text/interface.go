@@ -90,8 +90,8 @@ func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, err
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (i tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	response, err := i.readPlainWithPlain(ctx, api.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
+func (i tinterface) ReadPlainWithInput(ctx context.Context, input string, expectation api.ExpectationRequest, sessionID string) (string, error) {
+	response, err := i.readPlainWithPlain(ctx, api.ReadPlainRequest{Input: input, Expectation: expectation, SessionID: sessionID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}

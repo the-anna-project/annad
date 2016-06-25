@@ -8,7 +8,6 @@ import (
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/impulse"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/knowledge"
 	"github.com/xh3b4sd/anna/scheduler"
@@ -122,19 +121,6 @@ func (n *network) Boot() {
 	n.BootOnce.Do(func() {
 		go n.TextGateway.Listen(n.gatewayListener, nil)
 	})
-}
-
-func (n *network) NewImpulse() (spec.Impulse, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 15}, "call NewImpulse")
-
-	newConfig := impulse.DefaultConfig()
-	newConfig.Log = n.Log
-	newImpulse, err := impulse.New(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newImpulse, nil
 }
 
 func (n *network) Shutdown() {

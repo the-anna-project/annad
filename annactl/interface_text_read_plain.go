@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -15,7 +17,7 @@ func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitInterfaceTextReadPlainCmd")
 
 	newCmd := &cobra.Command{
-		Use:   "plain [text] ...",
+		Use:   "plain <input>",
 		Short: "Make Anna read plain text.",
 		Long:  "Make Anna read plain text.",
 		Run:   a.ExecInterfaceTextReadPlainCmd,
@@ -26,7 +28,7 @@ func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
 		},
 	}
 
-	newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expected, "expected", "", "output expected to receive with respect to the given input")
+	newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expectation, "expectation", "", "expectation object in JSON format")
 
 	return newCmd
 }
@@ -41,7 +43,18 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 
 	ctx := context.Background()
 
-	ID, err := a.TextInterface.ReadPlainWithInput(ctx, strings.Join(args, " "), a.Flags.InterfaceTextReadPlain.Expected, a.SessionID)
+	var expectation api.ExpectationRequest
+	err := json.Unmarshal([]byte(a.Flags.InterfaceTextReadPlain.Expectation), &expectation)
+	if err != nil {
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+	}
+
+	coreRequest := api.CoreRequest{
+		Input:       strings.Join(args, " "),
+		Expectation: expectation,
+	}
+
+	ID, err := a.TextInterface.ReadPlainWithInput(ctx, coreRequest, a.SessionID)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
