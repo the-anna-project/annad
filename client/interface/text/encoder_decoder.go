@@ -11,9 +11,9 @@ import (
 	"github.com/xh3b4sd/anna/api"
 )
 
-// read plain
+// get response for ID
 
-func readPlainEncoder(ctx context.Context, r *http.Request, request interface{}) error {
+func getResponseForIDEncoder(ctx context.Context, r *http.Request, request interface{}) error {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(request); err != nil {
 		return maskAny(err)
@@ -22,8 +22,25 @@ func readPlainEncoder(ctx context.Context, r *http.Request, request interface{})
 	return nil
 }
 
-func readPlainDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.ReadPlainResponse
+func getResponseForIDDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
+	var response api.GetResponseForIDResponse
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	return response, maskAny(err)
+}
+
+// read core request
+
+func readCoreRequestEncoder(ctx context.Context, r *http.Request, request interface{}) error {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(request); err != nil {
+		return maskAny(err)
+	}
+	r.Body = ioutil.NopCloser(&buf)
+	return nil
+}
+
+func readCoreRequestDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
+	var response api.ReadCoreRequestResponse
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }

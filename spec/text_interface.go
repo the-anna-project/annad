@@ -8,16 +8,6 @@ import (
 
 // TextInterface provides a way to feed neural networks with text input.
 type TextInterface interface {
-	// FetchURL causes Anna to fetch information from a given URL.
-	FetchURL(url string) ([]byte, error)
-
-	// ReadFile causes Anna to read information from the given file.
-	ReadFile(file string) ([]byte, error)
-
-	// ReadStream causes Anna to read information from the given stream. So far
-	// the idea. The interface is wrong. The use case unclear.
-	ReadStream(stream string) ([]byte, error)
-
 	// GetResponseForID asks for a job result using the given job ID. This call
 	// might block so long the job is not finished.
 	GetResponseForID(ctx context.Context, jobID string) (string, error)

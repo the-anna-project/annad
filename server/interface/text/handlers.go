@@ -1,42 +1,28 @@
 package text
 
 import (
-	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/go-kit/kit/transport/http"
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/spec"
 )
 
 // NewHandlers returns HTTP handlers configured for the text interface object.
-func NewHandlers(ctx context.Context, ti spec.TextInterface) map[string]*httptransport.Server {
-	handlers := map[string]*httptransport.Server{}
+func NewHandlers(ctx context.Context, ti spec.TextInterface) map[string]*http.Server {
+	handlers := map[string]*http.Server{}
 
-	handlers["/interface/text/action/fetchurl"] = httptransport.NewServer(
+	handlers["/interface/text/response"] = http.NewServer(
 		ctx,
-		fetchURLEndpoint(ti),
-		fetchURLDecoder,
-		fetchURLEncoder,
+		getResponseForIDEndpoint(ti),
+		getResponseForIDDecoder,
+		getResponseForIDEncoder,
 	)
 
-	handlers["/interface/text/action/readfile"] = httptransport.NewServer(
+	handlers["/interface/text/read"] = http.NewServer(
 		ctx,
-		readFileEndpoint(ti),
-		readFileDecoder,
-		readFileEncoder,
-	)
-
-	handlers["/interface/text/action/readstream"] = httptransport.NewServer(
-		ctx,
-		readStreamEndpoint(ti),
-		readStreamDecoder,
-		readStreamEncoder,
-	)
-
-	handlers["/interface/text/action/readplain"] = httptransport.NewServer(
-		ctx,
-		readPlainEndpoint(ti),
-		readPlainDecoder,
-		readPlainEncoder,
+		readCoreRequestEndpoint(ti),
+		readCoreRequestDecoder,
+		readCoreRequestEncoder,
 	)
 
 	return handlers

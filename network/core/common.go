@@ -4,13 +4,14 @@ import (
 	"reflect"
 	"sync/atomic"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
 )
 
 func (n *network) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	input := newSignal.GetInput()
 
-	newImpulse, err := n.NewImpulse(input.(spec.CoreRequest))
+	newImpulse, err := n.NewImpulse(input.(api.CoreRequest))
 	if err != nil {
 		return nil, maskAny(err)
 	}

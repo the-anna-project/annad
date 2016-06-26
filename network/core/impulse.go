@@ -12,7 +12,7 @@ func (n *network) NewImpulse(coreRequest api.CoreRequest) (spec.Impulse, error) 
 
 	// Create a new expectation based on the given request.
 	newExpectationConfig := expectation.DefaultConfig()
-	newExpectationConfig.ExpectationRequest = coreRequest.Expectation
+	newExpectationConfig.ExpectationRequest = coreRequest.ExpectationRequest
 	newExpectation, err := expectation.New(newExpectationConfig)
 	if err != nil {
 		return nil, maskAny(err)

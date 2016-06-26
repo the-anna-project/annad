@@ -4,3 +4,7 @@ package api
 type ExpectationRequest struct {
 	// TODO
 }
+
+func (er ExpectationRequest) IsEmpty() bool {
+	return false
+}

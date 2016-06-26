@@ -13,5 +13,9 @@ type CoreRequest struct {
 	// match against the calculated output. In case there is an expectation
 	// given, the neural network tries to calculate an output until it generated
 	// one that matches the given expectation.
-	Expectation ExpectationRequest `json:"expectation,omitempty"`
+	ExpectationRequest ExpectationRequest `json:"expectation,omitempty"`
+}
+
+func (cr CoreRequest) IsEmpty() bool {
+	return cr.Input == "" || cr.ExpectationRequest.IsEmpty()
 }

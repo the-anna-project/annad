@@ -50,19 +50,19 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 	}
 
 	coreRequest := api.CoreRequest{
-		Input:       strings.Join(args, " "),
-		Expectation: expectation,
+		Input:              strings.Join(args, " "),
+		ExpectationRequest: expectation,
 	}
 
-	ID, err := a.TextInterface.ReadPlainWithInput(ctx, coreRequest, a.SessionID)
+	ID, err := a.TextInterface.ReadCoreRequest(ctx, coreRequest, a.SessionID)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	data, err := a.TextInterface.ReadPlainWithID(ctx, ID)
+	response, err := a.TextInterface.GetResponseForID(ctx, ID)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	fmt.Printf("%s\n", data)
+	fmt.Printf("%s\n", response)
 }

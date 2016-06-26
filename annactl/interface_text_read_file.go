@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -47,7 +46,7 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 	}
 
 	var coreRequest api.CoreRequest
-	err := json.Unmarshal(b, &coreRequest)
+	err = json.Unmarshal(b, &coreRequest)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
@@ -57,10 +56,10 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	data, err := a.TextInterface.GetResponseForID(ctx, ID)
+	response, err := a.TextInterface.GetResponseForID(ctx, ID)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	fmt.Printf("%s\n", data)
+	fmt.Printf("%s\n", response)
 }
