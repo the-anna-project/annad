@@ -6,11 +6,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/knowledge"
-	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
 )
@@ -25,9 +25,9 @@ const (
 // object.
 type NetworkConfig struct {
 	// Dependencies.
+	Collection       *clg.Collection
 	KnowledgeNetwork spec.Network
 	Log              spec.Log
-	Scheduler        spec.Scheduler
 	Storage          spec.Storage
 	TextGateway      spec.Gateway
 }
@@ -35,12 +35,12 @@ type NetworkConfig struct {
 // DefaultNetworkConfig provides a default configuration to create a new core
 // network object by best effort.
 func DefaultNetworkConfig() NetworkConfig {
-	newKnowledgeNetwork, err := knowledge.NewNetwork(knowledge.DefaultNetworkConfig())
+	newCollection, err := clg.NewCollection(clg.DefaultCollectionConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	newScheduler, err := scheduler.NewScheduler(scheduler.DefaultConfig())
+	newKnowledgeNetwork, err := knowledge.NewNetwork(knowledge.DefaultNetworkConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -51,9 +51,9 @@ func DefaultNetworkConfig() NetworkConfig {
 	}
 
 	newConfig := NetworkConfig{
+		Collection:       newCollection,
 		KnowledgeNetwork: newKnowledgeNetwork,
 		Log:              log.NewLog(log.DefaultConfig()),
-		Scheduler:        newScheduler,
 		Storage:          newStorage,
 		TextGateway:      gateway.NewGateway(gateway.DefaultConfig()),
 	}
@@ -88,9 +88,6 @@ func NewNetwork(config NetworkConfig) (spec.Network, error) {
 	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if newNetwork.Scheduler == nil {
-		return nil, maskAnyf(invalidConfigError, "scheduler must not be empty")
 	}
 	if newNetwork.Storage == nil {
 		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
@@ -145,40 +142,40 @@ func (n *network) Shutdown() {
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
-	var input []reflect.Value
-	var err error
-	var stage int
+	stage := 0
+	input := prepareInput(stage, reflect.ValueOf(imp.GetInput()))
 
 	for {
 		// Execute the current stage. Therefore contextual relevant connections are
 		// looked up. The context is provided by the given input. In the first
 		// stage this the input is provided by the incoming impulse. In all
-		// following stages the input will be output of the preceding strategy.
-		if stage == 0 {
-			input = prepareInput(stage, imp.GetInput())
-		} else {
-			input = prepareInput(stage, imp.GetOutput())
-		}
-		connections, err := n.Collection.Execute(spec.CLG("GetConnections"), input)
+		// following stages the input will be output of the preceding strategy. See
+		// /doc/concept/stage.md for more information.
+		connections, err := n.Collection.ExecuteCLG(spec.CLG("FindConnections"), input)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		// Having all necessary connections in place enables to create a strategy
 		// based on peer relationships.
-		strategy, err := n.Collection.Execute(spec.CLG("CreateStrategy"), connections)
+		strategy, err := n.Collection.ExecuteCLG(spec.CLG("CreateStrategy"), connections)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		// Finally the created strategy can simply be executed.
-		output, err := n.Collection.Execute(spec.CLG("ExecuteStrategy"), strategy)
+		output, err := n.Collection.ExecuteCLG(spec.CLG("ExecuteStrategy"), strategy)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		// The iteration of this stage is over. We need to increment the stage and
-		// set the calculated output to the current impulse.
+		// The iteration of this stage is over. We need to increment the stage in
+		// case there is another iteration. For the case of another iteration we
+		// also prepare the generated output to be the input for the next stage.
+		// For the case of not having another iteration, we set the calculated
+		// output to the current impulse.
 		stage++
-		imp.SetOutput(prepareOutput(output))
+		input = prepareInput(stage, output...)
+		imp.SetOutput(prepareOutput(output...))
+
 		// TODO we probably want to also track connections and strategies.
 
 		// TODO check if there were enough stages iterated. The eventual decent
@@ -194,8 +191,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		//
 
 		// Check the calculated output aganst the provided expectation, if any.
-		expectation := imp.GetExpectation()
-		if expectation == nil {
+		if imp.GetExpectation().IsEmpty() {
 			// There is no expectation provided. We simply go with what we
 			// calculated.
 			break
@@ -203,7 +199,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 
 		// There is an expectation provided. Thus we are going to check the
 		// calculated output against it.
-		match, err := expectation.Match(imp)
+		match, err := imp.GetExpectation().Match(imp)
 		if err != nil {
 			return nil, maskAny(err)
 		}

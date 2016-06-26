@@ -7,20 +7,10 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// Collection represents the object holding all available CLGs. This is only
-// intended to be used package internally and for documentation reasons. The
-// clg package implements a global and stateless collection that is used in
-// Execute and Names.
-type Collection struct{}
-
-var (
-	collection = Collection{}
-)
-
-// Execute is convenient to call CLGs by their method name and abstracted input
-// values.
-func Execute(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
-	v, err := getMethodValue(name)
+// ExecuteCLG is convenient to call CLGs by their method name and abstracted
+// input values.
+func (c *Collection) ExecuteCLG(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
+	v, err := c.getMethodValue(name)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -30,9 +20,9 @@ func Execute(name spec.CLG, inputs []reflect.Value) ([]reflect.Value, error) {
 	return outputs, nil
 }
 
-// Inputs returns the input types of the CLG identified by name.
-func Inputs(name spec.CLG) ([]reflect.Type, error) {
-	v, err := getMethodValue(name)
+// CLGInputs returns the input types of the CLG identified by name.
+func (c *Collection) CLGInputs(name spec.CLG) ([]reflect.Type, error) {
+	v, err := c.getMethodValue(name)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -47,9 +37,9 @@ func Inputs(name spec.CLG) ([]reflect.Type, error) {
 	return inputs, nil
 }
 
-// Outputs returns the output types of the CLG identified by name.
-func Outputs(name spec.CLG) ([]reflect.Type, error) {
-	v, err := getMethodValue(name)
+// CLGOutputs returns the output types of the CLG identified by name.
+func (c *Collection) CLGOutputs(name spec.CLG) ([]reflect.Type, error) {
+	v, err := c.getMethodValue(name)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -64,9 +54,9 @@ func Outputs(name spec.CLG) ([]reflect.Type, error) {
 	return outputs, nil
 }
 
-// Names returns all available CLG method names.
-func Names() []spec.CLG {
-	t := reflect.TypeOf(collection)
+// CLGNames returns all available CLG method names.
+func (c *Collection) CLGNames() []spec.CLG {
+	t := reflect.TypeOf(c)
 	var names []spec.CLG
 
 	for i := 0; i < t.NumMethod(); i++ {

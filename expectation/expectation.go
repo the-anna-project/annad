@@ -35,6 +35,10 @@ type expectation struct {
 	Config
 }
 
+func (e *expectation) IsEmpty() bool {
+	return e.ExpectationRequest.IsEmpty()
+}
+
 // TODO
 func (e *expectation) Match(imp spec.Impulse) (bool, error) {
 	return false, nil

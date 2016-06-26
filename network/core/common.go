@@ -37,17 +37,12 @@ func (n *network) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 	return newSignal, nil
 }
 
-func prepareInput(stage int, input string) []reflect.Value {
-	values := []reflect.Value{
-		reflect.ValueOf(stage),    // stage
-		reflect.ValueOf("string"), // input type
-		reflect.ValueOf(input),    // input value
-	}
-
+func prepareInput(stage int, inputs ...reflect.Value) []reflect.Value {
+	values := append([]reflect.Value{reflect.ValueOf(stage)}, inputs...)
 	return values
 }
 
-func prepareOutput(values []reflect.Value) string {
+func prepareOutput(values ...reflect.Value) string {
 	var output string
 
 	for _, v := range values {
