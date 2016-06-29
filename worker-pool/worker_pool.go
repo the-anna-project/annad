@@ -29,9 +29,6 @@ type Config struct {
 	// worker functions.
 	Canceler chan struct{}
 
-	// Drained can be used to wait until the worker is drained.
-	Drained chan struct{}
-
 	// CancelOnError defines whether to signal cancelation of worker processes in
 	// case one worker of the pool throws an error.
 	CancelOnError bool
@@ -76,6 +73,7 @@ func New(config Config) (spec.WorkerPool, error) {
 		Config:      config,
 		Errors:      make(chan error, 1),
 		ExecuteOnce: sync.Once{},
+		Drained:     make(chan struct{}, 1),
 		ID:          newID,
 		Mutex:       sync.Mutex{},
 		Type:        ObjectTypeWorkerPool,
@@ -98,9 +96,14 @@ type workerPool struct {
 
 	Errors      chan error
 	ExecuteOnce sync.Once
-	ID          spec.ObjectID
-	Mutex       sync.Mutex
-	Type        spec.ObjectType
+
+	// Drained can is used to wait until the worker pool is drained and no work
+	// is to be done anymore.
+	Drained chan struct{}
+
+	ID    spec.ObjectID
+	Mutex sync.Mutex
+	Type  spec.ObjectType
 }
 
 func (wp *workerPool) Execute() chan error {
@@ -111,4 +114,8 @@ func (wp *workerPool) Execute() chan error {
 	})
 
 	return errors
+}
+
+func (wp *workerPool) Wait() {
+	<-wp.Drained
 }

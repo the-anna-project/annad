@@ -15,18 +15,20 @@ func (wp *workerPool) executeOnce() chan error {
 	canceler := make(chan struct{}, 1)
 	errors := make(chan error, wp.NumWorkers)
 
-	go func() {
-		select {
-		case <-wp.Canceler:
-			// Receiving a signal from the global canceler will forward the
-			// cancelation to all workers. Simply closing the workers canceler wil
-			// broadcast the signal to each listener. Here we also make sure we do
-			// not close on a closed channel by only closing once.
-			once.Do(func() {
-				close(canceler)
-			})
-		}
-	}()
+	if wp.Canceler != nil {
+		go func() {
+			select {
+			case <-wp.Canceler:
+				// Receiving a signal from the global canceler will forward the
+				// cancelation to all workers. Simply closing the workers canceler wil
+				// broadcast the signal to each listener. Here we also make sure we do
+				// not close on a closed channel by only closing once.
+				once.Do(func() {
+					close(canceler)
+				})
+			}
+		}()
+	}
 
 	for n := 0; n < wp.NumWorkers; n++ {
 		wg.Add(1)
@@ -35,7 +37,7 @@ func (wp *workerPool) executeOnce() chan error {
 
 			err := wp.WorkerFunc(canceler)
 			if err != nil {
-				if wp.CancelOnError {
+				if wp.CancelOnError && wp.Canceler != nil {
 					// Closing the canceler channel acts as broadcast to all workers that
 					// should listen to the canceler. Here we also make sure we do not
 					// close on a closed channel by only closing once.

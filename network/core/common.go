@@ -38,7 +38,7 @@ func (n *network) gatewayListener(newSignal spec.Signal) (spec.Signal, error) {
 }
 
 func prepareInput(stage int, inputs ...reflect.Value) []reflect.Value {
-	values := append([]reflect.Value{reflect.ValueOf(stage)}, inputs...)
+	values := []reflect.Value{reflect.ValueOf(stage), reflect.ValueOf(inputs)}
 	return values
 }
 

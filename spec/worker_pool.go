@@ -17,4 +17,7 @@ type WorkerPool interface {
 	Execute() chan error
 
 	Object
+
+	// Wait blocks until the current worker pool is drained and all work is done.
+	Wait()
 }

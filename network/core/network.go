@@ -155,6 +155,10 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		if err != nil {
 			return nil, maskAny(err)
 		}
+		//
+		// TODO what about a CLG that learns about errors and decides if the
+		// complete calculation should be aborted or can be go on?
+		//
 		// Having all necessary connections in place enables to create a strategy
 		// based on peer relationships.
 		strategy, err := n.Collection.ExecuteCLG(spec.CLG("CreateStrategy"), connections)
