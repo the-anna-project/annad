@@ -26,9 +26,9 @@ relation between a stages, input types, input values and strategy. This
 information is required for strategy creation.
 
 ```
-<prefix>:<stage>                   <strategy-id>:<weight>, <strategy-id>:<weight>, ...
-<prefix>:<strategy-input-type>     <strategy-id>:<weight>, <strategy-id>:<weight>, ...
-<prefix>:<strategy-input-value>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
+<prefix>:stage:<stage>                         <strategy-id>:<weight>, <strategy-id>:<weight>, ...
+<prefix>:input-type:<strategy-input-type>      <strategy-id>:<weight>, <strategy-id>:<weight>, ...
+<prefix>:input-value:<strategy-input-value>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
 ```
 
 ### strategy
@@ -38,7 +38,7 @@ holds the `<strategy-object>`, that represents the storable data of [the
 strategy object](https://godoc.org/github.com/xh3b4sd/anna/spec#Strategy).
 
 ```
-<prefix>:<strategy-id>    <strategy-object>
+<prefix>:strategy:<strategy-id>    <strategy-object>
 ```
 
 Storing the strategy path related data structures is done using the following
@@ -50,5 +50,5 @@ is to store the importance and the relation between strategies. This
 information is required for strategy creation.
 
 ```
-<prefix>:<strategy-id>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
+<prefix>:path:<strategy-id>    <strategy-id>:<weight>, <strategy-id>:<weight>, ...
 ```

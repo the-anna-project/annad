@@ -58,7 +58,5 @@ func (wp *workerPool) executeOnce() chan error {
 	// channel.
 	close(errors)
 
-	wp.Drained <- struct{}{}
-
 	return errors
 }

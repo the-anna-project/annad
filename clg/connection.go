@@ -1,8 +1,11 @@
 package clg
 
 import (
+	"encoding/json"
+
 	"github.com/spf13/cast"
 
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/worker-pool"
 )
@@ -25,7 +28,11 @@ func (c *Collection) FindConnections(stage int, inputs []reflect.Value) ([]spec.
 	}
 
 	// TODO
-	TODO, err := findPeers(c.Storage, peerIDs)
+	// storage
+	// asynch
+	// contextual scope
+	// stage, input type, input value
+	peers, err := findPeers(c, peerIDs)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -42,11 +49,11 @@ func getPeerIDs(stage int, inputs []reflect.Value) (chan string, error) {
 	peerIDs := make(chan string, cap)
 
 	// Convert stage value to string.
-	peerIDs = append(peerIDs, cast.ToString(stage))
+	peerIDs = append(peerIDs, "stage:"+cast.ToString(stage))
 
 	// Convert input types to strings.
 	for _, v := range inputs {
-		peerIDs = append(peerIDs, v.Type().String())
+		peerIDs = append(peerIDs, "input-type:"+v.Type().String())
 	}
 
 	// Convert input values to strings.
@@ -58,19 +65,53 @@ func getPeerIDs(stage int, inputs []reflect.Value) (chan string, error) {
 			// types this errors cause and improve the convertion if necessary.
 			continue
 		}
-		peerIDs = append(peerIDs, casted)
+		peerIDs = append(peerIDs, "input-value:"+casted)
 	}
 
 	return peerIDs, nil
 }
 
-func findPeers(storage spec.Storage, peerIDs chan string) (TODO, error) {
+func findPeers(c *Collection, peerIDs chan string) ([]spec.Strategy, error) {
+	pipeline := make(chan spec.Strategy, cap(peerIDs))
+	defer close(pipeline)
+
+	// Synchronize the asynchronous pipeline. The peers list will be filled with
+	// all peers coming through the pipeline.
+	var peers []spec.Strategy
+	go func() {
+		for {
+			select {
+			case p := <-pipeline:
+				peers = append(peers, p)
+			}
+		}
+	}()
+
 	// Collect all peers that are might be connected to the current scope.
 	workerFunc := func(canceler <-chan struct{}) error {
-		// get peers pointing to
-		//   - stage related strategies
-		//   - input type related strategies
-		//   - input value related strategies
+		for {
+			select {
+			case <-canceler:
+				return nil
+			case peerID := <-peerIDs:
+				// Here we lookup the stored peers. "o" represents the object used in
+				// the key for identification and scoping. This initiating instance is
+				// the CLG FindConnections.
+				o := "FindConnections"
+				value, err := c.Storage.Get(key.NewCLGKey(o, peerID))
+				if err != nil {
+					return maskAny(err)
+				}
+
+				var peer spec.Strategy
+				err := json.Unmarshal([]byte(value), &peer)
+				if err != nil {
+					return maskAny(err)
+				}
+
+				pipeline <- peer
+			}
+		}
 	}
 
 	// Create a new worker pool configured with the new worker function.
@@ -82,14 +123,30 @@ func findPeers(storage spec.Storage, peerIDs chan string) (TODO, error) {
 	}
 
 	// Execute the worker pool and wait for it to be finished.
-	errors := newWorkerPool.Execute()
-	newWorkerPool.Wait()
-
-	// Handle all errors occured during the worker pool execution.
-	for err := range errors {
-		if IsWorkerCanceled(err) {
-			continue
-		}
+	err := maybeReturnAndLogErrors(c, newWorkerPool.Execute())
+	if err != nil {
 		return nil, maskAny(err)
 	}
+
+	return peers, nil
+}
+
+func maybeReturnAndLogErrors(c *Collection, errors chan error) error {
+	var executeErr error
+
+	for err := range errors {
+		if executeErr == nil {
+			// Only return the first error.
+			executeErr = err
+		} else {
+			// Log all errors but the first one
+			c.Log.WithTags(spec.Tags{L: "E", O: c, T: nil, V: 4}, "%#v", maskAny(err))
+		}
+	}
+
+	if executeErr != nil {
+		return maskAny(executeErr)
+	}
+
+	return nil
 }

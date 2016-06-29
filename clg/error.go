@@ -35,10 +35,3 @@ var invalidCLGExecutionError = errgo.New("invalid CLG execution")
 func IsInvalidCLGExecution(err error) bool {
 	return errgo.Cause(err) == invalidCLGExecutionError
 }
-
-var workerCanceledError = errgo.New("worker canceled")
-
-// IsWorkerCanceled asserts workerCanceledError.
-func IsWorkerCanceled(err error) bool {
-	return errgo.Cause(err) == workerCanceledError
-}

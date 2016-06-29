@@ -14,6 +14,7 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [CLG](clg.md)
 - [connection](connection.md)
 - [control](control.md)
+- [data structure](data_structure.md)
 - [expectation](expectation.md)
 - [gateway](gateway.md)
 - [impulse](impulse.md)
