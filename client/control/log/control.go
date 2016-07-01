@@ -7,7 +7,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -64,7 +63,7 @@ func (c *control) ResetLevels(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.ResetLevelsResponse)
+	apiResponse := response.(api.ResetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -81,7 +80,6 @@ func (c *control) ResetLevels(ctx context.Context) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
@@ -91,7 +89,7 @@ func (c *control) ResetObjects(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.ResetObjectsResponse)
+	apiResponse := response.(api.ResetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -108,7 +106,6 @@ func (c *control) ResetObjects(ctx context.Context) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
@@ -118,7 +115,7 @@ func (c *control) ResetVerbosity(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.ResetVerbosityResponse)
+	apiResponse := response.(api.ResetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -135,17 +132,16 @@ func (c *control) ResetVerbosity(ctx context.Context) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (c *control) SetLevels(ctx context.Context, levels string) error {
-	response, err := c.setLevels(ctx, log.SetLevelsRequest{Levels: levels})
+	response, err := c.setLevels(ctx, api.SetLevelsRequest{Levels: levels})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.SetLevelsResponse)
+	apiResponse := response.(api.SetLevelsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -162,17 +158,16 @@ func (c *control) SetLevels(ctx context.Context, levels string) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (c *control) SetObjects(ctx context.Context, objects string) error {
-	response, err := c.setObjects(ctx, log.SetObjectsRequest{Objects: objects})
+	response, err := c.setObjects(ctx, api.SetObjectsRequest{Objects: objects})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.SetObjectsResponse)
+	apiResponse := response.(api.SetObjectsResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -189,17 +184,16 @@ func (c *control) SetObjects(ctx context.Context, objects string) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
 func (c *control) SetVerbosity(ctx context.Context, verbosity int) error {
-	response, err := c.setVerbosity(ctx, log.SetVerbosityRequest{Verbosity: verbosity})
+	response, err := c.setVerbosity(ctx, api.SetVerbosityRequest{Verbosity: verbosity})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(log.SetVerbosityResponse)
+	apiResponse := response.(api.SetVerbosityResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -216,6 +210,5 @@ func (c *control) SetVerbosity(ctx context.Context, verbosity int) error {
 		}
 	}
 
-	// TODO proper logging
 	return maskAnyf(invalidAPIResponseError, "unexpected API response")
 }

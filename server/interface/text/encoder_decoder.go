@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"golang.org/x/net/context"
+
+	"github.com/xh3b4sd/anna/api"
 )
 
 // fetch url
 
 func fetchURLDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request FetchURLRequest
+	var request api.FetchURLRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -27,7 +29,7 @@ func fetchURLEncoder(ctx context.Context, w http.ResponseWriter, response interf
 // read file
 
 func readFileDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request ReadFileRequest
+	var request api.ReadFileRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -44,7 +46,7 @@ func readFileEncoder(ctx context.Context, w http.ResponseWriter, response interf
 // read stream
 
 func readStreamDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request ReadStreamRequest
+	var request api.ReadStreamRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
@@ -61,7 +63,7 @@ func readStreamEncoder(ctx context.Context, w http.ResponseWriter, response inte
 // read plain
 
 func readPlainDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request ReadPlainRequest
+	var request api.ReadPlainRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}

@@ -7,7 +7,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -66,12 +65,12 @@ func (i tinterface) ReadStream(stream string) ([]byte, error) {
 }
 
 func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
-	response, err := i.readPlainWithID(ctx, text.ReadPlainRequest{ID: ID})
+	response, err := i.readPlainWithID(ctx, api.ReadPlainRequest{ID: ID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(text.ReadPlainResponse)
+	apiResponse := response.(api.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -92,12 +91,12 @@ func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, err
 }
 
 func (i tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	response, err := i.readPlainWithPlain(ctx, text.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
+	response, err := i.readPlainWithPlain(ctx, api.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(text.ReadPlainResponse)
+	apiResponse := response.(api.ReadPlainResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {

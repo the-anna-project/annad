@@ -12,7 +12,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -172,7 +171,7 @@ func Test_Text_TextInterface_ReadPlainWithInput_004(t *testing.T) {
 // TextInterface.ReadPlainWithInput sends the correct request.
 func Test_Text_TextInterface_ReadPlainWithInput_Request(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var request text.ReadPlainRequest
+		var request api.ReadPlainRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -294,7 +293,7 @@ func Test_Text_TextInterface_ReadPlainWithID_008(t *testing.T) {
 // TextInterface.ReadPlainWithID sends the correct request.
 func Test_Text_TextInterface_ReadPlainWithID_Request(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var request text.ReadPlainRequest
+		var request api.ReadPlainRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
