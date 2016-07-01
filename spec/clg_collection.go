@@ -199,21 +199,8 @@ type CLGFeature interface {
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
 type CLGFloat64 interface {
-	// BetweenFloat64 checks whether a given number lies between two given
-	// numbers.
-	BetweenFloat64(args ...interface{}) ([]interface{}, error)
-
-	// DivideFloat64 creates the difference of the given float64s.
-	DivideFloat64(args ...interface{}) ([]interface{}, error)
-
-	// GreaterThanFloat64 returns the int that is greater than the other.
-	GreaterThanFloat64(args ...interface{}) ([]interface{}, error)
-
 	// LesserThanFloat64 returns the int that is lesser than the other.
 	LesserThanFloat64(args ...interface{}) ([]interface{}, error)
-
-	// MultiplyFloat64 creates the product of the given float64s.
-	MultiplyFloat64(args ...interface{}) ([]interface{}, error)
 
 	// PowFloat64 provides functionality of math.Pow, but for float64s.
 	PowFloat64(args ...interface{}) ([]interface{}, error)
@@ -223,9 +210,6 @@ type CLGFloat64 interface {
 
 	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
 	SqrtFloat64(args ...interface{}) ([]interface{}, error)
-
-	// SubtractFloat64 creates the difference of the given float64s.
-	SubtractFloat64(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGFloat64Slice represents all float64 slice compatible CLGs that can be used.
@@ -321,29 +305,14 @@ type CLGFloat64Slice interface {
 
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
-	// BetweenInt checks whether a given number lies between two given numbers.
-	BetweenInt(args ...interface{}) ([]interface{}, error)
-
-	// DivideInt creates the difference of the given ints.
-	DivideInt(args ...interface{}) ([]interface{}, error)
-
-	// GreaterThanInt returns the int that is greater than the other.
-	GreaterThanInt(args ...interface{}) ([]interface{}, error)
-
 	// LesserThanInt returns the int that is lesser than the other.
 	LesserThanInt(args ...interface{}) ([]interface{}, error)
-
-	// MultiplyInt creates the product of the given ints.
-	MultiplyInt(args ...interface{}) ([]interface{}, error)
 
 	// PowInt provides functionality of math.Pow, but for ints.
 	PowInt(args ...interface{}) ([]interface{}, error)
 
 	// SqrtInt provides functionality of math.Sqrt, but for ints.
 	SqrtInt(args ...interface{}) ([]interface{}, error)
-
-	// SubtractInt creates the difference of the given ints.
-	SubtractInt(args ...interface{}) ([]interface{}, error)
 }
 
 // CLGInterface represents all interface compatible CLGs that can be used.
