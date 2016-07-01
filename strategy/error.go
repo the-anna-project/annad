@@ -29,11 +29,11 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidStrategyError = errgo.New("invalid strategy")
+var invalidInterfaceError = errgo.New("invalid interface")
 
-// IsInvalidStrategy asserts invalidStrategyError.
-func IsInvalidStrategy(err error) bool {
-	return errgo.Cause(err) == invalidStrategyError
+// IsInvalidInterface asserts invalidInterfaceError.
+func IsInvalidInterface(err error) bool {
+	return errgo.Cause(err) == invalidInterfaceError
 }
 
 var indexOutOfRangeError = errgo.New("index out of range")

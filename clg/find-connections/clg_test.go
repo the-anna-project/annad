@@ -1,4 +1,4 @@
-package clg
+package findconnections
 
 import (
 	"reflect"

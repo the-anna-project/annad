@@ -1,3 +1,5 @@
+// Package collection provides the collection of CLGs that implement basic
+// behaviour.
 package clg
 
 import (
@@ -19,56 +21,29 @@ const (
 type CollectionConfig struct {
 	// Dependencies.
 	Log spec.Log
-
-	// Settings.
-	Expectation spec.Expectation
-	Input       string
-	Output      string
-	SessionID   string
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new
 // collection object by best effort.
 func DefaultCollectionConfig() CollectionConfig {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := CollectionConfig{
 		// Dependencies.
 		Log: log.NewLog(log.DefaultConfig()),
-
-		// Settings.
-		Expectation: nil,
-		Input:       "",
-		Output:      "",
-		SessionID:   string(newID),
 	}
 
 	return newConfig
 }
 
-// New creates a new configured collection object.
+// NewCollection creates a new configured collection object.
 func NewCollection(config CollectionConfig) (*Collection, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return &Collection{}, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return &Collection{}, maskAny(err)
-	}
-
 	newCollection := &Collection{
 		CollectionConfig: config,
-		ID:               newID,
-		Mutex:            sync.Mutex{},
-		Type:             ObjectTypeCollection,
+
+		BootOnce: sync.Once{},
+		CLGs:     newCLGs(),
+		ID:       id.MustNew(),
+		Mutex:    sync.Mutex{},
+		Type:     ObjectTypeCollection,
 	}
 
 	newCollection.Log.Register(newCollection.GetType())
@@ -80,7 +55,45 @@ func NewCollection(config CollectionConfig) (*Collection, error) {
 type Collection struct {
 	CollectionConfig
 
-	ID    spec.ObjectID
-	Mutex sync.Mutex
-	Type  spec.ObjectType
+	BootOnce sync.Once
+	CLGs     map[string]spec.CLG
+	ID       spec.ObjectID
+	Mutex    sync.Mutex
+	Type     spec.ObjectType
+}
+
+// TODO
+func (c *Collection) Activate(clgName string, inputs []reflect.Value) (bool, error) {
+	return nil, nil
+}
+
+func (c *Collection) Boot() error {
+	c.BootOnce.Do(func() {
+		c.configureCLGs()
+	})
+
+	return nil
+}
+
+// TODO
+func (c *Collection) Calculate(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+	return nil, nil
+}
+
+// TODO
+func (c *Collection) Execute(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+	// Activate
+	activate, err := c.Activate(clgName, inputs)
+	if err != nil {
+		return nil
+	}
+
+	// Calculate
+	// Forward
+	return nil, nil
+}
+
+// TODO
+func (c *Collection) Forward(clgName string, inputs []reflect.Value) error {
+	return nil, nil
 }

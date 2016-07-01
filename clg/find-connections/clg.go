@@ -1,4 +1,4 @@
-package clg
+package findconnections
 
 import (
 	"encoding/json"
@@ -12,8 +12,7 @@ import (
 
 // clg
 
-// TODO
-func (c *Collection) FindConnections(stage int, inputs []reflect.Value) ([]spec.Strategy, error) {
+func (c *clg) execute(imp spec.Impulse, stage int, inputs []reflect.Value) (spec.Impulse, []spec.Strategy, error) {
 	if len(inputs) == 0 {
 		return nil, maskAnyf(invalidCLGExecutionError, "inputs must not be empty")
 	}
@@ -39,7 +38,7 @@ func (c *Collection) FindConnections(stage int, inputs []reflect.Value) ([]spec.
 
 	// simply return highest weighted top ten?
 
-	return nil, nil
+	return imp, peers, nil
 }
 
 // helper
