@@ -440,6 +440,16 @@ func (c *collection) NewFloat64Slice(args ...interface{}) ([]interface{}, error)
 	return []interface{}{fs}, nil
 }
 
+func betweenFloat64(i, min, max float64) bool {
+	if i < min {
+		return false
+	}
+	if i > max {
+		return false
+	}
+	return true
+}
+
 func percentilesFloat64(fs, ps []float64) ([]float64, error) {
 	// Validate the input.
 	l := float64(len(fs))
