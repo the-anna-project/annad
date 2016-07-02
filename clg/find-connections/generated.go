@@ -68,14 +68,11 @@ type clg struct {
 	Type spec.ObjectType
 }
 
-// TODO
 func (c *clg) Execute(inputs []reflect.Value) ([]reflect.Value, error) {
-	v := reflect.ValueOf(c).MethodByName(c.GetType())
-	if !v.IsValid() {
-		return nil, maskAnyf(methodNotFoundError, c.GetType())
+	outputs, err := filterError(reflect.ValueOf(c.Calculate).Call(inputs))
+	if err != nil {
+		return nil, maskAny(err)
 	}
-
-	outputs := v.Call(inputs)
 
 	return outputs, nil
 }

@@ -12,7 +12,7 @@ import (
 
 // clg
 
-func (c *clg) execute(imp spec.Impulse, stage int, inputs []reflect.Value) (spec.Impulse, []spec.Strategy, error) {
+func (c *clg) Calculate(imp spec.Impulse, stage int, inputs []reflect.Value) (spec.Impulse, []spec.Strategy, error) {
 	if len(inputs) == 0 {
 		return nil, maskAnyf(invalidCLGExecutionError, "inputs must not be empty")
 	}
