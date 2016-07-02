@@ -1,4 +1,11 @@
-package core
+// TODO Package network implements spec.Network to provide dynamic and self
+// improving CLG execution. Gateways send signals to the core network to
+// request calculations. The core network translates a signal into an impulse.
+// So the core network is the starting point for all impulses. Once an impulse
+// finished its walk through the core network, the impulse's output is
+// translated back to the requesting signal and the signal is send back through
+// the gateway to its requestor.
+package network
 
 import (
 	"reflect"
@@ -10,82 +17,63 @@ import (
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/network/knowledge"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
 )
 
 const (
-	// ObjectTypeCoreNetwork represents the object type of the core network
-	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeCoreNetwork spec.ObjectType = "core-network"
+	// ObjectTypeNetwork represents the object type of the network object. This
+	// is used e.g. to register itself to the logger.
+	ObjectTypeNetwork spec.ObjectType = "network"
 )
 
-// NetworkConfig represents the configuration used to create a new core network
-// object.
-type NetworkConfig struct {
+// Config represents the configuration used to create a new network object.
+type Config struct {
 	// Dependencies.
-	Collection       *clg.Collection
-	KnowledgeNetwork spec.Network
-	Log              spec.Log
-	Storage          spec.Storage
-	TextGateway      spec.Gateway
+	Log         spec.Log
+	Storage     spec.Storage
+	TextGateway spec.Gateway
+
+	// Settings.
+
+	// Delay causes each CLG execution to be delayed. This value represents a
+	// default value. The actually used value is optimized based on experience
+	// and learning.
+	// TODO implement
+	Delay time.Duration
 }
 
-// DefaultNetworkConfig provides a default configuration to create a new core
-// network object by best effort.
-func DefaultNetworkConfig() NetworkConfig {
-	newCollection, err := clg.NewCollection(clg.DefaultCollectionConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newKnowledgeNetwork, err := knowledge.NewNetwork(knowledge.DefaultNetworkConfig())
-	if err != nil {
-		panic(err)
-	}
-
+// DefaultConfig provides a default configuration to create a new network
+// object by best effort.
+func DefaultConfig() Config {
 	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	newConfig := NetworkConfig{
-		Collection:       newCollection,
-		KnowledgeNetwork: newKnowledgeNetwork,
-		Log:              log.NewLog(log.DefaultConfig()),
-		Storage:          newStorage,
-		TextGateway:      gateway.NewGateway(gateway.DefaultConfig()),
+	newConfig := Config{
+		Log:         log.NewLog(log.DefaultConfig()),
+		Storage:     newStorage,
+		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
 	}
 
 	return newConfig
 }
 
-// NewNetwork creates a new configured core network object.
-func NewNetwork(config NetworkConfig) (spec.Network, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
+// New creates a new configured network object.
+func New(config Config) (spec.Network, error) {
 	newNetwork := &network{
-		NetworkConfig: config,
+		Config: config,
 
 		BootOnce:           sync.Once{},
-		ID:                 newID,
+		CLGs:               getNewCLGs(),
+		ID:                 id.MustNew(),
 		ImpulsesInProgress: 0,
 		Mutex:              sync.Mutex{},
 		ShutdownOnce:       sync.Once{},
-		Type:               ObjectTypeCoreNetwork,
+		Type:               ObjectTypeNetwork,
 	}
 
-	if newNetwork.KnowledgeNetwork == nil {
-		return nil, maskAnyf(invalidConfigError, "knowledge network must not be empty")
-	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
@@ -102,9 +90,10 @@ func NewNetwork(config NetworkConfig) (spec.Network, error) {
 }
 
 type network struct {
-	NetworkConfig
+	Config
 
 	BootOnce           sync.Once
+	CLGs               map[string]spec.CLG
 	ID                 spec.ObjectID
 	ImpulsesInProgress int64
 	Mutex              sync.Mutex
@@ -112,12 +101,90 @@ type network struct {
 	Type               spec.ObjectType
 }
 
+// Check if the requested CLG should be activated.
+// TODO
+func (n *network) Activate(clgName string, inputs []reflect.Value) (bool, error) {
+	// Check if the interface of the requested CLG matches the provided inputs.
+	// In case the interface does not match, it is not possible to call the
+	// requested CLG using the provided inputs. Then we return an error.
+	{
+		v, err := n.getMethodValue(clgName)
+		if err != nil {
+			return false, maskAny(err)
+		}
+
+		t := v.Type()
+		for i := 0; i < t.NumIn(); i++ {
+			clgInputs = append(clgInputs, t.In(i))
+		}
+
+		if !reflect.DeepEqual(inputs, clgInputs) {
+			return false, maskAnyf(invalidCLGExecutionError, "inputs must match interface")
+		}
+	}
+
+	// TODO check connections if the requested CLG should be emitted
+	// TODO check connections if an error should be returned in case the CLG should not be activated (learn if error should be returned or not)
+
+	return true, nil
+}
+
 func (n *network) Boot() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Boot")
 
 	n.BootOnce.Do(func() {
-		go n.TextGateway.Listen(n.gatewayListener, nil)
+		n.configureCLGs()
+		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
+}
+
+// Process the calculation of the requested CLG
+// TODO
+func (n *network) Calculate(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+	return nil, nil
+}
+
+// Execute CLG
+// TODO
+func (n *network) Execute(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+	// Check if the requested CLG should be activated.
+	var activate bool
+	var err error
+	{
+		activate, err = n.Activate(clgName, inputs)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	if !activate {
+		return nil, nil
+	}
+
+	// Calculate
+	var outputs []reflect.Value
+	{
+		outputs, err = n.Calculate(clgName, inputs)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	// Forward
+	{
+		err = n.Forward(clgName, inputs, outputs)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return outputs, nil
+}
+
+// Forward to other CLGs
+// TODO
+func (n *network) Forward(clgName string, inputs, outputs []reflect.Value) error {
+	return nil, nil
 }
 
 func (n *network) Shutdown() {
@@ -130,7 +197,7 @@ func (n *network) Shutdown() {
 			impulsesInProgress := atomic.LoadInt64(&n.ImpulsesInProgress)
 			if impulsesInProgress == 0 {
 				// As soon as all impulses are processed we can go ahead to shutdown the
-				// core network.
+				// network.
 				break
 			}
 

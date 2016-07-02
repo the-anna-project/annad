@@ -1,4 +1,4 @@
-package clg
+package network
 
 import (
 	"fmt"
