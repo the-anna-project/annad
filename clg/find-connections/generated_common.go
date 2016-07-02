@@ -21,7 +21,7 @@ func filterError(values []reflect.Value) ([]reflect.Value, error) {
 			if i != len(values)-1 {
 				// In golang we expect the error to be the last element of the output.
 				// If this is not the case, we throw an error.
-				return nil, maskAny(invalidInterfaceError)
+				return nil, maskAnyf(invalidInterfaceError, "error must be last")
 			}
 			if err != nil {
 				// There was an error in the CLG output.

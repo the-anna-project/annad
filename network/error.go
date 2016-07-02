@@ -29,11 +29,11 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var methodNotFoundError = errgo.New("method not found")
+var clgNotFoundError = errgo.New("clg not found")
 
-// IsMethodNotFound asserts methodNotFoundError.
-func IsMethodNotFound(err error) bool {
-	return errgo.Cause(err) == methodNotFoundError
+// IsCLGNotFound asserts clgNotFoundError.
+func IsCLGNotFound(err error) bool {
+	return errgo.Cause(err) == clgNotFoundError
 }
 
 var invalidCLGExecutionError = errgo.New("invalid CLG execution")
@@ -41,4 +41,11 @@ var invalidCLGExecutionError = errgo.New("invalid CLG execution")
 // IsInvalidCLGExecution asserts invalidCLGExecutionError.
 func IsInvalidCLGExecution(err error) bool {
 	return errgo.Cause(err) == invalidCLGExecutionError
+}
+
+var invalidInterfaceError = errgo.New("invalid interface")
+
+// IsInvalidInterface asserts invalidInterfaceError.
+func IsInvalidInterface(err error) bool {
+	return errgo.Cause(err) == invalidInterfaceError
 }

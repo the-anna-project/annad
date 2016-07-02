@@ -76,3 +76,5 @@ func (c *clg) Execute(inputs []reflect.Value) ([]reflect.Value, error) {
 
 	return outputs, nil
 }
+
+// TODO Inputs

@@ -66,7 +66,7 @@ func New(config Config) (spec.Network, error) {
 		Config: config,
 
 		BootOnce:           sync.Once{},
-		CLGs:               getNewCLGs(),
+		CLGs:               newCLGs(),
 		ID:                 id.MustNew(),
 		ImpulsesInProgress: 0,
 		Mutex:              sync.Mutex{},
@@ -93,7 +93,7 @@ type network struct {
 	Config
 
 	BootOnce           sync.Once
-	CLGs               map[string]spec.CLG
+	CLGs               map[string]clgScope
 	ID                 spec.ObjectID
 	ImpulsesInProgress int64
 	Mutex              sync.Mutex
@@ -104,10 +104,13 @@ type network struct {
 // Check if the requested CLG should be activated.
 // TODO
 func (n *network) Activate(clgName string, inputs []reflect.Value) (bool, error) {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
+
 	// Check if the interface of the requested CLG matches the provided inputs.
 	// In case the interface does not match, it is not possible to call the
 	// requested CLG using the provided inputs. Then we return an error.
 	{
+		// TODO move to generated CLG code Inputs method and use it here
 		v, err := n.getMethodValue(clgName)
 		if err != nil {
 			return false, maskAny(err)
@@ -133,7 +136,8 @@ func (n *network) Boot() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Boot")
 
 	n.BootOnce.Do(func() {
-		n.configureCLGs()
+		n.CLGs = n.configureCLGs(n.CLGs)
+
 		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
 }
@@ -141,24 +145,28 @@ func (n *network) Boot() {
 // Process the calculation of the requested CLG
 // TODO
 func (n *network) Calculate(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Calculate")
+
 	return nil, nil
 }
 
 // Execute CLG
 // TODO
-func (n *network) Execute(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+func (n *network) Execute(clgName string, inputs []reflect.Value) error {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
+
 	// Check if the requested CLG should be activated.
 	var activate bool
 	var err error
 	{
 		activate, err = n.Activate(clgName, inputs)
 		if err != nil {
-			return nil, maskAny(err)
+			return maskAny(err)
 		}
 	}
 
 	if !activate {
-		return nil, nil
+		return nil
 	}
 
 	// Calculate
@@ -166,7 +174,7 @@ func (n *network) Execute(clgName string, inputs []reflect.Value) ([]reflect.Val
 	{
 		outputs, err = n.Calculate(clgName, inputs)
 		if err != nil {
-			return nil, maskAny(err)
+			return maskAny(err)
 		}
 	}
 
@@ -174,17 +182,72 @@ func (n *network) Execute(clgName string, inputs []reflect.Value) ([]reflect.Val
 	{
 		err = n.Forward(clgName, inputs, outputs)
 		if err != nil {
-			return nil, maskAny(err)
+			return maskAny(err)
 		}
 	}
+
+	return nil
+}
+
+// Forward to other CLGs
+// Split the neural connection path
+// TODO
+func (n *network) Forward(clgName string, inputs, outputs []reflect.Value) error {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
+
+	return nil, nil
+}
+
+// Listen to every CLGs input channel
+// TODO comment
+func (n *network) Listen() {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
+
+	for clgName, CLG := range n.CLGs {
+		go func(clgName string, CLG spec.CLG) {
+			for {
+				select {
+				case inputs := <-n.CLGs[clgName].Input:
+					go func() {
+						err := Execute(clgName, inputs)
+						if err != nil {
+							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						}
+					}()
+				}
+			}
+		}(clgName, CLG)
+	}
+
+	select {}
+}
+
+// TODO comment
+func (n *network) Receive(clgName string) ([]reflect.Value, error) {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
+
+	CLG, ok := n.CLGs[clgName]
+	if !ok {
+		return nil, maskAnyf(clgNotFoundError, clgName)
+	}
+
+	outputs := <-CLG
 
 	return outputs, nil
 }
 
-// Forward to other CLGs
-// TODO
-func (n *network) Forward(clgName string, inputs, outputs []reflect.Value) error {
-	return nil, nil
+// TODO comment
+func (n *network) Send(clgName string, inputs []reflect.Value) error {
+	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Send")
+
+	CLG, ok := n.CLGs[clgName]
+	if !ok {
+		return maskAnyf(clgNotFoundError, clgName)
+	}
+
+	CLG.Input <- inputs
+
+	return nil
 }
 
 func (n *network) Shutdown() {
@@ -209,74 +272,57 @@ func (n *network) Shutdown() {
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
-	stage := 0
-	input := prepareInput(stage, reflect.ValueOf(imp.GetInput()))
+	input := prepareInput(imp)
 
 	for {
-		// Execute the current stage. Therefore contextual relevant connections are
-		// looked up. The context is provided by the given input. In the first
-		// stage this the input is provided by the incoming impulse. In all
-		// following stages the input will be output of the preceding strategy. See
-		// /doc/concept/stage.md for more information.
-		connections, err := n.Collection.ExecuteCLG(spec.CLG("FindConnections"), input)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		//
-		// TODO what about a CLG that learns about errors and decides if the
-		// complete calculation should be aborted or can be go on?
-		//
-		// Having all necessary connections in place enables to create a strategy
-		// based on peer relationships.
-		strategy, err := n.Collection.ExecuteCLG(spec.CLG("CreateStrategy"), connections)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		// Finally the created strategy can simply be executed.
-		output, err := n.Collection.ExecuteCLG(spec.CLG("ExecuteStrategy"), strategy)
+		// Trigger the very first CLG for neural processing. This is the Input CLG.
+		// It is provided with the impulse for contextual relevant information
+		// related to the current task. Here we send the impulse through the CLG in
+		// a fire and forget style. We send something along the neural network
+		// without receiving anything back at this point. In the first iteration
+		// the input is provided by the incoming impulse. In all following
+		// iterations, if any, the input will be output of the preceding iteration.
+		err := n.Send("Input", input)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		// The iteration of this stage is over. We need to increment the stage in
-		// case there is another iteration. For the case of another iteration we
-		// also prepare the generated output to be the input for the next stage.
+		// Wait for output of the neural network. In the call before we sent some
+		// input to trigger the neural connections between the CLGs. Here we wait
+		// until the Output CLG was triggered. Once this happens, it means the
+		// formerly sent input triggered neural connections up to a point where a
+		// connection path was drawn. This connection path started with the Input
+		// CLG and ended now here with the Output CLG.
+		output, err := n.Receive("Output")
+		if err != nil {
+			return nil, maskAny(err)
+		}
+
+		// The current iteration is over. For the case of another iteration we also
+		// prepare the generated output to be the input for the next iteration.
 		// For the case of not having another iteration, we set the calculated
 		// output to the current impulse.
-		stage++
-		input = prepareInput(stage, output...)
-		imp.SetOutput(prepareOutput(output...))
+		input = output
+		imp, err = prepareOutput(output)
+		if err != nil {
+			return nil, maskAny(err)
+		}
 
-		// TODO we probably want to also track connections and strategies.
-
-		// TODO check if there were enough stages iterated. The eventual decent
-		// number of required stages could be calculated by the number of stages
-		// that were required in the past.
-		//
-		//     // TODO this should be a CLG/strategy as well.
-		//     numStages := mean(mean(len(connections.Stages)), mean(len(strategy.Stages)))
-		//
-		//     if stage < numStages {
-		//       continue
-		//     }
-		//
-
-		// Check the calculated output aganst the provided expectation, if any.
+		// Check the calculated output aganst the provided expectation, if any. In
+		// case there is no expectation provided, we simply go with what we
+		// calculated. This then means we are probably not in a training situation.
 		if imp.GetExpectation().IsEmpty() {
-			// There is no expectation provided. We simply go with what we
-			// calculated.
 			break
 		}
 
 		// There is an expectation provided. Thus we are going to check the
-		// calculated output against it.
+		// calculated output against it. In case the provided expectation did match
+		// the calculated result, we simply return it and stop the iteration.
 		match, err := imp.GetExpectation().Match(imp)
 		if err != nil {
 			return nil, maskAny(err)
 		}
 		if match {
-			// The provided expectation did match the calculated result. We apply the
-			// information as output to the current impulse and return it.
 			break
 		}
 	}
