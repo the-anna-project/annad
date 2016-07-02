@@ -29,9 +29,6 @@ type Config struct {
 	// worker functions.
 	Canceler chan struct{}
 
-	// Drained can be used to wait until the worker is drained.
-	Drained chan struct{}
-
 	// CancelOnError defines whether to signal cancelation of worker processes in
 	// case one worker of the pool throws an error.
 	CancelOnError bool

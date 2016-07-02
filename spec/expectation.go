@@ -1,9 +1,12 @@
 package spec
 
-// TODO implement
-
 // Expectation represents a description of what output is to be expected when
 // requesting calculations by providing some input.
 type Expectation interface {
-	// TODO
+	// IsEmpty checks whether the current expectation is empty or not. In case
+	// there is no expectation request given, this should return true.
+	IsEmpty() bool
+
+	// Match verifies whether the given impulse matches the current expectation.
+	Match(imp Impulse) (bool, error)
 }

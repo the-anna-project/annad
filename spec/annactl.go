@@ -50,6 +50,10 @@ type Annactl interface {
 	// ExecInterfaceTextReadCmd executes the interface text read command.
 	ExecInterfaceTextReadCmd(cmd *cobra.Command, args []string)
 
+	// ExecInterfaceTextReadFileCmd executes the interface text read file
+	// command.
+	ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string)
+
 	// ExecInterfaceTextReadPlainCmd executes the interface text read plain
 	// command.
 	ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string)
@@ -105,6 +109,10 @@ type Annactl interface {
 
 	// InitInterfaceTextReadCmd initializes the interface text read command.
 	InitInterfaceTextReadCmd() *cobra.Command
+
+	// InitInterfaceTextReadFileCmd initializes the interface text read file
+	// command.
+	InitInterfaceTextReadFileCmd() *cobra.Command
 
 	// InitInterfaceTextReadPlainCmd initializes the interface text read plain
 	// command.

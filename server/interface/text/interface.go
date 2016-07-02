@@ -3,10 +3,9 @@ package text
 import (
 	"sync"
 
-	"time"
-
 	"golang.org/x/net/context"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
@@ -68,11 +67,12 @@ func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 	if newInterface.Scheduler == nil {
 		return nil, maskAnyf(invalidConfigError, "scheduler must not be empty")
 	}
-	newInterface.Scheduler.Register("ReadPlainWithInputAction", newInterface.ReadPlainWithInputAction)
+	newInterface.Scheduler.Register("ReadCoreRequestAction", newInterface.ReadCoreRequestAction)
 
 	return newInterface, nil
 }
 
+// tinterface is not named interface because this is a reserved key in golang.
 type tinterface struct {
 	InterfaceConfig
 
@@ -81,24 +81,8 @@ type tinterface struct {
 	Type  spec.ObjectType
 }
 
-// TODO this should actually fetch a url from the web
-func (i *tinterface) FetchURL(url string) ([]byte, error) {
-	return nil, nil
-}
-
-// TODO this should actually read a file from file system
-func (i *tinterface) ReadFile(file string) ([]byte, error) {
-	return nil, nil
-}
-
-// TODO this should actually be streamed
-func (i *tinterface) ReadStream(stream string) ([]byte, error) {
-	return nil, nil
-}
-
-// return response
-func (i *tinterface) ReadPlainWithID(ctx context.Context, jobID string) (string, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call ReadPlainWithID")
+func (i *tinterface) GetResponseForID(ctx context.Context, jobID string) (string, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call GetResponseForID")
 
 	job, err := i.Scheduler.WaitForFinalStatus(spec.ObjectID(jobID), ctx.Done())
 	if err != nil {
@@ -114,16 +98,12 @@ func (i *tinterface) ReadPlainWithID(ctx context.Context, jobID string) (string,
 	return result, nil
 }
 
-// return jobID
-func (i *tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call ReadPlainWithInput")
+func (i *tinterface) ReadCoreRequest(ctx context.Context, coreRequest api.CoreRequest, sessionID string) (string, error) {
+	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call ReadCoreRequest")
 
 	newJobConfig := scheduler.DefaultJobConfig()
-	newJobConfig.ActionID = "ReadPlainWithInputAction"
-	newJobConfig.Args = readPlainWithInputArgs{
-		Input:    input,
-		Expected: expected,
-	}
+	newJobConfig.ActionID = "ReadCoreRequestAction"
+	newJobConfig.Args = coreRequest
 	newJobConfig.SessionID = sessionID
 	newJob, err := scheduler.NewJob(newJobConfig)
 	if err != nil {
@@ -136,60 +116,4 @@ func (i *tinterface) ReadPlainWithInput(ctx context.Context, input, expected, se
 	}
 
 	return string(newJob.GetID()), nil
-}
-
-// readPlainWithInputArgs represents the arguments configured for and passed to
-// ReadPlainWithInputAction.
-type readPlainWithInputArgs struct {
-	Input    string
-	Expected string
-}
-
-// ReadPlainWithInputAction represents the action of a scheduler job being
-// executed to process ReadPlainWithInput requests asynchronously. args is
-// supposed to be of type readPlainWithInputArgs and represents the arguments
-// passed to this action method. closer represents a notification channel
-// signaling the cancelation of the current job. Thus it informs the action to
-// stop.
-func (i *tinterface) ReadPlainWithInputAction(args interface{}, closer <-chan struct{}) (string, error) {
-	input := args.(readPlainWithInputArgs).Input
-	expected := args.(readPlainWithInputArgs).Expected
-
-	newConfig := gateway.DefaultSignalConfig()
-	newConfig.Input = input
-	newSignal := gateway.NewSignal(newConfig)
-
-	// Start processing the input. Note that we in all cases want to send a
-	// signal with the given input at least ones to the neural networks,
-	// regardless any cancelations through the closer. The closer is allowed to
-	// end the work being done here in case the input was processed by the neural
-	// networks at least one time.
-	for {
-		newSignal, err := i.TextGateway.Send(newSignal, nil)
-		if err != nil {
-			return "", maskAny(err)
-		}
-
-		output := newSignal.GetOutput()
-		o := output.(string)
-		if expected == "" || (expected != "" && o == expected) {
-			// When there is no expected output given, simply return what we got.
-			// When there is expected output given and it matches what we got,
-			// return it.
-			return o, nil
-		}
-
-		select {
-		case <-closer:
-			// This action was closed by the scheduler itself. This happens e.g.
-			// when the job's final status was manually set, or another job for the
-			// same session ID was scheduled.
-			return "", nil
-		default:
-			// We did not yet receive the signal to stop the work of this action. Go
-			// ahead with the next iteration.
-		}
-
-		time.Sleep(1 * time.Second)
-	}
 }

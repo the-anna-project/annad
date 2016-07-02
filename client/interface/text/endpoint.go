@@ -7,29 +7,29 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-func newReadPlainWithIDEndpoint(URL url.URL, path string) endpoint.Endpoint {
+func newGetResponseForIDEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
 		&URL,
-		readPlainEncoder,
-		readPlainDecoder,
+		getResponseForIDEncoder,
+		getResponseForIDDecoder,
 	).Endpoint()
 
 	return newEndpoint
 }
 
-func newReadPlainWithPlainEndpoint(URL url.URL, path string) endpoint.Endpoint {
+func newReadCoreRequestEndpoint(URL url.URL, path string) endpoint.Endpoint {
 	URL.Path = path
 	URL.RawPath = path
 
 	newEndpoint := httptransport.NewClient(
 		"POST",
 		&URL,
-		readPlainEncoder,
-		readPlainDecoder,
+		readCoreRequestEncoder,
+		readCoreRequestDecoder,
 	).Endpoint()
 
 	return newEndpoint

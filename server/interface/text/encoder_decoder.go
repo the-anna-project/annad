@@ -9,68 +9,34 @@ import (
 	"github.com/xh3b4sd/anna/api"
 )
 
-// fetch url
+// get response for ID
 
-func fetchURLDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request api.FetchURLRequest
+func getResponseForIDDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
+	var request api.GetResponseForIDRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
 	return request, nil
 }
 
-func fetchURLEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+func getResponseForIDEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}
 	return nil
 }
 
-// read file
+// read core request
 
-func readFileDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request api.ReadFileRequest
+func readCoreRequestDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
+	var request api.ReadCoreRequestRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		return nil, maskAny(err)
 	}
 	return request, nil
 }
 
-func readFileEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		return maskAny(err)
-	}
-	return nil
-}
-
-// read stream
-
-func readStreamDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request api.ReadStreamRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, maskAny(err)
-	}
-	return request, nil
-}
-
-func readStreamEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		return maskAny(err)
-	}
-	return nil
-}
-
-// read plain
-
-func readPlainDecoder(ctx context.Context, r *http.Request) (interface{}, error) {
-	var request api.ReadPlainRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, maskAny(err)
-	}
-	return request, nil
-}
-
-func readPlainEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+func readCoreRequestEncoder(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		return maskAny(err)
 	}

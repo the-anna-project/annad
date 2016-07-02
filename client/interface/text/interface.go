@@ -35,8 +35,8 @@ func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 	newInterface := &tinterface{
 		InterfaceConfig: config,
 
-		readPlainWithID:    newReadPlainWithIDEndpoint(*config.URL, "/interface/text/action/readplain"),
-		readPlainWithPlain: newReadPlainWithPlainEndpoint(*config.URL, "/interface/text/action/readplain"),
+		getResponseForID: newGetResponseForIDEndpoint(*config.URL, "/interface/text/response"),
+		readCoreRequest:  newReadCoreRequestEndpoint(*config.URL, "/interface/text/read"),
 	}
 
 	return newInterface, nil
@@ -45,32 +45,17 @@ func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 type tinterface struct {
 	InterfaceConfig
 
-	readPlainWithID    endpoint.Endpoint
-	readPlainWithPlain endpoint.Endpoint
+	getResponseForID endpoint.Endpoint
+	readCoreRequest  endpoint.Endpoint
 }
 
-func (i tinterface) FetchURL(url string) ([]byte, error) {
-	// TODO
-	return nil, nil
-}
-
-func (i tinterface) ReadFile(file string) ([]byte, error) {
-	// TODO
-	return nil, nil
-}
-
-func (i tinterface) ReadStream(stream string) ([]byte, error) {
-	// TODO
-	return nil, nil
-}
-
-func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, error) {
-	response, err := i.readPlainWithID(ctx, api.ReadPlainRequest{ID: ID})
+func (i tinterface) GetResponseForID(ctx context.Context, ID string) (string, error) {
+	response, err := i.getResponseForID(ctx, api.GetResponseForIDRequest{ID: ID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.ReadPlainResponse)
+	apiResponse := response.(api.GetResponseForIDResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
@@ -90,13 +75,13 @@ func (i tinterface) ReadPlainWithID(ctx context.Context, ID string) (string, err
 	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }
 
-func (i tinterface) ReadPlainWithInput(ctx context.Context, input, expected, sessionID string) (string, error) {
-	response, err := i.readPlainWithPlain(ctx, api.ReadPlainRequest{Input: input, Expected: expected, SessionID: sessionID})
+func (i tinterface) ReadCoreRequest(ctx context.Context, coreRequest api.CoreRequest, sessionID string) (string, error) {
+	response, err := i.readCoreRequest(ctx, api.ReadCoreRequestRequest{CoreRequest: coreRequest, SessionID: sessionID})
 	if err != nil {
 		return "", maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.ReadPlainResponse)
+	apiResponse := response.(api.ReadCoreRequestResponse)
 
 	if api.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {

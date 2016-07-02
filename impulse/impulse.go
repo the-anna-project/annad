@@ -24,12 +24,10 @@ type Config struct {
 	Log spec.Log
 
 	// Settings.
-	CLGNames   []string
-	Inputs     map[spec.ObjectID]string
-	Output     string
-	Requestor  spec.ObjectType
-	SessionID  string
-	Strategies map[spec.ObjectType]spec.Strategy
+	Expectation spec.Expectation
+	Input       string
+	Output      string
+	SessionID   string
 }
 
 // DefaultConfig provides a default configuration to create a new impulse
@@ -49,12 +47,10 @@ func DefaultConfig() Config {
 		Log: log.NewLog(log.DefaultConfig()),
 
 		// Settings.
-		CLGNames:   []string{},
-		Inputs:     map[spec.ObjectID]string{},
-		Output:     "",
-		Requestor:  spec.ObjectType(""),
-		SessionID:  string(newID),
-		Strategies: map[spec.ObjectType]spec.Strategy{},
+		Expectation: nil,
+		Input:       "",
+		Output:      "",
+		SessionID:   string(newID),
 	}
 
 	return newConfig
@@ -72,11 +68,10 @@ func New(config Config) (spec.Impulse, error) {
 	}
 
 	newImpulse := &impulse{
-		Config:            config,
-		ID:                newID,
-		Mutex:             sync.Mutex{},
-		OrderedStrategies: []spec.Strategy{},
-		Type:              ObjectTypeImpulse,
+		Config: config,
+		ID:     newID,
+		Mutex:  sync.Mutex{},
+		Type:   ObjectTypeImpulse,
 	}
 
 	if newImpulse.SessionID == "" {
@@ -91,42 +86,23 @@ func New(config Config) (spec.Impulse, error) {
 type impulse struct {
 	Config
 
-	ID                spec.ObjectID
-	Mutex             sync.Mutex
-	OrderedStrategies []spec.Strategy
-	Type              spec.ObjectType
+	ID    spec.ObjectID
+	Mutex sync.Mutex
+	Type  spec.ObjectType
 }
 
-func (i *impulse) GetCLGNames() []string {
+func (i *impulse) GetExpectation() spec.Expectation {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	return i.CLGNames
+	return i.Expectation
 }
 
-func (i *impulse) GetAllInputs() map[spec.ObjectID]string {
+func (i *impulse) GetInput() string {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
-	return i.Inputs
-}
-
-func (i *impulse) GetAllStrategies() map[spec.ObjectType]spec.Strategy {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	return i.Strategies
-}
-
-func (i *impulse) GetInputByImpulseID(impulseID spec.ObjectID) (string, error) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	if i, ok := i.Inputs[impulseID]; ok {
-		return i, nil
-	}
-
-	return "", maskAny(inputNotFoundError)
+	return i.Input
 }
 
 func (i *impulse) GetOutput() string {
@@ -136,13 +112,6 @@ func (i *impulse) GetOutput() string {
 	return i.Output
 }
 
-func (i *impulse) GetRequestor() spec.ObjectType {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	return i.Requestor
-}
-
 func (i *impulse) GetSessionID() string {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
@@ -150,49 +119,9 @@ func (i *impulse) GetSessionID() string {
 	return i.SessionID
 }
 
-func (i *impulse) GetStrategy() spec.Strategy {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	if len(i.OrderedStrategies) == 0 {
-		return nil
-	}
-
-	return i.OrderedStrategies[len(i.OrderedStrategies)-1]
-}
-
-func (i *impulse) SetCLGNames(clgNames []string) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	i.CLGNames = clgNames
-}
-
-func (i *impulse) SetInputByImpulseID(impulseID spec.ObjectID, input string) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	i.Inputs[impulseID] = input
-}
-
-func (i *impulse) SetRequestor(requestor spec.ObjectType) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	i.Requestor = requestor
-}
-
 func (i *impulse) SetOutput(output string) {
 	i.Mutex.Lock()
 	defer i.Mutex.Unlock()
 
 	i.Output = output
-}
-
-func (i *impulse) SetStrategyByRequestor(requestor spec.ObjectType, strategy spec.Strategy) {
-	i.Mutex.Lock()
-	defer i.Mutex.Unlock()
-
-	i.OrderedStrategies = append(i.OrderedStrategies, strategy)
-	i.Strategies[requestor] = strategy
 }

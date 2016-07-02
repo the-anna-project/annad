@@ -6,6 +6,8 @@ package spec
 // turned out to be way too complex and stood in the way of getting things
 // done. Anyway, networks need to provide critical business logic though. At
 // the end the question is what makes sense and what works out.
+//
+// TODO rename to core ?
 type Network interface {
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you

@@ -8,82 +8,39 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func fetchURLEndpoint(ti spec.TextInterface) endpoint.Endpoint {
+func getResponseForIDEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.FetchURLRequest)
+		req := request.(api.GetResponseForIDRequest)
 
-		response, err := ti.FetchURL(req.URL)
-		if err != nil {
-			return api.WithError(maskAny(err)), nil
-		}
-
-		return api.WithData(string(response)), nil
-	}
-}
-
-func readFileEndpoint(ti spec.TextInterface) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.ReadFileRequest)
-
-		response, err := ti.ReadFile(req.File)
-		if err != nil {
-			return api.WithError(maskAny(err)), nil
-		}
-
-		return api.WithData(string(response)), nil
-	}
-}
-
-func readStreamEndpoint(ti spec.TextInterface) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.ReadStreamRequest)
-
-		response, err := ti.ReadStream(req.Stream)
-		if err != nil {
-			return api.WithError(maskAny(err)), nil
-		}
-
-		return api.WithData(string(response)), nil
-	}
-}
-
-func readPlainEndpoint(ti spec.TextInterface) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.ReadPlainRequest)
-
-		var err error
-		var ID string
-		var response string
-
-		if req.ID == "" && req.Input == "" {
-			// All empty means error.
+		if req.ID == "" {
+			// There must be an ID given. We don't have one, thus we return an error.
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		if req.ID != "" && req.Input == "" {
-			// Only ID given means there is something we want to fetch by ID.
-			response, err = ti.ReadPlainWithID(ctx, req.ID)
-			if err != nil {
-				return api.WithError(maskAny(err)), nil
-			}
-			return api.WithData(response), nil
+		response, err := ti.GetResponseForID(ctx, req.ID)
+		if err != nil {
+			return api.WithError(maskAny(err)), nil
 		}
 
-		if req.ID == "" && req.Input != "" {
-			// Only Input given means we want to do something, but only return an ID
-			// in the first place.
-			ID, err = ti.ReadPlainWithInput(ctx, req.Input, req.Expected, req.SessionID)
-			if err != nil {
-				return api.WithError(maskAny(err)), nil
-			}
-			return api.WithID(ID), nil
-		}
+		return api.WithData(response), nil
+	}
+}
 
-		if req.ID != "" && req.Input != "" {
-			// All NOT empty means error.
+func readCoreRequestEndpoint(ti spec.TextInterface) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(api.ReadCoreRequestRequest)
+
+		if req.CoreRequest.IsEmpty() {
+			// There must be an core request given. We don't have one, thus we return
+			// an error.
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		return api.WithError(maskAny(invalidRequestError)), nil
+		response, err := ti.ReadCoreRequest(ctx, req.CoreRequest, req.SessionID)
+		if err != nil {
+			return api.WithError(maskAny(err)), nil
+		}
+
+		return api.WithData(response), nil
 	}
 }

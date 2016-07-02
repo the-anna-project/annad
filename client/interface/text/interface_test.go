@@ -35,158 +35,109 @@ func testMaybeNewTextInterfaceAndServer(t *testing.T, handler http.Handler) (spe
 	return newInterface, ts
 }
 
-// Test_Text_TextInterface_FetchURL ensures that TextInterface.FetchURL is not
-// implemented yet.
-func Test_Text_TextInterface_FetchURL(t *testing.T) {
-	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, nil)
-	defer ts.Close()
+// read core request
 
-	res, err := newTextInterface.FetchURL("test-url")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if res != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-// Test_Text_TextInterface_ReadFile ensures that TextInterface.ReadFile is not
-// implemented yet.
-func Test_Text_TextInterface_ReadFile(t *testing.T) {
-	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, nil)
-	defer ts.Close()
-
-	res, err := newTextInterface.ReadFile("test-url")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if res != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-// Test_Text_TextInterface_ReadStream ensures that TextInterface.ReadStream is not
-// implemented yet.
-func Test_Text_TextInterface_ReadStream(t *testing.T) {
-	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, nil)
-	defer ts.Close()
-
-	res, err := newTextInterface.ReadStream("test-url")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if res != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-// read plain with plain
-
-// Test_Text_TextInterface_ReadPlainWithInput_001 checks for
-// TextInterface.ReadPlainWithInput to work properly under normal conditions
-// using api.WithID.
-func Test_Text_TextInterface_ReadPlainWithInput_001(t *testing.T) {
+func Test_Text_TextInterface_ReadCoreRequest_ReceiveID(t *testing.T) {
 	responseID := "test-id"
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithID(responseID)
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			t.Fatalf("json.NewEncoder returned error: %#v", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
+	request := api.CoreRequest{
+		Input: "test input",
+	}
+	sessionID := "session id"
+	ID, err := newTextInterface.ReadCoreRequest(ctx, request, sessionID)
 	if err != nil {
-		t.Fatalf("TextInterface.ReadPlainWithInput returned error: %#v", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 	if ID != responseID {
-		t.Fatalf("expected response ID to be '%s', got '%s'", responseID, ID)
+		t.Fatal("expected", responseID, "got", ID)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithInput_002 checks for
-// TextInterface.ReadPlainWithInput to handle errors properly on valid error
-// responses using api.WithError.
-func Test_Text_TextInterface_ReadPlainWithInput_002(t *testing.T) {
+func Test_Text_TextInterface_ReadCoreRequest_ErrorResponse(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			t.Fatalf("json.NewEncoder returned error: %#v", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
+	request := api.CoreRequest{
+		Input: "test input",
+	}
+	sessionID := "session id"
+	ID, err := newTextInterface.ReadCoreRequest(ctx, request, sessionID)
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
+		t.Fatal("expected", nil, "got", err)
 	}
 	if ID != "" {
-		t.Fatalf("expected response ID to be empty, got '%s'", ID)
+		t.Fatal("expected", "", "got", ID)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithInput_003 checks for
-// TextInterface.ReadPlainWithInput to handle errors properly on plain text
-// responses.
-func Test_Text_TextInterface_ReadPlainWithInput_003(t *testing.T) {
+func Test_Text_TextInterface_ReadCoreRequest_PlainTextError(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "error")
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
+	request := api.CoreRequest{
+		Input: "test input",
+	}
+	sessionID := "session id"
+	ID, err := newTextInterface.ReadCoreRequest(ctx, request, sessionID)
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
+		t.Fatal("expected", nil, "got", err)
 	}
 	if ID != "" {
-		t.Fatalf("expected response ID to be empty, got '%s'", ID)
+		t.Fatal("expected", "", "got", ID)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithInput_004 checks for
-// TextInterface.ReadPlainWithInput to handle errors properly on invalid JSON
-// responses.
-func Test_Text_TextInterface_ReadPlainWithInput_004(t *testing.T) {
+func Test_Text_TextInterface_ReadCoreRequest_InvalidJSON(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, `{"error": true}`)
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	ID, err := newTextInterface.ReadPlainWithInput(ctx, "hello world", "", "")
+	request := api.CoreRequest{
+		Input: "test input",
+	}
+	sessionID := "session id"
+	ID, err := newTextInterface.ReadCoreRequest(ctx, request, sessionID)
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithInput NOT returned proper error")
+		t.Fatal("expected", nil, "got", err)
 	}
 	if ID != "" {
-		t.Fatalf("expected response ID to be empty, got '%s'", ID)
+		t.Fatal("expected", "", "got", ID)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithInput_Request ensures that
-// TextInterface.ReadPlainWithInput sends the correct request.
-func Test_Text_TextInterface_ReadPlainWithInput_Request(t *testing.T) {
+func Test_Text_TextInterface_ReadCoreRequest_RequestTransport(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var request api.ReadPlainRequest
+		var request api.ReadCoreRequestRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 
-		if request.ID != "" {
-			t.Fatal("expected", "empty string", "got", request.ID)
+		if request.CoreRequest.Input != "test input" {
+			t.Fatal("expected", "test input", "got", request.CoreRequest.Input)
 		}
-		if request.Input != "input" {
-			t.Fatal("expected", "input", "got", request.Input)
-		}
-		if request.Expected != "expected" {
-			t.Fatal("expected", "expected", "got", request.Expected)
-		}
-		if request.SessionID != "session-id" {
-			t.Fatal("expected", "expected", "got", request.SessionID)
+		if request.SessionID != "session id" {
+			t.Fatal("expected", "session id", "got", request.SessionID)
 		}
 
 		response := api.WithID("test-id")
@@ -197,115 +148,100 @@ func Test_Text_TextInterface_ReadPlainWithInput_Request(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	_, err := newTextInterface.ReadPlainWithInput(ctx, "input", "expected", "session-id")
+	request := api.CoreRequest{
+		Input: "test input",
+	}
+	sessionID := "session id"
+	_, err := newTextInterface.ReadCoreRequest(ctx, request, sessionID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
-// read plain with ID
+// get response for id
 
-// Test_Text_TextInterface_ReadPlainWithID_005 checks for
-// TextInterface.ReadPlainWithID to work properly under normal conditions.
-func Test_Text_TextInterface_ReadPlainWithID_005(t *testing.T) {
+func Test_Text_TextInterface_GetResponseForID_ReceiveResponse(t *testing.T) {
 	responseData := "hello world"
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithData(responseData)
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			t.Fatalf("json.NewEncoder returned error: %#v", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	data, err := newTextInterface.GetResponseForID(ctx, "test-id")
 	if err != nil {
-		t.Fatalf("TextInterface.ReadPlainWithID returned error: %#v", err)
+		t.Fatal("expected", nil, "got", err)
 	}
 	if data != responseData {
-		t.Fatalf("expected response data to be '%s', got '%s'", responseData, data)
+		t.Fatal("expected", responseData, "got", data)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithID_006 checks for
-// TextInterface.ReadPlainWithInput to handle errors properly on valid error
-// responses using api.WithError.
-func Test_Text_TextInterface_ReadPlainWithID_006(t *testing.T) {
+func Test_Text_TextInterface_GetResponseForID_ErrorResponse(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := api.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			t.Fatalf("json.NewEncoder returned error: %#v", err)
+			t.Fatal("expected", nil, "got", err)
 		}
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	data, err := newTextInterface.GetResponseForID(ctx, "test-id")
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
+		t.Fatal("expected", true, "got", false)
 	}
 	if data != "" {
-		t.Fatalf("expected response data to be empty, got '%s'", data)
+		t.Fatal("expected", "", "got", data)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithID_007 checks for
-// TextInterface.ReadPlainWithID to handle errors properly on plain text
-// responses.
-func Test_Text_TextInterface_ReadPlainWithID_007(t *testing.T) {
+func Test_Text_TextInterface_GetResponseForID_PlainTextError(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "error")
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	data, err := newTextInterface.GetResponseForID(ctx, "test-id")
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
+		t.Fatal("expected", true, "got", false)
 	}
 	if data != "" {
-		t.Fatalf("expected response data to be empty, got '%s'", data)
+		t.Fatal("expected", "", "got", data)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithID_008 checks for
-// TextInterface.ReadPlainWithID to handle errors properly on invalid JSON
-// responses.
-func Test_Text_TextInterface_ReadPlainWithID_008(t *testing.T) {
+func Test_Text_TextInterface_GetResponseForID_InvalidJSON(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, `{"error": true}`)
 	}))
 	defer ts.Close()
 
 	ctx := context.Background()
-	data, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	data, err := newTextInterface.GetResponseForID(ctx, "test-id")
 	if !IsInvalidAPIResponse(err) {
-		t.Fatalf("TextInterface.ReadPlainWithID NOT returned proper error")
+		t.Fatal("expected", true, "got", false)
 	}
 	if data != "" {
-		t.Fatalf("expected response data to be empty, got '%s'", data)
+		t.Fatal("expected", "", "got", data)
 	}
 }
 
-// Test_Text_TextInterface_ReadPlainWithID_Request ensures that
-// TextInterface.ReadPlainWithID sends the correct request.
-func Test_Text_TextInterface_ReadPlainWithID_Request(t *testing.T) {
+func Test_Text_TextInterface_GetResponseForID_RequestTransport(t *testing.T) {
 	newTextInterface, ts := testMaybeNewTextInterfaceAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var request api.ReadPlainRequest
+		var request api.GetResponseForIDRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
 
 		if request.ID != "test-id" {
-			t.Fatal("expected", "test-id", "got", request.ID)
-		}
-		if request.Input != "" {
-			t.Fatal("expected", "empty string", "got", request.Input)
-		}
-		if request.Expected != "" {
-			t.Fatal("expected", "empty string", "got", request.Expected)
+			t.Fatal("expected", "", "got", request.ID)
 		}
 
 		response := api.WithData("test response")
@@ -316,7 +252,7 @@ func Test_Text_TextInterface_ReadPlainWithID_Request(t *testing.T) {
 	defer ts.Close()
 
 	ctx := context.Background()
-	_, err := newTextInterface.ReadPlainWithID(ctx, "test-id")
+	_, err := newTextInterface.GetResponseForID(ctx, "test-id")
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
