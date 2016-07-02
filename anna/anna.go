@@ -10,10 +10,8 @@ import (
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
-	"github.com/xh3b4sd/anna/index/clg"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/network/core"
-	"github.com/xh3b4sd/anna/network/knowledge"
+	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
@@ -35,11 +33,10 @@ var (
 // Config represents the configuration used to create a new anna object.
 type Config struct {
 	// Dependencies.
-	CLGIndex    spec.CLGIndex
-	CoreNetwork spec.Network
-	Log         spec.Log
-	Server      spec.Server
-	Storage     spec.Storage
+	Network spec.Network
+	Log     spec.Log
+	Server  spec.Server
+	Storage spec.Storage
 
 	// Settings.
 	Flags   Flags
@@ -49,12 +46,7 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new anna object
 // by best effort.
 func DefaultConfig() Config {
-	newCLGIndex, err := clg.NewIndex(clg.DefaultIndexConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newCoreNetwork, err := core.NewNetwork(core.DefaultNetworkConfig())
+	newNetwork, err := network.New(network.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -71,11 +63,10 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		CLGIndex:    newCLGIndex,
-		CoreNetwork: newCoreNetwork,
-		Log:         log.NewLog(log.DefaultConfig()),
-		Server:      newServer,
-		Storage:     newStorage,
+		Network: newNetwork,
+		Log:     log.NewLog(log.DefaultConfig()),
+		Server:  newServer,
+		Storage: newStorage,
 
 		// Settings.
 		Version: version,
@@ -86,29 +77,17 @@ func DefaultConfig() Config {
 
 // New creates a new configured anna object.
 func New(config Config) (spec.Anna, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	newAnna := &anna{
 		Config: config,
 
 		BootOnce:     sync.Once{},
-		ID:           newID,
+		ID:           id.MustNew(),
 		ShutdownOnce: sync.Once{},
 		Type:         spec.ObjectType(ObjectTypeAnna),
 	}
 
-	if newAnna.CLGIndex == nil {
-		return nil, maskAnyf(invalidConfigError, "CLG index must not be empty")
-	}
-	if newAnna.CoreNetwork == nil {
-		return nil, maskAnyf(invalidConfigError, "core network must not be empty")
+	if newAnna.Network == nil {
+		return nil, maskAnyf(invalidConfigError, "network must not be empty")
 	}
 	if newAnna.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
@@ -137,11 +116,8 @@ func New(config Config) (spec.Anna, error) {
 			go newAnna.listenToSignal()
 			go newAnna.writeStateInfo()
 
-			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting CLG index")
-			go newAnna.CLGIndex.Boot()
-
-			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting core network")
-			go newAnna.CoreNetwork.Boot()
+			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting network")
+			go newAnna.Network.Boot()
 
 			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting server")
 			go newAnna.Server.Boot()
@@ -180,22 +156,11 @@ func New(config Config) (spec.Anna, error) {
 			newScheduler, err := scheduler.NewScheduler(newSchedulerConfig)
 			panicOnError(err)
 
-			// knowledge network.
-			newKnowledgeNetworkConfig := knowledge.DefaultNetworkConfig()
-			newKnowledgeNetworkConfig.Log = newAnna.Log
-			newKnowledgeNetwork, err := knowledge.NewNetwork(newKnowledgeNetworkConfig)
-			panicOnError(err)
-
-			// core network.
-			newCoreNetworkConfig := core.DefaultNetworkConfig()
-			newCoreNetworkConfig.KnowledgeNetwork = newKnowledgeNetwork
-			newCoreNetworkConfig.Log = newAnna.Log
-			newCoreNetworkConfig.TextGateway = newTextGateway
-			newCoreNetwork, err := core.NewNetwork(newCoreNetworkConfig)
-			panicOnError(err)
-
-			// CLG index.
-			newCLGIndex, err := createCLGIndex(newAnna.Log, newStorage)
+			// network.
+			newNetworkConfig := network.DefaultConfig()
+			newNetworkConfig.Log = newAnna.Log
+			newNetworkConfig.TextGateway = newTextGateway
+			newNetwork, err := network.New(newNetworkConfig)
 			panicOnError(err)
 
 			// log control.
@@ -219,8 +184,7 @@ func New(config Config) (spec.Anna, error) {
 			panicOnError(err)
 
 			// Anna.
-			newAnna.CLGIndex = newCLGIndex
-			newAnna.CoreNetwork = newCoreNetwork
+			newAnna.Network = newNetwork
 			newAnna.Server = newServer
 			newAnna.Storage = newStorage
 		},
@@ -230,7 +194,7 @@ func New(config Config) (spec.Anna, error) {
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to bind Anna's server to")
 
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. core-network,impulse)")
+	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network,impulse)")
 	newAnna.Cmd.PersistentFlags().IntVar(&newAnna.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
@@ -269,15 +233,8 @@ func (a *anna) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down CLG index")
-			a.CLGIndex.Shutdown()
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down core net")
-			a.CoreNetwork.Shutdown()
+			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down network")
+			a.Network.Shutdown()
 			wg.Done()
 		}()
 

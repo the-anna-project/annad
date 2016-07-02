@@ -4,19 +4,27 @@ import (
 	"reflect"
 	"sync/atomic"
 
-	"github.com/xh3b4sd/anna/clg/find-connections"
+	//"github.com/xh3b4sd/anna/clg/find-connections"
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
 )
 
+// receiver
+
+func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.ObjectID]clgScope {
+	for name := range CLGs {
+		CLGs[name].CLG.SetStorage(n.Storage)
+	}
+
+	return CLGs
+}
+
 func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal, error) {
 	newListener := func(newSignal spec.Signal) (spec.Signal, error) {
-		input := newSignal.GetInput()
-
-		newImpulse, err := n.NewImpulse()
+		newImpulse, err := n.NewImpulse(newSignal.GetInput().(api.CoreRequest))
 		if err != nil {
 			return nil, maskAny(err)
 		}
-		newImpulse.SetInputByImpulseID(newImpulse.GetID(), input.(string))
 
 		// Increment the impulse count to track how many impulses are processed
 		// inside the core network.
@@ -40,14 +48,30 @@ func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal,
 	return newListener
 }
 
-// TODO this does not work
-func (n *network) getMethodValue(name string) (reflect.Value, error) {
-	v := reflect.ValueOf(n).MethodByName(name)
-	if !v.IsValid() {
-		return reflect.Value{}, maskAnyf(methodNotFoundError, n)
+// private
+
+type clgScope struct {
+	CLG    spec.CLG
+	Input  chan []reflect.Value
+	Output chan []reflect.Value
+}
+
+func newCLGs() map[spec.ObjectID]clgScope {
+	newList := []spec.CLG{
+	//findconnections.MustNew(),
 	}
 
-	return v, nil
+	newCLGs := map[spec.ObjectID]clgScope{}
+
+	for _, CLG := range newList {
+		newCLGs[CLG.GetID()] = clgScope{
+			CLG:    CLG,
+			Input:  make(chan []reflect.Value, 10),
+			Output: make(chan []reflect.Value, 10),
+		}
+	}
+
+	return newCLGs
 }
 
 func prepareInput(imp spec.Impulse) []reflect.Value {
@@ -55,12 +79,12 @@ func prepareInput(imp spec.Impulse) []reflect.Value {
 	return values
 }
 
-func prepareOutput(values ...reflect.Value) (spec.Impulse, error) {
+func prepareOutput(values []reflect.Value) (spec.Impulse, error) {
 	if len(values) == 0 {
 		return nil, maskAnyf(invalidInterfaceError, "output must not be empty")
 	}
 
-	imp, ok := values[:1][0].(spec.Impulse)
+	imp, ok := values[0].Interface().(spec.Impulse)
 	if !ok {
 		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
 	}
@@ -71,5 +95,5 @@ func prepareOutput(values ...reflect.Value) (spec.Impulse, error) {
 	}
 	imp.SetOutput(output)
 
-	return imp
+	return imp, nil
 }

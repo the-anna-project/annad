@@ -1,4 +1,4 @@
-// Package expectectation implements spec.Expectation to provide verification
+// Package expectation implements spec.Expectation to provide verification
 // between input and out.
 package expectation
 

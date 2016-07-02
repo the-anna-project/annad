@@ -16,6 +16,8 @@ type CoreRequest struct {
 	ExpectationRequest ExpectationRequest `json:"expectation,omitempty"`
 }
 
+// IsEmpty checks whether the current core request is empty. An empty core
+// request can be consider invalid.
 func (cr CoreRequest) IsEmpty() bool {
 	return cr.Input == "" || cr.ExpectationRequest.IsEmpty()
 }

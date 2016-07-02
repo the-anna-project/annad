@@ -1,4 +1,4 @@
-// TODO Package network implements spec.Network to provide dynamic and self
+// Package network implements spec.Network to provide dynamic and self
 // improving CLG execution. Gateways send signals to the core network to
 // request calculations. The core network translates a signal into an impulse.
 // So the core network is the starting point for all impulses. Once an impulse
@@ -13,7 +13,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xh3b4sd/anna/clg"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
@@ -93,7 +92,7 @@ type network struct {
 	Config
 
 	BootOnce           sync.Once
-	CLGs               map[string]clgScope
+	CLGs               map[spec.ObjectID]clgScope
 	ID                 spec.ObjectID
 	ImpulsesInProgress int64
 	Mutex              sync.Mutex
@@ -103,7 +102,7 @@ type network struct {
 
 // Check if the requested CLG should be activated.
 // TODO
-func (n *network) Activate(clgName string, inputs []reflect.Value) (bool, error) {
+func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
 
 	// Check if the interface of the requested CLG matches the provided inputs.
@@ -111,12 +110,13 @@ func (n *network) Activate(clgName string, inputs []reflect.Value) (bool, error)
 	// requested CLG using the provided inputs. Then we return an error.
 	{
 		// TODO move to generated CLG code Inputs method and use it here
-		v, err := n.getMethodValue(clgName)
-		if err != nil {
-			return false, maskAny(err)
+		v := reflect.ValueOf(n).MethodByName("todo")
+		if !v.IsValid() {
+			return false, nil
 		}
-
 		t := v.Type()
+
+		var clgInputs []reflect.Type
 		for i := 0; i < t.NumIn(); i++ {
 			clgInputs = append(clgInputs, t.In(i))
 		}
@@ -144,7 +144,7 @@ func (n *network) Boot() {
 
 // Process the calculation of the requested CLG
 // TODO
-func (n *network) Calculate(clgName string, inputs []reflect.Value) ([]reflect.Value, error) {
+func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]reflect.Value, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Calculate")
 
 	return nil, nil
@@ -152,14 +152,14 @@ func (n *network) Calculate(clgName string, inputs []reflect.Value) ([]reflect.V
 
 // Execute CLG
 // TODO
-func (n *network) Execute(clgName string, inputs []reflect.Value) error {
+func (n *network) Execute(clgID spec.ObjectID, inputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
 
 	// Check if the requested CLG should be activated.
 	var activate bool
 	var err error
 	{
-		activate, err = n.Activate(clgName, inputs)
+		activate, err = n.Activate(clgID, inputs)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -172,7 +172,7 @@ func (n *network) Execute(clgName string, inputs []reflect.Value) error {
 	// Calculate
 	var outputs []reflect.Value
 	{
-		outputs, err = n.Calculate(clgName, inputs)
+		outputs, err = n.Calculate(clgID, inputs)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -180,7 +180,7 @@ func (n *network) Execute(clgName string, inputs []reflect.Value) error {
 
 	// Forward
 	{
-		err = n.Forward(clgName, inputs, outputs)
+		err = n.Forward(clgID, inputs, outputs)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -192,10 +192,10 @@ func (n *network) Execute(clgName string, inputs []reflect.Value) error {
 // Forward to other CLGs
 // Split the neural connection path
 // TODO
-func (n *network) Forward(clgName string, inputs, outputs []reflect.Value) error {
+func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
 
-	return nil, nil
+	return nil
 }
 
 // Listen to every CLGs input channel
@@ -203,49 +203,49 @@ func (n *network) Forward(clgName string, inputs, outputs []reflect.Value) error
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
-	for clgName, CLG := range n.CLGs {
-		go func(clgName string, CLG spec.CLG) {
+	for clgID, clgScope := range n.CLGs {
+		go func(clgID spec.ObjectID, CLG spec.CLG) {
 			for {
 				select {
-				case inputs := <-n.CLGs[clgName].Input:
+				case inputs := <-n.CLGs[clgID].Input:
 					go func() {
-						err := Execute(clgName, inputs)
+						err := n.Execute(clgID, inputs)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 						}
 					}()
 				}
 			}
-		}(clgName, CLG)
+		}(clgID, clgScope.CLG)
 	}
 
 	select {}
 }
 
 // TODO comment
-func (n *network) Receive(clgName string) ([]reflect.Value, error) {
+func (n *network) Receive(clgID spec.ObjectID) ([]reflect.Value, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
 
-	CLG, ok := n.CLGs[clgName]
+	clgScope, ok := n.CLGs[clgID]
 	if !ok {
-		return nil, maskAnyf(clgNotFoundError, clgName)
+		return nil, maskAnyf(clgNotFoundError, "%s", clgID)
 	}
 
-	outputs := <-CLG
+	outputs := <-clgScope.Output
 
 	return outputs, nil
 }
 
 // TODO comment
-func (n *network) Send(clgName string, inputs []reflect.Value) error {
+func (n *network) Send(clgID spec.ObjectID, inputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Send")
 
-	CLG, ok := n.CLGs[clgName]
+	clgScope, ok := n.CLGs[clgID]
 	if !ok {
-		return maskAnyf(clgNotFoundError, clgName)
+		return maskAnyf(clgNotFoundError, "%s", clgID)
 	}
 
-	CLG.Input <- inputs
+	clgScope.Input <- inputs
 
 	return nil
 }
