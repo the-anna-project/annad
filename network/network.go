@@ -5,14 +5,6 @@
 // finished its walk through the core network, the impulse's output is
 // translated back to the requesting signal and the signal is send back through
 // the gateway to its requestor.
-//
-// Note that this package defines a go generate statement to generate fully
-// functional source code for all CLGs.
-//
-// TODO
-//
-//     //go:generate ${GOPATH}/bin/clggen generate -p clg
-//
 package network
 
 import (
