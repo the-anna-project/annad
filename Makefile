@@ -46,7 +46,7 @@ goget:
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@# Install project dependencies.
 	@go get -d -v ./...
-	@go get github.com/xh3b4sd/loader
+	@go get github.com/xh3b4sd/clggen
 	@# Install dev dependencies.
 	@go get github.com/client9/misspell/cmd/misspell
 	@go get github.com/fzipp/gocyclo
