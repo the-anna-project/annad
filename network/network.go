@@ -5,6 +5,14 @@
 // finished its walk through the core network, the impulse's output is
 // translated back to the requesting signal and the signal is send back through
 // the gateway to its requestor.
+//
+// Note that this package defines a go generate statement to generate fully
+// functional source code for all CLGs.
+//
+// TODO
+//
+//     //go:generate ${GOPATH}/bin/clggen generate -p clg
+//
 package network
 
 import (
@@ -108,22 +116,12 @@ func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, e
 	// Check if the interface of the requested CLG matches the provided inputs.
 	// In case the interface does not match, it is not possible to call the
 	// requested CLG using the provided inputs. Then we return an error.
-	{
-		// TODO move to generated CLG code Inputs method and use it here
-		v := reflect.ValueOf(n).MethodByName("todo")
-		if !v.IsValid() {
-			return false, nil
-		}
-		t := v.Type()
-
-		var clgInputs []reflect.Type
-		for i := 0; i < t.NumIn(); i++ {
-			clgInputs = append(clgInputs, t.In(i))
-		}
-
-		if !reflect.DeepEqual(inputs, clgInputs) {
-			return false, maskAnyf(invalidCLGExecutionError, "inputs must match interface")
-		}
+	clgScope, ok := n.CLGs[clgID]
+	if !ok {
+		return false, maskAnyf(clgNotFoundError, "%s", clgID)
+	}
+	if !equalInputs(inputs, clgScope.CLG.Inputs()) {
+		return false, maskAnyf(invalidCLGExecutionError, "inputs must match interface")
 	}
 
 	// TODO check connections if the requested CLG should be emitted
@@ -142,48 +140,51 @@ func (n *network) Boot() {
 	})
 }
 
-// Process the calculation of the requested CLG
-// TODO
 func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]reflect.Value, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Calculate")
 
-	return nil, nil
+	clgScope, ok := n.CLGs[clgID]
+	if !ok {
+		return nil, maskAnyf(clgNotFoundError, "%s", clgID)
+	}
+
+	outputs, err := clgScope.CLG.Calculate(inputs)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return outputs, nil
 }
 
-// Execute CLG
-// TODO
 func (n *network) Execute(clgID spec.ObjectID, inputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
 
-	// Check if the requested CLG should be activated.
-	var activate bool
-	var err error
-	{
-		activate, err = n.Activate(clgID, inputs)
-		if err != nil {
-			return maskAny(err)
-		}
+	// Each CLG that is executed needs to decide if it wants to be activated.
+	// This happens using the Activate method. To make this decision the given
+	// input, the CLGs connections and behaviour properties are considered.
+	activate, err := n.Activate(clgID, inputs)
+	if err != nil {
+		return maskAny(err)
 	}
-
 	if !activate {
 		return nil
 	}
 
-	// Calculate
-	var outputs []reflect.Value
-	{
-		outputs, err = n.Calculate(clgID, inputs)
-		if err != nil {
-			return maskAny(err)
-		}
+	// Once activated, a CLG executes its actual implemented behaviour using
+	// Calculate. This behaviour can be anything. It is up to the CLG.
+	outputs, err := n.Calculate(clgID, inputs)
+	if err != nil {
+		return maskAny(err)
 	}
 
-	// Forward
-	{
-		err = n.Forward(clgID, inputs, outputs)
-		if err != nil {
-			return maskAny(err)
-		}
+	// After the CLGs calculation it can decide what to do next. Like Activate,
+	// it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
+	// might or might not forward its calculated results to one or more CLGs.
+	// All this depends on its inputs, calculated outputs, CLG connections and
+	// behaviour properties.
+	err = n.Forward(clgID, inputs, outputs)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
@@ -198,8 +199,6 @@ func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) 
 	return nil
 }
 
-// Listen to every CLGs input channel
-// TODO comment
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
@@ -222,7 +221,6 @@ func (n *network) Listen() {
 	select {}
 }
 
-// TODO comment
 func (n *network) Receive(clgID spec.ObjectID) ([]reflect.Value, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
 
@@ -236,7 +234,6 @@ func (n *network) Receive(clgID spec.ObjectID) ([]reflect.Value, error) {
 	return outputs, nil
 }
 
-// TODO comment
 func (n *network) Send(clgID spec.ObjectID, inputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Send")
 

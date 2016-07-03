@@ -74,6 +74,24 @@ func newCLGs() map[spec.ObjectID]clgScope {
 	return newCLGs
 }
 
+func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
+	var p []string
+	for _, v := range provided {
+		p = append(p, v.Type().String())
+	}
+
+	var i []string
+	for _, t := range implemented {
+		i = append(i, t.String())
+	}
+
+	if !reflect.DeepEqual(p, i) {
+		return false
+	}
+
+	return true
+}
+
 func prepareInput(imp spec.Impulse) []reflect.Value {
 	values := []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())}
 	return values
