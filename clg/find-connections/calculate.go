@@ -3,6 +3,7 @@ package findconnections
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/spf13/cast"
 
@@ -12,27 +13,20 @@ import (
 )
 
 func (c *clg) calculate(imp spec.Impulse, stage int, inputs []reflect.Value) (spec.Impulse, []spec.Strategy, error) {
-	if len(inputs) == 0 {
-		return nil, maskAnyf(invalidCLGExecutionError, "inputs must not be empty")
-	}
-
 	// We need all string representations of the given inputs. These information
 	// are used as peer IDs to lookup connections with other peers. The stage
 	// number is a peer. Each input type is a peer. Each input value is a peer.
 	// Note that peerIDs is of type chan string.
-	peerIDs, err := c.getPeerIDs(stage, inputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	peerIDs := c.getPeerIDs(stage, inputs)
 
 	// TODO
 	// storage
 	// asynch
 	// contextual scope
 	// stage, input type, input value
-	peers, err := findPeers(c, peerIDs)
+	peers, err := c.findPeers(peerIDs)
 	if err != nil {
-		return nil, maskAny(err)
+		return nil, nil, maskAny(err)
 	}
 
 	// simply return highest weighted top ten?
@@ -42,34 +36,27 @@ func (c *clg) calculate(imp spec.Impulse, stage int, inputs []reflect.Value) (sp
 
 // helper
 
-func getPeerIDs(stage int, inputs []reflect.Value) (chan string, error) {
+func (c *clg) getPeerIDs(stage int, inputs []reflect.Value) chan string {
 	cap := 1 + 2*len(inputs)
 	peerIDs := make(chan string, cap)
 
 	// Convert stage value to string.
-	peerIDs = append(peerIDs, "stage:"+cast.ToString(stage))
+	peerIDs <- "stage:" + cast.ToString(stage)
 
 	// Convert input types to strings.
 	for _, v := range inputs {
-		peerIDs = append(peerIDs, "input-type:"+v.Type().String())
+		peerIDs <- "input-type:" + v.Type().String()
 	}
 
 	// Convert input values to strings.
 	for _, v := range inputs {
-		casted, err := cast.ToString(v.Interface())
-		if err != nil {
-			// TODO In case the cast library fails, it means it cannot convert the
-			// given type into string. This might happen. We need to monitor which
-			// types this errors cause and improve the conversion if necessary.
-			continue
-		}
-		peerIDs = append(peerIDs, "input-value:"+casted)
+		peerIDs <- "input-value:" + cast.ToString(v.Interface())
 	}
 
-	return peerIDs, nil
+	return peerIDs
 }
 
-func findPeers(c *Collection, peerIDs chan string) ([]spec.Strategy, error) {
+func (c *clg) findPeers(peerIDs chan string) ([]spec.Strategy, error) {
 	pipeline := make(chan spec.Strategy, cap(peerIDs))
 	defer close(pipeline)
 
@@ -102,7 +89,7 @@ func findPeers(c *Collection, peerIDs chan string) ([]spec.Strategy, error) {
 				}
 
 				var peer spec.Strategy
-				err := json.Unmarshal([]byte(value), &peer)
+				err = json.Unmarshal([]byte(value), &peer)
 				if err != nil {
 					return maskAny(err)
 				}
@@ -121,7 +108,7 @@ func findPeers(c *Collection, peerIDs chan string) ([]spec.Strategy, error) {
 	}
 
 	// Execute the worker pool and wait for it to be finished.
-	err := maybeReturnAndLogErrors(c, newWorkerPool.Execute())
+	err = c.maybeReturnAndLogErrors(newWorkerPool.Execute())
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -129,7 +116,7 @@ func findPeers(c *Collection, peerIDs chan string) ([]spec.Strategy, error) {
 	return peers, nil
 }
 
-func maybeReturnAndLogErrors(c *Collection, errors chan error) error {
+func (c *clg) maybeReturnAndLogErrors(errors chan error) error {
 	var executeErr error
 
 	for err := range errors {

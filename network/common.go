@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"sync/atomic"
 
-	//"github.com/xh3b4sd/anna/clg/find-connections"
 	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/clg/find-connections"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -13,6 +13,7 @@ import (
 
 func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.ObjectID]clgScope {
 	for name := range CLGs {
+		CLGs[name].CLG.SetLog(n.Log)
 		CLGs[name].CLG.SetStorage(n.Storage)
 	}
 
@@ -58,7 +59,7 @@ type clgScope struct {
 
 func newCLGs() map[spec.ObjectID]clgScope {
 	newList := []spec.CLG{
-	//findconnections.MustNew(),
+		findconnections.MustNew(),
 	}
 
 	newCLGs := map[spec.ObjectID]clgScope{}
