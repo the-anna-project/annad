@@ -4,6 +4,33 @@ import (
 	"reflect"
 )
 
+// InputRequest represents the request provided to a CLG to ask it to do some
+// work.
+type InputRequest struct {
+	// Source represents the ID of the CLG that sends the message.
+	Source ObjectID
+
+	// Destination represents the ID of the CLG that receives the message.
+	Destination ObjectID
+
+	// Inputs represents the input values intended to be used for the requested
+	// CLG execution.
+	Inputs []reflect.Value
+}
+
+// OutputResponse represents the response created by a requested CLG.
+type OutputResponse struct {
+	// Source represents the ID of the CLG that sends the message.
+	Source ObjectID
+
+	// Destination represents the ID of the CLG that receives the message.
+	Destination ObjectID
+
+	// Outputs represents the output values being calculated during the requested
+	// CLG execution.
+	Outputs []reflect.Value
+}
+
 // Network represents the artificial neural network. It provides access for
 // external events to the internal neural activities through a gateway.
 // Internally CLGs interact like neurons. The following illustrates the
@@ -86,11 +113,11 @@ type Network interface {
 
 	Object
 
-	Receive(clgID ObjectID) ([]reflect.Value, error)
+	Receive(clgID ObjectID) (OutputResponse, error)
 
 	// TODO network add reward
 
-	Send(clgID ObjectID, inputs []reflect.Value) error
+	Send(request InputRequest) error
 
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so

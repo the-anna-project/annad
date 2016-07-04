@@ -13,9 +13,9 @@ import (
 // receiver
 
 func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.ObjectID]clgScope {
-	for name := range CLGs {
-		CLGs[name].CLG.SetLog(n.Log)
-		CLGs[name].CLG.SetStorage(n.Storage)
+	for ID := range CLGs {
+		CLGs[ID].CLG.SetLog(n.Log)
+		CLGs[ID].CLG.SetStorage(n.Storage)
 	}
 
 	return CLGs
@@ -50,6 +50,16 @@ func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal,
 	return newListener
 }
 
+func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]clgScope) map[string]spec.ObjectID {
+	var clgIDs map[string]spec.ObjectID
+
+	for ID, clgScope := range CLGs {
+		clgIDs[clgScope.CLG.GetName()] = ID
+	}
+
+	return clgIDs
+}
+
 // private
 
 func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
@@ -73,11 +83,11 @@ func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
 // joinRequestInputs joins all input lists of the given input requests
 // together. The order of the joined inputs equals the order of the given input
 // requests.
-func joinRequestInputs(inputRequests []inputRequest) []reflect.Value {
+func joinRequestInputs(inputRequests []spec.InputRequest) []reflect.Value {
 	var inputs []reflect.Value
 
 	for _, ir := range inputRequests {
-		inputs = append(inputs, ir.Inputs)
+		inputs = append(inputs, ir.Inputs...)
 	}
 
 	return inputs
@@ -85,32 +95,8 @@ func joinRequestInputs(inputRequests []inputRequest) []reflect.Value {
 
 type clgScope struct {
 	CLG    spec.CLG
-	Input  chan inputRequest
-	Output chan outputResponse
-}
-
-type inputRequest struct {
-	// Source represents the ID of the CLG that sends the message.
-	Source string
-
-	// Destination represents the ID of the CLG that receives the message.
-	Destination string
-
-	// Inputs represents the input values intended to be used for the requested
-	// CLG exection.
-	Inputs []reflect.Value
-}
-
-type outputResponse struct {
-	// Source represents the ID of the CLG that sends the message.
-	Source string
-
-	// Destination represents the ID of the CLG that receives the message.
-	Destination string
-
-	// Outputs represents the output values being calculated during the requested
-	// CLG exection.
-	Outputs []reflect.Value
+	Input  chan spec.InputRequest
+	Output chan spec.OutputResponse
 }
 
 func newCLGs() map[spec.ObjectID]clgScope {
@@ -124,34 +110,49 @@ func newCLGs() map[spec.ObjectID]clgScope {
 	for _, CLG := range newList {
 		newCLGs[CLG.GetID()] = clgScope{
 			CLG:    CLG,
-			Input:  make(chan []reflect.Value, 10),
-			Output: make(chan []reflect.Value, 10),
+			Input:  make(chan spec.InputRequest, 10),
+			Output: make(chan spec.OutputResponse, 10),
 		}
 	}
 
 	return newCLGs
 }
 
-func prepareInput(imp spec.Impulse) []reflect.Value {
-	values := []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())}
-	return values
+func prepareInput(imp spec.Impulse, source, destination spec.ObjectID) spec.InputRequest {
+	request := spec.InputRequest{
+		Source:      source,
+		Destination: destination,
+		Inputs:      []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())},
+	}
+
+	return request
 }
 
-func prepareOutput(values []reflect.Value) (spec.Impulse, error) {
-	if len(values) == 0 {
+func prepareOutput(response spec.OutputResponse) (spec.Impulse, error) {
+	if len(response.Outputs) == 0 {
 		return nil, maskAnyf(invalidInterfaceError, "output must not be empty")
 	}
 
-	imp, ok := values[0].Interface().(spec.Impulse)
+	imp, ok := response.Outputs[0].Interface().(spec.Impulse)
 	if !ok {
 		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
 	}
 
 	var output string
-	for _, v := range values[1:] {
+	for _, v := range response.Outputs[1:] {
 		output += v.String()
 	}
 	imp.SetOutput(output)
 
 	return imp, nil
+}
+
+func responseToRequest(response spec.OutputResponse) spec.InputRequest {
+	request := spec.InputRequest{
+		Source:      response.Source,
+		Destination: response.Destination,
+		Inputs:      response.Outputs,
+	}
+
+	return request
 }
