@@ -52,10 +52,65 @@ func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal,
 
 // private
 
+func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
+	var p []string
+	for _, v := range provided {
+		p = append(p, v.Type().String())
+	}
+
+	var i []string
+	for _, t := range implemented {
+		i = append(i, t.String())
+	}
+
+	if !reflect.DeepEqual(p, i) {
+		return false
+	}
+
+	return true
+}
+
+// joinRequestInputs joins all input lists of the given input requests
+// together. The order of the joined inputs equals the order of the given input
+// requests.
+func joinRequestInputs(inputRequests []inputRequest) []reflect.Value {
+	var inputs []reflect.Value
+
+	for _, ir := range inputRequests {
+		inputs = append(inputs, ir.Inputs)
+	}
+
+	return inputs
+}
+
 type clgScope struct {
 	CLG    spec.CLG
-	Input  chan []reflect.Value
-	Output chan []reflect.Value
+	Input  chan inputRequest
+	Output chan outputResponse
+}
+
+type inputRequest struct {
+	// Source represents the ID of the CLG that sends the message.
+	Source string
+
+	// Destination represents the ID of the CLG that receives the message.
+	Destination string
+
+	// Inputs represents the input values intended to be used for the requested
+	// CLG exection.
+	Inputs []reflect.Value
+}
+
+type outputResponse struct {
+	// Source represents the ID of the CLG that sends the message.
+	Source string
+
+	// Destination represents the ID of the CLG that receives the message.
+	Destination string
+
+	// Outputs represents the output values being calculated during the requested
+	// CLG exection.
+	Outputs []reflect.Value
 }
 
 func newCLGs() map[spec.ObjectID]clgScope {
@@ -75,24 +130,6 @@ func newCLGs() map[spec.ObjectID]clgScope {
 	}
 
 	return newCLGs
-}
-
-func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
-	var p []string
-	for _, v := range provided {
-		p = append(p, v.Type().String())
-	}
-
-	var i []string
-	for _, t := range implemented {
-		i = append(i, t.String())
-	}
-
-	if !reflect.DeepEqual(p, i) {
-		return false
-	}
-
-	return true
 }
 
 func prepareInput(imp spec.Impulse) []reflect.Value {

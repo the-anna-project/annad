@@ -105,17 +105,6 @@ type network struct {
 func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
 
-	// Check if the interface of the requested CLG matches the provided inputs.
-	// In case the interface does not match, it is not possible to call the
-	// requested CLG using the provided inputs. Then we return an error.
-	clgScope, ok := n.CLGs[clgID]
-	if !ok {
-		return false, maskAnyf(clgNotFoundError, "%s", clgID)
-	}
-	if !equalInputs(inputs, clgScope.CLG.Inputs()) {
-		return false, maskAnyf(invalidCLGExecutionError, "inputs must match interface")
-	}
-
 	// TODO check connections if the requested CLG should be emitted
 	// TODO check connections if an error should be returned in case the CLG should not be activated (learn if error should be returned or not)
 
@@ -196,15 +185,48 @@ func (n *network) Listen() {
 
 	for clgID, clgScope := range n.CLGs {
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
+			// This is the list of input requests for a CLG execution. We wait a
+			// certain amount of time to collect inputs until the requested CLG's
+			// interface is fullfilled somehow.
+			var inputRequests []inputRequest
+
 			for {
 				select {
-				case inputs := <-n.CLGs[clgID].Input:
-					go func() {
-						err := n.Execute(clgID, inputs)
+				case request := <-n.CLGs[clgID].Input:
+					// Check if the interface of the requested CLG matches the provided
+					// inputs. In case the interface does not match, it is not possible
+					// to call the requested CLG using the provided inputs. Then we
+					// collect this specific request and wait some time for other input
+					// requests to arrive.
+					if !equalInputs(request.Inputs, clgScope.CLG.Inputs()) {
+						inputRequests = append(inputRequests, request)
+					}
+
+					// We should only hold a rather small number of pending requests. A
+					// request is considered pending when it is not able to fullfill the
+					// requested CLG's interface on its own. Especially the untrained
+					// network tends to throw around signals without that much sense.
+					// Then the request queue for each CLG can grow and increase the
+					// process memory. That is why we cap the queue. TODO The cap must be
+					// learned. For ow we hard code it to 10.
+					var maxPending = 10
+					if len(inputRequests) > maxPending {
+						inputRequests = inputRequests[1:]
+					}
+
+					// TODO permute the requests until some combination causes the interface to be fullfilled.
+					// TODO create a properly ordered list of input requests for the CLG execution below.
+
+					// In case the interface is fullfilled we can finally execute the CLG.
+					go func(inputRequests []inputRequest) {
+						err := n.Execute(clgID, joinRequestInputs(inputRequests))
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+							return
 						}
-					}()
+
+						// TODO we need to reward the CLG connections that forwarded signals together correctly
+					}(inputRequests)
 				}
 			}
 		}(clgID, clgScope.CLG)
@@ -213,7 +235,7 @@ func (n *network) Listen() {
 	select {}
 }
 
-func (n *network) Receive(clgID spec.ObjectID) ([]reflect.Value, error) {
+func (n *network) Receive(clgID spec.ObjectID) (outputResponse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
 
 	clgScope, ok := n.CLGs[clgID]
@@ -226,7 +248,7 @@ func (n *network) Receive(clgID spec.ObjectID) ([]reflect.Value, error) {
 	return outputs, nil
 }
 
-func (n *network) Send(clgID spec.ObjectID, inputs []reflect.Value) error {
+func (n *network) Send(clgID spec.ObjectID, request inputRequest) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Send")
 
 	clgScope, ok := n.CLGs[clgID]
@@ -234,7 +256,7 @@ func (n *network) Send(clgID spec.ObjectID, inputs []reflect.Value) error {
 		return maskAnyf(clgNotFoundError, "%s", clgID)
 	}
 
-	clgScope.Input <- inputs
+	clgScope.Input <- request
 
 	return nil
 }
@@ -282,7 +304,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// formerly sent input triggered neural connections up to a point where a
 		// connection path was drawn. This connection path started with the Input
 		// CLG and ended now here with the Output CLG.
-		output, err := n.Receive("Output")
+		response, err := n.Receive("Output")
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -291,8 +313,8 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// prepare the generated output to be the input for the next iteration.
 		// For the case of not having another iteration, we set the calculated
 		// output to the current impulse.
-		input = output
-		imp, err = prepareOutput(output)
+		input = response.Outputs
+		imp, err = prepareOutput(response.Outputs)
 		if err != nil {
 			return nil, maskAny(err)
 		}
