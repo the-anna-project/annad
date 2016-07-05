@@ -127,7 +127,7 @@ func (n *network) Boot() {
 		n.CLGs = n.configureCLGs(n.CLGs)
 		n.CLGIDs = n.mapCLGIDs(n.CLGs)
 
-		n.Listen()
+		go n.Listen()
 		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
 }
