@@ -119,6 +119,7 @@ func (n *network) Boot() {
 		n.CLGs = n.configureCLGs(n.CLGs)
 		n.CLGIDs = n.mapCLGIDs(n.CLGs)
 
+		n.Listen()
 		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
 }
@@ -139,7 +140,7 @@ func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]refl
 	return outputs, nil
 }
 
-func (n *network) Execute(clgID spec.ObjectID, inputs []reflect.Value) error {
+func (n *network) Execute(clgID spec.ObjectID, request spec.InputRequest) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
 
 	// Each CLG that is executed needs to decide if it wants to be activated.
@@ -159,6 +160,8 @@ func (n *network) Execute(clgID spec.ObjectID, inputs []reflect.Value) error {
 	if err != nil {
 		return maskAny(err)
 	}
+
+	// TODO we need to reward the CLG connections that forwarded signals together correctly
 
 	// After the CLGs calculation it can decide what to do next. Like Activate,
 	// it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
@@ -182,59 +185,60 @@ func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) 
 	return nil
 }
 
+// TODO
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
 	for clgID, clgScope := range n.CLGs {
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
-			// This is the list of input requests for a CLG execution. We wait a
-			// certain amount of time to collect inputs until the requested CLG's
-			// interface is fulfilled somehow.
-			var inputRequests []spec.InputRequest
+			// This is the queue of input requests. We collect inputs until the
+			// requested CLG's interface is fulfilled somehow. Then the CLG is
+			// executed and the inputs used to execute the CLG are removed from the
+			// queue.
+			var queue []spec.InputRequest
+			desired := CLG.Inputs()
 
 			for {
 				select {
 				case request := <-n.CLGs[clgID].Input:
-					// Check if the interface of the requested CLG matches the provided
-					// inputs. In case the interface does not match, it is not possible
-					// to call the requested CLG using the provided inputs. Then we
-					// collect this specific request and wait some time for other input
-					// requests to arrive.
-					if !equalInputs(request.Inputs, CLG.Inputs()) {
-						inputRequests = append(inputRequests, request)
-					}
-
 					// We should only hold a rather small number of pending requests. A
 					// request is considered pending when it is not able to fulfill the
 					// requested CLG's interface on its own. Especially the untrained
 					// network tends to throw around signals without that much sense.
 					// Then the request queue for each CLG can grow and increase the
 					// process memory. That is why we cap the queue. TODO The cap must be
-					// learned. For ow we hard code it to 10.
+					// learned. For now we hard code it to 10.
 					var maxPending = 10
-					if len(inputRequests) > maxPending {
-						inputRequests = inputRequests[1:]
+					queue = append(queue, request)
+					if len(queue) > maxPending {
+						queue = queue[1:]
 					}
 
-					// TODO permute the requests until some combination causes the interface to be fulfilled.
-					// TODO create a properly ordered list of input requests for the CLG execution below.
+					// Check if the interface of the requested CLG matches the provided
+					// inputs. In case the interface does not match, it is not possible
+					// to call the requested CLG using the provided inputs. Then we do
+					// nothing, but wait some time for other input requests to arrive.
+					execute, matching, newQueue, err := n.extractMatchingInputRequests(queue, desired)
+					if err != nil {
+						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						continue
+					}
+					if !execute {
+						continue
+					}
+					queue = newQueue
 
 					// In case the interface is fulfilled we can finally execute the CLG.
-					go func(inputRequests []spec.InputRequest) {
-						err := n.Execute(clgID, joinRequestInputs(inputRequests))
+					go func(matching []spec.InputRequest) {
+						err := n.Execute(clgID, matching)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-							return
 						}
-
-						// TODO we need to reward the CLG connections that forwarded signals together correctly
-					}(inputRequests)
+					}(matching)
 				}
 			}
 		}(clgID, clgScope.CLG)
 	}
-
-	select {}
 }
 
 func (n *network) Receive(clgID spec.ObjectID) (spec.OutputResponse, error) {

@@ -7,6 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/find-connections"
+	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -19,6 +20,40 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.Object
 	}
 
 	return CLGs
+}
+
+func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desired []reflect.Type) (bool, []spec.InputRequest, []spec.InputRequest, error) {
+	permutationList, err := inputRequestsToPermutationList(queue, desired)
+	if err != nil {
+		return false, nil, nil, maskAny(err)
+	}
+
+	var execute bool
+	var matching []spec.InputRequest
+	var newQueue []spec.InputRequest
+	for {
+		if !equalTypes(n.permutationListToTypes(permutationList), desired) { // to []reflect.Types{...}
+			err := n.PermutationFactory.PermuteBy(permutationList, 1)
+			if permutation.IsMaxGrowthReached(err) {
+				// We cannot permute the given list anymore. There is nothing useful
+				// for a CLG. So we only return signaling not to execute this CLG with
+				// the provided input.
+				return false, nil, nil, nil
+			} else if err != nil {
+				return false, nil, nil, maskAny(err)
+			}
+			continue
+		}
+
+		execute = true
+		matching, newQueue, err = filterInputRequests(permutationList, queue)
+		if err != nil {
+			return false, nil, nil, maskAny(err)
+		}
+		break
+	}
+
+	return execute, matching, newQueue, nil
 }
 
 func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal, error) {
@@ -60,24 +95,114 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]clgScope) map[string]spec.Obj
 	return clgIDs
 }
 
+func (n *network) permutationListToTypes(permutationList spec.PermutationList) ([]reflect.Type, error) {
+	err := n.PermutationFactory.MapTo(permutationList)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	members := permutationList.GetMembers()
+
+	var types []reflect.Type
+
+	for _, m := range members {
+		request, ok := m.(spec.InputRequest)
+		if !ok {
+			return nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
+		}
+
+		for _, v := range request.Inputs {
+			types = append(types, v.Type())
+		}
+	}
+
+	return types, nil
+}
+
 // private
 
-func equalInputs(provided []reflect.Value, implemented []reflect.Type) bool {
-	var p []string
-	for _, v := range provided {
-		p = append(p, v.Type().String())
+func containsInputRequest(list []spec.InputRequest, item spec.InputRequest) bool {
+	for _, r := range list {
+		if equalInputRequest(r, item) {
+			return true
+		}
 	}
 
-	var i []string
-	for _, t := range implemented {
-		i = append(i, t.String())
-	}
+	return false
+}
 
-	if !reflect.DeepEqual(p, i) {
+func equalInputRequest(a spec.InputRequest, b spec.InputRequest) bool {
+	if a.Source != b.Source {
+		return false
+	}
+	if a.Destination != b.Destination {
+		return false
+	}
+	if !reflect.DeepEqual(a.Inputs, b.Inputs) {
 		return false
 	}
 
 	return true
+}
+
+// equalTypes checks if the given two lists are equal in their ordered values.
+func equalTypes(a, b []reflect.Type) bool {
+	for _, at := range a {
+		for _, bt := range b {
+			if at.String() != bt.String() {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
+	err := n.PermutationFactory.MapTo(permutationList)
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	members := permutationList.GetMembers()
+
+	var matching []spec.InputRequest
+	for _, m := range members {
+		request, ok := m.(spec.InputRequest)
+		if !ok {
+			return nil, nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
+		}
+		matching = append(matching, request)
+	}
+
+	var newQueue []spec.InputRequest
+	matchingSeen := map[*spec.InputRequest]struct{}{}
+	for _, r := range queue {
+		_, ok := matchingSeen[&r]
+		if containsInputRequest(matching, r) && !ok {
+			matchingSeen[&r] = struct{}{}
+			continue
+		}
+		newQueue = append(newQueue, request)
+	}
+
+	return matching, newQueue, nil
+}
+
+func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect.Type) (spec.PermutationList, error) {
+	var values []interface{}
+	for _, ir := range queued {
+		values = append(values, ir)
+	}
+
+	newConfig := permutation.DefaultListConfig()
+	newConfig.MaxGrowth = len(desired)
+	newConfig.Values = values
+
+	permutationList, err = permutation.NewList(newConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return permutationList, nil
 }
 
 // joinRequestInputs joins all input lists of the given input requests
