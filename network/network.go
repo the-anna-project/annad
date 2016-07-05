@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -29,9 +30,10 @@ const (
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
-	Log         spec.Log
-	Storage     spec.Storage
-	TextGateway spec.Gateway
+	Log                spec.Log
+	PermutationFactory spec.PermutationFactory
+	Storage            spec.Storage
+	TextGateway        spec.Gateway
 
 	// Settings.
 
@@ -45,15 +47,21 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new network
 // object by best effort.
 func DefaultConfig() Config {
+	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := Config{
-		Log:         log.NewLog(log.DefaultConfig()),
-		Storage:     newStorage,
-		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
+		Log:                log.NewLog(log.DefaultConfig()),
+		PermutationFactory: newPermutationFactory,
+		Storage:            newStorage,
+		TextGateway:        gateway.NewGateway(gateway.DefaultConfig()),
 	}
 
 	return newConfig
@@ -140,8 +148,10 @@ func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]refl
 	return outputs, nil
 }
 
-func (n *network) Execute(clgID spec.ObjectID, request spec.InputRequest) error {
+func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
+
+	inputs := joinRequestInputs(requests)
 
 	// Each CLG that is executed needs to decide if it wants to be activated.
 	// This happens using the Activate method. To make this decision the given

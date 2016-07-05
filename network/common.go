@@ -32,7 +32,11 @@ func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desire
 	var matching []spec.InputRequest
 	var newQueue []spec.InputRequest
 	for {
-		if !equalTypes(n.permutationListToTypes(permutationList), desired) { // to []reflect.Types{...}
+		types, err := n.permutationListToTypes(permutationList)
+		if err != nil {
+			return false, nil, nil, maskAny(err)
+		}
+		if !equalTypes(types, desired) { // to []reflect.Types{...}
 			err := n.PermutationFactory.PermuteBy(permutationList, 1)
 			if permutation.IsMaxGrowthReached(err) {
 				// We cannot permute the given list anymore. There is nothing useful
@@ -46,7 +50,7 @@ func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desire
 		}
 
 		execute = true
-		matching, newQueue, err = filterInputRequests(permutationList, queue)
+		matching, newQueue, err = n.filterInputRequests(permutationList, queue)
 		if err != nil {
 			return false, nil, nil, maskAny(err)
 		}
@@ -157,7 +161,8 @@ func equalTypes(a, b []reflect.Type) bool {
 	return true
 }
 
-func filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
+// TODO
+func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
 	err := n.PermutationFactory.MapTo(permutationList)
 	if err != nil {
 		return nil, nil, maskAny(err)
@@ -173,6 +178,7 @@ func filterInputRequests(permutationList spec.PermutationList, queue []spec.Inpu
 		matching = append(matching, request)
 	}
 
+	// TODO test
 	var newQueue []spec.InputRequest
 	matchingSeen := map[*spec.InputRequest]struct{}{}
 	for _, r := range queue {
@@ -181,7 +187,7 @@ func filterInputRequests(permutationList spec.PermutationList, queue []spec.Inpu
 			matchingSeen[&r] = struct{}{}
 			continue
 		}
-		newQueue = append(newQueue, request)
+		newQueue = append(newQueue, r)
 	}
 
 	return matching, newQueue, nil
@@ -189,7 +195,7 @@ func filterInputRequests(permutationList spec.PermutationList, queue []spec.Inpu
 
 func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect.Type) (spec.PermutationList, error) {
 	var values []interface{}
-	for _, ir := range queued {
+	for _, ir := range queue {
 		values = append(values, ir)
 	}
 
@@ -197,7 +203,7 @@ func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect
 	newConfig.MaxGrowth = len(desired)
 	newConfig.Values = values
 
-	permutationList, err = permutation.NewList(newConfig)
+	permutationList, err := permutation.NewList(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

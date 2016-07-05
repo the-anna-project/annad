@@ -105,7 +105,7 @@ type Network interface {
 
 	Calculate(clgID ObjectID, inputs []reflect.Value) ([]reflect.Value, error)
 
-	Execute(clgID ObjectID, inputs []reflect.Value) error
+	Execute(clgID ObjectID, requests []InputRequest) error
 
 	Forward(clgID ObjectID, inputs, outputs []reflect.Value) error
 
