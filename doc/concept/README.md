@@ -22,7 +22,6 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [instrumentation](instrumentation.md)
 - [interface](interface.md)
 - [logging](logging.md)
+- [network](network.md)
 - [output](output.md)
 - [permutation factory](permutation_factory.md)
-- [stage](stage.md)
-- [strategy](strategy.md)
