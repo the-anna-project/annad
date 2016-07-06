@@ -277,13 +277,3 @@ func prepareOutput(response spec.OutputResponse) (spec.Impulse, error) {
 
 	return imp, nil
 }
-
-func responseToRequest(response spec.OutputResponse) spec.InputRequest {
-	request := spec.InputRequest{
-		Source:      response.Source,
-		Destination: response.Destination,
-		Inputs:      response.Outputs,
-	}
-
-	return request
-}

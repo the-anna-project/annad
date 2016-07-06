@@ -41,40 +41,40 @@ type OutputResponse struct {
 //     At the very beginning there is the neural network. It initializes all known
 //     CLGs. Every CLG has an input and an output channel.
 //
-// Listen
+// Network.Listen
 //
 //     The network listens on each CLG input channel using Listen.
 //
-// Trigger
+// Network.Trigger
 //
 //     When there is some signal coming through the gateway, the received
 //     signal is translated into an Impulse. This Impulse is then triggered to
 //     walk through the network using Trigger. Here is the only hard coded CLG
 //     structure: the Input and Output CLG.
 //
-// Send
+// Network.Send
 //
 //     The Send method is used to emit the Input CLG by providing the impulses
 //     input. Once send, the input is submitted to the neural network.
 //
-// Execute
+// Network.Execute
 //
 //     As stated above, Listen was initialized to wait for inputs of each CLG.
 //     Now the Input CLG received some input. Thus it is executed using Execute
 //     and the provided input.
 //
-// Activate
+// Network.Activate
 //
 //     Each CLG that is executed needs to decide if it wants to be activated.
 //     This happens using the Activate method. To make this decision the given
 //     input, the CLGs connections and behaviour properties are considered.
 //
-// Calculate
+// Network.Calculate
 //
 //     Once activated, a CLG executes its actual implemented behaviour using
 //     Calculate. This behaviour can be anything. It is up to the CLG.
 //
-// Forward
+// Network.Forward
 //
 //     After the CLGs calculation it can decide what to do next. Like Activate,
 //     it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
@@ -82,7 +82,7 @@ type OutputResponse struct {
 //     All this depends on its inputs, calculated outputs, CLG connections and
 //     behaviour properties.
 //
-// Receive
+// Network.Receive
 //
 //     In the Trigger method, the Input CLG takes the Impulse's input and
 //     causes the neural network to trigger. There the Output CLG is asked to
@@ -115,7 +115,7 @@ type Network interface {
 
 	Receive(clgID ObjectID) (OutputResponse, error)
 
-	// TODO network add reward
+	// TODO add reward and punish
 
 	Send(request InputRequest) error
 

@@ -200,6 +200,14 @@ func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
 	for clgID, clgScope := range n.CLGs {
+		// The Output CLG is the only other special CLG, next to the Input CLG.
+		// Only these both are treated specially. Here we exclude the Output CLG
+		// from the listener, because Network.Trigger is already listening for
+		// responses from it.
+		if clgScope.CLG.GetName() == "Output" {
+			continue
+		}
+
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
 			// This is the queue of input requests. We collect inputs until the
 			// requested CLG's interface is fulfilled somehow. Then the CLG is
@@ -320,16 +328,24 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// formerly sent input triggered neural connections up to a point where a
 		// connection path was drawn. This connection path started with the Input
 		// CLG and ended now here with the Output CLG.
+		//
+		// TODO we have a concurrency issue here. The network's CLGs are connected
+		// through channels. The output received here is not necessarily related to
+		// the input we send above. In case we want to deal with concurrent
+		// requests at a later point of time, we need to solve this issue. Current
+		// idea would be to maintain some sort of output queue that contains all
+		// generated outputs. When waiting on the correct output related to our
+		// send input, we would need to go through the output queue until we find
+		// the right output. Unimportant outputs would be requeued. The right
+		// output would be recognized by the ID of the impulse being responded with
+		// the output together.
 		response, err := n.Receive(n.CLGIDs["output"])
 		if err != nil {
 			return nil, maskAny(err)
 		}
 
-		// The current iteration is over. For the case of another iteration we also
-		// prepare the generated output to be the input for the next iteration.
-		// For the case of not having another iteration, we set the calculated
-		// output to the current impulse.
-		request = responseToRequest(response)
+		// The current iteration is over. For the case of not having another
+		// iteration, we set the calculated output to the current impulse.
 		imp, err = prepareOutput(response)
 		if err != nil {
 			return nil, maskAny(err)
@@ -352,6 +368,10 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		if match {
 			break
 		}
+
+		// TODO move reward/punish to output CLG?
+		// TODO expectation met == reward?
+		// TODO expectation NOT met == punishing?
 	}
 
 	return imp, nil
