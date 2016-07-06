@@ -67,4 +67,3 @@ The Anna project is open source and license free software. This means I am
 holding the copyright in the first place to be defensive for now. Further I am
 open to change that, as long as the project stay open, free and serves
 humanity. See [LICENSE](LICENSE).
-
