@@ -12,4 +12,11 @@ output CLG, it is returned. In case the given expectation, if any given, does
 not match the responded output, the involved connections of the failed
 iteration will be "punished", otherwise "rewarded".
 
+The following picture illustrates the only hard coded Input and Output CLGs
+using the red circles. They represent the entrance and exit of the neural
+network. The black arrows represent information and behaviour flow into certain
+directions from peers to peers. Here each peer decides on its own how to
+proceed, until the walk through the neural network is finished and some final
+output is generated.
+
 ![network](image/network.png)
