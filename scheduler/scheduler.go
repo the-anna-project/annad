@@ -84,20 +84,11 @@ func DefaultConfig() Config {
 //         ID1,timestamp1,ID2,timestamp2,...
 //
 func NewScheduler(config Config) (spec.Scheduler, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	newScheduler := &scheduler{
 		Config: config,
 
 		BootOnce: sync.Once{},
-		ID:       newID,
+		ID:       id.MustNew(),
 		Mutex:    sync.Mutex{},
 		Type:     ObjectTypeScheduler,
 	}

@@ -94,18 +94,9 @@ func DefaultConfig() Config {
 
 // NewLog creates a new configured log object.
 func NewLog(config Config) spec.Log {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newLog := log{
 		Config:            config,
-		ID:                newID,
+		ID:                id.MustNew(),
 		Mutex:             sync.Mutex{},
 		RegisteredObjects: []spec.ObjectType{},
 		Type:              spec.ObjectType(ObjectTypeLog),

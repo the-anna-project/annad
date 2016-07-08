@@ -35,20 +35,11 @@ func DefaultConfig() Config {
 
 // NewGateway creates a new configured gateway object.
 func NewGateway(config Config) spec.Gateway {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newGateway := &gateway{
 		Closed: false,
 		Closer: make(chan struct{}, 1),
 		Config: config,
-		ID:     newID,
+		ID:     id.MustNew(),
 		Link:   make(chan spec.Signal, 1000),
 		Mutex:  sync.Mutex{},
 		Type:   spec.ObjectType(ObjectTypeGateway),
