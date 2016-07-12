@@ -49,12 +49,13 @@ AI lives from its intelligence. This can only be achieved by information that
 are more or less structured. Business logic and state must be fully decoupled.
 That way Anna is able to completely backup and restore her whole state. Her
 inner workings aim to be that flexible and dynamic that intelligence arises
-from the combination of sufficient [strategies](/doc/concept/strategy.md) and
-information provided by the sorounding environment. The concept of having such
-a state model is important for a lot of reasons. State can be backed up and
-restored. Once Anna is shut down, she can backup her state. Once she is coming
-back to life, she can restore her state like nothing happened. Imagine to test
-a specific part or structure of some self awareness. Think about analysing,
-debugging and manipulating Anna's mind. Future dreams go along the matrix way.
-Upload the state of a doctor's mind. Inject the knowledge of a helicopter
-pilot. You name it.
+from the combination of sufficient [connections](/doc/concept/connection.md)
+between [inputs](/doc/concept/input.md), [outputs](/doc/concept/output.md) and
+[connections](/doc/concept/connection.md) provided by the sorounding
+environment. The concept of having such a state model is important for a lot of
+reasons. State can be backed up and restored. Once Anna is shut down, she can
+backup her state. Once she is coming back to life, she can restore her state
+like nothing happened. Imagine to test a specific part or structure of some
+self awareness. Think about analysing, debugging and manipulating Anna's mind.
+Future dreams go along the matrix way.  Upload the state of a doctor's mind.
+Inject the knowledge of a helicopter pilot. You name it.

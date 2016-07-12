@@ -33,7 +33,7 @@ way.
 # documentation
 All documentation is done using markdown file within the [doc/](doc) directory.
 Code documentation can also be found at
-https://godoc.org/github.com/xh3b4sd/anna.
+[godoc](https://godoc.org/github.com/xh3b4sd/anna).
 
 - [api](doc/api)
 - [concept](doc/concept)

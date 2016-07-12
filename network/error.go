@@ -36,13 +36,6 @@ func IsCLGNotFound(err error) bool {
 	return errgo.Cause(err) == clgNotFoundError
 }
 
-var invalidCLGExecutionError = errgo.New("invalid CLG execution")
-
-// IsInvalidCLGExecution asserts invalidCLGExecutionError.
-func IsInvalidCLGExecution(err error) bool {
-	return errgo.Cause(err) == invalidCLGExecutionError
-}
-
 var invalidInterfaceError = errgo.New("invalid interface")
 
 // IsInvalidInterface asserts invalidInterfaceError.

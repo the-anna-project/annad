@@ -7,13 +7,15 @@ import (
 // CLG TODO
 type CLG interface {
 	// TODO
-	Execute(inputs []reflect.Value) ([]reflect.Value, error)
+	Calculate(inputs []reflect.Value) ([]reflect.Value, error)
 
 	GetName() string
 
 	Inputs() []reflect.Type
 
 	Object
+
+	SetLog(log Log)
 
 	SetStorage(storage Storage)
 }

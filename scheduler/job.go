@@ -29,19 +29,10 @@ type JobConfig struct {
 // DefaultJobConfig provides a default configuration to create a new job object
 // by best effort.
 func DefaultJobConfig() JobConfig {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := JobConfig{
 		ActionID:  "",
 		Args:      nil,
-		SessionID: string(newID),
+		SessionID: string(id.MustNew()),
 	}
 
 	return newConfig
@@ -49,21 +40,12 @@ func DefaultJobConfig() JobConfig {
 
 // NewJob creates a new configured job object.
 func NewJob(config JobConfig) (spec.Job, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newJob := &job{
 		JobConfig: config,
 
 		ActiveStatus: "",
 		CreatedAt:    time.Now(),
-		ID:           newID,
+		ID:           id.MustNew(),
 		Mutex:        sync.Mutex{},
 		FinalStatus:  "",
 		Type:         ObjectTypeJob,

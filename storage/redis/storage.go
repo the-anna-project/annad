@@ -74,19 +74,10 @@ func DefaultStorageConfig() StorageConfig {
 
 // NewStorage creates a new configured redis storage object.
 func NewStorage(config StorageConfig) (spec.Storage, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:    newID,
+		ID:    id.MustNew(),
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeRedisStorage,
 	}

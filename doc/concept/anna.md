@@ -5,30 +5,40 @@ aiming to learn and improve by itself.
 ### abstract
 There are a lot of really good ideas towards machine learning and AI out there.
 As soon as there is anything that helps Anna reaching the next level of
-intelligence, it is worth considering it. Note that the artificial neural
-network described here does not align with the commonly implemented neural
-networks. [Perceptron](https://en.wikipedia.org/wiki/Perceptron) like neural
-networks are manually layered and only provide quiet dumb activation functions
-to "connect" to other neurons. The network being created by connections described
-here is way more advanced and dynamic. Layers are not hard coded. Instead there
-are dynamic [stages](stage.md) in which dynamic [strategies](strategy.md) are
-executed. There is no static [activation
+intelligence, it is worth considering it. The artificial neural
+[network](network.md) described here does not align that much with the commonly
+implemented neural networks.
+[Perceptron](https://en.wikipedia.org/wiki/Perceptron) like neural networks are
+manually layered and only provide quite dumb activation functions to "connect"
+to other neurons. The network being created by connections described here is
+way more advanced and dynamic. Layers are not hard coded. Instead there are
+dynamic [connections](connection.md) being executed based on contextual
+relativity. There is no static [activation
 function](https://en.wikipedia.org/wiki/Activation_function). Instead
 connections are considered based on contextual relevance with respect to their
 weight within the current context. The problems being able to be solved are not
-limited due to static implementation. Instead the implementation provides
-general purpose intelligence using exendable [CLGs](clg.md). Anyway, the
-concepts described in this documentation, draw pictures about the ideas behind
-Anna's inner workings.
+limited due to static implementations. Instead the implementation of the Anna
+project provides general purpose intelligence using pluggable [CLGs](clg.md).
+Anyway, the concepts described in this documentation, draw pictures about the
+ideas behind Anna's inner workings.
 
 ### CLG
 A [CLG](clg.md), a complex logic gate, provides an implementation of a
 fundamental functionality. This can be anything. E.g. summing up two numbers,
-concatenating two strings and so on. You get the idea. CLGs solce some very
+concatenating two strings and so on. You get the idea. CLGs solve some very
 limited and specific problem. The very simple trick we make use of, is
 combining CLGs, to form more complex strategies that are capable of solving
 more complex problems. The theory is, that at some point, having enough proper
-CLGs available, an intelligence explosion takes place.
+CLGs available and connected, an intelligence explosion takes place.
+
+### connection
+The [connection](connection.md) between information and behaviour is another
+very important key during the creation of knowledge and intelligence. Here it
+is more important what we do not predefine, than what we simply hard code. The
+trick in finding the right connections is to let peers decide on their own,
+based on data. Human bias needs to be prevented as much as possible. It will
+help to provide some sort of bias in certain situations, but in general
+connections need to be found by the peers they are using them.
 
 ### backpropagation
 Backpropagation is a term originating from the scientific field of machine
@@ -86,18 +96,15 @@ from the very top we consider the following layers.
   server and the core.
 
 - The `network` layer describes the implementation of Anna's most inner
-  workings. It bundles everything around data processing and intelligence.  The
-  network itself is able to contain multiple networks which itself can contain
-  multiple networks as well. That way a deeply nested neural network is formed.
-  Signals provided by the gateway are translated to impulses that pass through
-  the networks and magic happens.
+  workings. The neural network. It bundles everything around data processing
+  and intelligence. The network itself contains CLGs acting as some sort of
+  artificial neurons. They connect to each other and form the network. Signals
+  provided by the gateway are translated to impulses that pass through the
+  networks and magic happens.
 
 - The `scheduler` layer describes processing of work that should be done by
   jobs. A job can be any type of work. E.g. the processing of an incoming
   impulse.
-
-- The `index` layer describes indizes that group entities of the same type.
-  E.g. the clg index provides all kinds of CLGs available to the networks.
 
 - The `storage` layer describes the data storage responsible for storing any
   kind of data. E.g. this is Anna's memory.
