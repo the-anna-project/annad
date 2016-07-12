@@ -60,6 +60,38 @@ func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desire
 	return execute, matching, newQueue, nil
 }
 
+// TODO
+func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
+	err := n.PermutationFactory.MapTo(permutationList)
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+	members := permutationList.GetMembers()
+
+	var matching []spec.InputRequest
+	for _, m := range members {
+		request, ok := m.(spec.InputRequest)
+		if !ok {
+			return nil, nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
+		}
+		matching = append(matching, request)
+	}
+
+	// TODO test
+	var newQueue []spec.InputRequest
+	matchingSeen := map[*spec.InputRequest]struct{}{}
+	for _, r := range queue {
+		_, ok := matchingSeen[&r]
+		if containsInputRequest(matching, r) && !ok {
+			matchingSeen[&r] = struct{}{}
+			continue
+		}
+		newQueue = append(newQueue, r)
+	}
+
+	return matching, newQueue, nil
+}
+
 func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal, error) {
 	newListener := func(newSignal spec.Signal) (spec.Signal, error) {
 		newImpulse, err := n.NewImpulse(newSignal.GetInput().(api.CoreRequest))
@@ -161,38 +193,6 @@ func equalTypes(a, b []reflect.Type) bool {
 	return true
 }
 
-// TODO
-func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
-	err := n.PermutationFactory.MapTo(permutationList)
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-	members := permutationList.GetMembers()
-
-	var matching []spec.InputRequest
-	for _, m := range members {
-		request, ok := m.(spec.InputRequest)
-		if !ok {
-			return nil, nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
-		}
-		matching = append(matching, request)
-	}
-
-	// TODO test
-	var newQueue []spec.InputRequest
-	matchingSeen := map[*spec.InputRequest]struct{}{}
-	for _, r := range queue {
-		_, ok := matchingSeen[&r]
-		if containsInputRequest(matching, r) && !ok {
-			matchingSeen[&r] = struct{}{}
-			continue
-		}
-		newQueue = append(newQueue, r)
-	}
-
-	return matching, newQueue, nil
-}
-
 func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect.Type) (spec.PermutationList, error) {
 	var values []interface{}
 	for _, ir := range queue {
@@ -276,4 +276,14 @@ func prepareOutput(response spec.OutputResponse) (spec.Impulse, error) {
 	imp.SetOutput(output)
 
 	return imp, nil
+}
+
+func valuesToTypes(values []reflect.Value) []reflect.Type {
+	var types []reflect.Type
+
+	for _, v := range values {
+		types = append(types, v.Type())
+	}
+
+	return types
 }

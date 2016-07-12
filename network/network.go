@@ -109,10 +109,22 @@ type network struct {
 	Type               spec.ObjectType
 }
 
-// Check if the requested CLG should be activated.
 // TODO
 func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
+
+	// Check if the given inputs can be used against the requested CLG's
+	// interface.
+	clgScope, ok := n.CLGs[clgID]
+	if !ok {
+		return false, maskAnyf(clgNotFoundError, "%s", clgID)
+	}
+	if !equalTypes(valuesToTypes(inputs), clgScope.CLG.Inputs()) {
+		return false, maskAnyf(invalidInterfaceError, "types must match")
+	}
+
+	// where does the input come from?
+	// am I part of a successful path?
 
 	// TODO check connections if the requested CLG should be emitted
 	// TODO check connections if an error should be returned in case the CLG should not be activated (learn if error should be returned or not)
@@ -195,7 +207,6 @@ func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) 
 	return nil
 }
 
-// TODO
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
@@ -304,6 +315,7 @@ func (n *network) Shutdown() {
 	})
 }
 
+// TODO
 func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
 
