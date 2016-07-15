@@ -18,8 +18,8 @@ is how information is translated into behavior. Using some function
 implementing some functionality.
 
 Random fact: currently Anna is capable of more than 130 CLG implementations.
-This number is expected to to be raised even further. For now manually, later
-on automatically. See https://godoc.org/github.com/xh3b4sd/anna/spec#CLGIndex.
+This number is expected to be raised even further. For now manually, later on
+automatically. See https://godoc.org/github.com/xh3b4sd/anna/spec#CLGIndex.
 
 ### BI, basic information
 BI, Basic Information, represent fundamental information that must be known to
