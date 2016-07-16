@@ -35,13 +35,16 @@ The process of looking up relevant information and bevahiors looks as follows.
 When [input](input.md) is provided, it is mapped onto a multi dimensional
 space. The given input draws an information path. This information path is used
 to lookup [CLG](clg.md) paths in the sorounding area, which represent behavior
-paths. The following picture illustrates the multi dimensional connection
-space. For simplicity it only shows three dimensions. In theory this dimensions
-can represent anything: space, time or conceptional weights like emotions. Over
-time connection paths are formed when each dimension pulls connection peers in
-its own interest of functionality into its own direction. That way a balanced
+paths. Over time the connection paths are formed while each dimension is
+pulling on connection peers into their own direction. That way a balanced
 alignment is achieved that makes each connection unique in terms of information
-and behavior.
+and behavior. The following picture illustrates the multi dimensional
+connection space. For simplicity it only shows three dimensions. In theory this
+dimensions can represent anything: space, time or conceptional weights
+representing even something like emotions. Here we see two different connection
+paths. Some peers are pretty near to each other. This small distance is an
+indicator for common connection patterns that are aligned over time in case
+such common connection cause challenges to be accomplished.
 
 ![connection](image/connection.png)
 
@@ -56,6 +59,8 @@ describe relations between objects because of simplicity and speed.
 The notation of the described data structures reads as follows. On the left is
 the key, on the right is the value described. `<prefix>` represents some
 internal storage prefix.
+
+---
 
 ###### map information to ID
 When having input given it needs to be registered, to be remembered. The
