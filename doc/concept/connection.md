@@ -70,7 +70,7 @@ internal storage prefix.
 When having input given it needs to be registered, to be remembered. The
 following key maps a character sequence to it's space representation. Unknown
 character sequences are created and placed within the connection space using
-randomly choosen coordinates.
+randomly chosen coordinates.
 
 ```
 <prefix>:information:sequence:<character><character>...    <information-id>
