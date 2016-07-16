@@ -6,15 +6,6 @@ multi dimensional space. [Inputs](input.md), [outputs](output.md) and
 [CLGs](clg.md) are wired together that way. Many of these connections joined
 together form Anna's neural [network](network.md).
 
-### space
-
-multiple dimensions
-  time
-  usage
-  success
-  emotions
-  targets
-
 ### creation
 
 When creating new connections it is important not to create weak connections.
