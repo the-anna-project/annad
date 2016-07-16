@@ -76,6 +76,8 @@ randomly chosen coordinates.
 <prefix>:information:sequence:<character><character>...    <information-id>
 ```
 
+---
+
 ###### map information ID to coordinates
 When having an information ID given it's position within the connection space
 needs to be looked up. The following key maps an information ID to coordinates
@@ -84,6 +86,8 @@ within the connection space.
 ```
 <prefix>:information-id:coordinates:<information-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
+
+---
 
 ###### map information coordinates to behavior IDs
 When having information coordinates given they need to be mapped to behaviors.
@@ -97,6 +101,8 @@ matching behaviors simply by scanning for connections within a certain padding.
 <prefix>:information-coordinates:behavior-ids:[<x>,<y>,...],[<x>,<y>,...],...    <behavior-id>,<behavior-id>,...
 ```
 
+---
+
 ###### map behavior ID to coordinates
 When having a behavior ID given it's position within the connection space needs
 to be looked up. The following key maps a behavior ID to coordinates within the
@@ -105,6 +111,8 @@ connection space.
 ```
 <prefix>:behavior-id:coordinates:<behavior-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
+
+---
 
 ###### map behavior coordinates to information IDs
 When having behavior coordinates given they need to be mapped to information.
