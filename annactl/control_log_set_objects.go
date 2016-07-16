@@ -27,7 +27,7 @@ func (a *annactl) ExecControlLogSetObjectsCmd(cmd *cobra.Command, args []string)
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetObjectsCmd")
 
 	if len(args) == 0 {
-		cmd.Help()
+		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 

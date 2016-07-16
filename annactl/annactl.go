@@ -112,7 +112,7 @@ func New(config Config) (spec.Annactl, error) {
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			cmd.HelpFunc()(cmd, nil)
 		},
 
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {

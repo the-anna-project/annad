@@ -27,7 +27,7 @@ func (a *annactl) ExecControlLogSetVerbosityCmd(cmd *cobra.Command, args []strin
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetVerbosityCmd")
 
 	if len(args) != 1 {
-		cmd.Help()
+		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 
