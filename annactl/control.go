@@ -24,5 +24,5 @@ func (a *annactl) InitControlCmd() *cobra.Command {
 func (a *annactl) ExecControlCmd(cmd *cobra.Command, args []string) {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlCmd")
 
-	cmd.Help()
+	cmd.HelpFunc()(cmd, nil)
 }

@@ -106,7 +106,7 @@ func New(config Config) (spec.Anna, error) {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) > 0 {
-				cmd.Help()
+				cmd.HelpFunc()(cmd, nil)
 				os.Exit(1)
 			}
 

@@ -24,5 +24,5 @@ func (a *annactl) InitInterfaceTextReadCmd() *cobra.Command {
 func (a *annactl) ExecInterfaceTextReadCmd(cmd *cobra.Command, args []string) {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadCmd")
 
-	cmd.Help()
+	cmd.HelpFunc()(cmd, nil)
 }

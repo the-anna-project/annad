@@ -34,7 +34,7 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadFileCmd")
 
 	if len(args) == 0 || len(args) >= 2 {
-		cmd.Help()
+		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 
