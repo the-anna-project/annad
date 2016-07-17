@@ -100,9 +100,9 @@ key maps an information ID to an input tree ID.
 
 ###### map input tree ID to input tree
 When having an input tree ID given it needs to be mapped to an input tree. An
-input tree represents an optimization structure that holds IDs of ordered input
-sequences broken down into their features. The following key maps an input tree
-ID to an input tree.
+input tree represents an organizational structure that holds ordered IDs of
+input sequences broken down into their features. The following key maps an
+input tree ID to an input tree.
 
 ```
 <prefix>:input-tree-id:input-tree:<input-tree-id>    [[<sequence-id>,<sequence-id>,...],[<sequence-id>,<sequence-id>,...],...]
@@ -110,64 +110,76 @@ ID to an input tree.
 
 ---
 
-###### map information ID to information coordinates
-When having an information ID given it's position within the connection space
+###### map input tree ID to input tree coordinates
+When having an input tree ID given it's position within the connection space
 needs to be looked up. Such lookups are necessary when conceptionaly related
-connections to information during tree operations are required. The following
-key maps an information ID to information coordinates within the connection space.
+connections between input trees are required during operations on information
+level. The following key maps an input tree ID to input tree coordinates within
+the connection space.
 
 ```
-<prefix>:information-id:information-coordinates:<information-id>    [<x>,<y>,...],[<x>,<y>,...],...
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-###### map information coordinates to behavior IDs
-When having information coordinates given they need to be mapped to behaviors.
-The following key maps information coordinates to behavior IDs. Having
-coordinates indexed as keys enables fast scans when it needs to be found out
-which information are near to the sorounding area of a given behavior within
-the connection space. That way information can be mapped and aligned to
-matching behaviors simply by scanning for connections within a certain padding.
-
-```
-<prefix>:information-coordinates:behavior-ids:[<x>,<y>,...],[<x>,<y>,...],...    <behavior-id>,<behavior-id>,...
+<prefix>:input-tree-id:input-tree-coordinates:<input-tree-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
 
 ---
 
-###### map behavior ID to coordinates
-When having a behavior ID given it's position within the connection space needs
-to be looked up. The following key maps a behavior ID to coordinates within the
-connection space.
+###### map input tree coordinates to input tree ID
+When having input tree coordinates given they need to be mapped to their input
+tree ID. Having input tree coordinates indexed as keys enables fast scans when
+it needs to be found out which input trees are near to the surrounding area of a
+given input tree within the connection space. That way information can be
+mapped and aligned to matching input trees. The following key maps input tree
+coordinates to it's input tree ID.
 
 ```
-<prefix>:behavior-id:coordinates:<behavior-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:input-tree-coordinates:input-tree-id:[<x>,<y>,...],[<x>,<y>,...],...    <input-tree-id>
 ```
 
 ---
 
-###### map behavior coordinates to information IDs
-When having behavior coordinates given they need to be mapped to information.
-The following key maps behavior coordinates to information IDs. Having
-coordinates indexed as keys enables fast scans when it needs to be found out
-which behaviors are near to the sorounding area of given information within the
-connection space. That way behaviors can be mapped and aligned to matching
-information simply by scanning for connections within a certain padding.
+###### map input tree ID to CLG tree ID
+When having an input tree ID given it needs to be mapped to a CLG tree ID. This
+is the key that maps information to behavior. The following key maps input tree
+coordinates to input tree it's ID.
 
 ```
-<prefix>:behavior-coordinates:information-ids:[<x>,<y>,...],[<x>,<y>,...],...    <information-id>,<information-id>,...
+<prefix>:input-tree-id:clg-tree-id:<input-tree-id>    <clg-tree-id>
+```
+
+---
+
+###### map CLG tree ID to CLG tree
+When having a CLG tree ID given it needs to be mapped to a CLG tree. A CLG tree
+represents an organizational structure that holds ordered IDs of CLGs forming
+an executable behavior network. Note that a CLG tree can only be valid in case
+it starts with the ID of the Input CLG, and ends with the ID of the Output CLG
+in any branch. The following key maps an CLG tree ID to a CLG tree.
+
+```
+<prefix>:clg-tree-id:clg-tree:<clg-tree-id>    {<clg-id>: {<clg-id>: {...}, <clg-id>: {...}, ...}}
+```
+
+---
+
+###### map CLG tree ID to CLG tree coordinates
+When having a CLG tree ID given it's position within the connection space needs
+to be looked up. The following key maps a CLG tree ID to CLG tree coordinates
+within the connection space.
+
+```
+<prefix>:clg-tree-id:clg-tree-coordinates:<clg-tree-id>    [<x>,<y>,...],[<x>,<y>,...],...
+```
+
+---
+
+###### map CLG tree coordinates to CLG tree ID
+When having CLG tree coordinates given they need to be mapped to their CLG tree
+ID. Having CLG tree coordinates indexed as keys enables fast scans when it
+needs to be found out which CLG trees are near to the surrounding area of a
+given CLG tree within the connection space. That way behavior can be mapped and
+aligned to matching CLG trees. The following key maps CLG tree coordinates to
+it's CLG tree ID.
+
+```
+<prefix>:clg-tree-coordinates:clg-tree-id:[<x>,<y>,...],[<x>,<y>,...],...    <clg-tree-id>
 ```
