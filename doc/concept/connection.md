@@ -56,32 +56,82 @@ data structure design aims to be efficient and fast while meeting the
 requirements of Anna's business logic. We use key-value pairs to store data and
 describe relations between objects because of simplicity and speed.
 
-The notation of the described data structures reads as follows. On the left is
-the key, on the right is the value described. `<prefix>` represents some
-internal storage prefix.
+The notation of the described data structures reads as follows. Everything
+within angle brackets (`<>`) reads as variable. On the left is the key, on the
+right is the value of the key-value pairs. `<prefix>` represents some internal
+storage prefix simply used to prefix data structures to a certain scope.
 
 ---
 
-###### map information to ID
-When having input given it needs to be registered, to be remembered. The
-following key maps a character sequence to it's space representation. Unknown
-character sequences are created and placed within the connection space using
-randomly chosen coordinates.
+###### map input sequence to information ID
+When having an input sequence given it needs to be registered. An input
+sequence represents some externally provided information as it is in the first
+place. Over time input sequences are broken down into their separate features
+based on their usage. The following key maps an input sequence to an
+information ID.
 
 ```
-<prefix>:information:sequence:<character><character>...    <information-id>
+<prefix>:information:sequence:<input-sequence>    <information-id>
 ```
 
 ---
 
-###### map information ID to coordinates
+###### map information ID to input sequence
+When having an information ID given it needs to be mapped to an input sequence.
+That way a mapping to the original information can be achieved. The following
+key maps an information ID to an input sequence.
+
+```
+<prefix>:information-id:input-sequence:<information-id>   <input-sequence>
+```
+
+---
+
+###### map information ID to input tree ID
+When having an information ID given it needs to be mapped to an input tree ID.
+That way a mapping to an optimization structure can be achieved. The following
+key maps an information ID to an input tree ID.
+
+```
+<prefix>:information-id:input-tree-id:<information-id>   <input-tree-id>
+```
+
+---
+
+###### map input tree ID to input tree
+When having an input tree ID given it needs to be mapped to an input tree. An
+input tree represents an optimization structure that holds IDs of ordered input
+sequences broken down into their features. The following key maps an input tree
+ID to an input tree.
+
+```
+<prefix>:input-tree-id:input-tree:<input-tree-id>    [[<sequence-id>,<sequence-id>,...],[<sequence-id>,<sequence-id>,...],...]
+```
+
+---
+
+###### map information ID to information coordinates
 When having an information ID given it's position within the connection space
-needs to be looked up. The following key maps an information ID to coordinates
-within the connection space.
+needs to be looked up. Such lookups are necessary when conceptionaly related
+connections to information during tree operations are required. The following
+key maps an information ID to information coordinates within the connection space.
 
 ```
-<prefix>:information-id:coordinates:<information-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:information-id:information-coordinates:<information-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 
