@@ -36,7 +36,7 @@ aligned over time.
 ### creation
 When creating new connections it is important not to create weak connections.
 Each connection that exists only exists because it brought some kind of value
-in the past. The process of creating connections is a continous task, that is
+in the past. The process of creating connections is a continuous task, that is
 fully dynamic and learned by experience and can be described as follows. These
 strategies are considered when it comes to draw new connections within a multi
 dimensional space.
