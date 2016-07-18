@@ -6,13 +6,40 @@ multi dimensional space. [Inputs](input.md), [outputs](output.md) and
 [CLGs](clg.md) are wired together that way. Many of these connections joined
 together form Anna's neural [network](network.md).
 
-### creation
+### space
+The connection space can be seen as a multi dimensional vector space. In theory
+it's dimensions can represent everything: space, time or even conceptional
+weights representing something like emotions. Information and behaviors are
+mapped onto the connection space. Here similarities between information, and
+similarities between behaviors can be calculated. In the connection space
+information are represented by the coordinates of input trees. Each coordinate
+reflects one character. The distance calculation is done with respect to the
+input tree's coordinates. You can think of the joined coordinates of the input
+tree as a drawn information path in multi dimensional space. Information paths
+in the surrounding area are evidence of some kind of similarity. Over time the
+information paths are formed while each dimension is pulling on the peers of
+the information path into their own direction. That way a balanced alignment is
+achieved that makes each information path unique. The same concept that applies
+to information paths also applies to behavior paths, but only on a different
+problem domain. Here behavior is mapped to an executable CLG tree, which
+coordinates are mapped onto the multi dimensional connection space.
 
+The following picture illustrates the multi dimensional connection space. For
+simplicity it only shows three dimensions. Here we see two different paths. It
+doesn't matter if they are information or behavior paths. The same principle
+applies to each of them. We see some peers are pretty near to each other. A
+smaller distance is an indicator for common connection patterns which are
+aligned over time.
+
+![connection](image/connection.png)
+
+### creation
 When creating new connections it is important not to create weak connections.
 Each connection that exists only exists because it brought some kind of value
-in the past. The process of creating connections is fully dynamic and learned
-by experience and can be described as follows. These strategies are considered
-when it comes to draw new connections within a multi dimensional space.
+in the past. The process of creating connections is a continous task, that is
+fully dynamic and learned by experience and can be described as follows. These
+strategies are considered when it comes to draw new connections within a multi
+dimensional space.
 
 1. Bias is some manually provided hint, intended to guide some connection path
    into a certain direction. Read more on on this in this issue:
@@ -30,23 +57,15 @@ when it comes to draw new connections within a multi dimensional space.
    available.
 
 ### lookup
-
-The process of looking up relevant information and bevahiors looks as follows.
-When [input](input.md) is provided, it is mapped onto a multi dimensional
-space. The given input draws an information path. This information path is used
-to lookup [CLG](clg.md) paths in the sorounding area, which represent behavior
-paths. Over time the connection paths are formed while each dimension is
-pulling on connection peers into their own direction. That way a balanced
-alignment is achieved that makes each connection unique in terms of information
-and behavior. The following picture illustrates the multi dimensional
-connection space. For simplicity it only shows three dimensions. In theory this
-dimensions can represent anything: space, time or conceptional weights
-representing even something like emotions. Here we see two different connection
-paths. Some peers are pretty near to each other. This small distance is an
-indicator for common connection patterns that are aligned over time in case
-such common connection cause challenges to be accomplished.
-
-![connection](image/connection.png)
+The process of looking up connections is triggered on demand and thus must be
+optimized for fast execution. When information is provided in the form of
+[input](input.md), it is mapped onto a multi dimensional space, to enable the
+lookup of some behavior. The given input translates to a so called input tree,
+which coordinates identify it's location within the connection space. Due to
+the created connection we already have a mapping between the input tree and the
+[CLG](clg.md) tree, which we actually want to lookup. This relationship creates
+the link between information and behavior, because the connected CLG tree maps
+directly to executable behavior.
 
 ### data structure
 Designing a data structure is quite important. Smart systems need to store
