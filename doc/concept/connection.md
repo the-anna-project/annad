@@ -97,8 +97,8 @@ information ID.
 
 ###### map information ID to input sequence
 When having an information ID given it needs to be mapped to an input sequence.
-That way a mapping to the original information can be achieved. The following
-key maps an information ID to an input sequence.
+That way a mapping of input sequences broken down into their reusable features
+can be achieved. The following key maps an information ID to an input sequence.
 
 ```
 <prefix>:information-id:input-sequence:<information-id>   <input-sequence>
@@ -119,12 +119,15 @@ key maps an information ID to an input tree ID.
 
 ###### map input tree ID to input tree
 When having an input tree ID given it needs to be mapped to an input tree. An
-input tree represents an organizational structure that holds ordered IDs of
-input sequences broken down into their features. The following key maps an
-input tree ID to an input tree.
+input tree represents an organizational structure that holds ordered
+information IDs. Note that one information ID per list needs to be used when
+joining the whole input tree's underlying input sequence together. That means
+that in case one list needs to be omitted in some cases, the list must contain
+the information ID of an empty input sequence. That is, an empty string. The
+following key maps an input tree ID to an input tree.
 
 ```
-<prefix>:input-tree-id:input-tree:<input-tree-id>    [[<sequence-id>,<sequence-id>,...],[<sequence-id>,<sequence-id>,...],...]
+<prefix>:input-tree-id:input-tree:<input-tree-id>    [[<information-id>,<information-id>,...],[<information-id>,<information-id>,...],...]
 ```
 
 ---
@@ -169,10 +172,10 @@ coordinates to input tree it's ID.
 
 ###### map CLG tree ID to CLG tree
 When having a CLG tree ID given it needs to be mapped to a CLG tree. A CLG tree
-represents an organizational structure that holds ordered IDs of CLGs forming
-an executable behavior network. Note that a CLG tree can only be valid in case
-it starts with the ID of the Input CLG, and ends with the ID of the Output CLG
-in any branch. The following key maps an CLG tree ID to a CLG tree.
+represents an organizational structure that holds ordered CLG IDs forming an
+executable behavior network. Note that a CLG tree can only be valid in case it
+starts with the ID of the Input CLG, and ends with the ID of the Output CLG in
+any branch. The following key maps an CLG tree ID to a CLG tree.
 
 ```
 <prefix>:clg-tree-id:clg-tree:<clg-tree-id>    {<clg-id>: {<clg-id>: {...}, <clg-id>: {...}, ...}}
