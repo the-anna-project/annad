@@ -12,17 +12,18 @@ it's dimensions can represent everything: space, time or even conceptional
 weights representing something like emotions. Information and behaviors are
 mapped onto the connection space. Here similarities between information, and
 similarities between behaviors can be calculated. In the connection space
-information are represented by the coordinates of input trees. Each coordinate
-reflects one character. The distance calculation is done with respect to the
-input tree's coordinates. You can think of the joined coordinates of the input
-tree as a drawn information path in multi dimensional space. Information paths
-in the surrounding area are evidence of some kind of similarity. Over time the
-information paths are formed while each dimension is pulling on the peers of
-the information path into their own direction. That way a balanced alignment is
-achieved that makes each information path unique. The same concept that applies
-to information paths also applies to behavior paths, but only on a different
-problem domain. Here behavior is mapped to an executable CLG tree, which
-coordinates are mapped onto the multi dimensional connection space.
+information are represented by the coordinates of input trees. Each vector,
+that is a list of coordinates, reflects one character. The distance calculation
+is done with respect to the input tree's coordinates. You can think of the
+joined coordinates of the input tree as a drawn information path in multi
+dimensional space. Information paths in the surrounding area are evidence of
+some kind of similarity. Over time the information paths are formed while each
+dimension is pulling on the peers of the information path into their own
+direction. That way a balanced alignment is achieved that makes each
+information path unique. The same concept that applies to information paths
+also applies to behavior paths, but only on a different problem domain. Here
+behavior is mapped to an executable CLG tree, which coordinates are mapped onto
+the multi dimensional connection space.
 
 The following picture illustrates the multi dimensional connection space. For
 simplicity it only shows three dimensions. Here we see two different paths. It
@@ -42,7 +43,7 @@ strategies are considered when it comes to draw new connections within a multi
 dimensional space.
 
 1. Bias is some manually provided hint, intended to guide some connection path
-   into a certain direction. Read more on on this in this issue:
+   into a certain direction. Read more on this in this issue:
    https://github.com/xh3b4sd/anna/issues/44.
 
 2. Intuition is some sort of vague feeling that points into a certain
@@ -54,12 +55,13 @@ dimensional space.
    problem domain might be useful as well in another.
 
 4. Random connections can be drawn if none of the preceding options are
-   available.
+   available. This is the most weak way to create new connections, because it
+   does not consider any additional information.
 
 ### lookup
 The process of looking up connections is triggered on demand and thus must be
 optimized for fast execution. When information is provided in the form of
-[input](input.md), it is mapped onto a multi dimensional space, to enable the
+[input](input.md), it is mapped onto a multi dimensional space to enable the
 lookup of some behavior. The given input translates to a so called input tree,
 which coordinates identify it's location within the connection space. Due to
 the created connection we already have a mapping between the input tree and the
@@ -90,7 +92,7 @@ based on their usage. The following key maps an input sequence to an
 information ID.
 
 ```
-<prefix>:information:sequence:<input-sequence>    <information-id>
+<prefix>:input-sequence:information-id:<input-sequence>    <information-id>
 ```
 
 ---
@@ -108,8 +110,8 @@ can be achieved. The following key maps an information ID to an input sequence.
 
 ###### map information ID to input tree ID
 When having an information ID given it needs to be mapped to an input tree ID.
-That way a mapping to an optimization structure can be achieved. The following
-key maps an information ID to an input tree ID.
+That way a mapping to an organizational structure can be achieved. The
+following key maps an information ID to an input tree ID.
 
 ```
 <prefix>:information-id:input-tree-id:<information-id>   <input-tree-id>
@@ -132,29 +134,29 @@ following key maps an input tree ID to an input tree.
 
 ---
 
-###### map input tree ID to input tree coordinates
-When having an input tree ID given it's position within the connection space
+###### map information ID to information coordinates
+When having an information ID given it's position within the connection space
 needs to be looked up. Such lookups are necessary when conceptionaly related
 connections between input trees are required during operations on information
 level. The following key maps an input tree ID to input tree coordinates within
 the connection space.
 
 ```
-<prefix>:input-tree-id:input-tree-coordinates:<input-tree-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:information-id:information-coordinates:<input-tree-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
 
 ---
 
-###### map input tree coordinates to input tree ID
-When having input tree coordinates given they need to be mapped to their input
-tree ID. Having input tree coordinates indexed as keys enables fast scans when
-it needs to be found out which input trees are near to the surrounding area of a
-given input tree within the connection space. That way information can be
-mapped and aligned to matching input trees. The following key maps input tree
-coordinates to it's input tree ID.
+###### map information coordinates to information ID
+When having information coordinates given they need to be mapped to their
+information ID. Having information coordinates indexed as keys enables fast
+scans when it needs to be found out which informations are near to the
+surrounding area of a given information within the connection space. That way
+information can be mapped and aligned to matching information. The following
+key maps information coordinates to it's information ID.
 
 ```
-<prefix>:input-tree-coordinates:input-tree-id:[<x>,<y>,...],[<x>,<y>,...],...    <input-tree-id>
+<prefix>:information-coordinates:information-id:[<x>,<y>,...],[<x>,<y>,...],...    <information-id>
 ```
 
 ---
@@ -162,7 +164,7 @@ coordinates to it's input tree ID.
 ###### map input tree ID to CLG tree ID
 When having an input tree ID given it needs to be mapped to a CLG tree ID. This
 is the key that maps information to behavior. The following key maps input tree
-coordinates to input tree it's ID.
+coordinates to it's linked input tree ID.
 
 ```
 <prefix>:input-tree-id:clg-tree-id:<input-tree-id>    <clg-tree-id>
@@ -172,36 +174,37 @@ coordinates to input tree it's ID.
 
 ###### map CLG tree ID to CLG tree
 When having a CLG tree ID given it needs to be mapped to a CLG tree. A CLG tree
-represents an organizational structure that holds ordered CLG IDs forming an
-executable behavior network. Note that a CLG tree can only be valid in case it
-starts with the ID of the Input CLG, and ends with the ID of the Output CLG in
-any branch. The following key maps an CLG tree ID to a CLG tree.
+represents an organizational structure that holds ordered behavior IDs forming
+an executable behavior network. A behavior ID is effectively a CLG ID. Note
+that a CLG tree can only be valid in case it starts with the ID of the Input
+CLG, and ends with the ID of the Output CLG in any branch. The following key
+maps an CLG tree ID to a CLG tree.
 
 ```
-<prefix>:clg-tree-id:clg-tree:<clg-tree-id>    {<clg-id>: {<clg-id>: {...}, <clg-id>: {...}, ...}}
+<prefix>:clg-tree-id:clg-tree:<clg-tree-id>    {<behavior-id>: {<behavior-id>: {...}, <behavior-id>: {...}, ...}}
 ```
 
 ---
 
-###### map CLG tree ID to CLG tree coordinates
-When having a CLG tree ID given it's position within the connection space needs
-to be looked up. The following key maps a CLG tree ID to CLG tree coordinates
+###### map behavior ID to behavior coordinates
+When having a behavior ID given it's position within the connection space needs
+to be looked up. The following key maps a behavior ID to behavior coordinates
 within the connection space.
 
 ```
-<prefix>:clg-tree-id:clg-tree-coordinates:<clg-tree-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:behavior-id:behavior-coordinates:<behavior-id>    [<x>,<y>,...],[<x>,<y>,...],...
 ```
 
 ---
 
-###### map CLG tree coordinates to CLG tree ID
-When having CLG tree coordinates given they need to be mapped to their CLG tree
-ID. Having CLG tree coordinates indexed as keys enables fast scans when it
-needs to be found out which CLG trees are near to the surrounding area of a
-given CLG tree within the connection space. That way behavior can be mapped and
-aligned to matching CLG trees. The following key maps CLG tree coordinates to
-it's CLG tree ID.
+###### map behavior coordinates to behavior ID
+When having behavior coordinates given they need to be mapped to their behavior
+ID. Having behavior coordinates indexed as keys enables fast scans when it
+needs to be found out which behaviors are near to the surrounding area of a
+given behavior within the connection space. That way behavior can be mapped and
+aligned to matching behaviors. The following key maps behavior coordinates to
+it's behavior ID.
 
 ```
-<prefix>:clg-tree-coordinates:clg-tree-id:[<x>,<y>,...],[<x>,<y>,...],...    <clg-tree-id>
+<prefix>:behavior-coordinates:behavior-id:[<x>,<y>,...],[<x>,<y>,...],...    <behavior-id>
 ```
