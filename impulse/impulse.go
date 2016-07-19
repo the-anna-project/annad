@@ -33,15 +33,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new impulse
 // object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
 		Log: log.NewLog(log.DefaultConfig()),
@@ -50,7 +41,7 @@ func DefaultConfig() Config {
 		Expectation: nil,
 		Input:       "",
 		Output:      "",
-		SessionID:   string(newID),
+		SessionID:   string(id.MustNew()),
 	}
 
 	return newConfig
