@@ -41,11 +41,6 @@ func New(config Config) (spec.ConnectionPath, error) {
 		Config: config,
 	}
 
-	err := newConnectionPath.Validate()
-	if err != nil {
-		return nil, maskAnyf(invalidConfigError, "Validate failed: %s", err.Error())
-	}
-
 	return newConnectionPath, nil
 }
 
@@ -55,7 +50,7 @@ func New(config Config) (spec.ConnectionPath, error) {
 // The vector list is then used to create a new connection path by using New.
 func NewFromString(s string) (spec.ConnectionPath, error) {
 	var cs [][]float64
-	err := json.Unmarshal([]byte(string), &cs)
+	err := json.Unmarshal([]byte(s), &cs)
 	if err != nil {
 		return nil, maskAnyf(invalidConfigError, "cannot parse string to [][]float64: %s", err.Error())
 	}
@@ -85,14 +80,14 @@ func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
 		smallerLength, greaterLength = len(smallerCoordinates), len(greaterCoordinates)
 	}
 
-	numPeers := math.Floor(greaterLength / smallerLength)
-	fillRest := math.Floor(greaterLength % smallerLength / 2)
+	numPeers := math.Floor(float64(greaterLength) / float64(smallerLength))
+	fillRest := math.Floor(float64(greaterLength % smallerLength / 2))
 
 	var newCoordinates [][]float64
 	for i, vector := range smallerCoordinates {
-		for j := 0; j < numPeers; j++ {
+		for j := 0; j < int(numPeers); j++ {
 			if i == 0 || i == smallerLength-1 {
-				for k := 0; k < numPeers; k++ {
+				for k := 0; k < int(fillRest); k++ {
 					newCoordinates = append(newCoordinates, vector)
 				}
 			}
@@ -106,7 +101,7 @@ func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
 	}
 
 	if len(newCoordinates) != greaterLength {
-		return nil, maskAny(invalidConnectionPathError)
+		return 0, maskAny(invalidConnectionPathError)
 	}
 
 	var distance float64
@@ -138,7 +133,7 @@ func (cp *connectionPath) IsCloser(a, b spec.ConnectionPath) (spec.ConnectionPat
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	db, err := cp.DistanceTo(a)
+	db, err := cp.DistanceTo(b)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -176,6 +171,10 @@ func (cp *connectionPath) String() (string, error) {
 
 func (cp *connectionPath) Validate() error {
 	if len(cp.GetCoordinates()) == 0 {
+		return maskAnyf(invalidConnectionPathError, "vectors must not be empty")
+	}
+
+	if len(cp.GetCoordinates()[0]) == 0 {
 		return maskAnyf(invalidConnectionPathError, "coordinates must not be empty")
 	}
 
