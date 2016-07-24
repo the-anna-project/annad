@@ -4,6 +4,7 @@ package connectionpath
 
 import (
 	"encoding/json"
+	"math"
 
 	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/spec"
@@ -74,9 +75,57 @@ type connectionPath struct {
 	Config
 }
 
-// TODO
-func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) ([]float64, error) {
-	return nil, nil
+func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
+	//
+	smallerCoordinates, greaterCoordinates := cp.GetCoordinates(), a.GetCoordinates()
+	smallerLength, greaterLength := len(smallerCoordinates), len(greaterCoordinates)
+
+	if smallerLength > greaterLength {
+		smallerCoordinates, greaterCoordinates = a.GetCoordinates(), cp.GetCoordinates()
+		smallerLength, greaterLength = len(smallerCoordinates), len(greaterCoordinates)
+	}
+
+	numPeers := math.Floor(greaterLength / smallerLength)
+	fillRest := math.Floor(greaterLength % smallerLength / 2)
+
+	var newCoordinates [][]float64
+	for i, vector := range smallerCoordinates {
+		for j := 0; j < numPeers; j++ {
+			if i == 0 || i == smallerLength-1 {
+				for k := 0; k < numPeers; k++ {
+					newCoordinates = append(newCoordinates, vector)
+				}
+			}
+
+			newCoordinates = append(newCoordinates, vector)
+		}
+	}
+
+	if len(newCoordinates) < greaterLength {
+		newCoordinates = append(newCoordinates, smallerCoordinates[smallerLength-1])
+	}
+
+	if len(newCoordinates) != greaterLength {
+		return nil, maskAny(invalidConnectionPathError)
+	}
+
+	var distance float64
+	for i, newVector := range newCoordinates {
+		for j, newCoordinate := range newVector {
+			greaterCoordinate := greaterCoordinates[i][j]
+
+			var d float64
+			if newCoordinate > greaterCoordinate {
+				d = newCoordinate - greaterCoordinate
+			} else {
+				d = greaterCoordinate - newCoordinate
+			}
+
+			distance += d
+		}
+	}
+
+	return distance, nil
 }
 
 func (cp *connectionPath) GetCoordinates() [][]float64 {
@@ -85,36 +134,26 @@ func (cp *connectionPath) GetCoordinates() [][]float64 {
 
 func (cp *connectionPath) IsCloser(a, b spec.ConnectionPath) (spec.ConnectionPath, error) {
 	// At first we calculate the distance a and b have to cp.
-	dta, err := cp.DistanceTo(a)
+	da, err := cp.DistanceTo(a)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	dtb, err := cp.DistanceTo(a)
+	db, err := cp.DistanceTo(a)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	// For simplicity we sum the distances to have a comparable value.
-	var sa float64
-	for _, f := range dta {
-		sa += f
-	}
-	var sb float64
-	for _, f := range dtb {
-		sb += f
-	}
-
-	if sa < sb {
+	if da < db {
 		// The sum of the distance of a to cp is the smaller one. Thus we qualified
 		// it to be closer to cp and return a.
 		return a, nil
 	}
-	if sa > sb {
+	if da > db {
 		// The sum of the distance of a to cp is the bigger one. Thus we qualified
 		// it to be farther to cp and return b.
 		return b, nil
 	}
-	if sa == sb {
+	if da == db {
 		if random.Bit() == 0 {
 			// The sum of the distance of a to cp is equal to the sum of the distance
 			// of b to cp. We rolled the dice and got a 0. Thus we return a.
