@@ -101,8 +101,8 @@ func Test_ConnectionPath_IsCloser(t *testing.T) {
 		{
 			CP: [][]float64{{1, 1, 1}},
 			M: map[string][][]float64{
-				"A": [][]float64{{1, 1, 1}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{1, 1, 1}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "A",
 			ErrorMatcher: nil,
@@ -110,8 +110,8 @@ func Test_ConnectionPath_IsCloser(t *testing.T) {
 		{
 			CP: [][]float64{{2, 2, 2}},
 			M: map[string][][]float64{
-				"A": [][]float64{{1, 1, 1}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{1, 1, 1}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "B",
 			ErrorMatcher: nil,
@@ -119,8 +119,8 @@ func Test_ConnectionPath_IsCloser(t *testing.T) {
 		{
 			CP: [][]float64{{3, 3, 3}},
 			M: map[string][][]float64{
-				"A": [][]float64{{1, 1, 1}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{1, 1, 1}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "B",
 			ErrorMatcher: nil,
@@ -128,8 +128,8 @@ func Test_ConnectionPath_IsCloser(t *testing.T) {
 		{
 			CP: [][]float64{{1, 2, 1}},
 			M: map[string][][]float64{
-				"A": [][]float64{{1, 1, 1}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{1, 1, 1}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "A",
 			ErrorMatcher: nil,
@@ -171,8 +171,8 @@ func Test_ConnectionPath_IsCloser_Equal(t *testing.T) {
 		{
 			CP: [][]float64{{1, 1, 1}},
 			M: map[string][][]float64{
-				"A": [][]float64{{2, 2, 2}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{2, 2, 2}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "A",
 			ErrorMatcher: nil,
@@ -180,8 +180,8 @@ func Test_ConnectionPath_IsCloser_Equal(t *testing.T) {
 		{
 			CP: [][]float64{{1, 1, 1}},
 			M: map[string][][]float64{
-				"A": [][]float64{{2, 2, 2}},
-				"B": [][]float64{{2, 2, 2}},
+				"A": {{2, 2, 2}},
+				"B": {{2, 2, 2}},
 			},
 			ID:           "B",
 			ErrorMatcher: nil,
