@@ -35,6 +35,15 @@ func Test_ConnectionPath_NewFromString(t *testing.T) {
 	}
 }
 
+func Test_ConnectionPath_NewFromString_Error(t *testing.T) {
+	s := "0.332,4,-8.5]]"
+
+	_, err := NewFromString(s)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
 func Test_ConnectionPath_DistanceTo(t *testing.T) {
 	testCases := []struct {
 		A            [][]float64
@@ -61,6 +70,12 @@ func Test_ConnectionPath_DistanceTo(t *testing.T) {
 			ErrorMatcher: nil,
 		},
 		{
+			A:            [][]float64{{2, 2, 2}, {2, 2, 2}},
+			B:            [][]float64{{1, 1, 1}, {1, 1, 1}},
+			Distance:     6,
+			ErrorMatcher: nil,
+		},
+		{
 			A:            [][]float64{{1, 1, 1}},
 			B:            [][]float64{{2, 2, 2}, {2, 2, 2}},
 			Distance:     6,
@@ -70,6 +85,12 @@ func Test_ConnectionPath_DistanceTo(t *testing.T) {
 			A:            [][]float64{{1, 1, 1}},
 			B:            [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
 			Distance:     9,
+			ErrorMatcher: nil,
+		},
+		{
+			A:            [][]float64{{1, 1, 1}},
+			B:            [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
+			Distance:     12,
 			ErrorMatcher: nil,
 		},
 	}
