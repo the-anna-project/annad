@@ -16,7 +16,7 @@ type ConnectionPath interface {
 	//
 	// Note that for this calculation dimensions within the connection space must
 	// be defined by positive floating point numbers.
-	DistanceTo(a ConnectionPath) (float64, error)
+	DistanceTo(a ConnectionPath) float64
 
 	// GetCoordinates returns the configured coordinates of the current
 	// connection path.

@@ -46,52 +46,49 @@ func Test_ConnectionPath_NewFromString_Error(t *testing.T) {
 
 func Test_ConnectionPath_DistanceTo(t *testing.T) {
 	testCases := []struct {
-		A            [][]float64
-		B            [][]float64
-		Distance     float64
-		ErrorMatcher func(err error) bool
+		A        [][]float64
+		B        [][]float64
+		Distance float64
 	}{
 		{
-			A:            [][]float64{{1, 1, 1}},
-			B:            [][]float64{{1, 1, 1}},
-			Distance:     0,
-			ErrorMatcher: nil,
+			A:        [][]float64{{1, 1, 1}},
+			B:        [][]float64{{1, 1, 1}},
+			Distance: 0,
 		},
 		{
-			A:            [][]float64{{1, 1, 1}},
-			B:            [][]float64{{2, 2, 2}},
-			Distance:     3,
-			ErrorMatcher: nil,
+			A:        [][]float64{{1, 1, 1}},
+			B:        [][]float64{{2, 2, 2}},
+			Distance: 3,
 		},
 		{
-			A:            [][]float64{{1, 1, 1}, {1, 1, 1}},
-			B:            [][]float64{{2, 2, 2}, {2, 2, 2}},
-			Distance:     6,
-			ErrorMatcher: nil,
+			A:        [][]float64{{1, 1, 1}, {1, 1, 1}},
+			B:        [][]float64{{2, 2, 2}, {2, 2, 2}},
+			Distance: 6,
 		},
 		{
-			A:            [][]float64{{2, 2, 2}, {2, 2, 2}},
-			B:            [][]float64{{1, 1, 1}, {1, 1, 1}},
-			Distance:     6,
-			ErrorMatcher: nil,
+			A:        [][]float64{{2, 2, 2}, {2, 2, 2}},
+			B:        [][]float64{{1, 1, 1}, {1, 1, 1}},
+			Distance: 6,
 		},
 		{
-			A:            [][]float64{{1, 1, 1}},
-			B:            [][]float64{{2, 2, 2}, {2, 2, 2}},
-			Distance:     6,
-			ErrorMatcher: nil,
+			A:        [][]float64{{1, 1, 1}},
+			B:        [][]float64{{2, 2, 2}, {2, 2, 2}},
+			Distance: 6,
 		},
 		{
-			A:            [][]float64{{1, 1, 1}},
-			B:            [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
-			Distance:     9,
-			ErrorMatcher: nil,
+			A:        [][]float64{{2, 2, 2}, {2, 2, 2}},
+			B:        [][]float64{{1, 1, 1}},
+			Distance: 6,
 		},
 		{
-			A:            [][]float64{{1, 1, 1}},
-			B:            [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
-			Distance:     12,
-			ErrorMatcher: nil,
+			A:        [][]float64{{1, 1, 1}},
+			B:        [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
+			Distance: 9,
+		},
+		{
+			A:        [][]float64{{1, 1, 1}},
+			B:        [][]float64{{2, 2, 2}, {2, 2, 2}, {2, 2, 2}, {2, 2, 2}},
+			Distance: 12,
 		},
 	}
 
@@ -99,15 +96,10 @@ func Test_ConnectionPath_DistanceTo(t *testing.T) {
 		a := testMaybeNewConnectionPath(t, testCase.A)
 		b := testMaybeNewConnectionPath(t, testCase.B)
 
-		distance, err := a.DistanceTo(b)
+		distance := a.DistanceTo(b)
 
-		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
-			t.Fatal("case", i+1, "expected", true, "got", false)
-		}
-		if testCase.ErrorMatcher == nil {
-			if distance != testCase.Distance {
-				t.Fatal("case", i+1, "expected", testCase.Distance, "got", distance)
-			}
+		if distance != testCase.Distance {
+			t.Fatal("case", i+1, "expected", testCase.Distance, "got", distance)
 		}
 	}
 }

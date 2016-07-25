@@ -70,7 +70,7 @@ type connectionPath struct {
 	Config
 }
 
-func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
+func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) float64 {
 	//
 	smallerCoordinates, greaterCoordinates := cp.GetCoordinates(), a.GetCoordinates()
 	smallerLength, greaterLength := len(smallerCoordinates), len(greaterCoordinates)
@@ -100,10 +100,6 @@ func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
 		newCoordinates = append(newCoordinates, smallerCoordinates[smallerLength-1])
 	}
 
-	if len(newCoordinates) != greaterLength {
-		return 0, maskAny(invalidConnectionPathError)
-	}
-
 	var distance float64
 	for i, newVector := range newCoordinates {
 		for j, newCoordinate := range newVector {
@@ -120,7 +116,7 @@ func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) (float64, error) {
 		}
 	}
 
-	return distance, nil
+	return distance
 }
 
 func (cp *connectionPath) GetCoordinates() [][]float64 {
@@ -129,14 +125,8 @@ func (cp *connectionPath) GetCoordinates() [][]float64 {
 
 func (cp *connectionPath) IsCloser(a, b spec.ConnectionPath) (spec.ConnectionPath, error) {
 	// At first we calculate the distance a and b have to cp.
-	da, err := cp.DistanceTo(a)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	db, err := cp.DistanceTo(b)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	da := cp.DistanceTo(a)
+	db := cp.DistanceTo(b)
 
 	if da < db {
 		// The sum of the distance of a to cp is the smaller one. Thus we qualified
