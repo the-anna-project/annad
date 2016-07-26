@@ -81,17 +81,10 @@ func (cp *connectionPath) DistanceTo(a spec.ConnectionPath) float64 {
 	}
 
 	numPeers := math.Floor(float64(greaterLength) / float64(smallerLength))
-	fillRest := math.Floor(float64(greaterLength % smallerLength / 2))
 
 	var newCoordinates [][]float64
-	for i, vector := range smallerCoordinates {
+	for _, vector := range smallerCoordinates {
 		for j := 0; j < int(numPeers); j++ {
-			if i == 0 || i == smallerLength-1 {
-				for k := 0; k < int(fillRest); k++ {
-					newCoordinates = append(newCoordinates, vector)
-				}
-			}
-
 			newCoordinates = append(newCoordinates, vector)
 		}
 	}
