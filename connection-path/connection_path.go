@@ -65,7 +65,6 @@ func NewFromString(s string) (spec.ConnectionPath, error) {
 	return newConnectionPath, nil
 }
 
-// TODO write tests
 type connectionPath struct {
 	Config
 }
