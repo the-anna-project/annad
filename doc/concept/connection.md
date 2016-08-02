@@ -1,7 +1,7 @@
 # connection
 The connection model is the most important concept of the Anna project. A
 connection can be seen as a neural connection. Such connections represent
-relationships between certain information and bevahiors, represented in a
+relationships between certain information and behaviors, represented in a
 multi dimensional space. [Inputs](input.md), [outputs](output.md) and
 [CLGs](clg.md) are wired together that way. Many of these connections joined
 together form Anna's neural [network](network.md).
@@ -38,9 +38,29 @@ aligned over time.
 When creating new connections it is important not to create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
-fully dynamic and learned by experience and can be described as follows. These
-strategies are considered when it comes to draw new connections within a multi
-dimensional space.
+fully dynamic and learned by experience and can be described as follows. The
+creation of connections takes place on the CLG level if there is no known
+connection path yet. That means that connections are only persisted in case
+they belong to a successful connection path that in turn helped to solve some
+problem. So, the connection path is made out of connections. A connection is
+represented as single key-value pair where its key being the string
+representation of coordinates links to another string representation of
+coordinates. Therefore coordinates act as some kind of IDs. A CLG is identified
+using its unique coordinates within the multi dimensional connection space in
+combination with its very unique connection path. At some point, each single
+CLG needs to decide where to forward its own signal to. Once forwarded, the
+coordinates of the CLG receiving the forwarded impulse are randomly created
+with some offset. The offset of the CLG's coordinates is orientated to the
+coordinates of the CLG actually being forwarding the impulse. All newly created
+connections are persisted within a trial scope in the first place. This is done
+to label the current creation process to something that is volatile. If the
+neural network succeeds to solve a problem with some newly created connection
+path, the connections stored and marked within a trial scope are persisted as
+regular connections. In case the created connection path did not lead to some
+successful operation, all connections marked within a trial scope are simply
+removed again. Anyway, there needs a decision to be made to forward to some
+CLG. These strategies are considered when it comes to draw new connections
+within a multi dimensional connection space.
 
 1. Bias is some manually provided hint, intended to guide some connection path
    into a certain direction. Read more on this in this issue:
@@ -59,6 +79,11 @@ dimensional space.
    does not consider any additional information.
 
 ### lookup
+
+TODO
+
+Lookup happens within each CLG's scope to fetch all the peers supposed to be forwarded to.
+
 The process of looking up connections is triggered on demand and thus must be
 optimized for fast execution. When information is provided in the form of
 [input](input.md), it is mapped onto a multi dimensional space to enable the
@@ -105,53 +130,13 @@ information ID.
 
 ---
 
-###### map information ID to input sequence
-When having an information ID given it needs to be mapped to an input sequence.
-That way a mapping of input sequences broken down into their reusable features
-can be achieved. The following key maps an information ID to an input sequence.
+###### map information ID to input object
+When having an information ID given it needs to be mapped to an input object.
+That way all accociated meta data of an input sequences can be tracked by one
+reference object. The following key maps an information ID to an input object.
 
 ```
-<prefix>:information-id:input-sequence:<information-id>   <input-sequence>
-```
-
----
-
-###### map information ID to input tree ID
-When having an information ID given it needs to be mapped to an input tree ID.
-That way a mapping to an organizational structure can be achieved. In fact some
-feature of an input sequence can be part of many different input seuqeuences.
-The following key maps an information ID to many input tree IDs.
-
-```
-<prefix>:information-id:input-tree-id:<information-id>   <input-tree-id>,<input-tree-id>,...
-```
-
----
-
-###### map input tree ID to input tree
-When having an input tree ID given it needs to be mapped to an input tree. An
-input tree represents an organizational structure that holds ordered
-information IDs. Note that one information ID per list needs to be used when
-joining the whole input tree's underlying input sequence together. That means
-that in case one list needs to be omitted in some cases, the list must contain
-the information ID of an empty input sequence. That is, an empty string. The
-following key maps an input tree ID to an input tree.
-
-```
-<prefix>:input-tree-id:input-tree:<input-tree-id>    [[<information-id>,<information-id>,...],[<information-id>,<information-id>,...],...]
-```
-
----
-
-###### map information ID to information coordinates
-When having an information ID given it's position within the connection space
-needs to be looked up. Such lookups are necessary when conceptionaly related
-connections between information are required during operations on information
-level. The following key maps an information ID to information coordinates
-within the connection space.
-
-```
-<prefix>:information-id:information-coordinates:<information-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:information-id:input-object:<information-id>    {input-sequence: <input-sequence>, information-coordinates: <information-coordinates>, clg-tree-ids: [<clg-tree-id>,<clg-tree-id>,...]}
 ```
 
 ---
@@ -170,16 +155,9 @@ key maps information coordinates to it's information ID.
 
 ---
 
-###### map input tree ID to CLG tree ID
-When having an input tree ID given it needs to be mapped to a CLG tree ID. This
-is the key that maps information to behavior. The following key maps input tree
-coordinates to it's linked input tree ID.
-
-```
-<prefix>:input-tree-id:clg-tree-id:<input-tree-id>    <clg-tree-id>
-```
-
----
+TODO
+- How to scope persisted single key-value pair connections? Which role does the CLG tree ID have?
+- Is there a way to make connections "longer" so we store coordinates of more peers than two? This would make 10000 feet view lookups faster.
 
 ###### map CLG tree ID to CLG tree
 When having a CLG tree ID given it needs to be mapped to a CLG tree. A CLG tree
@@ -195,13 +173,13 @@ maps an CLG tree ID to a CLG tree.
 
 ---
 
-###### map behavior ID to behavior coordinates
-When having a behavior ID given it's position within the connection space needs
-to be looked up. The following key maps a behavior ID to behavior coordinates
-within the connection space.
+###### map behavior ID to behavior object
+When having an behavior ID given it needs to be mapped to an behavior object.
+That way all accociated meta data of an behavior can be tracked by one
+reference object. The following key maps an behavior ID to an behavior object.
 
 ```
-<prefix>:behavior-id:behavior-coordinates:<behavior-id>    [<x>,<y>,...],[<x>,<y>,...],...
+<prefix>:behavior-id:behavior-coordinates:<behavior-id>    {behavior-coordinates: <behavior-coordinates>, clg-tree-id: <clg-tree-id>}
 ```
 
 ---
