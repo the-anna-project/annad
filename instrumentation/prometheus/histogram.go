@@ -19,7 +19,7 @@ type HistogramConfig struct {
 	//
 	// The buckets need to be properly configured to match the use case of the
 	// oberseved samples, otherwise the histogram becomes pretty useless. E.g.
-	// mapping samples of 25 milliseconds into a 5 second bucket makes no sence.
+	// mapping samples of 25 milliseconds into a 5 second bucket makes no sense.
 	Buckets []float64
 
 	// Help represents some sort of informative description of the registered
