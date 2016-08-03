@@ -132,11 +132,24 @@ information ID.
 
 ###### map information ID to input object
 When having an information ID given it needs to be mapped to an input object.
-That way all accociated meta data of an input sequences can be tracked by one
+That way accociated meta data of an input sequences can be tracked by one
 reference object. The following key maps an information ID to an input object.
 
 ```
-<prefix>:information-id:input-object:<information-id>    {input-sequence: <input-sequence>, information-coordinates: <information-coordinates>, clg-tree-ids: [<clg-tree-id>,<clg-tree-id>,...]}
+<prefix>:information-id:input-object:<information-id>    {input-sequence: <input-sequence>, information-coordinates: <information-coordinates>}
+```
+
+---
+
+###### map information ID to CLG tree IDs
+When having an information ID given it needs to be mapped to CLG tree IDs.
+Here we make use of sets being able to create intersections with other sets.
+Note that this key-value pair represents a link between information and
+behavior due to the reference from an information ID to CLG tree IDs. The
+following key maps an information ID to CLG tree IDs.
+
+```
+<prefix>:information-id:clg-tree-id:<information-id>    <clg-tree-id>,<clg-tree-id>,...
 ```
 
 ---
@@ -150,48 +163,33 @@ information can be mapped and aligned to matching information. The following
 key maps information coordinates to it's information ID.
 
 ```
-<prefix>:information-coordinates:information-id:[<x>,<y>,...],[<x>,<y>,...],...    <information-id>
+<prefix>:information-coordinates:information-id:<information-coordinates>    <information-id>
 ```
 
 ---
 
-TODO
-- How to scope persisted single key-value pair connections? Which role does the CLG tree ID have?
-- Is there a way to make connections "longer" so we store coordinates of more peers than two? This would make 10000 feet view lookups faster.
-
-###### map CLG tree ID to CLG tree
-When having a CLG tree ID given it needs to be mapped to a CLG tree. A CLG tree
-represents an organizational structure that holds ordered behavior IDs forming
-an executable behavior network. A behavior ID is effectively a CLG ID. Note
-that a CLG tree can only be valid in case it starts with the ID of the Input
-CLG, and ends with the ID of the Output CLG in any branch. The following key
-maps an CLG tree ID to a CLG tree.
+###### map behavior coordinates to behavior coordinates
+When having behavior coordinates given they need to be mapped to behavior
+coordinates. This mapping represents a single connection within the multi
+dimensional connection space. CLGs can lookup connections supposed to be used
+to forward impulses to their peers using their own coordinates. The following
+key maps behavior coordinates to behavior coordinates.
 
 ```
-<prefix>:clg-tree-id:clg-tree:<clg-tree-id>    {<behavior-id>: {<behavior-id>: {...}, <behavior-id>: {...}, ...}}
+<prefix>:behavior-coordinates:behavior-coordinates:<behavior-coordinates>    <behavior-coordinates>,<behavior-coordinates>,...
 ```
 
 ---
 
-###### map behavior ID to behavior object
-When having an behavior ID given it needs to be mapped to an behavior object.
-That way all accociated meta data of an behavior can be tracked by one
-reference object. The following key maps an behavior ID to an behavior object.
+###### map behavior coordinates to CLG ID
+When having behavior coordinates given they need to be mapped to their CLG ID.
+Having behavior coordinates indexed as keys enables fast scans when it needs to
+be found out which behaviors are near to the surrounding area of a given
+behavior within the multi dimensional connection space. That way behavior can
+be mapped and aligned to matching behaviors. Further it needs to be known where
+to forward impulses to when walking through connection paths. The following key
+maps behavior coordinates to it's CLG ID.
 
 ```
-<prefix>:behavior-id:behavior-coordinates:<behavior-id>    {behavior-coordinates: <behavior-coordinates>, clg-tree-id: <clg-tree-id>}
-```
-
----
-
-###### map behavior coordinates to behavior ID
-When having behavior coordinates given they need to be mapped to their behavior
-ID. Having behavior coordinates indexed as keys enables fast scans when it
-needs to be found out which behaviors are near to the surrounding area of a
-given behavior within the connection space. That way behavior can be mapped and
-aligned to matching behaviors. The following key maps behavior coordinates to
-it's behavior ID.
-
-```
-<prefix>:behavior-coordinates:behavior-id:[<x>,<y>,...],[<x>,<y>,...],...    <behavior-id>
+<prefix>:behavior-coordinates:behavior-id:<behavior-coordinates>    <CLG-id>
 ```
