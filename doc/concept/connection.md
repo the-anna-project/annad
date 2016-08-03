@@ -10,20 +10,29 @@ together form Anna's neural [network](network.md).
 The connection space can be seen as a multi dimensional vector space. In theory
 it's dimensions can represent everything: space, time or even conceptional
 weights representing something like emotions. Information and behaviors are
-mapped onto the connection space. Here similarities between information, and
-similarities between behaviors can be calculated. In the connection space
-information are represented by the coordinates of input trees. Each vector,
-that is a list of coordinates, reflects a specific reusable feature of an input
-sequence. The distance calculation is done with respect to the input tree's
-coordinates. You can think of the joined coordinates of the input tree as a
-drawn information path in multi dimensional space. Information paths in the
-surrounding area are evidence of some kind of similarity. Over time the
-information paths are formed while each dimension is pulling on the peers of
-the information path into their own direction. That way a balanced alignment is
-achieved that makes each information path unique. The same concept that applies
-to information paths also applies to behavior paths, but only on a different
-problem domain. Here behavior is mapped to an executable CLG tree, which
-coordinates are mapped onto the multi dimensional connection space.
+mapped onto the multi dimensional connection space. Here similarities between
+information, and similarities between behaviors can be calculated, because they
+are represented by connection paths. These connection paths consist of
+coordinates, which identify the connection path's location within the
+connection space. Coordinates can be used to calculate distances to other
+coordinates in the surrounding area. Close connection paths can indicate some
+kind of similarity.
+
+In the connection space information are represented by the coordinates of input
+sequences. Each vector, that is represented by coordinates, reflects a specific
+character of a specific input sequence. You can think of the joined coordinates
+of an input sequence as a drawn information path in the multi dimensional
+space. Information paths in the surrounding area are evidence of some kind of
+similarity input wise . Over time the information paths are transformed when
+each dimension is pulling on the coordinates of the information path into their
+own direction. That way a balanced alignment is achieved that makes each
+information path unique and comparable against other information paths in the
+surrounding area. The same concept that applies to information paths also
+applies to behavior paths, but only on a different problem domain. Here
+behavior is mapped to an executable CLG tree, which coordinates are mapped onto
+the multi dimensional connection space as well. The relationship between an
+input sequence and a CLG tree that solved a problem for this input sequence
+creates the link between information and behavior.
 
 The following picture illustrates the multi dimensional connection space. For
 simplicity it only shows three dimensions. Here we see two different paths. It
@@ -38,28 +47,40 @@ aligned over time.
 When creating new connections it is important not to create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
-fully dynamic and learned by experience and can be described as follows. The
-creation of connections takes place on the CLG level if there is no known
-connection path yet. That means that connections are only persisted in case
-they belong to a successful connection path that in turn helped to solve some
-problem. So, the connection path is made out of connections. A connection is
-represented as single key-value pair where its key being the string
-representation of coordinates links to another string representation of
-coordinates. Therefore coordinates act as some kind of IDs. A CLG is identified
-using its unique coordinates within the multi dimensional connection space in
-combination with its very unique connection path. At some point, each single
-CLG needs to decide where to forward its own signal to. Once forwarded, the
-coordinates of the CLG receiving the forwarded impulse are randomly created
-with some offset. The offset of the CLG's coordinates is orientated to the
-coordinates of the CLG actually being forwarding the impulse. All newly created
-connections are persisted within a trial scope in the first place. This is done
-to label the current creation process to something that is volatile. If the
-neural network succeeds to solve a problem with some newly created connection
-path, the connections stored and marked within a trial scope are persisted as
-regular connections. In case the created connection path did not lead to some
-successful operation, all connections marked within a trial scope are simply
-removed again. Anyway, there needs a decision to be made to forward to some
-CLG. These strategies are considered when it comes to draw new connections
+fully dynamic and learned by experience and can be described as follows.
+
+When information is provided in the form of [input](input.md), and no
+connection path for the current input sequence exists yet, it is mapped onto a
+multi dimensional space. Each character of the input sequence is represented
+by their own coordinates. That way an input sequence draws a connection path
+within the multi dimensional connection space. This is then the connection path
+of information.
+
+The creation of behavior connections takes place on the CLG level. Connections
+of behaviors are only persisted in case they belong to a successful behavior
+connection path that in turn helped to solve some problem. So, the connection
+path of behaviors is made out of connections that belond to behaviors. Here a
+connection is represented as single key-value pair where its key being the
+string representation of coordinates links to another string representation of
+coordinates. A CLG is identified using its unique coordinates within the multi
+dimensional connection space in combination with its very unique connection
+path. A reference from coordinates to an actual CLG ID is also stored for
+mapping of coordinates to actual behavior later on. This is then the connection
+path of behaviors.
+
+At some point, each single CLG needs to decide where to forward its own signal
+to. Once forwarded, the coordinates of the CLG receiving the forwarded impulse
+are randomly created with some offset. The offset of the CLG's coordinates is
+orientated to the coordinates of the CLG actually being forwarding the impulse.
+All newly created connections are persisted within a trial scope in the first
+place. This is done to label the current creation process of behavior
+connections to something that is volatile. If the neural network succeeds to
+solve a problem with some newly created connection path, the behavior
+connections stored and marked within a trial scope are persisted as regular
+connections. In case the created connection path did not lead to some
+successful operation, all behaior connections marked within a trial scope are
+simply removed again. Anyway, there needs a decision to be made to forward to
+some CLG. These strategies are considered when it comes to draw new connections
 within a multi dimensional connection space.
 
 1. Bias is some manually provided hint, intended to guide some connection path
@@ -79,28 +100,16 @@ within a multi dimensional connection space.
    does not consider any additional information.
 
 ### lookup
-
-TODO
-
-Lookup happens within each CLG's scope to fetch all the peers supposed to be forwarded to.
-
 The process of looking up connections is triggered on demand and thus must be
-optimized for fast execution. When information is provided in the form of
-[input](input.md), it is mapped onto a multi dimensional space to enable the
-lookup of some behavior. The given input consists of many different reusable
-features. These features are resolved to their information IDs, which translate
-to many of so called input tree IDs. Here we can lookup information IDs of all
-features and create an intersection of the created set. The resulting input
-tree ID is then identified to represent the full original input sequence.
-However this input tree ID maps to an input tree, which itself maps to
-information IDs. Their coordinates identify the input tree's location within
-the connection space. The input tree's coordinates can be used to calculate
-distances to other input trees in the surrounding area. Close connection paths
-can indicate helpful information or some kind of similarity. Due to the already
-created connection we have a mapping between the input tree and the
-[CLG](clg.md) tree, which we actually want to lookup. This relationship creates
-the link between information and behavior, because the connected CLG tree maps
-directly to executable behavior.
+optimized for fast execution.
+
+When information is provided in the form of [input](input.md), and there does a
+connection path for the current input sequence exist, the information ID of the
+input sequence is fetched. This information ID links to some meta data
+associated with this input sequence, which also contains CLG tree IDs. Using
+such CLG tree IDs it is possible to lookup the connection path of behaviors.
+Within each CLG's scope a lookup happens to fetch all the peers that needs to
+be known to forward signals to.
 
 ### data structure
 Designing a data structure is quite important. Smart systems need to store
