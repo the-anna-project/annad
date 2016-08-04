@@ -135,8 +135,6 @@ When having an input sequence given it needs to be mapped to an information ID.
 An input sequence represents some externally provided information. The
 following key maps an input sequence to an information ID.
 
-  TODO what implications does it have to store input sequences as they are? Why not reusing and breaking down to features?
-
 ```
 <prefix>:input-sequence:information-id:<input-sequence>    <information-id>
 ```
@@ -204,8 +202,6 @@ behavior within the multi dimensional connection space. That way behavior can
 be mapped and aligned to matching behaviors. Further it needs to be known where
 to forward impulses to when walking through connection paths. The following key
 maps behavior coordinates to it's CLG ID.
-
-  TODO Here we need to ask the question from above the other way around. Is it good enough to store very single pieces of connection paths insteasd of whole chains?
 
 ```
 <prefix>:behavior-coordinates:behavior-id:<behavior-coordinates>    <CLG-id>
