@@ -6,7 +6,6 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
-	"github.com/xh3b4sd/anna/clg/find-connections"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -233,7 +232,6 @@ type clgScope struct {
 func newCLGs() map[spec.ObjectID]clgScope {
 	newList := []spec.CLG{
 		divide.MustNew(),
-		findconnections.MustNew(),
 	}
 
 	newCLGs := map[spec.ObjectID]clgScope{}

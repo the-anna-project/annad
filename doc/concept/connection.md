@@ -111,7 +111,7 @@ When information is provided in the form of input, and there does a connection
 path for the current input sequence exist, the information ID of the input
 sequence is fetched. This information ID links to some meta data associated
 with this input sequence, which also contains CLG tree IDs. Using such CLG tree
-IDs it is possible to lookup the connection path of behaviors.  Within each
+IDs it is possible to lookup the connection path of behaviors. Within each
 CLG's scope a lookup happens to fetch all the peers that needs to be known to
 forward signals to.
 
