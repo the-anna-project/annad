@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_TextInterface_maskAnyf_001(t *testing.T) {
+func Test_TextInterface_maskAnyf(t *testing.T) {
 	testCases := []struct {
 		InputError  error
 		InputFormat string
@@ -43,5 +43,14 @@ func Test_TextInterface_maskAnyf_001(t *testing.T) {
 		if testCase.Expected != nil && output.Error() != testCase.Expected.Error() {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)
 		}
+	}
+}
+
+func Test_TextInterface_IsUnsupportedType_False(t *testing.T) {
+	if IsUnsupportedType(nil) {
+		t.Fatal("expected", false, "got", true)
+	}
+	if IsUnsupportedType(maskAny(invalidAPIResponseError)) {
+		t.Fatal("expected", false, "got", true)
 	}
 }
