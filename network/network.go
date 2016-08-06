@@ -345,7 +345,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// idea would be to maintain some sort of output queue that contains all
 		// generated outputs. When waiting on the correct output related to our
 		// send input, we would need to go through the output queue until we find
-		// the right output. Irrelevent outputs would be requeued. The right output
+		// the right output. Irrelevant outputs would be requeued. The right output
 		// would be recognized by the ID of the impulse being responded with the
 		// output together.
 		//
