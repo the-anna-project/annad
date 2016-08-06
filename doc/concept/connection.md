@@ -43,7 +43,7 @@ applies to both of them. We see some peers are pretty near to each other. A
 smaller distance is an indicator for common connection patterns which are
 aligned over time.
 
-![connection](image/connection.png)
+![connection space](image/connection_space.png)
 
 ### creation
 When creating new connections it is important not to create weak connections.
@@ -102,6 +102,16 @@ within a multi dimensional connection space.
 4. *Random* connections can be drawn if none of the preceding options are
    available. This is the most weak way to create new connections, because it
    does not consider any additional information.
+
+Following is a picture describing the process of connection creation within the
+neural network. `[0]` marks the point at which it is tried to map the given
+input sequence to a CLG tree ID in the available storage. This information is
+attached to the current impulse. `[1]` marks the points at which it is tried to
+lookup connections of the current CLG tree. This is only possible in case there
+is a CLG tree ID known. If there is no CLG tree ID available, connections are
+created as described above.
+
+![connection creation](image/connection_creation.png)
 
 ### lookup
 The process of looking up connections is triggered on demand and thus must be
