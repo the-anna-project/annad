@@ -37,10 +37,11 @@ that solved a problem for this input sequence creates the link between
 information and behavior.
 
 The following picture illustrates the multi dimensional connection space. For
-simplicity it only shows three dimensions. Here we see two different paths. It
-doesn't matter if they are information or behavior paths. The same principle
-applies to both of them. We see some peers are pretty near to each other. A
-smaller distance is an indicator for common connection patterns which are
+simplicity it only shows two dimensions, `x` and `y`. We see two different
+paths within the coordinate system like space. It doesn't matter if the paths
+are information or behavior paths. The same principle applies to both of these
+concepts. We see some peers which are pretty near to each other. We assume that
+a smaller distance is an indicator for common connection patterns which are
 aligned over time.
 
 ![connection space](image/connection_space.png)
