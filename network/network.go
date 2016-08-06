@@ -109,7 +109,6 @@ type network struct {
 	Type               spec.ObjectType
 }
 
-// TODO
 func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
 
@@ -122,12 +121,6 @@ func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, e
 	if !equalTypes(valuesToTypes(inputs), clgScope.CLG.Inputs()) {
 		return false, maskAnyf(invalidInterfaceError, "types must match")
 	}
-
-	// where does the input come from?
-	// am I part of a successful path?
-
-	// TODO check connections if the requested CLG should be emitted
-	// TODO check connections if an error should be returned in case the CLG should not be activated (learn if error should be returned or not)
 
 	return true, nil
 }
@@ -183,8 +176,6 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 		return maskAny(err)
 	}
 
-	// TODO we need to reward the CLG connections that forwarded signals together correctly
-
 	// After the CLGs calculation it can decide what to do next. Like Activate,
 	// it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
 	// might or might not forward its calculated results to one or more CLGs.
@@ -203,6 +194,12 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 // TODO
 func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
+
+	// input provides CLG tree ID
+
+	// create
+
+	// read
 
 	return nil
 }
@@ -348,9 +345,13 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// idea would be to maintain some sort of output queue that contains all
 		// generated outputs. When waiting on the correct output related to our
 		// send input, we would need to go through the output queue until we find
-		// the right output. Unimportant outputs would be requeued. The right
-		// output would be recognized by the ID of the impulse being responded with
-		// the output together.
+		// the right output. Irrelevent outputs would be requeued. The right output
+		// would be recognized by the ID of the impulse being responded with the
+		// output together.
+		//
+		// TODO there can be multiple outputs on one input. We need to handle a
+		// stream of outputs that can be streamed as responses over network.
+		//
 		response, err := n.Receive(n.CLGIDs["output"])
 		if err != nil {
 			return nil, maskAny(err)
@@ -382,8 +383,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		}
 
 		// TODO move reward/punish to output CLG?
-		// TODO expectation met == reward?
-		// TODO expectation NOT met == punishing?
+		// TODO expectation met == reward
 	}
 
 	return imp, nil
