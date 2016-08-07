@@ -21,15 +21,15 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.Object
 	return CLGs
 }
 
-func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desired []reflect.Type) (bool, []spec.InputRequest, []spec.InputRequest, error) {
+func (n *network) extractMatchingInputRequests(queue []spec.NetworkPayload, desired []reflect.Type) (bool, []spec.NetworkPayload, []spec.NetworkPayload, error) {
 	permutationList, err := inputRequestsToPermutationList(queue, desired)
 	if err != nil {
 		return false, nil, nil, maskAny(err)
 	}
 
 	var execute bool
-	var matching []spec.InputRequest
-	var newQueue []spec.InputRequest
+	var matching []spec.NetworkPayload
+	var newQueue []spec.NetworkPayload
 	for {
 		types, err := n.permutationListToTypes(permutationList)
 		if err != nil {
@@ -60,25 +60,25 @@ func (n *network) extractMatchingInputRequests(queue []spec.InputRequest, desire
 }
 
 // TODO
-func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.InputRequest) ([]spec.InputRequest, []spec.InputRequest, error) {
+func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.NetworkPayload) ([]spec.NetworkPayload, []spec.NetworkPayload, error) {
 	err := n.PermutationFactory.MapTo(permutationList)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
 	members := permutationList.GetMembers()
 
-	var matching []spec.InputRequest
+	var matching []spec.NetworkPayload
 	for _, m := range members {
-		request, ok := m.(spec.InputRequest)
+		payload, ok := m.(spec.NetworkPayload)
 		if !ok {
 			return nil, nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
 		}
-		matching = append(matching, request)
+		matching = append(matching, payload)
 	}
 
 	// TODO test
-	var newQueue []spec.InputRequest
-	matchingSeen := map[*spec.InputRequest]struct{}{}
+	var newQueue []spec.NetworkPayload
+	matchingSeen := map[*spec.NetworkPayload]struct{}{}
 	for _, r := range queue {
 		_, ok := matchingSeen[&r]
 		if containsInputRequest(matching, r) && !ok {
@@ -140,12 +140,12 @@ func (n *network) permutationListToTypes(permutationList spec.PermutationList) (
 	var types []reflect.Type
 
 	for _, m := range members {
-		request, ok := m.(spec.InputRequest)
+		payload, ok := m.(spec.NetworkPayload)
 		if !ok {
 			return nil, maskAnyf(invalidInterfaceError, "invalid type for permutation list member")
 		}
 
-		for _, v := range request.Inputs {
+		for _, v := range payload.Args {
 			types = append(types, v.Type())
 		}
 	}
@@ -155,7 +155,7 @@ func (n *network) permutationListToTypes(permutationList spec.PermutationList) (
 
 // private
 
-func containsInputRequest(list []spec.InputRequest, item spec.InputRequest) bool {
+func containsInputRequest(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
 	for _, r := range list {
 		if equalInputRequest(r, item) {
 			return true
@@ -165,14 +165,14 @@ func containsInputRequest(list []spec.InputRequest, item spec.InputRequest) bool
 	return false
 }
 
-func equalInputRequest(a spec.InputRequest, b spec.InputRequest) bool {
-	if a.Source != b.Source {
+func equalInputRequest(a spec.NetworkPayload, b spec.NetworkPayload) bool {
+	if !reflect.DeepEqual(a.Args, b.Args) {
 		return false
 	}
 	if a.Destination != b.Destination {
 		return false
 	}
-	if !reflect.DeepEqual(a.Inputs, b.Inputs) {
+	if !reflect.DeepEqual(a.Sources, b.Sources) {
 		return false
 	}
 
@@ -192,7 +192,7 @@ func equalTypes(a, b []reflect.Type) bool {
 	return true
 }
 
-func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect.Type) (spec.PermutationList, error) {
+func inputRequestsToPermutationList(queue []spec.NetworkPayload, desired []reflect.Type) (spec.PermutationList, error) {
 	var values []interface{}
 	for _, ir := range queue {
 		values = append(values, ir)
@@ -210,23 +210,38 @@ func inputRequestsToPermutationList(queue []spec.InputRequest, desired []reflect
 	return permutationList, nil
 }
 
-// joinRequestInputs joins all input lists of the given input requests
-// together. The order of the joined inputs equals the order of the given input
-// requests.
-func joinRequestInputs(inputRequests []spec.InputRequest) []reflect.Value {
-	var inputs []reflect.Value
+// mergeInputRequests joins the given network payloadss to one new network payloads.
+// The order of the joined inputs equals the order of the given network payloads.
+// In the inputs of the network payloads the first element is always an impulse.
+// When merging the network payloads the first impulse of the first inputs list
+// is used to apply it to the new joined network payloads. All impulses of the
+// given network payloads should be the same impulse anyway.
+func mergeInputRequests(payloads []spec.NetworkPayload) (spec.NetworkPayload, error) {
+	var payload spec.NetworkPayload
+	var imp spec.Impulse
+	var err error
 
-	for _, ir := range inputRequests {
-		inputs = append(inputs, ir.Inputs...)
+	for _, ir := range payloads {
+		if imp == nil {
+			imp, err = argsToImpulse(ir.Args)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+
+			payload.Destination = ir.Destination
+		}
+		// Note we ignore the first argument which should only ever be the same
+		// impulse across all network payloads, which we already tracked above.
+		payload.Args = append(payload.Args, ir.Args[1:]...)
+		payload.Sources = append(payload.Sources, ir.Sources...)
 	}
 
-	return inputs
+	return inputs, nil
 }
 
 type clgScope struct {
-	CLG    spec.CLG
-	Input  chan spec.InputRequest
-	Output chan spec.OutputResponse
+	CLG   spec.CLG
+	Input chan spec.NetworkPayload
 }
 
 func newCLGs() map[spec.ObjectID]clgScope {
@@ -238,33 +253,41 @@ func newCLGs() map[spec.ObjectID]clgScope {
 
 	for _, CLG := range newList {
 		newCLGs[CLG.GetID()] = clgScope{
-			CLG:    CLG,
-			Input:  make(chan spec.InputRequest, 10),
-			Output: make(chan spec.OutputResponse, 10),
+			CLG:   CLG,
+			Input: make(chan spec.NetworkPayload, 10),
 		}
 	}
 
 	return newCLGs
 }
 
-func prepareInput(imp spec.Impulse, source, destination spec.ObjectID) spec.InputRequest {
-	request := spec.InputRequest{
-		Source:      source,
+func prepareInput(imp spec.Impulse, source, destination spec.ObjectID) spec.NetworkPayload {
+	payload := spec.NetworkPayload{
+		Sources:     []spec.ObjectID{source},
 		Destination: destination,
-		Inputs:      []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())},
+		Args:        []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())},
 	}
 
-	return request
+	return payload
+}
+
+func argsToImpulse(args []reflect.Value) (spec.Impulse, error) {
+	if len(args) < 1 {
+		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
+	}
+
+	imp, ok := args[0].Interface().(spec.Impulse)
+	if !ok {
+		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
+	}
+
+	return imp, nil
 }
 
 func prepareOutput(response spec.OutputResponse) (spec.Impulse, error) {
-	if len(response.Outputs) == 0 {
-		return nil, maskAnyf(invalidInterfaceError, "output must not be empty")
-	}
-
-	imp, ok := response.Outputs[0].Interface().(spec.Impulse)
-	if !ok {
-		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
+	imp, err := argsToImpulse(response.Outputs)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
 	var output string

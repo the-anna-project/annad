@@ -156,8 +156,6 @@ func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]refl
 func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
 
-	inputs := joinRequestInputs(requests)
-
 	// Each CLG that is executed needs to decide if it wants to be activated.
 	// This happens using the Activate method. To make this decision the given
 	// input, the CLGs connections and behaviour properties are considered.
@@ -195,15 +193,31 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
 
-	// input provides CLG tree ID
+	// Check if the impulse provides a CLG tree ID.
+	imp, err := argsToImpulse(inputs)
+	if err != nil {
+		return nil, maskAny(err)
+	}
 
-	// create
+	clgTreeID := imp.GetCLGTreeID()
+	var requests []spec.InputRequest
+	if clgTreeID == "" {
+		// create new
+	} else {
+		// lookup existing
+	}
 
-	// read
+	for _, r := range requests {
+		err := n.Send(r)
+		if err != nil {
+			return maskAny(err)
+		}
+	}
 
 	return nil
 }
 
+// TODO
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
@@ -212,7 +226,7 @@ func (n *network) Listen() {
 		// Only these both are treated specially. Here we exclude the Output CLG
 		// from the listener, because Network.Trigger is already listening for
 		// responses from it.
-		if clgScope.CLG.GetName() == "Output" {
+		if clgScope.CLG.GetName() == "output" {
 			continue
 		}
 
@@ -255,19 +269,19 @@ func (n *network) Listen() {
 					queue = newQueue
 
 					// In case the interface is fulfilled we can finally execute the CLG.
-					go func(matching []spec.InputRequest) {
-						err := n.Execute(clgID, matching)
+					go func(request spec.InputRequest) {
+						err := n.Execute(clgID, request)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 						}
-					}(matching)
+					}(request)
 				}
 			}
 		}(clgID, clgScope.CLG)
 	}
 }
 
-func (n *network) Receive(clgID spec.ObjectID) (spec.OutputResponse, error) {
+func (n *network) Receive() (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
 
 	clgScope, ok := n.CLGs[clgID]
@@ -345,7 +359,7 @@ func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
 		// idea would be to maintain some sort of output queue that contains all
 		// generated outputs. When waiting on the correct output related to our
 		// send input, we would need to go through the output queue until we find
-		// the right output. Irrelevant outputs would be requeued. The right output
+		// the right output. Irrelevent outputs would be requeued. The right output
 		// would be recognized by the ID of the impulse being responded with the
 		// output together.
 		//

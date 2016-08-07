@@ -4,31 +4,19 @@ import (
 	"reflect"
 )
 
-// InputRequest represents the request provided to a CLG to ask it to do some
+// NetworkPayload represents the request provided to a CLG to ask it to do some
 // work.
-type InputRequest struct {
-	// Source represents the ID of the CLG that sends the message.
-	Source ObjectID
+type NetworkPayload struct {
+	// Args represents the arguments intended to be used for the requested CLG
+	// execution, or the output values being calculated during the requested CLG
+	// execution.
+	Args []reflect.Value
 
 	// Destination represents the ID of the CLG that receives the message.
 	Destination ObjectID
 
-	// Inputs represents the input values intended to be used for the requested
-	// CLG execution.
-	Inputs []reflect.Value
-}
-
-// OutputResponse represents the response created by a requested CLG.
-type OutputResponse struct {
-	// Source represents the ID of the CLG that sends the message.
-	Source ObjectID
-
-	// Destination represents the ID of the CLG that receives the message.
-	Destination ObjectID
-
-	// Outputs represents the output values being calculated during the requested
-	// CLG execution.
-	Outputs []reflect.Value
+	// Sources represents the IDs of the CLGs that sent the message.
+	Sources []ObjectID
 }
 
 // Network represents the artificial neural network. It provides access for
@@ -105,7 +93,7 @@ type Network interface {
 
 	Calculate(clgID ObjectID, inputs []reflect.Value) ([]reflect.Value, error)
 
-	Execute(clgID ObjectID, requests []InputRequest) error
+	Execute(clgID ObjectID, requests []NetworkPayload) error
 
 	Forward(clgID ObjectID, inputs, outputs []reflect.Value) error
 
@@ -113,11 +101,11 @@ type Network interface {
 
 	Object
 
-	Receive(clgID ObjectID) (OutputResponse, error)
+	Receive(clgID ObjectID) (NetworkPayload, error)
 
 	// TODO add reward and punish
 
-	Send(request InputRequest) error
+	Send(request NetworkPayload) error
 
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so
