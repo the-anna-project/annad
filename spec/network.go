@@ -31,10 +31,11 @@ type OutputResponse struct {
 	Outputs []reflect.Value
 }
 
-// Network represents the artificial neural network. It provides access for
-// external events to the internal neural activities through a gateway.
-// Internally CLGs interact like neurons. The following illustrates the
-// control flow hierarchy of the neural network.
+// Network provides a neural network based on dynamic and self improving CLG
+// execution. The network provides input and output channels. When input is
+// received it is injected into the neural communication. The following neural
+// activity calculates output which is streamed through the output channel back
+// to the requestor.
 //
 // Network
 //
@@ -45,7 +46,7 @@ type OutputResponse struct {
 //
 //     The network listens on each CLG input channel using Listen.
 //
-// Network.Trigger
+// TODO Network.Trigger
 //
 //     When there is some signal coming through the gateway, the received
 //     signal is translated into an Impulse. This Impulse is then triggered to

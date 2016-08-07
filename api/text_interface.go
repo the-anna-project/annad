@@ -1,29 +1,47 @@
 package api
 
-// get response for ID
+// stream text request
 
-// GetResponseForIDRequest represents the request payload of the route used to
-// fetch the response for a job by providing the job's ID. There must be an ID
-// given.
-type GetResponseForIDRequest struct {
-	ID string `json:"id"`
+// TextRequest represents a streamed request being send to the neural network.
+// This is basically good for requesting calculations from the neural network
+// by providing text input and an optional expectation object.
+type TextRequest struct {
+	// ExpectationRequest represents the expectation object. This is used to
+	// match against the calculated output. In case there is an expectation
+	// given, the neural network tries to calculate an output until it generated
+	// one that matches the given expectation.
+	ExpectationRequest ExpectationRequest `json:"expectation,omitempty"`
+
+	// Input represents the input being fed into the neural network. There must
+	// be a none empty input given when requesting calculations from the neural
+	// network.
+	Input string `json:"input"`
+
+	// SessionID represents the session the current text request is associated
+	// with. This is provided to differentiate streams between different users.
+	SessionID string `json:"session_id,omitempty"`
 }
 
-// GetResponseForIDResponse represents the response payload of the route used
-// to fetch the response for a job by providing the job's ID. This payload by
-// convention follows the same schema as all other API responses.
-type GetResponseForIDResponse Response
-
-// read core request
-
-// ReadCoreRequestRequest represents the request payload of the route used to
-// read input by providing a core request. There must be a core request given.
-type ReadCoreRequestRequest struct {
-	CoreRequest CoreRequest `json:"core_request"`
-	SessionID   string      `json:"session_id,omitempty"`
+// IsEmpty checks whether the current text request is empty. An empty text
+// request can be considered invalid.
+func (tr TextRequest) IsEmpty() bool {
+	return tr.Input == "" || tr.SessionID == ""
 }
 
-// ReadCoreRequestResponse represents the response payload of the route used to
-// read input by providing a core request. This payload by convention follows
-// the same schema as all other API responses.
-type ReadCoreRequestResponse Response
+// TextResponse represents a streamed response being replied from the neural
+// text.
+type TextResponse struct {
+	// Output represents the output being calculated by the neural network.
+	Output string `json:"output"`
+}
+
+// StreamTextRequest represents the request payload of the route used to stream
+// text.
+type StreamTextRequest struct {
+	TextRequest TextRequest `json:"text_request"`
+}
+
+// StreamTextResponse represents the response payload of the route used to
+// stream text. This payload by convention follows the same schema as all other
+// API responses.
+type StreamTextResponse Response

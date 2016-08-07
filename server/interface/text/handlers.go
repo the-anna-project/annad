@@ -11,18 +11,11 @@ import (
 func NewHandlers(ctx context.Context, ti spec.TextInterface) map[string]*http.Server {
 	handlers := map[string]*http.Server{}
 
-	handlers["/interface/text/response"] = http.NewServer(
+	handlers["/interface/text"] = http.NewServer(
 		ctx,
-		getResponseForIDEndpoint(ti),
-		getResponseForIDDecoder,
-		getResponseForIDEncoder,
-	)
-
-	handlers["/interface/text/read"] = http.NewServer(
-		ctx,
-		readCoreRequestEndpoint(ti),
-		readCoreRequestDecoder,
-		readCoreRequestEncoder,
+		streamTextEndpoint(ti),
+		streamTextDecoder,
+		streamTextEncoder,
 	)
 
 	return handlers

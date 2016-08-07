@@ -72,20 +72,11 @@ func DefaultConfig() Config {
 
 // New creates a new configured server object.
 func New(config Config) (spec.Server, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newServer := &server{
 		Config: config,
 
 		BootOnce: sync.Once{},
-		ID:       newID,
+		ID:       id.MustNew(),
 		Mutex:    sync.Mutex{},
 		Server: &graceful.Server{
 			NoSignalHandling: true,
@@ -98,14 +89,17 @@ func New(config Config) (spec.Server, error) {
 		Type:         spec.ObjectType(ObjectTypeServer),
 	}
 
-	newServer.Log.Register(newServer.GetType())
-
+	if newServer.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
 	if newServer.LogControl == nil {
 		return nil, maskAnyf(invalidConfigError, "log control must not be empty")
 	}
 	if newServer.TextInterface == nil {
 		return nil, maskAnyf(invalidConfigError, "text interface must not be empty")
 	}
+
+	newServer.Log.Register(newServer.GetType())
 
 	return newServer, nil
 }

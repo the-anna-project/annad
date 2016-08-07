@@ -8,27 +8,9 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func getResponseForIDEndpoint(ti spec.TextInterface) endpoint.Endpoint {
+func streamTextEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.GetResponseForIDRequest)
-
-		if req.ID == "" {
-			// There must be an ID given. We don't have one, thus we return an error.
-			return api.WithError(maskAny(invalidRequestError)), nil
-		}
-
-		response, err := ti.GetResponseForID(ctx, req.ID)
-		if err != nil {
-			return api.WithError(maskAny(err)), nil
-		}
-
-		return api.WithData(response), nil
-	}
-}
-
-func readCoreRequestEndpoint(ti spec.TextInterface) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(api.ReadCoreRequestRequest)
+		req := request.(api.StreamTextRequest)
 
 		if req.CoreRequest.IsEmpty() {
 			// There must be an core request given. We don't have one, thus we return
@@ -36,11 +18,24 @@ func readCoreRequestEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		response, err := ti.ReadCoreRequest(ctx, req.CoreRequest, req.SessionID)
+		in := make(chan api.NetworkRequest, 1)
+		out := make(chan api.NetworkResponse, 1000)
+
+		go func() {
+			// TODO stream continously
+			in <- req.NetworkRequest
+		}()
+
+		go func() {
+			// TODO stream continously
+			api.WithData(<-out)
+		}()
+
+		err := ti.StreamText(ctx, in, out)
 		if err != nil {
 			return api.WithError(maskAny(err)), nil
 		}
 
-		return api.WithData(response), nil
+		return nil, nil
 	}
 }
