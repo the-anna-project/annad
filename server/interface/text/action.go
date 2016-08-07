@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/gateway"
 )
 
 // ReadCoreRequestAction represents the action of a scheduler job being

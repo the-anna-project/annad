@@ -22,9 +22,10 @@ const (
 // InterfaceConfig represents the configuration used to create a new text
 // interface object.
 type InterfaceConfig struct {
-	Log         spec.Log
-	Scheduler   spec.Scheduler
-	TextGateway spec.Gateway
+	Log        spec.Log
+	Scheduler  spec.Scheduler
+	TextInput  chan string
+	TextOutput chan string
 }
 
 // DefaultInterfaceConfig provides a default configuration to create a new text
@@ -36,9 +37,10 @@ func DefaultInterfaceConfig() InterfaceConfig {
 	}
 
 	newConfig := InterfaceConfig{
-		Log:         log.NewLog(log.DefaultConfig()),
-		Scheduler:   newScheduler,
-		TextGateway: gateway.NewGateway(gateway.DefaultConfig()),
+		Log:        log.NewLog(log.DefaultConfig()),
+		Scheduler:  newScheduler,
+		TextInput:  make(chan string, 1000),
+		TextOutput: make(chan string, 1000),
 	}
 
 	return newConfig

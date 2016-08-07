@@ -10,7 +10,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	logcontrol "github.com/xh3b4sd/anna/server/control/log"
@@ -30,7 +29,6 @@ type Config struct {
 	Instrumentation spec.Instrumentation
 	Log             spec.Log
 	LogControl      spec.LogControl
-	TextGateway     spec.Gateway
 	TextInterface   spec.TextInterface
 
 	// Settings.
@@ -63,7 +61,6 @@ func DefaultConfig() Config {
 		Instrumentation: newInstrumentation,
 		Log:             log.NewLog(log.DefaultConfig()),
 		LogControl:      newLogControl,
-		TextGateway:     gateway.NewGateway(gateway.DefaultConfig()),
 		TextInterface:   newTextInterface,
 
 		// Settings.
