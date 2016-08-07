@@ -89,12 +89,7 @@ from the very top we consider the following layers.
 - The `server` layer describes the actual server listening for traffic of
   implemented network protocols. It provides so called
   [interfaces](interface.md) that are used to differentiate between different
-  types of inputs that serve different types of purposes. Interfaces are
-  executed within scheduler jobs.
-
-- The `scheduler` layer describes processing of work that should be done by
-  jobs. A job can be any type of work. E.g. the processing of an incoming
-  request which is forwareded to the [network](network.md).
+  types of inputs that serve different types of purposes.
 
 - The `network` layer describes the implementation of Anna's most inner
   workings. This can be seen as the neural network. It bundles everything
