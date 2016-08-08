@@ -8,7 +8,7 @@ https://github.com/blog/1506-closing-issues-via-pull-requests for more
 information.
 
 ### checklist
-- [ ] Make sure you read and understood the [CONTRIBUTING.md](/.github/CONTRIBUTING.md).
+- [ ] Make sure you read and understood the [CONTRIBUTING.md](https://github.com/xh3b4sd/anna/.github/CONTRIBUTING.md).
 - [ ] Make sure you applied sufficient labels, milestone and assignee.
 - [ ] Make sure all TODOs are addressed.
 - [ ] Make sure there is sufficient documentation.
