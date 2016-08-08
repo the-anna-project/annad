@@ -2,9 +2,7 @@ package network
 
 import (
 	"reflect"
-	"sync/atomic"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/spec"
@@ -89,35 +87,6 @@ func (n *network) filterInputRequests(permutationList spec.PermutationList, queu
 	}
 
 	return matching, newQueue, nil
-}
-
-func (n *network) getGatewayListener() func(newSignal spec.Signal) (spec.Signal, error) {
-	newListener := func(newSignal spec.Signal) (spec.Signal, error) {
-		newImpulse, err := n.NewImpulse(newSignal.GetInput().(api.CoreRequest))
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// Increment the impulse count to track how many impulses are processed
-		// inside the core network.
-		atomic.AddInt64(&n.ImpulsesInProgress, 1)
-		newImpulse, err = n.Trigger(newImpulse)
-		// Decrement the impulse count once all hard work is done. Note that this
-		// is important to be done before the error handling of Core.Trigger to
-		// ensure the impulse count is properly decreased.
-		atomic.AddInt64(&n.ImpulsesInProgress, -1)
-
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		output := newImpulse.GetOutput()
-		newSignal.SetOutput(output)
-
-		return newSignal, nil
-	}
-
-	return newListener
 }
 
 func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]clgScope) map[string]spec.ObjectID {

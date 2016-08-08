@@ -87,30 +87,21 @@ from the very top we consider the following layers.
   coming from the server.
 
 - The `server` layer describes the actual server listening for traffic of
-  implemented network protocols. It provides so called `interfaces` that are
-  used to differentiate between different types of inputs that serve different
-  types of purposes. Interfaces dispatch information to and from gateways.
-
-- The `gateway` layer describes a gateway where data is exchanged. The concept
-  of a separate gateway is important architectural wise to fully decouple the
-  server and the core.
+  implemented network protocols. It provides so called
+  [interfaces](interface.md) that are used to differentiate between different
+  types of inputs that serve different types of purposes.
 
 - The `network` layer describes the implementation of Anna's most inner
-  workings. The neural network. It bundles everything around data processing
-  and intelligence. The network itself contains CLGs acting as some sort of
-  artificial neurons. They connect to each other and form the network. Signals
-  provided by the gateway are translated to impulses that pass through the
-  networks and magic happens.
-
-- The `scheduler` layer describes processing of work that should be done by
-  jobs. A job can be any type of work. E.g. the processing of an incoming
-  impulse.
+  workings. This can be seen as the neural network. It bundles everything
+  around data processing and intelligence. The network itself contains
+  [CLGs](clg.md) acting as some sort of artificial neurons. They connect to
+  each other and form the network.
 
 - The `storage` layer describes the data storage responsible for storing any
-  kind of data. E.g. this is Anna's memory.
+  kind of information like the neural [connections](connection.md). This can be
+  seen as Anna's memory.
 
-This is how it basically looks like. Note that the white pale boxes represent
-ideas that are not yet implemented. The strong grey boxes in fact represent
-components that, at least partly, are implemented.
+This is how it basically looks like. Note that the pale boxes represent ideas
+that are not yet implemented.
 
 ![anna](image/anna.png)

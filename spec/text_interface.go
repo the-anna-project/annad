@@ -8,12 +8,8 @@ import (
 
 // TextInterface provides a way to feed neural networks with text input.
 type TextInterface interface {
-	// GetResponseForID asks for a job result using the given job ID. This call
-	// might block so long the job is not finished.
-	GetResponseForID(ctx context.Context, jobID string) (string, error)
-
-	// ReadCoreRequest creates a new job to feed the neural network with input.
-	// Only a new job ID will be returned, immediately. The actual job response
-	// can be retrieved using GetResponseForID.
-	ReadCoreRequest(ctx context.Context, coreRequest api.CoreRequest, sessionID string) (string, error)
+	// StreamText forwards the text request provided by in to the neural network
+	// and forwards the text response to the client. StreamText blocks until the
+	// given context is canceled.
+	StreamText(ctx context.Context, in chan api.TextRequest, out chan api.TextResponse) error
 }

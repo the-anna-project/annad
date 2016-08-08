@@ -1,10 +1,8 @@
-// Package network implements spec.Network to provide dynamic and self
-// improving CLG execution. Gateways send signals to the core network to
-// request calculations. The core network translates a signal into an impulse.
-// So the core network is the starting point for all impulses. Once an impulse
-// finished its walk through the core network, the impulse's output is
-// translated back to the requesting signal and the signal is send back through
-// the gateway to its requestor.
+// Package network implements spec.Network to provide a neural network based on
+// dynamic and self improving CLG execution. The network provides input and
+// output channels. When input is received it is injected into the neural
+// communication. The following neural activity calculates output which is
+// streamed through the output channel back to the requestor.
 package network
 
 import (
@@ -13,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -33,7 +31,8 @@ type Config struct {
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
 	Storage            spec.Storage
-	TextGateway        spec.Gateway
+	TextInput          chan api.TextRequest
+	TextOutput         chan api.TextResponse
 
 	// Settings.
 
@@ -61,7 +60,8 @@ func DefaultConfig() Config {
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
-		TextGateway:        gateway.NewGateway(gateway.DefaultConfig()),
+		TextInput:          make(chan api.TextRequest, 1000),
+		TextOutput:         make(chan api.TextResponse, 1000),
 	}
 
 	return newConfig
@@ -87,8 +87,11 @@ func New(config Config) (spec.Network, error) {
 	if newNetwork.Storage == nil {
 		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
 	}
-	if newNetwork.TextGateway == nil {
-		return nil, maskAnyf(invalidConfigError, "text gateway must not be empty")
+	if newNetwork.TextInput == nil {
+		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
+	}
+	if newNetwork.TextOutput == nil {
+		return nil, maskAnyf(invalidConfigError, "text output channel must not be empty")
 	}
 
 	newNetwork.Log.Register(newNetwork.GetType())
@@ -195,6 +198,22 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 		return maskAny(err)
 	}
 
+	// The output CLG is the only other special CLG, next to the input CLG.  Only
+	// these both are treated specially. Here we forward the ouputs of the output
+	// CLG to the output channel. This will cause the output returned here to be
+	// streamed back to the client waiting for calculations of the neural network.
+	if n.CLGs[clgID].GetName() == "output" {
+		var output string
+		// TODO it feels shit that there has to be a convention of having the impulse always being the first argument
+		for _, v := range outputs[1:] {
+			output += v.String()
+		}
+		// TODO output needs to be api.TextResponse
+		n.TextOutput <- output
+	}
+
+	// TODO what role does the impulse have? for what do we need it?
+
 	return nil
 }
 
@@ -211,14 +230,6 @@ func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
 	for clgID, clgScope := range n.CLGs {
-		// The Output CLG is the only other special CLG, next to the Input CLG.
-		// Only these both are treated specially. Here we exclude the Output CLG
-		// from the listener, because Network.Trigger is already listening for
-		// responses from it.
-		if clgScope.CLG.GetName() == "Output" {
-			continue
-		}
-
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
 			// This is the queue of input requests. We collect inputs until the
 			// requested CLG's interface is fulfilled somehow. Then the CLG is
@@ -303,6 +314,7 @@ func (n *network) Shutdown() {
 		n.TextGateway.Close()
 
 		for {
+			// TODO this needs to be tested properly
 			impulsesInProgress := atomic.LoadInt64(&n.ImpulsesInProgress)
 			if impulsesInProgress == 0 {
 				// As soon as all impulses are processed we can go ahead to shutdown the
