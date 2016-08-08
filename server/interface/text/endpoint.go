@@ -12,23 +12,27 @@ func streamTextEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(api.StreamTextRequest)
 
-		if req.CoreRequest.IsEmpty() {
+		if req.TextRequest.IsEmpty() {
 			// There must be an core request given. We don't have one, thus we return
 			// an error.
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		in := make(chan api.NetworkRequest, 1)
-		out := make(chan api.NetworkResponse, 1000)
+		in := make(chan api.TextRequest, 1)
+		out := make(chan api.TextResponse, 1000)
 
 		go func() {
 			// TODO stream continously
-			in <- req.NetworkRequest
+			in <- req.TextRequest
 		}()
 
 		go func() {
-			// TODO stream continously
-			api.WithData(<-out)
+			for {
+				select {
+				case textResponse := <-out:
+					api.WithData(textResponse.Output)
+				}
+			}
 		}()
 
 		err := ti.StreamText(ctx, in, out)

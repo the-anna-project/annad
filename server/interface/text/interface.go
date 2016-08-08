@@ -67,13 +67,16 @@ type tinterface struct {
 func (i *tinterface) StreamText(ctx context.Context, in chan api.TextRequest, out chan api.TextResponse) error {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StreamText")
 
+	fail := make(chan error, 1000)
+
 	// Start processing the text request through the text input channel.
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
+				fail <- maskAny(ctx.Err())
 				return
-			case textRequest <- in:
+			case textRequest := <-in:
 				i.TextInput <- textRequest
 			}
 		}
@@ -81,8 +84,10 @@ func (i *tinterface) StreamText(ctx context.Context, in chan api.TextRequest, ou
 
 	for {
 		select {
+		case err := <-fail:
+			return maskAny(err)
 		case <-ctx.Done():
-			return ctx.Error()
+			return maskAny(ctx.Err())
 		case textResponse := <-i.TextOutput:
 			out <- textResponse
 		}
