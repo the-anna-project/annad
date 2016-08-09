@@ -22,7 +22,7 @@ func streamTextEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 		out := make(chan api.TextResponse, 1000)
 
 		go func() {
-			// TODO stream continously
+			// TODO stream continuously
 			in <- req.TextRequest
 		}()
 

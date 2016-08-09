@@ -55,7 +55,7 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 	out := make(chan api.TextResponse, 1000)
 
 	go func() {
-		// TODO stream continously
+		// TODO stream continuously
 		in <- textRequest
 	}()
 	err = a.TextInterface.StreamText(ctx, in, out)

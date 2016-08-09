@@ -87,17 +87,13 @@ type Network interface {
 
 	Calculate(clgID ObjectID, inputs []reflect.Value) ([]reflect.Value, error)
 
-	Execute(clgID ObjectID, requests []NetworkPayload) error
+	Execute(clgID ObjectID, payload NetworkPayload) error
 
 	Forward(clgID ObjectID, inputs, outputs []reflect.Value) error
 
 	Listen()
 
 	Object
-
-	Receive(clgID ObjectID) (NetworkPayload, error)
-
-	Send(request NetworkPayload) error
 
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so

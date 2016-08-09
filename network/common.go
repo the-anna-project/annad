@@ -19,7 +19,7 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.Object
 	return CLGs
 }
 
-func (n *network) extractMatchingInputRequests(queue []spec.NetworkPayload, desired []reflect.Type) (bool, []spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) extractMatchingNetworkPayload(queue []spec.NetworkPayload, desired []reflect.Type) (bool, []spec.NetworkPayload, []spec.NetworkPayload, error) {
 	permutationList, err := inputRequestsToPermutationList(queue, desired)
 	if err != nil {
 		return false, nil, nil, maskAny(err)
@@ -47,7 +47,7 @@ func (n *network) extractMatchingInputRequests(queue []spec.NetworkPayload, desi
 		}
 
 		execute = true
-		matching, newQueue, err = n.filterInputRequests(permutationList, queue)
+		matching, newQueue, err = n.filterNetworkPayloads(permutationList, queue)
 		if err != nil {
 			return false, nil, nil, maskAny(err)
 		}
@@ -58,7 +58,7 @@ func (n *network) extractMatchingInputRequests(queue []spec.NetworkPayload, desi
 }
 
 // TODO
-func (n *network) filterInputRequests(permutationList spec.PermutationList, queue []spec.NetworkPayload) ([]spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) filterNetworkPayloads(permutationList spec.PermutationList, queue []spec.NetworkPayload) ([]spec.NetworkPayload, []spec.NetworkPayload, error) {
 	err := n.PermutationFactory.MapTo(permutationList)
 	if err != nil {
 		return nil, nil, maskAny(err)
@@ -79,7 +79,7 @@ func (n *network) filterInputRequests(permutationList spec.PermutationList, queu
 	matchingSeen := map[*spec.NetworkPayload]struct{}{}
 	for _, r := range queue {
 		_, ok := matchingSeen[&r]
-		if containsInputRequest(matching, r) && !ok {
+		if containsNetworkPayload(matching, r) && !ok {
 			matchingSeen[&r] = struct{}{}
 			continue
 		}
@@ -124,9 +124,9 @@ func (n *network) permutationListToTypes(permutationList spec.PermutationList) (
 
 // private
 
-func containsInputRequest(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
+func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
 	for _, r := range list {
-		if equalInputRequest(r, item) {
+		if equalNetworkPayload(r, item) {
 			return true
 		}
 	}
@@ -134,7 +134,7 @@ func containsInputRequest(list []spec.NetworkPayload, item spec.NetworkPayload) 
 	return false
 }
 
-func equalInputRequest(a spec.NetworkPayload, b spec.NetworkPayload) bool {
+func equalNetworkPayload(a spec.NetworkPayload, b spec.NetworkPayload) bool {
 	if !reflect.DeepEqual(a.Args, b.Args) {
 		return false
 	}
@@ -179,34 +179,35 @@ func inputRequestsToPermutationList(queue []spec.NetworkPayload, desired []refle
 	return permutationList, nil
 }
 
-// mergeInputRequests joins the given network payloadss to one new network payloads.
-// The order of the joined inputs equals the order of the given network payloads.
-// In the inputs of the network payloads the first element is always an impulse.
-// When merging the network payloads the first impulse of the first inputs list
-// is used to apply it to the new joined network payloads. All impulses of the
-// given network payloads should be the same impulse anyway.
-func mergeInputRequests(payloads []spec.NetworkPayload) (spec.NetworkPayload, error) {
-	var payload spec.NetworkPayload
-	var imp spec.Impulse
-	var err error
-
-	for _, ir := range payloads {
-		if imp == nil {
-			imp, err = argsToImpulse(ir.Args)
-			if err != nil {
-				return nil, maskAny(err)
-			}
-
-			payload.Destination = ir.Destination
-		}
-		// Note we ignore the first argument which should only ever be the same
-		// impulse across all network payloads, which we already tracked above.
-		payload.Args = append(payload.Args, ir.Args[1:]...)
-		payload.Sources = append(payload.Sources, ir.Sources...)
-	}
-
-	return inputs, nil
-}
+// mergeNetworkPayloads joins the given network payloads to one new network
+// payload. The order of the joined inputs equals the order of the given
+// network payload. In the inputs of the network payloads the first element is
+// always a context. When merging the network payloads the first context of the
+// first inputs list is used to be applied to the new unified network payload.
+// All contexts of the given network payloads should be equal anyway anyway.
+// TODO
+// func mergeNetworkPayloads(payloads []spec.NetworkPayload) (spec.NetworkPayload, error) {
+// 	var payload spec.NetworkPayload
+// 	var imp spec.Impulse
+// 	var err error
+//
+// 	for _, ir := range payloads {
+// 		if imp == nil {
+// 			imp, err = argsToImpulse(ir.Args)
+// 			if err != nil {
+// 				return nil, maskAny(err)
+// 			}
+//
+// 			payload.Destination = ir.Destination
+// 		}
+// 		// Note we ignore the first argument which should only ever be the same
+// 		// impulse across all network payloads, which we already tracked above.
+// 		payload.Args = append(payload.Args, ir.Args[1:]...)
+// 		payload.Sources = append(payload.Sources, ir.Sources...)
+// 	}
+//
+// 	return inputs, nil
+// }
 
 type clgScope struct {
 	CLG   spec.CLG
@@ -228,44 +229,6 @@ func newCLGs() map[spec.ObjectID]clgScope {
 	}
 
 	return newCLGs
-}
-
-func prepareInput(imp spec.Impulse, source, destination spec.ObjectID) spec.NetworkPayload {
-	payload := spec.NetworkPayload{
-		Sources:     []spec.ObjectID{source},
-		Destination: destination,
-		Args:        []reflect.Value{reflect.ValueOf(imp), reflect.ValueOf(imp.GetInput())},
-	}
-
-	return payload
-}
-
-func argsToImpulse(args []reflect.Value) (spec.Impulse, error) {
-	if len(args) < 1 {
-		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
-	}
-
-	imp, ok := args[0].Interface().(spec.Impulse)
-	if !ok {
-		return nil, maskAnyf(invalidInterfaceError, "impulse must be first")
-	}
-
-	return imp, nil
-}
-
-func prepareOutput(response spec.OutputResponse) (spec.Impulse, error) {
-	imp, err := argsToImpulse(response.Outputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	var output string
-	for _, v := range response.Outputs[1:] {
-		output += v.String()
-	}
-	imp.SetOutput(output)
-
-	return imp, nil
 }
 
 func valuesToTypes(values []reflect.Value) []reflect.Type {

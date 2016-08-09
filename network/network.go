@@ -8,7 +8,6 @@ package network
 import (
 	"reflect"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/xh3b4sd/anna/api"
@@ -72,13 +71,12 @@ func New(config Config) (spec.Network, error) {
 	newNetwork := &network{
 		Config: config,
 
-		BootOnce:           sync.Once{},
-		CLGs:               newCLGs(),
-		ID:                 id.MustNew(),
-		ImpulsesInProgress: 0,
-		Mutex:              sync.Mutex{},
-		ShutdownOnce:       sync.Once{},
-		Type:               ObjectTypeNetwork,
+		BootOnce:     sync.Once{},
+		CLGs:         newCLGs(),
+		ID:           id.MustNew(),
+		Mutex:        sync.Mutex{},
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectTypeNetwork,
 	}
 
 	if newNetwork.Log == nil {
@@ -102,14 +100,13 @@ func New(config Config) (spec.Network, error) {
 type network struct {
 	Config
 
-	BootOnce           sync.Once
-	CLGs               map[spec.ObjectID]clgScope
-	CLGIDs             map[string]spec.ObjectID
-	ID                 spec.ObjectID
-	ImpulsesInProgress int64
-	Mutex              sync.Mutex
-	ShutdownOnce       sync.Once
-	Type               spec.ObjectType
+	BootOnce     sync.Once
+	CLGs         map[spec.ObjectID]clgScope
+	CLGIDs       map[string]spec.ObjectID
+	ID           spec.ObjectID
+	Mutex        sync.Mutex
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (n *network) Activate(clgID spec.ObjectID, inputs []reflect.Value) (bool, error) {
@@ -155,9 +152,10 @@ func (n *network) Calculate(clgID spec.ObjectID, inputs []reflect.Value) ([]refl
 	return outputs, nil
 }
 
-func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) error {
+func (n *network) Execute(clgID spec.ObjectID, requests spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
 
+	var inputs []reflect.Value
 	// Each CLG that is executed needs to decide if it wants to be activated.
 	// This happens using the Activate method. To make this decision the given
 	// input, the CLGs connections and behaviour properties are considered.
@@ -190,7 +188,7 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 	// these both are treated specially. Here we forward the ouputs of the output
 	// CLG to the output channel. This will cause the output returned here to be
 	// streamed back to the client waiting for calculations of the neural network.
-	if n.CLGs[clgID].GetName() == "output" {
+	if n.CLGs[clgID].CLG.GetName() == "output" {
 		var output string
 		for _, v := range outputs[1:] {
 			output += v.String()
@@ -209,26 +207,21 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
 
-	// Check if the impulse provides a CLG tree ID.
-	imp, err := argsToImpulse(inputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	// Check if the given context provides a CLG tree ID.
 
-	clgTreeID := imp.GetCLGTreeID()
-	var requests []spec.InputRequest
+	clgTreeID := ""
 	if clgTreeID == "" {
 		// create new
 	} else {
 		// lookup existing
 	}
 
-	for _, r := range requests {
-		err := n.Send(r)
-		if err != nil {
-			return maskAny(err)
-		}
-	}
+	// for _, r := range requests {
+	// 	err := n.Send(r) send does not exist anymore
+	// 	if err != nil {
+	// 		return maskAny(err)
+	// 	}
+	// }
 
 	return nil
 }
@@ -237,14 +230,16 @@ func (n *network) Forward(clgID spec.ObjectID, inputs, outputs []reflect.Value) 
 func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
+	// TODO listen in TextInput from the outside to receive text requests
+
 	for clgID, clgScope := range n.CLGs {
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
 			// This is the queue of input requests. We collect inputs until the
 			// requested CLG's interface is fulfilled somehow. Then the CLG is
 			// executed and the inputs used to execute the CLG are removed from the
 			// queue.
-			var queue []spec.InputRequest
-			desired := CLG.Inputs()
+			var queue []spec.NetworkPayload
+			//desired := CLG.Inputs()
 
 			for {
 				select {
@@ -262,22 +257,22 @@ func (n *network) Listen() {
 						queue = queue[1:]
 					}
 
-					// Check if the interface of the requested CLG matches the provided
-					// inputs. In case the interface does not match, it is not possible
-					// to call the requested CLG using the provided inputs. Then we do
-					// nothing, but wait some time for other input requests to arrive.
-					execute, matching, newQueue, err := n.extractMatchingInputRequests(queue, desired)
-					if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-						continue
-					}
-					if !execute {
-						continue
-					}
-					queue = newQueue
+					// // Check if the interface of the requested CLG matches the provided
+					// // inputs. In case the interface does not match, it is not possible
+					// // to call the requested CLG using the provided inputs. Then we do
+					// // nothing, but wait some time for other input requests to arrive.
+					// execute, matching, newQueue, err := n.extractMatchingNetworkPayloads(queue, desired)
+					// if err != nil {
+					// 	n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+					// 	continue
+					// }
+					// if !execute {
+					// 	continue
+					// }
+					// queue = newQueue
 
 					// In case the interface is fulfilled we can finally execute the CLG.
-					go func(request spec.InputRequest) {
+					go func(request spec.NetworkPayload) {
 						err := n.Execute(clgID, request)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
@@ -287,32 +282,6 @@ func (n *network) Listen() {
 			}
 		}(clgID, clgScope.CLG)
 	}
-}
-
-func (n *network) Receive() (spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Receive")
-
-	clgScope, ok := n.CLGs[clgID]
-	if !ok {
-		return spec.OutputResponse{}, maskAnyf(clgNotFoundError, "%s", clgID)
-	}
-
-	outputs := <-clgScope.Output
-
-	return outputs, nil
-}
-
-func (n *network) Send(request spec.InputRequest) error {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Send")
-
-	clgScope, ok := n.CLGs[request.Destination]
-	if !ok {
-		return maskAnyf(clgNotFoundError, "%s", request.Destination)
-	}
-
-	clgScope.Input <- request
-
-	return nil
 }
 
 func (n *network) Shutdown() {
