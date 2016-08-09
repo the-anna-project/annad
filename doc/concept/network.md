@@ -9,7 +9,7 @@ triggered. Here the network hooks in again. As soon as the network receives a
 message from the output CLG, it is streamed back to the client. In case the
 given expectation, if any given, does not match the responded output, the
 involved connections of the failed iteration will be "punished" by being ask to
-calculate again, otherwise "rewarded", what means that the successfull
+calculate again, otherwise "rewarded", what means that the successful
 connection path is persisted.
 
 The following picture illustrates the only hard coded Input and Output CLGs
