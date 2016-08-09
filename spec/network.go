@@ -46,13 +46,6 @@ type OutputResponse struct {
 //
 //     The network listens on each CLG input channel using Listen.
 //
-// TODO Network.Trigger
-//
-//     When there is some signal coming through the gateway, the received
-//     signal is translated into an Impulse. This Impulse is then triggered to
-//     walk through the network using Trigger. Here is the only hard coded CLG
-//     structure: the Input and Output CLG.
-//
 // Network.Send
 //
 //     The Send method is used to emit the Input CLG by providing the impulses
@@ -116,16 +109,10 @@ type Network interface {
 
 	Receive(clgID ObjectID) (OutputResponse, error)
 
-	// TODO add reward and punish
-
 	Send(request InputRequest) error
 
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
-
-	// Trigger represents the entrance and exit provided for an Impulse to walk
-	// through the network. Within the network, the Impulse might be manipulated.
-	Trigger(imp Impulse) (Impulse, error)
 }

@@ -143,7 +143,6 @@ func (n *network) Boot() {
 		n.CLGIDs = n.mapCLGIDs(n.CLGs)
 
 		go n.Listen()
-		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
 }
 
@@ -186,8 +185,6 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 		return maskAny(err)
 	}
 
-	// TODO we need to reward the CLG connections that forwarded signals together correctly
-
 	// After the CLGs calculation it can decide what to do next. Like Activate,
 	// it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
 	// might or might not forward its calculated results to one or more CLGs.
@@ -204,15 +201,13 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 	// streamed back to the client waiting for calculations of the neural network.
 	if n.CLGs[clgID].GetName() == "output" {
 		var output string
-		// TODO it feels shit that there has to be a convention of having the impulse always being the first argument
 		for _, v := range outputs[1:] {
 			output += v.String()
 		}
-		// TODO output needs to be api.TextResponse
-		n.TextOutput <- output
+		n.TextOutput <- api.TextResponse{Output: output}
 	}
 
-	// TODO what role does the impulse have? for what do we need it?
+	// TODO we need to reward the CLG connections that forwarded signals together correctly in the output CLG
 
 	return nil
 }
@@ -311,92 +306,6 @@ func (n *network) Shutdown() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Shutdown")
 
 	n.ShutdownOnce.Do(func() {
-		n.TextGateway.Close()
-
-		for {
-			// TODO this needs to be tested properly
-			impulsesInProgress := atomic.LoadInt64(&n.ImpulsesInProgress)
-			if impulsesInProgress == 0 {
-				// As soon as all impulses are processed we can go ahead to shutdown the
-				// network.
-				break
-			}
-
-			time.Sleep(100 * time.Millisecond)
-		}
-	})
-}
-
-// TODO
-func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
-
-	request := prepareInput(imp, n.GetID(), n.CLGIDs["input"])
-
-	for {
-		// Trigger the very first CLG for neural processing. This is the Input CLG.
-		// It is provided with the impulse for contextual relevant information
-		// related to the current task. Here we send the impulse through the CLG in
-		// a fire and forget style. We send something along the neural network
-		// without receiving anything back at this point. In the first iteration
-		// the input is provided by the incoming impulse. In all following
-		// iterations, if any, the input will be output of the preceding iteration.
-		err := n.Send(request)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// Wait for output of the neural network. In the call before we sent some
-		// input to trigger the neural connections between the CLGs. Here we wait
-		// until the Output CLG was triggered. Once this happens, it means the
-		// formerly sent input triggered neural connections up to a point where a
-		// connection path was drawn. This connection path started with the Input
-		// CLG and ended now here with the Output CLG.
 		//
-		// TODO we have a concurrency issue here. The network's CLGs are connected
-		// through channels. The output received here is not necessarily related to
-		// the input we send above. In case we want to deal with concurrent
-		// requests at a later point of time, we need to solve this issue. Current
-		// idea would be to maintain some sort of output queue that contains all
-		// generated outputs. When waiting on the correct output related to our
-		// send input, we would need to go through the output queue until we find
-		// the right output. Unimportant outputs would be requeued. The right
-		// output would be recognized by the ID of the impulse being responded with
-		// the output together.
-		response, err := n.Receive(n.CLGIDs["output"])
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// The current iteration is over. For the case of not having another
-		// iteration, we set the calculated output to the current impulse.
-		imp, err = prepareOutput(response)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// Check the calculated output aganst the provided expectation, if any. In
-		// case there is no expectation provided, we simply go with what we
-		// calculated. This then means we are probably not in a training situation.
-		if imp.GetExpectation().IsEmpty() {
-			break
-		}
-
-		// There is an expectation provided. Thus we are going to check the
-		// calculated output against it. In case the provided expectation did match
-		// the calculated result, we simply return it and stop the iteration.
-		match, err := imp.GetExpectation().Match(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		if match {
-			break
-		}
-
-		// TODO move reward/punish to output CLG?
-		// TODO expectation met == reward?
-		// TODO expectation NOT met == punishing?
-	}
-
-	return imp, nil
+	})
 }
