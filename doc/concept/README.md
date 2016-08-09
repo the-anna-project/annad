@@ -15,7 +15,6 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [connection](connection.md)
 - [control](control.md)
 - [distribution](distribution.md)
-- [data structure](data_structure.md)
 - [expectation](expectation.md)
 - [input](input.md)
 - [instrumentation](instrumentation.md)
