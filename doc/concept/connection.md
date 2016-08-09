@@ -107,7 +107,7 @@ within a multi dimensional connection space.
 Following is a picture describing the process of connection creation within the
 neural network. `[0]` marks the point at which it is tried to map the given
 input sequence to a CLG tree ID in the available storage. This information is
-attached to the current impulse. `[1]` marks the points at which it is tried to
+attached to the current context. `[1]` marks the points at which it is tried to
 lookup connections of the current CLG tree. This is only possible in case there
 is a CLG tree ID known. If there is no CLG tree ID available, connections are
 created as described above.

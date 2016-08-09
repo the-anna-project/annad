@@ -1,4 +1,7 @@
 # imagination
+**Note that the following is not fully thought through and is currently only
+there to help to form more concrete ideas around solutions.**
+
 What is key for Anna to be intelligent is to be able to imagine things. She
 needs to have an idea about what is going on. About the differences between
 objects interacting within the sorounding environment.
