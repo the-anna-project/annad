@@ -108,18 +108,18 @@ make gotest
 
 You should see something like this.
 ```
-ok    _/home/vagrant/projects/private/anna/clg  1.955s  coverage: 98.4% of statements
-ok    _/home/vagrant/projects/private/anna/clg/distribution 0.008s  coverage: 100.0% of statements
-ok    _/home/vagrant/projects/private/anna/clg/feature-set  0.388s  coverage: 99.3% of statements
-ok    _/home/vagrant/projects/private/anna/client/control/log 0.026s  coverage: 96.0% of statements
-ok    _/home/vagrant/projects/private/anna/client/interface/text  0.020s  coverage: 98.1% of statements
-ok    _/home/vagrant/projects/private/anna/id 0.043s  coverage: 87.5% of statements
-ok    _/home/vagrant/projects/private/anna/log  0.005s  coverage: 99.0% of statements
-ok    _/home/vagrant/projects/private/anna/net/pat  0.006s  coverage: 90.0% of statements
-ok    _/home/vagrant/projects/private/anna/scheduler  0.178s  coverage: 92.1% of statements
-ok    _/home/vagrant/projects/private/anna/storage/memory 0.011s  coverage: 98.0% of statements
-ok    _/home/vagrant/projects/private/anna/storage/redis  0.013s  coverage: 96.8% of statements
-ok    _/home/vagrant/projects/private/anna/strategy 0.007s  coverage: 98.5% of statements
+ok    _/home/vagrant/projects/private/anna/client/control/log  0.020s  coverage: 100.0% of statements
+ok    _/home/vagrant/projects/private/anna/client/interface/text  0.005s  coverage: 30.0% of statements
+ok    _/home/vagrant/projects/private/anna/connection-path  0.005s  coverage: 97.3% of statements
+ok    _/home/vagrant/projects/private/anna/factory/id  0.040s  coverage: 91.2% of statements
+ok    _/home/vagrant/projects/private/anna/factory/permutation  0.005s  coverage: 100.0% of statements
+ok    _/home/vagrant/projects/private/anna/factory/random  0.027s  coverage: 100.0% of statements
+ok    _/home/vagrant/projects/private/anna/index/clg/collection  2.566s  coverage: 94.6% of statements
+ok    _/home/vagrant/projects/private/anna/index/clg/collection/distribution  0.009s  coverage: 85.7% of statements
+ok    _/home/vagrant/projects/private/anna/index/clg/collection/feature-set  0.411s  coverage: 96.7% of statements
+ok    _/home/vagrant/projects/private/anna/log  0.007s  coverage: 99.0% of statements
+ok    _/home/vagrant/projects/private/anna/storage/memory  0.013s  coverage: 97.9% of statements
+ok    _/home/vagrant/projects/private/anna/storage/redis  0.014s  coverage: 97.9% of statements
 ```
 
 ### projectcheck
