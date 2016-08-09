@@ -22,62 +22,12 @@ type NetworkPayload struct {
 // Network provides a neural network based on dynamic and self improving CLG
 // execution. The network provides input and output channels. When input is
 // received it is injected into the neural communication. The following neural
-// activity calculates output which is streamed through the output channel back
-// to the requestor.
-//
-// Network
-//
-//     At the very beginning there is the neural network. It initializes all known
-//     CLGs. Every CLG has an input and an output channel.
-//
-// Network.Listen
-//
-//     The network listens on each CLG input channel using Listen.
-//
-// Network.Send
-//
-//     The Send method is used to emit the Input CLG by providing the impulses
-//     input. Once send, the input is submitted to the neural network.
-//
-// Network.Execute
-//
-//     As stated above, Listen was initialized to wait for inputs of each CLG.
-//     Now the Input CLG received some input. Thus it is executed using Execute
-//     and the provided input.
-//
-// Network.Activate
-//
-//     Each CLG that is executed needs to decide if it wants to be activated.
-//     This happens using the Activate method. To make this decision the given
-//     input, the CLGs connections and behaviour properties are considered.
-//
-// Network.Calculate
-//
-//     Once activated, a CLG executes its actual implemented behaviour using
-//     Calculate. This behaviour can be anything. It is up to the CLG.
-//
-// Network.Forward
-//
-//     After the CLGs calculation it can decide what to do next. Like Activate,
-//     it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
-//     might or might not forward its calculated results to one or more CLGs.
-//     All this depends on its inputs, calculated outputs, CLG connections and
-//     behaviour properties.
-//
-// Network.Receive
-//
-//     In the Trigger method, the Input CLG takes the Impulse's input and
-//     causes the neural network to trigger. There the Output CLG is asked to
-//     provide some output. Trigger waits until the Output CLG returns
-//     something using Receive. In case Receive returns in behalf of the Output
-//     CLG at some point in time, the Impulse found a way from the Input CLG,
-//     through the neural network, up to the Output CLG. Some expectation
-//     matching might be required, if provided with the request. If the
-//     expectation, if any, matches, the calculated output is returned. If it
-//     does not match, the procedure starts again with Send. Then the
-//     calculated output is used as input for the next iteration.
-//
+// activity calculates outputs which are streamed through the output channel
+// back to the requestor.
 type Network interface {
+	// Activate decides if the requested CLG wants to be activated. To make this
+	// decision the given input, the CLGs connections and behaviour properties
+	// may be considered.
 	Activate(clgID ObjectID, inputs []reflect.Value) (bool, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
@@ -85,12 +35,25 @@ type Network interface {
 	// might want to call it in a separate goroutine.
 	Boot()
 
+	// Calculate executes the activated CLG and invokes its actual implemented
+	// behaviour. This behaviour can be anything. It is up to the CLG.
 	Calculate(clgID ObjectID, inputs []reflect.Value) ([]reflect.Value, error)
 
+	// Execute takes care about a CLG's execution. It represents basically a
+	// business logic bundle of Acivate, Calculate and Forward.
 	Execute(clgID ObjectID, payload NetworkPayload) error
 
+	// Forward is triggered after the CLGs calculation. Here is decided what to
+	// do next. Like Activate, it is up to the CLG if it forwards signals to
+	// further CLGs. E.g. a CLG may or may not forward its calculated results to
+	// one or more CLGs. All this depends on its inputs, calculated outputs, CLG
+	// connections and behaviour properties.
 	Forward(clgID ObjectID, inputs, outputs []reflect.Value) error
 
+	// Listen makes the network listen on requests from the outside. Here each
+	// CLG input channel is managed. This models Listen as kind of cortex in
+	// which impulses are dispatched into all possible direction and finally flow
+	// back again.
 	Listen()
 
 	Object
