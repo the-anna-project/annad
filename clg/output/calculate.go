@@ -5,7 +5,7 @@ import (
 )
 
 // TODO
-func (n *network) calculate() error {
+func (c *clg) calculate() error {
 	var e spec.Expectation
 
 	// Check the calculated output aganst the provided expectation, if any. In
