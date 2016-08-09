@@ -40,6 +40,6 @@ func (e *expectation) IsEmpty() bool {
 }
 
 // TODO
-func (e *expectation) Match(imp spec.Impulse) (bool, error) {
+func (e *expectation) Match() (bool, error) {
 	return false, nil
 }

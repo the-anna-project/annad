@@ -19,10 +19,11 @@ type NetworkPayload struct {
 	Sources []ObjectID
 }
 
-// Network represents the artificial neural network. It provides access for
-// external events to the internal neural activities through a gateway.
-// Internally CLGs interact like neurons. The following illustrates the
-// control flow hierarchy of the neural network.
+// Network provides a neural network based on dynamic and self improving CLG
+// execution. The network provides input and output channels. When input is
+// received it is injected into the neural communication. The following neural
+// activity calculates output which is streamed through the output channel back
+// to the requestor.
 //
 // Network
 //
@@ -32,13 +33,6 @@ type NetworkPayload struct {
 // Network.Listen
 //
 //     The network listens on each CLG input channel using Listen.
-//
-// Network.Trigger
-//
-//     When there is some signal coming through the gateway, the received
-//     signal is translated into an Impulse. This Impulse is then triggered to
-//     walk through the network using Trigger. Here is the only hard coded CLG
-//     structure: the Input and Output CLG.
 //
 // Network.Send
 //
@@ -103,16 +97,10 @@ type Network interface {
 
 	Receive(clgID ObjectID) (NetworkPayload, error)
 
-	// TODO add reward and punish
-
 	Send(request NetworkPayload) error
 
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
-
-	// Trigger represents the entrance and exit provided for an Impulse to walk
-	// through the network. Within the network, the Impulse might be manipulated.
-	Trigger(imp Impulse) (Impulse, error)
 }

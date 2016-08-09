@@ -35,8 +35,7 @@ func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 	newInterface := &tinterface{
 		InterfaceConfig: config,
 
-		getResponseForID: newGetResponseForIDEndpoint(*config.URL, "/interface/text/response"),
-		readCoreRequest:  newReadCoreRequestEndpoint(*config.URL, "/interface/text/read"),
+		streamText: newStreamTextEndpoint(*config.URL, "/interface/text"),
 	}
 
 	return newInterface, nil
@@ -45,58 +44,35 @@ func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
 type tinterface struct {
 	InterfaceConfig
 
-	getResponseForID endpoint.Endpoint
-	readCoreRequest  endpoint.Endpoint
+	streamText endpoint.Endpoint
 }
 
-func (i tinterface) GetResponseForID(ctx context.Context, ID string) (string, error) {
-	response, err := i.getResponseForID(ctx, api.GetResponseForIDRequest{ID: ID})
-	if err != nil {
-		return "", maskAnyf(invalidAPIResponseError, err.Error())
-	}
+func (i tinterface) StreamText(ctx context.Context, in chan api.TextRequest, out chan api.TextResponse) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case textRequest := <-in:
+			response, err := i.streamText(ctx, api.StreamTextRequest{TextRequest: textRequest})
+			if err != nil {
+				return maskAnyf(invalidAPIResponseError, err.Error())
+			}
 
-	apiResponse := response.(api.GetResponseForIDResponse)
+			apiResponse := response.(api.StreamTextResponse)
 
-	if api.WithError(nil).Code == apiResponse.Code {
-		switch t := apiResponse.Data.(type) {
-		case string:
-			return "", maskAnyf(invalidAPIResponseError, t)
+			if api.WithError(nil).Code == apiResponse.Code {
+				if errMessage, ok := apiResponse.Data.(string); ok {
+					return maskAnyf(invalidAPIResponseError, errMessage)
+				}
+			}
+
+			if api.WithID("").Code == apiResponse.Code {
+				if output, ok := apiResponse.Data.(string); ok {
+					out <- api.TextResponse{Output: output}
+				}
+			}
+
+			return maskAnyf(invalidAPIResponseError, "unexpected API response")
 		}
 	}
-
-	if api.WithData("").Code == apiResponse.Code {
-		switch t := apiResponse.Data.(type) {
-		case string:
-			// We received the expected response.
-			return t, nil
-		}
-	}
-
-	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
-}
-
-func (i tinterface) ReadCoreRequest(ctx context.Context, coreRequest api.CoreRequest, sessionID string) (string, error) {
-	response, err := i.readCoreRequest(ctx, api.ReadCoreRequestRequest{CoreRequest: coreRequest, SessionID: sessionID})
-	if err != nil {
-		return "", maskAnyf(invalidAPIResponseError, err.Error())
-	}
-
-	apiResponse := response.(api.ReadCoreRequestResponse)
-
-	if api.WithError(nil).Code == apiResponse.Code {
-		switch t := apiResponse.Data.(type) {
-		case string:
-			return "", maskAnyf(invalidAPIResponseError, t)
-		}
-	}
-
-	if api.WithID("").Code == apiResponse.Code {
-		switch t := apiResponse.Data.(type) {
-		case string:
-			// We received the expected response.
-			return t, nil
-		}
-	}
-
-	return "", maskAnyf(invalidAPIResponseError, "unexpected API response")
 }

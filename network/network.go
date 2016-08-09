@@ -1,10 +1,8 @@
-// Package network implements spec.Network to provide dynamic and self
-// improving CLG execution. Gateways send signals to the core network to
-// request calculations. The core network translates a signal into an impulse.
-// So the core network is the starting point for all impulses. Once an impulse
-// finished its walk through the core network, the impulse's output is
-// translated back to the requesting signal and the signal is send back through
-// the gateway to its requestor.
+// Package network implements spec.Network to provide a neural network based on
+// dynamic and self improving CLG execution. The network provides input and
+// output channels. When input is received it is injected into the neural
+// communication. The following neural activity calculates output which is
+// streamed through the output channel back to the requestor.
 package network
 
 import (
@@ -13,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -33,7 +31,8 @@ type Config struct {
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
 	Storage            spec.Storage
-	TextGateway        spec.Gateway
+	TextInput          chan api.TextRequest
+	TextOutput         chan api.TextResponse
 
 	// Settings.
 
@@ -61,7 +60,8 @@ func DefaultConfig() Config {
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
-		TextGateway:        gateway.NewGateway(gateway.DefaultConfig()),
+		TextInput:          make(chan api.TextRequest, 1000),
+		TextOutput:         make(chan api.TextResponse, 1000),
 	}
 
 	return newConfig
@@ -87,8 +87,11 @@ func New(config Config) (spec.Network, error) {
 	if newNetwork.Storage == nil {
 		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
 	}
-	if newNetwork.TextGateway == nil {
-		return nil, maskAnyf(invalidConfigError, "text gateway must not be empty")
+	if newNetwork.TextInput == nil {
+		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
+	}
+	if newNetwork.TextOutput == nil {
+		return nil, maskAnyf(invalidConfigError, "text output channel must not be empty")
 	}
 
 	newNetwork.Log.Register(newNetwork.GetType())
@@ -133,7 +136,6 @@ func (n *network) Boot() {
 		n.CLGIDs = n.mapCLGIDs(n.CLGs)
 
 		go n.Listen()
-		go n.TextGateway.Listen(n.getGatewayListener(), nil)
 	})
 }
 
@@ -184,6 +186,20 @@ func (n *network) Execute(clgID spec.ObjectID, requests []spec.InputRequest) err
 		return maskAny(err)
 	}
 
+	// The output CLG is the only other special CLG, next to the input CLG.  Only
+	// these both are treated specially. Here we forward the ouputs of the output
+	// CLG to the output channel. This will cause the output returned here to be
+	// streamed back to the client waiting for calculations of the neural network.
+	if n.CLGs[clgID].GetName() == "output" {
+		var output string
+		for _, v := range outputs[1:] {
+			output += v.String()
+		}
+		n.TextOutput <- api.TextResponse{Output: output}
+	}
+
+	// TODO we need to reward the CLG connections that forwarded signals together correctly in the output CLG
+
 	return nil
 }
 
@@ -222,14 +238,6 @@ func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
 	for clgID, clgScope := range n.CLGs {
-		// The Output CLG is the only other special CLG, next to the Input CLG.
-		// Only these both are treated specially. Here we exclude the Output CLG
-		// from the listener, because Network.Trigger is already listening for
-		// responses from it.
-		if clgScope.CLG.GetName() == "output" {
-			continue
-		}
-
 		go func(clgID spec.ObjectID, CLG spec.CLG) {
 			// This is the queue of input requests. We collect inputs until the
 			// requested CLG's interface is fulfilled somehow. Then the CLG is
@@ -311,94 +319,6 @@ func (n *network) Shutdown() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Shutdown")
 
 	n.ShutdownOnce.Do(func() {
-		n.TextGateway.Close()
-
-		for {
-			impulsesInProgress := atomic.LoadInt64(&n.ImpulsesInProgress)
-			if impulsesInProgress == 0 {
-				// As soon as all impulses are processed we can go ahead to shutdown the
-				// network.
-				break
-			}
-
-			time.Sleep(100 * time.Millisecond)
-		}
+		//
 	})
-}
-
-// TODO
-func (n *network) Trigger(imp spec.Impulse) (spec.Impulse, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Trigger")
-
-	request := prepareInput(imp, n.GetID(), n.CLGIDs["input"])
-
-	for {
-		// Trigger the very first CLG for neural processing. This is the Input CLG.
-		// It is provided with the impulse for contextual relevant information
-		// related to the current task. Here we send the impulse through the CLG in
-		// a fire and forget style. We send something along the neural network
-		// without receiving anything back at this point. In the first iteration
-		// the input is provided by the incoming impulse. In all following
-		// iterations, if any, the input will be output of the preceding iteration.
-		err := n.Send(request)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// Wait for output of the neural network. In the call before we sent some
-		// input to trigger the neural connections between the CLGs. Here we wait
-		// until the Output CLG was triggered. Once this happens, it means the
-		// formerly sent input triggered neural connections up to a point where a
-		// connection path was drawn. This connection path started with the Input
-		// CLG and ended now here with the Output CLG.
-		//
-		// TODO we have a concurrency issue here. The network's CLGs are connected
-		// through channels. The output received here is not necessarily related to
-		// the input we send above. In case we want to deal with concurrent
-		// requests at a later point of time, we need to solve this issue. Current
-		// idea would be to maintain some sort of output queue that contains all
-		// generated outputs. When waiting on the correct output related to our
-		// send input, we would need to go through the output queue until we find
-		// the right output. Irrelevent outputs would be requeued. The right output
-		// would be recognized by the ID of the impulse being responded with the
-		// output together.
-		//
-		// TODO there can be multiple outputs on one input. We need to handle a
-		// stream of outputs that can be streamed as responses over network.
-		//
-		response, err := n.Receive(n.CLGIDs["output"])
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// The current iteration is over. For the case of not having another
-		// iteration, we set the calculated output to the current impulse.
-		imp, err = prepareOutput(response)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// Check the calculated output aganst the provided expectation, if any. In
-		// case there is no expectation provided, we simply go with what we
-		// calculated. This then means we are probably not in a training situation.
-		if imp.GetExpectation().IsEmpty() {
-			break
-		}
-
-		// There is an expectation provided. Thus we are going to check the
-		// calculated output against it. In case the provided expectation did match
-		// the calculated result, we simply return it and stop the iteration.
-		match, err := imp.GetExpectation().Match(imp)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		if match {
-			break
-		}
-
-		// TODO move reward/punish to output CLG?
-		// TODO expectation met == reward
-	}
-
-	return imp, nil
 }

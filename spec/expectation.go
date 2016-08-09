@@ -7,6 +7,7 @@ type Expectation interface {
 	// there is no expectation request given, this should return true.
 	IsEmpty() bool
 
-	// Match verifies whether the given impulse matches the current expectation.
-	Match(imp Impulse) (bool, error)
+	// Match verifies whether the current expectation was met.
+	// TODO
+	Match() (bool, error)
 }
