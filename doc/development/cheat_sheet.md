@@ -37,9 +37,11 @@ find . -not -path "./.git/*" -not -path "./.workspace/*" | xargs misspell -w
 The following snippet can be used to easily run unit tests of single packages.
 This is unlike to the makefile target, that runs the tests of all packages.
 Here all tests of the package `pkg` will be run. For more options consider
-reading `go test -h`.
+reading `go test -h`. Note that it is a good idea to run tests with having the
+race detector enabled. For more information on this one see
+https://blog.golang.org/race-detector.
 ```
-GOPATH=$(pwd)/.workspace/ go test ./pkg
+GOPATH=$(pwd)/.workspace/ go test -race ./pkg
 ```
 
 ### search and replace
