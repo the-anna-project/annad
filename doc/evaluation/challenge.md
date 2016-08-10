@@ -1,4 +1,6 @@
 # challenge
+**Note that the following is not fully thought through and is currently only
+there to help to form more concrete ideas around solutions.**
 
 ### rules (idea)
 - At the beginning any organism is not living.

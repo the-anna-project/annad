@@ -10,7 +10,6 @@ solutions.
 ### ideas
 - [brainstorming](https://drive.google.com/open?id=0B-ehyYkjukxeNDVLdDUzY0R5MjQ) (google drive)
 - [guidance](guidance.md)
-- [character tree](character_tree.md)
 - [pattern recognition](pattern_recognition.md)
 - [selective perception](selective_perception.md)
 - [starting a conversation by greeting](starting_a_conversation_by_greeting.md)

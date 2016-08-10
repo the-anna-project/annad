@@ -6,7 +6,7 @@ alanysed. See https://godoc.org/github.com/xh3b4sd/anna/spec#Distribution for
 implementation details.
 
 ### balance system
-The distribution can be used a balance system. That describes the amount of
+The distribution can be used as balance system. That describes the amount of
 impulses and how harmonic or extreme the distribution of these currently is
 within a system. That way the state of an organism can be represented. Extremes
 of impulse occurrence cause imbalance within the organism. Extremes can be seen

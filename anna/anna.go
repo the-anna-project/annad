@@ -8,11 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network"
-	"github.com/xh3b4sd/anna/scheduler"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -140,26 +139,20 @@ func New(config Config) (spec.Anna, error) {
 
 			newAnna.Log.Register(newAnna.GetType())
 
-			// text gateway.
-			newTextGatewayConfig := gateway.DefaultConfig()
-			newTextGatewayConfig.Log = newAnna.Log
-			newTextGateway := gateway.NewGateway(newTextGatewayConfig)
+			// text input/output channel.
+			newTextInput := make(chan api.TextRequest, 1000)
+			newTextOutput := make(chan api.TextResponse, 1000)
 
 			// storage.
 			newStorage, err := newAnna.createStorage(newAnna.Log)
 			panicOnError(err)
 
-			// scheduler.
-			newSchedulerConfig := scheduler.DefaultConfig()
-			newSchedulerConfig.Log = newAnna.Log
-			newSchedulerConfig.Storage = newStorage
-			newScheduler, err := scheduler.NewScheduler(newSchedulerConfig)
-			panicOnError(err)
-
 			// network.
 			newNetworkConfig := network.DefaultConfig()
 			newNetworkConfig.Log = newAnna.Log
-			newNetworkConfig.TextGateway = newTextGateway
+			newNetworkConfig.Storage = newStorage
+			newNetworkConfig.TextInput = newTextInput
+			newNetworkConfig.TextOutput = newTextOutput
 			newNetwork, err := network.New(newNetworkConfig)
 			panicOnError(err)
 
@@ -168,7 +161,7 @@ func New(config Config) (spec.Anna, error) {
 			panicOnError(err)
 
 			// text interface.
-			newTextInterface, err := createTextInterface(newAnna.Log, newScheduler, newTextGateway)
+			newTextInterface, err := createTextInterface(newAnna.Log, newTextInput, newTextOutput)
 			panicOnError(err)
 
 			// server.
@@ -178,7 +171,6 @@ func New(config Config) (spec.Anna, error) {
 			panicOnError(err)
 			newServerConfig.Log = newAnna.Log
 			newServerConfig.LogControl = newLogControl
-			newServerConfig.TextGateway = newTextGateway
 			newServerConfig.TextInterface = newTextInterface
 			newServer, err := server.New(newServerConfig)
 			panicOnError(err)

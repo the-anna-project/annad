@@ -45,21 +45,28 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	var coreRequest api.CoreRequest
-	err = json.Unmarshal(b, &coreRequest)
+	var textRequest api.TextRequest
+	err = json.Unmarshal(b, &textRequest)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	ID, err := a.TextInterface.ReadCoreRequest(ctx, coreRequest, a.SessionID)
+	in := make(chan api.TextRequest, 1)
+	out := make(chan api.TextResponse, 1000)
+
+	go func() {
+		// TODO stream continuously
+		in <- textRequest
+	}()
+	err = a.TextInterface.StreamText(ctx, in, out)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	response, err := a.TextInterface.GetResponseForID(ctx, ID)
-	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+	for {
+		select {
+		case textResponse := <-out:
+			fmt.Printf("%s\n", textResponse.Output)
+		}
 	}
-
-	fmt.Printf("%s\n", response)
 }
