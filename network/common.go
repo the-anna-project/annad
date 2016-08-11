@@ -135,7 +135,7 @@ func (n *network) permutationListToTypes(permutationList spec.PermutationList) (
 	return types, nil
 }
 
-// private
+// helper
 
 func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
 	for _, r := range list {
