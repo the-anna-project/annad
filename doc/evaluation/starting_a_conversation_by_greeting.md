@@ -18,7 +18,8 @@ the situation down to analyse each step.
 Anna analyses incoming input. Here she alrwady needs to show how smart she
 really is. What she sees is actually only some mystery bytes. To turn these
 mystery bytes into something understandable we need to [guide
-her](/doc/challenge/guidance.md) beforehand that there are digits and letters.
+her](https://github.com/xh3b4sd/anna/blob/f0d28faa0f5d9ecba407b6678e3ebd767142e58c/doc/evaluation/guidance.md)
+beforehand that there are digits and letters.
 
 ### create character tree
 As soon as she knows what letters and words are, she can create a character

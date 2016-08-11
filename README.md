@@ -49,7 +49,7 @@ Code documentation can also be found at
 # contribution
 This project is very ambitious, thus help is always appreciated. Get in touch
 with us for the following topics and more. Further see the
-[CONTRIBUTING.md](/.github.com/CONTRIBUTING.md) and go for it.
+[CONTRIBUTING.md](/.github/CONTRIBUTING.md) and go for it.
 
 - Software architecture and software design.
 - Software engineering to get issues and pull requests done.

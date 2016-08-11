@@ -23,3 +23,4 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [network](network.md)
 - [output](output.md)
 - [permutation factory](permutation_factory.md)
+- [state](state.md)

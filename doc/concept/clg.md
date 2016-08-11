@@ -9,9 +9,7 @@ sufficient CLGs, intellectual explosion will happen. CLGs are supposed to be
 the minimal and fundamental inborn logic units that can be used out of the box.
 This builtin functionality should be the only hard coded logic. All other
 behavior must result out of the combination of learned data, CLGs and
-[connections](connection.md) between these two. CLGs represent the system's
-[strategies](strategy.md), especially when joined together by contextual
-connections.
+[connections](connection.md) between these two.
 
 A CLG creates behavior when having information provided during execution. This
 is how information is translated into behavior. Using some function
