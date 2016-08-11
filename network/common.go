@@ -10,10 +10,23 @@ import (
 
 // receiver
 
-func (n *network) configureCLGs(CLGs map[spec.ObjectID]clgScope) map[spec.ObjectID]clgScope {
+func (n *network) clgByName(name string) (spec.CLG, error) {
+	ID, ok := n.CLGIDs[name]
+	if !ok {
+		return nil, maskAnyf(clgNotFoundError, "name: %s", name)
+	}
+	CLG, ok := n.CLGs[ID]
+	if !ok {
+		return nil, maskAnyf(clgNotFoundError, "ID: %s", ID)
+	}
+
+	return CLG, nil
+}
+
+func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.ObjectID]spec.CLG {
 	for ID := range CLGs {
-		CLGs[ID].CLG.SetLog(n.Log)
-		CLGs[ID].CLG.SetStorage(n.Storage)
+		CLGs[ID].SetLog(n.Log)
+		CLGs[ID].SetStorage(n.Storage)
 	}
 
 	return CLGs
@@ -89,11 +102,11 @@ func (n *network) filterNetworkPayloads(permutationList spec.PermutationList, qu
 	return matching, newQueue, nil
 }
 
-func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]clgScope) map[string]spec.ObjectID {
+func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.ObjectID {
 	var clgIDs map[string]spec.ObjectID
 
-	for ID, clgScope := range CLGs {
-		clgIDs[clgScope.CLG.GetName()] = ID
+	for ID, CLG := range CLGs {
+		clgIDs[CLG.GetName()] = ID
 	}
 
 	return clgIDs
@@ -209,23 +222,15 @@ func inputRequestsToPermutationList(queue []spec.NetworkPayload, desired []refle
 // 	return inputs, nil
 // }
 
-type clgScope struct {
-	CLG   spec.CLG
-	Input chan spec.NetworkPayload
-}
-
-func newCLGs() map[spec.ObjectID]clgScope {
+func newCLGs() map[spec.ObjectID]spec.CLG {
 	newList := []spec.CLG{
 		divide.MustNew(),
 	}
 
-	newCLGs := map[spec.ObjectID]clgScope{}
+	newCLGs := map[spec.ObjectID]spec.CLG{}
 
 	for _, CLG := range newList {
-		newCLGs[CLG.GetID()] = clgScope{
-			CLG:   CLG,
-			Input: make(chan spec.NetworkPayload, 10),
-		}
+		newCLGs[CLG.GetID()] = CLG
 	}
 
 	return newCLGs
