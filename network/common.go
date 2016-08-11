@@ -198,6 +198,7 @@ func inputRequestsToPermutationList(queue []spec.NetworkPayload, desired []refle
 // always a context. When merging the network payloads the first context of the
 // first inputs list is used to be applied to the new unified network payload.
 // All contexts of the given network payloads should be equal anyway anyway.
+//
 // TODO
 // func mergeNetworkPayloads(payloads []spec.NetworkPayload) (spec.NetworkPayload, error) {
 // 	var payload spec.NetworkPayload
