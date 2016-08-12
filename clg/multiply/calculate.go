@@ -1,3 +1,5 @@
+// Package multiply implements spec.CLG and provides the mathematical operation
+// of multiplication.
 package multiply
 
 // calculate creates the product of the given float64s.

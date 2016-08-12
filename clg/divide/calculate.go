@@ -1,3 +1,5 @@
+// Package divide implements spec.CLG and provides the mathematical operation
+// of division.
 package divide
 
 // calculate creates the quotient of the given float64s.

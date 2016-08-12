@@ -1,3 +1,5 @@
+// Package subtract implements spec.CLG and provides the mathematical operation
+// of subtraction.
 package subtract
 
 // calculate creates the difference of the given float64s.

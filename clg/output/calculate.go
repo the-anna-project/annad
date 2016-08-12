@@ -1,3 +1,10 @@
+// Package output implements spec.CLG and provides one of the two very special
+// CLGs. That is the output CLG. Its purpose is to check if the calculated
+// output matches the provided expectation, if any expectation given. The
+// output CLG is handled in a special way because it determines the end of all
+// requested calculations within the neural network. After the output CLG has
+// been executed, the calculated output is returned back to the requesting
+// client.
 package output
 
 import (
