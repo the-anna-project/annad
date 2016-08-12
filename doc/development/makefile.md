@@ -1,5 +1,5 @@
 # makefile
-> A [makefile(https://en.wikipedia.org/wiki/Makefile) is a file containing a
+> A [makefile](https://en.wikipedia.org/wiki/Makefile) is a file containing a
 > set of directives used with the make build automation tool.
 
 The makefile is used to ease the development of the project. You may want to
