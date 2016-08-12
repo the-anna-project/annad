@@ -1,3 +1,5 @@
+// Package sum implements spec.CLG and provides the mathematical operation of
+// addition.
 package sum
 
 // calculate creates the sum of the given float64s.
