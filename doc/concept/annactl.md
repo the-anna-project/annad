@@ -1,6 +1,8 @@
 # annactl
-The client implementation of Anna's network API is reprsented by the command
-line tool `annactl`.
+The command line client implementation of Anna's network API is reprsented by
+the `annactl` binary. For convenience this can be compiled using the
+[makefile](/doc/development/makefile.md). `annactl` is written using the
+[cobra](https://github.com/spf13/cobra) CLI framework.
 
 ### autocompletion
 For convenience there are [autocompletion scripts](autocompletion.md).

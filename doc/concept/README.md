@@ -11,6 +11,7 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [anna](anna.md)
 - [annactl](annactl.md)
 - [autocompletion](autocompletion.md)
+- [client](client.md)
 - [CLG](clg.md)
 - [connection](connection.md)
 - [control](control.md)
@@ -24,4 +25,5 @@ architecture looks like, or what cool autocompletions are there for biniaries.
 - [network](network.md)
 - [output](output.md)
 - [permutation factory](permutation_factory.md)
+- [server](server.md)
 - [state](state.md)
