@@ -2,7 +2,11 @@
 The command line client implementation of Anna's network API is reprsented by
 the `annactl` binary. For convenience this can be compiled using the
 [makefile](/doc/development/makefile.md). `annactl` is written using the
-[cobra](https://github.com/spf13/cobra) CLI framework.
+[cobra](https://github.com/spf13/cobra) CLI framework. The binary can be
+executed to interact with Anna's remote API. In this communication the
+[client](client.md) implementation forwards any request to the
+[server](server.md). For a better understanding of this communication see the
+[data flow](data_flow.md) documentation.
 
 ### autocompletion
 For convenience there are [autocompletion scripts](autocompletion.md).
