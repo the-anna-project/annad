@@ -63,7 +63,5 @@ with us for the following topics and more. Further see the
 - Web frontend specific things like web design, graphic design, animations and videos
 
 # license
-The Anna project is open source and license free software. This means I am
-holding the copyright in the first place to be defensive for now. Further I am
-open to change that, as long as the project stay open, free and serves
-humanity. See [LICENSE](LICENSE).
+The purpose of the Anna project is to serve humanity. The project, its
+documentation and code is licensed under a BSD license. See [LICENSE](LICENSE).
