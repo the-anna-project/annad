@@ -47,7 +47,7 @@ type tinterface struct {
 	streamText endpoint.Endpoint
 }
 
-func (i tinterface) StreamText(ctx context.Context, in chan api.TextRequest, out chan api.TextResponse) error {
+func (i tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -66,9 +66,9 @@ func (i tinterface) StreamText(ctx context.Context, in chan api.TextRequest, out
 				}
 			}
 
-			if api.WithID("").Code == apiResponse.Code {
-				if output, ok := apiResponse.Data.(string); ok {
-					out <- api.TextResponse{Output: output}
+			if api.WithData("").Code == apiResponse.Code {
+				if textResponse, ok := apiResponse.Data.(spec.TextResponse); ok {
+					out <- textResponse
 				}
 			}
 

@@ -3,6 +3,7 @@ package network
 import (
 	"reflect"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -103,16 +104,16 @@ func membersToPayload(members []interface{}) (spec.NetworkPayload, error) {
 		}
 	}
 
-	newPayloadConfig := DefaultPayloadConfig()
-	newPayloadConfig.Args = args
-	newPayloadConfig.Destination = destination
-	newPayloadConfig.Sources = sources
-	newPayload, err := NewPayload(newPayloadConfig)
+	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig.Args = args
+	newNetworkPayloadConfig.Destination = destination
+	newNetworkPayloadConfig.Sources = sources
+	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return newPayload, nil
+	return newNetworkPayload, nil
 }
 
 func membersToTypes(members []interface{}) ([]reflect.Type, error) {
@@ -139,7 +140,7 @@ func membersToTypes(members []interface{}) ([]reflect.Type, error) {
 		}
 	}
 
-	return types
+	return types, nil
 }
 
 func newCLGs() map[spec.ObjectID]spec.CLG {
@@ -154,4 +155,14 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 	}
 
 	return newCLGs
+}
+
+func queueToValues(queue []spec.NetworkPayload) []interface{} {
+	var values []interface{}
+
+	for _, p := range queue {
+		values = append(values, p)
+	}
+
+	return values
 }

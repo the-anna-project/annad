@@ -45,14 +45,14 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	var textRequest api.TextRequest
+	textRequest := api.NewEmptyTextRequest()
 	err = json.Unmarshal(b, &textRequest)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	in := make(chan api.TextRequest, 1)
-	out := make(chan api.TextResponse, 1000)
+	in := make(chan spec.TextRequest, 1)
+	out := make(chan spec.TextResponse, 1000)
 
 	go func() {
 		// TODO stream continuously
@@ -66,7 +66,7 @@ func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string
 	for {
 		select {
 		case textResponse := <-out:
-			fmt.Printf("%s\n", textResponse.Output)
+			fmt.Printf("%s\n", textResponse.GetOutput())
 		}
 	}
 }

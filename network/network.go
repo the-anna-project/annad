@@ -32,8 +32,8 @@ type Config struct {
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
 	Storage            spec.Storage
-	TextInput          chan api.TextRequest
-	TextOutput         chan api.TextResponse
+	TextInput          chan spec.TextRequest
+	TextOutput         chan spec.TextResponse
 
 	// Settings.
 
@@ -61,8 +61,8 @@ func DefaultConfig() Config {
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
-		TextInput:          make(chan api.TextRequest, 1000),
-		TextOutput:         make(chan api.TextResponse, 1000),
+		TextInput:          make(chan spec.TextRequest, 1000),
+		TextOutput:         make(chan spec.TextResponse, 1000),
 	}
 
 	return newConfig
@@ -122,8 +122,8 @@ func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []sp
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.
 	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(desired)
-	newConfig.Values = append([]interface{}{}, queue...)
+	newConfig.MaxGrowth = len(CLG.GetInputTypes())
+	newConfig.Values = queueToValues(queue)
 	newPermutationList, err := permutation.NewList(newConfig)
 	if err != nil {
 		return nil, nil, maskAny(err)
@@ -136,8 +136,12 @@ func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []sp
 		}
 
 		// Check if the given payload satisfies the requested CLG's interface.
-		members := permutationList.GetMembers()
-		if reflect.DeepEqual(membersToTypes(members), CLG.GetInputTypes()) {
+		members := newPermutationList.GetMembers()
+		types, err := membersToTypes(members)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
 			newPayload, err := membersToPayload(members)
 			if err != nil {
 				return nil, nil, maskAny(err)
@@ -149,14 +153,14 @@ func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []sp
 
 			// In case the current queue exeeds the interface of the requested CLG, it is
 			// trimmed to cause a more strict behaviour of the neural network.
-			if len(permutationList.GetValues()) > len(CLG.GetInputTypes()) {
+			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
 				newQueue = newQueue[1:]
 			}
 
 			return newPayload, newQueue, nil
 		}
 
-		err := n.PermutationFactory.PermuteBy(newPermutationList, 1)
+		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
 		if permutation.IsMaxGrowthReached(err) {
 			// We cannot permute the given list anymore. So far the requested CLG's
 			// interface could not be satisfied.
@@ -233,11 +237,11 @@ func (n *network) Listen() error {
 		for {
 			select {
 			case textRequest := <-n.TextInput:
-				newPayloadConfig := DefaultPayloadConfig()
-				newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.Input)}
+				newPayloadConfig := api.DefaultNetworkPayloadConfig()
+				newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
 				newPayloadConfig.Destination = clgID
 				newPayloadConfig.Sources = []spec.ObjectID{networkID}
-				newPayload, err := NewPayload(newPayloadConfig)
+				newPayload, err := api.NewNetworkPayload(newPayloadConfig)
 				if err != nil {
 					n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 				}
@@ -264,7 +268,7 @@ func (n *network) Listen() error {
 							// The interface of the requested CLG was not fulfilled. We
 							// continue listening for the next network payload without doing
 							// any work.
-							continue
+							return
 						} else if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 						}
@@ -288,10 +292,16 @@ func (n *network) Listen() error {
 							var output string
 							// The first argument is always a context, which is ignored,
 							// because it only serves internal purposes.
-							for _, v := range calculatedPayload.Args[1:] {
+							for _, v := range calculatedPayload.GetArgs()[1:] {
 								output += v.String()
 							}
-							n.TextOutput <- api.TextResponse{Output: output}
+							newTextResponseConfig := api.DefaultTextResponseConfig()
+							newTextResponseConfig.Output = output
+							newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+							if err != nil {
+								n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+							}
+							n.TextOutput <- newTextResponse
 						}
 					}(payload)
 				}

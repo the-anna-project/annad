@@ -1,23 +1,17 @@
-package network
+package api
 
 import (
 	"reflect"
-	"sync"
-	"time"
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/factory/permutation"
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
 )
 
-// PayloadConfig represents the configuration used to create a new network
-// payload object.
-type PayloadConfig struct {
+// NetworkPayloadConfig represents the configuration used to create a new
+// network payload object.
+type NetworkPayloadConfig struct {
 	// Settings.
 
 	// Args represents the arguments intended to be used for the requested CLG
@@ -43,10 +37,10 @@ type PayloadConfig struct {
 	Sources []spec.ObjectID
 }
 
-// DefaultPayloadConfig provides a default configuration to create a new
+// DefaultNetworkPayloadConfig provides a default configuration to create a new
 // network payload object by best effort.
-func DefaultPayloadConfig() PayloadConfig {
-	newConfig := PayloadConfig{
+func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
+	newConfig := NetworkPayloadConfig{
 		Args:        nil,
 		Destination: "",
 		Sources:     nil,
@@ -55,32 +49,32 @@ func DefaultPayloadConfig() PayloadConfig {
 	return newConfig
 }
 
-// NewPayload creates a new configured network payload object.
-func NewPayload(config PayloadConfig) (spec.NetworkPayload, error) {
-	newPayload := &payload{
-		PayloadConfig: config,
+// NewNetworkPayload creates a new configured network payload object.
+func NewNetworkPayload(config NetworkPayloadConfig) (spec.NetworkPayload, error) {
+	newNetworkPayload := &networkPayload{
+		NetworkPayloadConfig: config,
 
 		ID: id.MustNew(),
 	}
 
-	return newPayload, nil
+	return newNetworkPayload, nil
 }
 
-type payload struct {
-	PayloadConfig
+type networkPayload struct {
+	NetworkPayloadConfig
 
 	ID spec.ObjectID
 }
 
-func (p payload) GetArgs() []reflect.Value {
-	return p.Args
+func (np *networkPayload) GetArgs() []reflect.Value {
+	return np.Args
 }
 
-func (p payload) GetContext() (conext.Context, error) {
-	if len(p.Args) < 1 {
+func (np *networkPayload) GetContext() (context.Context, error) {
+	if len(np.Args) < 1 {
 		return nil, maskAnyf(invalidConfigError, "arguments must have context")
 	}
-	ctx, ok := p.Args[0].Interface().(context.Context)
+	ctx, ok := np.Args[0].Interface().(context.Context)
 	if !ok {
 		return nil, maskAnyf(invalidInterfaceError, "arguments must have context")
 	}
@@ -88,32 +82,32 @@ func (p payload) GetContext() (conext.Context, error) {
 	return ctx, nil
 }
 
-func (p payload) GetDestination() spec.ObjectID {
-	return p.Destination
+func (np *networkPayload) GetDestination() spec.ObjectID {
+	return np.Destination
 }
 
-func (p payload) GetID() spec.ObjectID {
-	return p.ID
+func (np *networkPayload) GetID() spec.ObjectID {
+	return np.ID
 }
 
-func (p payload) GetSources() []spec.ObjectID {
-	return p.Sources
+func (np *networkPayload) GetSources() []spec.ObjectID {
+	return np.Sources
 }
 
-func (p payload) Validate() error {
-	// Check if the payload has invalid properties.
-	if p.Args == nil {
+func (np *networkPayload) Validate() error {
+	// Check if the network payload has invalid properties.
+	if np.Args == nil {
 		return maskAnyf(invalidConfigError, "arguments must not be empty")
 	}
-	if p.Destination == "" {
+	if np.Destination == "" {
 		return maskAnyf(invalidConfigError, "destination must not be empty")
 	}
-	if len(p.Sources) < 1 {
+	if len(np.Sources) < 1 {
 		return maskAnyf(invalidConfigError, "sources must not be empty")
 	}
 
-	// Check if the payload has an context as first argument.
-	_, err := p.GetContext()
+	// Check if the network payload has an context as first argument.
+	_, err := np.GetContext()
 	if err != nil {
 		return maskAny(err)
 	}

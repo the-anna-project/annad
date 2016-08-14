@@ -42,7 +42,7 @@ type Network interface {
 	// Activate decides if the requested CLG should be activated. To make this
 	// decision the given network payload is considered.
 	// TODO explain interface better
-	Activate(clgID spec.ObjectID, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error)
+	Activate(clg CLG, payload NetworkPayload, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -52,7 +52,7 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(clgID ObjectID, payload NetworkPayload) (NetworkPayload, error)
+	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
 
 	// Forward is triggered after the CLGs calculation. Here is decided what to
 	// do next. Like Activate, it is up to the CLG if it forwards signals to
@@ -60,7 +60,7 @@ type Network interface {
 	// one or more CLGs. All this depends on the information provided by the
 	// given network payload, the CLG's connections and its therefore resulting
 	// behaviour properties.
-	Forward(clgID ObjectID, payload NetworkPayload) error
+	Forward(clg CLG, payload NetworkPayload) error
 
 	// Listen makes the network listen on requests from the outside. Here each
 	// CLG input channel is managed. This models Listen as kind of cortex in

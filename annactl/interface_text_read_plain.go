@@ -43,24 +43,27 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 
 	ctx := context.Background()
 
-	var expectation api.ExpectationRequest
-	err := json.Unmarshal([]byte(a.Flags.InterfaceTextReadPlain.Expectation), &expectation)
+	var expectationRequest api.ExpectationRequest
+	err := json.Unmarshal([]byte(a.Flags.InterfaceTextReadPlain.Expectation), &expectationRequest)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	textRequest := api.TextRequest{
-		ExpectationRequest: expectation,
-		Input:              strings.Join(args, " "),
-		SessionID:          a.SessionID,
+	newTextRequestConfig := api.DefaultTextRequestConfig()
+	newTextRequestConfig.ExpectationRequest = expectationRequest
+	newTextRequestConfig.Input = strings.Join(args, " ")
+	newTextRequestConfig.SessionID = a.SessionID
+	newTextRequest, err := api.NewTextRequest(newTextRequestConfig)
+	if err != nil {
+		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
 	}
 
-	in := make(chan api.TextRequest, 1)
-	out := make(chan api.TextResponse, 1000)
+	in := make(chan spec.TextRequest, 1)
+	out := make(chan spec.TextResponse, 1000)
 
 	go func() {
 		// TODO stream continuously
-		in <- textRequest
+		in <- newTextRequest
 	}()
 
 	err = a.TextInterface.StreamText(ctx, in, out)
@@ -71,7 +74,7 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 	for {
 		select {
 		case textResponse := <-out:
-			fmt.Printf("%s\n", textResponse.Output)
+			fmt.Printf("%s\n", textResponse.GetOutput())
 		}
 	}
 }
