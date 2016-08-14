@@ -40,8 +40,23 @@ type NetworkPayload interface {
 // back to the requestor.
 type Network interface {
 	// Activate decides if the requested CLG should be activated. To make this
-	// decision the given network payload is considered.
-	// TODO explain interface better
+	// decision the given network payload and formerly received network payloads
+	// are considered. CLGs within the neural network are able to join forces to
+	// trigger a CLG together, where their own output types do not satisfy the
+	// input interface of the requested CLG. For this case some synchronization
+	// is required. That means network payloads need to be queued until the
+	// requested CLG can be properly executed with the provided inputs. That is
+	// why Activate takes a single payload, which represents the currently
+	// received one, and a list of network payloads, which represent the formerly
+	// received network payloads. Activate tries to find a combination of all
+	// known payloads that satisfy the interface of the requested CLG. Note that
+	// queue has a maximum length of the number of input arguments of the
+	// requested CLG. In case no match can be found the given single payload is
+	// added to queue and the oldest payload is removed. In case some match was
+	// found the unified network payload matching the CLG's interface is returned
+	// so it can be used for the requested CLG execution. Network payloads being
+	// matched will be removed from the new queue which is returned as second
+	// value.
 	Activate(clg CLG, payload NetworkPayload, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
