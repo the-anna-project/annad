@@ -163,8 +163,6 @@ func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []sp
 			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
 		}
 	}
-
-	return nil, nil, nil
 }
 
 func (n *network) Boot() {
