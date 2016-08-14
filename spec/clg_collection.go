@@ -75,19 +75,19 @@ type CLGConvert interface {
 
 // CLGControl represents all control flow CLGs that can be used.
 type CLGControl interface {
-	// ForControl provides code flow functionallity of the for statement to
+	// ForControl provides code flow functionally of the for statement to
 	// iterate over the given argument lists and applying some action to them
 	// identified by a CLG name.
 	ForControl(args ...interface{}) ([]interface{}, error)
 
-	// IfControl provides code flow functionallity of the if statement. It
+	// IfControl provides code flow functionally of the if statement. It
 	// expects the following four arguments in the given order.
 	//
 	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
 	//
 	IfControl(args ...interface{}) ([]interface{}, error)
 
-	// IfElseControl provides code flow functionallity of the if-else statement.
+	// IfElseControl provides code flow functionally of the if-else statement.
 	// It expects the following six arguments in the given order.
 	//
 	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs, AlternativeCLG, AlternativeArgs
@@ -455,7 +455,7 @@ type CLGString interface {
 	// corresponding occurrence count within the given string.
 	CountCharacterString(args ...interface{}) ([]interface{}, error)
 
-	// EditDistanceString implementes the Levenshtein distance to measure
+	// EditDistanceString implements the Levenshtein distance to measure
 	// similarity between two strings. Here all edit operations are weighted with
 	// the cost 1. See http://en.wikipedia.org/wiki/Levenshtein_distance.
 	EditDistanceString(args ...interface{}) ([]interface{}, error)

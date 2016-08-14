@@ -8,7 +8,7 @@ As soon as there is anything that helps Anna reaching the next level of
 intelligence, it is worth considering it. The artificial neural
 [network](network.md) described here does not align that much with the commonly
 implemented neural networks.
-[Perceptron](https://en.wikipedia.org/wiki/Perceptron) like neural networks are
+[Perception](https://en.wikipedia.org/wiki/Perceptron) like neural networks are
 manually layered and only provide quite dumb activation functions to "connect"
 to other neurons. The network being created by connections described here is
 way more advanced and dynamic. Layers are not hard coded. Instead there are

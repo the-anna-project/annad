@@ -1,4 +1,4 @@
-// Package memoryfilesystem implementes spec.FileSystem and provides an
+// Package memoryfilesystem implements spec.FileSystem and provides an
 // in-memory implementation for abstraction and testing reasons.
 package memoryfilesystem
 

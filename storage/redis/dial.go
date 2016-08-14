@@ -10,7 +10,7 @@ import (
 // DialConfig represents the configuration used to create a new redis
 // dialer.
 type DialConfig struct {
-	// Addr representes the address used to connect to a redis server.
+	// Addr represents the address used to connect to a redis server.
 	Addr string
 }
 
