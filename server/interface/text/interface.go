@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -21,8 +20,8 @@ const (
 // interface object.
 type InterfaceConfig struct {
 	Log        spec.Log
-	TextInput  chan api.TextRequest
-	TextOutput chan api.TextResponse
+	TextInput  chan spec.TextRequest
+	TextOutput chan spec.TextResponse
 }
 
 // DefaultInterfaceConfig provides a default configuration to create a new text
@@ -30,8 +29,8 @@ type InterfaceConfig struct {
 func DefaultInterfaceConfig() InterfaceConfig {
 	newConfig := InterfaceConfig{
 		Log:        log.NewLog(log.DefaultConfig()),
-		TextInput:  make(chan api.TextRequest, 1000),
-		TextOutput: make(chan api.TextResponse, 1000),
+		TextInput:  make(chan spec.TextRequest, 1000),
+		TextOutput: make(chan spec.TextResponse, 1000),
 	}
 
 	return newConfig
@@ -64,7 +63,7 @@ type tinterface struct {
 	Type  spec.ObjectType
 }
 
-func (i *tinterface) StreamText(ctx context.Context, in chan api.TextRequest, out chan api.TextResponse) error {
+func (i *tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StreamText")
 
 	fail := make(chan error, 1000)

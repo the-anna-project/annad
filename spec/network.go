@@ -2,21 +2,35 @@ package spec
 
 import (
 	"reflect"
+
+	"golang.org/x/net/context"
 )
 
-// NetworkPayload represents the request provided to a CLG to ask it to do some
-// work.
-type NetworkPayload struct {
-	// Args represents the arguments intended to be used for the requested CLG
-	// execution, or the output values being calculated during the requested CLG
-	// execution.
-	Args []reflect.Value
+// NetworkPayload represents the data container carried around within the
+// neural network.
+type NetworkPayload interface {
+	// GetArgs returns the arguments of the current network payload.
+	GetArgs() []reflect.Value
 
-	// Destination represents the ID of the CLG that receives the message.
-	Destination ObjectID
+	// GetContext returns the context the current network payload holds as first
+	// argument. If no context can be found, an error is returned.
+	GetContext() (context.Context, error)
 
-	// Sources represents the IDs of the CLGs that sent the message.
-	Sources []ObjectID
+	// GetArgs returns the destination of the current network payload.
+	GetDestination() ObjectID
+
+	// GetID returns the object ID of the current network payload.
+	GetID() ObjectID
+
+	// GetArgs returns the sources of the current network payload.
+	GetSources() []ObjectID
+
+	// Validate throws an error if the current network payload is not valid. An
+	// network payload is not valid if it is empty, or if it does not satisfy the
+	// convention of the CLG interface to have a proper context as first input
+	// and output parameter. For more information about the context being passed
+	// through see https://godoc.org/golang.org/x/net/context.
+	Validate() error
 }
 
 // Network provides a neural network based on dynamic and self improving CLG
@@ -26,8 +40,24 @@ type NetworkPayload struct {
 // back to the requestor.
 type Network interface {
 	// Activate decides if the requested CLG should be activated. To make this
-	// decision the given payload is considered.
-	Activate(clgID ObjectID, payload NetworkPayload) error
+	// decision the given network payload and formerly received network payloads
+	// are considered. CLGs within the neural network are able to join forces to
+	// trigger a CLG together, where their own output types do not satisfy the
+	// input interface of the requested CLG. For this case some synchronization
+	// is required. That means network payloads need to be queued until the
+	// requested CLG can be properly executed with the provided inputs. That is
+	// why Activate takes a single payload, which represents the currently
+	// received one, and a list of network payloads, which represent the formerly
+	// received network payloads. Activate tries to find a combination of all
+	// known payloads that satisfy the interface of the requested CLG. Note that
+	// queue has a maximum length of the number of input arguments of the
+	// requested CLG. In case no match can be found the given single payload is
+	// added to queue and the oldest payload is removed. In case some match was
+	// found the unified network payload matching the CLG's interface is returned
+	// so it can be used for the requested CLG execution. Network payloads being
+	// matched will be removed from the new queue which is returned as second
+	// value.
+	Activate(clg CLG, payload NetworkPayload, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -37,19 +67,15 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(clgID ObjectID, payload NetworkPayload) (NetworkPayload, error)
-
-	// Execute takes care about a CLG's execution. It represents basically a
-	// business logic bundle of Acivate, Calculate and Forward.
-	Execute(clgID ObjectID, payload NetworkPayload) (NetworkPayload, error)
+	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
 
 	// Forward is triggered after the CLGs calculation. Here is decided what to
 	// do next. Like Activate, it is up to the CLG if it forwards signals to
 	// further CLGs. E.g. a CLG may or may not forward its calculated results to
 	// one or more CLGs. All this depends on the information provided by the
-	// given payload, the CLG's connections and its therefore resulting behaviour
-	// properties.
-	Forward(clgID ObjectID, payload NetworkPayload) error
+	// given network payload, the CLG's connections and its therefore resulting
+	// behaviour properties.
+	Forward(clg CLG, payload NetworkPayload) error
 
 	// Listen makes the network listen on requests from the outside. Here each
 	// CLG input channel is managed. This models Listen as kind of cortex in

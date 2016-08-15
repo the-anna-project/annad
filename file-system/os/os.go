@@ -1,4 +1,4 @@
-// Package osfilesystem implementes spec.FileSystem and provides a real OS
+// Package osfilesystem implements spec.FileSystem and provides a real OS
 // bound file system implementation.
 package osfilesystem
 

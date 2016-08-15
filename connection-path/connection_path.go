@@ -1,4 +1,4 @@
-// Package connectionpath implementes spec.ConnectionPath for distance
+// Package connectionpath implements spec.ConnectionPath for distance
 // calculation within the connection space.
 package connectionpath
 
@@ -161,7 +161,7 @@ func (cp *connectionPath) Validate() error {
 	}
 
 	if !equalDimensionLength(cp.GetCoordinates()) {
-		return maskAnyf(invalidConnectionPathError, "coordinates must have equal vector lenghts")
+		return maskAnyf(invalidConnectionPathError, "coordinates must have equal vector lengths")
 	}
 
 	return nil

@@ -18,8 +18,8 @@ func streamTextEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 			return api.WithError(maskAny(invalidRequestError)), nil
 		}
 
-		in := make(chan api.TextRequest, 1)
-		out := make(chan api.TextResponse, 1000)
+		in := make(chan spec.TextRequest, 1)
+		out := make(chan spec.TextResponse, 1000)
 
 		go func() {
 			// TODO stream continuously
@@ -30,7 +30,7 @@ func streamTextEndpoint(ti spec.TextInterface) endpoint.Endpoint {
 			for {
 				select {
 				case textResponse := <-out:
-					api.WithData(textResponse.Output)
+					api.WithData(textResponse)
 				}
 			}
 		}()

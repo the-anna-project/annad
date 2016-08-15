@@ -1,7 +1,7 @@
 package spec
 
 // Tags provides criteria to decide what log messages are supposed to be
-// logged. Emitted logs not matching the given critera by Tags are not supposed
+// logged. Emitted logs not matching the given criteria by Tags are not supposed
 // to be logged.
 type Tags struct {
 	// L is the log level. E.g. debug or error.

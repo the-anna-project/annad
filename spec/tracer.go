@@ -5,7 +5,7 @@ package spec
 type TraceID string
 
 // Tracer represents a container for comparable and comprehensible data. A
-// tracer can be used in middlewares to differenciate or map requests.
+// tracer can be used in middlewares to differentiate or map requests.
 type Tracer interface {
 	// GetTraceID returns the tracer's ID.
 	GetTraceID() TraceID

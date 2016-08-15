@@ -32,8 +32,8 @@ type Config struct {
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
 	Storage            spec.Storage
-	TextInput          chan api.TextRequest
-	TextOutput         chan api.TextResponse
+	TextInput          chan spec.TextRequest
+	TextOutput         chan spec.TextResponse
 
 	// Settings.
 
@@ -61,8 +61,8 @@ func DefaultConfig() Config {
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
-		TextInput:          make(chan api.TextRequest, 1000),
-		TextOutput:         make(chan api.TextResponse, 1000),
+		TextInput:          make(chan spec.TextRequest, 1000),
+		TextOutput:         make(chan spec.TextResponse, 1000),
 	}
 
 	return newConfig
@@ -103,7 +103,7 @@ type network struct {
 	Config
 
 	BootOnce sync.Once
-	CLGs     map[spec.ObjectID]spec.CLG
+	CLGs     map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG
 	// ID.
@@ -114,20 +114,59 @@ type network struct {
 	Type         spec.ObjectType
 }
 
-func (n *network) Activate(clgID spec.ObjectID, payload spec.NetworkPayload) error {
+func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
 
-	// Check if the given inputs can be used against the requested CLG's
-	// interface.
-	CLG, ok := n.CLGs[clgID]
-	if !ok {
-		return maskAnyf(clgNotFoundError, "ID: %s", clgID)
-	}
-	if !equalTypes(valuesToTypes(payload.Args), CLG.GetInputTypes()) {
-		return maskAnyf(invalidInterfaceError, "types must match")
+	queue = append(queue, payload)
+
+	// Prepare the permutation list to find out which combination of payloads
+	// satisfies the requested CLG's interface.
+	newConfig := permutation.DefaultListConfig()
+	newConfig.MaxGrowth = len(CLG.GetInputTypes())
+	newConfig.Values = queueToValues(queue)
+	newPermutationList, err := permutation.NewList(newConfig)
+	if err != nil {
+		return nil, nil, maskAny(err)
 	}
 
-	return nil
+	for {
+		err := n.PermutationFactory.MapTo(newPermutationList)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+
+		// Check if the given payload satisfies the requested CLG's interface.
+		members := newPermutationList.GetMembers()
+		types, err := membersToTypes(members)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
+			newPayload, err := membersToPayload(members)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+			newQueue, err := filterMembersFromQueue(members, queue)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+
+			// In case the current queue exeeds the interface of the requested CLG, it is
+			// trimmed to cause a more strict behaviour of the neural network.
+			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
+				newQueue = newQueue[1:]
+			}
+
+			return newPayload, newQueue, nil
+		}
+
+		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
+		if permutation.IsMaxGrowthReached(err) {
+			// We cannot permute the given list anymore. So far the requested CLG's
+			// interface could not be satisfied.
+			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+		}
+	}
 }
 
 func (n *network) Boot() {
@@ -146,47 +185,12 @@ func (n *network) Boot() {
 	})
 }
 
-func (n *network) Calculate(clgID spec.ObjectID, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Calculate")
-
-	CLG, ok := n.CLGs[clgID]
-	if !ok {
-		return spec.NetworkPayload{}, maskAnyf(clgNotFoundError, "ID: %s", clgID)
-	}
 
 	calculatedPayload, err := CLG.Calculate(payload)
 	if err != nil {
-		return spec.NetworkPayload{}, maskAny(err)
-	}
-
-	return calculatedPayload, nil
-}
-
-func (n *network) Execute(clgID spec.ObjectID, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Execute")
-
-	// Each CLG that is executed needs to decide if it wants to be activated.
-	// This happens using the Activate method.
-	err := n.Activate(clgID, payload)
-	if err != nil {
-		return spec.NetworkPayload{}, maskAny(err)
-	}
-
-	// Once activated, a CLG executes its actual implemented behaviour using
-	// Calculate. This behaviour can be anything. It is up to the CLG.
-	calculatedPayload, err := n.Calculate(clgID, payload)
-	if err != nil {
-		return spec.NetworkPayload{}, maskAny(err)
-	}
-
-	// After the CLGs calculation it can decide what to do next. Like Activate,
-	// it is up to the CLG if it forwards signals to further CLGs. E.g. a CLG
-	// might or might not forward its calculated results to one or more CLGs.
-	// This depends on the calculated payload, the CLG's connections and its
-	// behaviour properties.
-	err = n.Forward(clgID, calculatedPayload)
-	if err != nil {
-		return spec.NetworkPayload{}, maskAny(err)
+		return nil, maskAny(err)
 	}
 
 	return calculatedPayload, nil
@@ -195,7 +199,7 @@ func (n *network) Execute(clgID spec.ObjectID, payload spec.NetworkPayload) (spe
 // Forward to other CLGs
 // Split the neural connection path
 // TODO
-func (n *network) Forward(clgID spec.ObjectID, payload spec.NetworkPayload) error {
+func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
 
 	// Check if the given context provides a CLG tree ID.
@@ -217,7 +221,6 @@ func (n *network) Forward(clgID spec.ObjectID, payload spec.NetworkPayload) erro
 	return nil
 }
 
-// TODO
 func (n *network) Listen() error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
@@ -227,22 +230,23 @@ func (n *network) Listen() error {
 		return maskAny(err)
 	}
 	go func() {
-		inputChannel := CLG.GetInputChannel()
+		clgID := CLG.GetID()
+		networkID := n.GetID()
+		clgChannel := CLG.GetInputChannel()
 
 		for {
 			select {
 			case textRequest := <-n.TextInput:
-				// TODO
-				ctx := context.Background()
-				ctx = context.WithValue(ctx, "key", textRequest)
-
-				payload := spec.NetworkPayload{
-					Args:        []reflect.Value{reflect.ValueOf(ctx)},
-					Destination: "",
-					Sources:     []spec.ObjectID{""},
+				newPayloadConfig := api.DefaultNetworkPayloadConfig()
+				newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
+				newPayloadConfig.Destination = clgID
+				newPayloadConfig.Sources = []spec.ObjectID{networkID}
+				newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+				if err != nil {
+					n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 				}
 
-				inputChannel <- payload
+				clgChannel <- newPayload
 			}
 		}
 	}()
@@ -250,62 +254,54 @@ func (n *network) Listen() error {
 	// Make all CLGs listening in their specific input channel.
 	for ID, CLG := range n.CLGs {
 		go func(ID spec.ObjectID, CLG spec.CLG) {
-			// This is the queue of input payloads. We collect inputs until the
-			// requested CLG's interface is fulfilled somehow. Then the CLG is
-			// executed and the inputs used to execute the CLG are removed from the
-			// queue.
 			var queue []spec.NetworkPayload
-			//desired := CLG.GetInputTypes()
-			inputChannel := CLG.GetInputChannel()
+			clgChannel := CLG.GetInputChannel()
 
 			for {
 				select {
-				case payload := <-inputChannel:
-					// We should only hold a rather small number of pending payloads. A
-					// payload is considered pending when it is not able to fulfill the
-					// requested CLG's interface on its own. Especially the untrained
-					// network tends to throw around signals without that much sense.
-					// Then the payload queue for each CLG can grow and increase the
-					// process memory. That is why we cap the queue. TODO The cap must be
-					// learned. For now we hard code it to 10.
-					var maxPending = 10
-					queue = append(queue, payload)
-					if len(queue) > maxPending {
-						queue = queue[1:]
-					}
-
-					// // Check if the interface of the requested CLG matches the provided
-					// // inputs. In case the interface does not match, it is not possible
-					// // to call the requested CLG using the provided inputs. Then we do
-					// // nothing, but wait some time for other input payloads to arrive.
-					// execute, matching, newQueue, err := n.extractMatchingNetworkPayloads(queue, desired)
-					// if err != nil {
-					// 	n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-					// 	continue
-					// }
-					// if !execute {
-					// 	continue
-					// }
-					// queue = newQueue
-
-					// In case the interface is fulfilled we can finally execute the CLG.
+				case payload := <-clgChannel:
 					go func(payload spec.NetworkPayload) {
-						calculatedPayload, err := n.Execute(ID, payload)
+						// Activate if the CLG's interface is satisfied by the given
+						// network payload.
+						newPayload, newQueue, err := n.Activate(CLG, payload, queue)
+						if IsInvalidInterface(err) {
+							// The interface of the requested CLG was not fulfilled. We
+							// continue listening for the next network payload without doing
+							// any work.
+							return
+						} else if err != nil {
+							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						}
+						queue = newQueue
+
+						// Calculate based on the CLG's implemented business logic.
+						calculatedPayload, err := n.Calculate(CLG, newPayload)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 						}
 
-						// The output CLG is the only other special CLG, next to the input CLG. Only
-						// these both are treated specially. Here we forward the ouputs of the output
-						// CLG to the output channel. This will cause the output returned here to be
-						// streamed back to the client waiting for calculations of the neural
-						// network.
+						// Forward to other CLG's, if necessary.
+						err = n.Forward(CLG, calculatedPayload)
+						if err != nil {
+							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						}
+
+						// Return the calculated output to the requesting client, if the
+						// current CLG is the output CLG.
 						if CLG.GetName() == "output" {
 							var output string
-							for _, v := range calculatedPayload.Args[1:] {
+							// The first argument is always a context, which is ignored,
+							// because it only serves internal purposes.
+							for _, v := range calculatedPayload.GetArgs()[1:] {
 								output += v.String()
 							}
-							n.TextOutput <- api.TextResponse{Output: output}
+							newTextResponseConfig := api.DefaultTextResponseConfig()
+							newTextResponseConfig.Output = output
+							newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+							if err != nil {
+								n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+							}
+							n.TextOutput <- newTextResponse
 						}
 					}(payload)
 				}

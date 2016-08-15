@@ -41,7 +41,7 @@ environment is one of the most influential factors of an object.
 
 The importance of the environment needs to be realized when creating smart
 systems, especially AI. AI can be good or bad. This lies in our hands. I think
-opinions assuming extreme scenarious completely ignore reality and the
+opinions assuming extreme scenarios completely ignore reality and the
 circumstances we are living in. People say AI will be definitely super good,
 because it will be so damn clever. People say AI will be definitely super bad,
 because it will be so damn clever. People say humans are so damn clever as

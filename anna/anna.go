@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network"
@@ -140,8 +139,8 @@ func New(config Config) (spec.Anna, error) {
 			newAnna.Log.Register(newAnna.GetType())
 
 			// text input/output channel.
-			newTextInput := make(chan api.TextRequest, 1000)
-			newTextOutput := make(chan api.TextResponse, 1000)
+			newTextInput := make(chan spec.TextRequest, 1000)
+			newTextOutput := make(chan spec.TextResponse, 1000)
 
 			// storage.
 			newStorage, err := newAnna.createStorage(newAnna.Log)

@@ -97,8 +97,8 @@ func NewDistribution(config Config) (spec.Distribution, error) {
 	return newDistribution, nil
 }
 
-// NewEmptyDistribution simply returns an empty, maybe invalid, job object.
-// This should only be used for things like unmarshaling.
+// NewEmptyDistribution simply returns an empty, maybe invalid, distribution
+// object. This should only be used for things like unmarshaling.
 func NewEmptyDistribution() spec.Distribution {
 	return &distribution{}
 }

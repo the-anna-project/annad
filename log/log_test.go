@@ -50,7 +50,7 @@ func (c core) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-// tracer implementes spec.Tracer and is used to provide a tracer for the
+// tracer implements spec.Tracer and is used to provide a tracer for the
 // log tags.
 
 type tracer struct{}
