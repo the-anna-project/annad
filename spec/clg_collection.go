@@ -75,19 +75,19 @@ type CLGConvert interface {
 
 // CLGControl represents all control flow CLGs that can be used.
 type CLGControl interface {
-	// ForControl provides code flow functionally of the for statement to
+	// ForControl provides code flow functionality of the for statement to
 	// iterate over the given argument lists and applying some action to them
 	// identified by a CLG name.
 	ForControl(args ...interface{}) ([]interface{}, error)
 
-	// IfControl provides code flow functionally of the if statement. It
+	// IfControl provides code flow functionality of the if statement. It
 	// expects the following four arguments in the given order.
 	//
 	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
 	//
 	IfControl(args ...interface{}) ([]interface{}, error)
 
-	// IfElseControl provides code flow functionally of the if-else statement.
+	// IfElseControl provides code flow functionality of the if-else statement.
 	// It expects the following six arguments in the given order.
 	//
 	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs, AlternativeCLG, AlternativeArgs
