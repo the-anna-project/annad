@@ -74,6 +74,12 @@ func Test_CLG_Greater(t *testing.T) {
 		if len(args) != 2 {
 			t.Fatal("case", i+1, "expected", 2, "got", len(args))
 		}
+		switch ctx := args[0].Interface().(type) {
+		case context.Context:
+			// all good
+		default:
+			t.Fatal("case", i+1, "expected", "context.Context", "got", ctx)
+		}
 		result := args[1].Float()
 
 		if result != testCase.Expected {
