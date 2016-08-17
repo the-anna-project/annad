@@ -2,11 +2,15 @@
 // of the given numbers is greater than the other.
 package greater
 
+import (
+	"golang.org/x/net/context"
+)
+
 // calculate returns the number that is greater than the other.
-func (c *clg) calculate(a, b float64) float64 {
+func (c *clg) calculate(ctx context.Context, a, b float64) (context.Context, float64) {
 	if a > b {
-		return a
+		return ctx, a
 	}
 
-	return b
+	return ctx, b
 }
