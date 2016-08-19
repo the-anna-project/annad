@@ -29,7 +29,6 @@ package spec
 //
 // TODO add more CLGs.
 type CLGCollection interface {
-	CLGControl
 	CLGConvert
 	CLGDistribution
 	CLGFeature
@@ -71,30 +70,6 @@ type CLGConvert interface {
 
 	// StringIntConvert provides functionality of strconv.Atoi.
 	StringIntConvert(args ...interface{}) ([]interface{}, error)
-}
-
-// CLGControl represents all control flow CLGs that can be used.
-type CLGControl interface {
-	// ForControl provides code flow functionality of the for statement to
-	// iterate over the given argument lists and applying some action to them
-	// identified by a CLG name.
-	ForControl(args ...interface{}) ([]interface{}, error)
-
-	// IfControl provides code flow functionality of the if statement. It
-	// expects the following four arguments in the given order.
-	//
-	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs
-	//
-	IfControl(args ...interface{}) ([]interface{}, error)
-
-	// IfElseControl provides code flow functionality of the if-else statement.
-	// It expects the following six arguments in the given order.
-	//
-	//     ConditionCLG, ConditionArgs, ActionCLG, ActionArgs, AlternativeCLG, AlternativeArgs
-	//
-	IfElseControl(args ...interface{}) ([]interface{}, error)
-
-	// TODO control flow ??? switch, goto, strategy modifier
 }
 
 // CLGDistribution represents all spec.Distribution CLGs that can be used.
