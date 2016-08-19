@@ -14,9 +14,27 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func Test_CLG_New_Error(t *testing.T) {
+func Test_CLG_New_LogError(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.Log = nil
+	_, err := New(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_New_StorageError(t *testing.T) {
+	newConfig := DefaultConfig()
+	newConfig.Storage = nil
+	_, err := New(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_New_InputChannelError(t *testing.T) {
+	newConfig := DefaultConfig()
+	newConfig.InputChannel = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)

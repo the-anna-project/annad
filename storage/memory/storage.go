@@ -69,6 +69,16 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	return newStorage, nil
 }
 
+// MustNew creates either a new default configured storage object, or panics.
+func MustNew() spec.Storage {
+	newStorage, err := NewStorage(DefaultStorageConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newStorage
+}
+
 type storage struct {
 	StorageConfig
 

@@ -34,15 +34,10 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new CLG object by
 // best effort.
 func DefaultConfig() Config {
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
 		Log:     log.NewLog(log.DefaultConfig()),
-		Storage: newStorage,
+		Storage: memory.MustNew(),
 
 		// Settings.
 		InputChannel: make(chan spec.NetworkPayload, 1000),
