@@ -45,15 +45,10 @@ func New(config Config) (spec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 
+		ID:    id.MustNew(),
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeCLGCollection,
 	}
-
-	newID, err := newCollection.IDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newCollection.ID = newID
 
 	newCollection.Log.Register(newCollection.GetType())
 
