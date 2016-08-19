@@ -5,37 +5,30 @@ package {{.PackageName}}
 // the CLG generator check https://github.com/xh3b4sd/clggen or have a look at
 // the network package. There is the go generate statement to invoke clggen.
 
-import (
-  "reflect"
-)
+{{if .IsErrorInterface}}
+  import (
+    "reflect"
+  )
 
-// filterError expects the given list of reflect values to be the output of a
-// CLG execution. In case a CLG returns an error, the error must be the last
-// element of the output, otherwise filterError will throw an error, because of
-// the invalid CLG interface. All elements of values, except the error, if any,
-// will not be included in the returned argument list.
-func filterError(values []reflect.Value) ([]reflect.Value, error) {
-  if len(values) == 0 {
-    return nil, nil
-  }
+  // filterError removes the last element of the given list. Thus filterError
+  // must only be used if the last element returned by a CLG implements the error
+  // interface. In case the last element is a non-nil error, this error is
+  // returned and the given list is discarded.
+  func filterError(values []reflect.Value) ([]reflect.Value, error) {
+    if len(values) == 0 {
+      return nil, nil
+    }
 
-  var outputs []reflect.Value
-
-  for i, v := range values {
-    if err, ok := v.Interface().(error); ok {
-      if i != len(values)-1 {
-        // In golang we expect the error to be the last element of the output.
-        // If this is not the case, we throw an error.
-        return nil, maskAnyf(invalidInterfaceError, "error must be last")
-      }
-      if err != nil {
-        // There was an error in the CLG output.
+    lastArg := values[len(values)-1]
+    switch lastArg.Kind() {
+    case reflect.Interface:
+      fallthrough
+    case reflect.Ptr:
+      if err, ok := lastArg.Interface().(error); ok {
         return nil, maskAny(err)
       }
     }
 
-    outputs = append(outputs, v)
+    return values[:len(values)-1], nil
   }
-
-  return outputs, nil
-}
+{{end}}
