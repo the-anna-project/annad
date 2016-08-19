@@ -7,10 +7,10 @@ import (
 )
 
 // calculate returns the number that is greater than the other.
-func (c *clg) calculate(ctx context.Context, a, b float64) (context.Context, float64) {
+func (c *clg) calculate(ctx context.Context, a, b float64) float64 {
 	if a > b {
-		return ctx, a
+		return a
 	}
 
-	return ctx, b
+	return b
 }

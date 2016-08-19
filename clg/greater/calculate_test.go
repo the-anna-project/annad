@@ -71,16 +71,10 @@ func Test_CLG_Greater(t *testing.T) {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 2 {
-			t.Fatal("case", i+1, "expected", 2, "got", len(args))
+		if len(args) != 1 {
+			t.Fatal("case", i+1, "expected", 1, "got", len(args))
 		}
-		switch ctx := args[0].Interface().(type) {
-		case context.Context:
-			// all good
-		default:
-			t.Fatal("case", i+1, "expected", "context.Context", "got", ctx)
-		}
-		result := args[1].Float()
+		result := args[0].Float()
 
 		if result != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)
