@@ -95,10 +95,8 @@ type clg struct {
 }
 
 func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	outputs, err := filterError(reflect.ValueOf(c.calculate).Call(payload.GetArgs()))
-	if err != nil {
-		return nil, maskAny(err)
-	}
+
+	outputs := reflect.ValueOf(c.calculate).Call(payload.GetArgs())
 
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
 	newNetworkPayloadConfig.Args = outputs

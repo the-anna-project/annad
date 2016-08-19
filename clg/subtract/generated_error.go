@@ -33,10 +33,3 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
-
-var invalidInterfaceError = errgo.New("invalid interface")
-
-// IsInvalidInterface asserts invalidInterfaceError.
-func IsInvalidInterface(err error) bool {
-	return errgo.Cause(err) == invalidInterfaceError
-}
