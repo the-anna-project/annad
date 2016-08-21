@@ -22,6 +22,7 @@ anna: gogenerate
 		github.com/xh3b4sd/anna/anna
 
 annactl: gogenerate
+	env
 	@go build \
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=${VERSION}" \
