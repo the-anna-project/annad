@@ -51,10 +51,6 @@ func DefaultConfig() Config {
 	if err != nil {
 		panic(err)
 	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
 
 	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
 	if err != nil {
@@ -73,7 +69,7 @@ func DefaultConfig() Config {
 		LogControl:    newLogControl,
 		TextInterface: newTextInterface,
 
-		SessionID: string(newID),
+		SessionID: string(id.MustNew()),
 		Version:   version,
 	}
 
@@ -82,22 +78,15 @@ func DefaultConfig() Config {
 
 // New creates a new configured command line object.
 func New(config Config) (spec.Annactl, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	// annactl
 	newAnnactl := &annactl{
 		Config: config,
 
-		BootOnce: sync.Once{},
-		ID:       newID,
-		Type:     spec.ObjectType(ObjectTypeAnnactl),
+		BootOnce:     sync.Once{},
+		Closer:       make(chan struct{}, 1),
+		ID:           id.MustNew(),
+		ShutdownOnce: sync.Once{},
+		Type:         spec.ObjectType(ObjectTypeAnnactl),
 	}
 
 	if newAnnactl.Log == nil {
@@ -116,6 +105,8 @@ func New(config Config) (spec.Annactl, error) {
 
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
+
+			go newAnnactl.listenToSignal()
 
 			// Log.
 			err = newAnnactl.Log.SetLevels(newAnnactl.Flags.ControlLogLevels)
@@ -160,10 +151,12 @@ func New(config Config) (spec.Annactl, error) {
 type annactl struct {
 	Config
 
-	Cmd      *cobra.Command
-	BootOnce sync.Once
-	ID       spec.ObjectID
-	Type     spec.ObjectType
+	BootOnce     sync.Once
+	Closer       chan struct{}
+	Cmd          *cobra.Command
+	ID           spec.ObjectID
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (a *annactl) Boot() {
@@ -177,6 +170,14 @@ func (a *annactl) Boot() {
 
 		// execute
 		a.Cmd.Execute()
+	})
+}
+
+func (a *annactl) Shutdown() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+
+	a.ShutdownOnce.Do(func() {
+		close(a.Closer)
 	})
 }
 
