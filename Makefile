@@ -66,5 +66,5 @@ projectcheck:
 protoc:
 	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
 	@unzip protoc-3.0.0-linux-x86_64.zip -d protoc
-	@mv protoc/bin/protoc /usr/local/bin/protoc
+	@mv protoc/bin/protoc .workspace/bin/protoc
 	@rm -rf protoc protoc-3.0.0-linux-x86_64.zip
