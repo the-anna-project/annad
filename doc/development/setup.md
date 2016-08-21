@@ -24,15 +24,12 @@ the setup will be similar to this.
     └── ...
 ```
 
-### install protocol-buffers
-
-In order to install `protoc`, simply download a prebuild binary from here:
-https://github.com/google/protobuf/releases.
+### prerequisites
+The Anna project requires
+[protocol-buffers](https://developers.google.com/protocol-buffers/). In order
+to install `protoc`, simply execute the following command.
 ```
-wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
-unzip protoc-3.0.0-linux-x86_64.zip -d protoc
-mv protoc/bin/protoc /usr/local/bin/protoc
-rm -rf protoc protoc-3.0.0-linux-x86_64.zip
+make setup
 ```
 
 When executing the `protoc` library you might experience the following error.
