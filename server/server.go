@@ -87,6 +87,7 @@ func New(config Config) (spec.Server, error) {
 		Config: config,
 
 		BootOnce:   sync.Once{},
+		Closer:     make(chan struct{}, 1),
 		GRPCServer: grpc.NewServer(),
 		HTTPServer: &graceful.Server{
 			NoSignalHandling: true,
@@ -131,6 +132,7 @@ type server struct {
 	Config
 
 	BootOnce     sync.Once
+	Closer       chan struct{}
 	GRPCServer   *grpc.Server
 	HTTPServer   *graceful.Server
 	ID           spec.ObjectID
@@ -158,6 +160,14 @@ func (s *server) Boot() {
 		api.RegisterTextInterfaceServer(s.GRPCServer, s.TextInterface)
 
 		// gRPC server.
+		fail := make(chan error, 1)
+		go func() {
+			select {
+			case <-s.Closer:
+			case err := <-fail:
+				s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
+			}
+		}()
 		go func() {
 			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
 			listener, err := net.Listen("tcp", s.GRPCAddr)
@@ -166,7 +176,7 @@ func (s *server) Boot() {
 			}
 			err = s.GRPCServer.Serve(listener)
 			if err != nil {
-				s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
+				fail <- maskAny(err)
 			}
 		}()
 
@@ -185,6 +195,8 @@ func (s *server) Shutdown() {
 	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Shutdown")
 
 	s.ShutdownOnce.Do(func() {
+		close(s.Closer)
+
 		var wg sync.WaitGroup
 
 		wg.Add(1)

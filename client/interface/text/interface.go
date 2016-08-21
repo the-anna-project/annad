@@ -51,20 +51,25 @@ type tinterface struct {
 }
 
 func (i tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
+	done := make(chan struct{}, 1)
+	fail := make(chan error, 1)
+
 	conn, err := grpc.Dial(i.GRPCAddr, grpc.WithInsecure())
 	if err != nil {
 		return maskAny(err)
 	}
-	defer conn.Close()
+	defer func() {
+		err := conn.Close()
+		if err != nil {
+			fail <- maskAny(err)
+		}
+	}()
 
 	client := api.NewTextInterfaceClient(conn)
 	stream, err := client.StreamText(ctx)
 	if err != nil {
 		return maskAny(err)
 	}
-
-	done := make(chan struct{}, 1)
-	fail := make(chan error, 1)
 
 	// Listen on the outout of the text interface stream send it back to the
 	// client.
