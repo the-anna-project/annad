@@ -124,10 +124,8 @@ func (i tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, ou
 		case <-done:
 			return nil
 		case err := <-fail:
-			if err != nil {
-				close(done)
-				return maskAny(err)
-			}
+			close(done)
+			return maskAny(err)
 		}
 	}
 }

@@ -159,7 +159,11 @@ func (s *server) Boot() {
 		// Text interface.
 		api.RegisterTextInterfaceServer(s.GRPCServer, s.TextInterface)
 
-		// gRPC server.
+		// Create the gRPC server. The Serve method below is returning listener
+		// errors, if any. In case net.Listener.Accept is called and waits for
+		// connections while the listener was closed, a net.OpError will be thrown.
+		// For this case we only log errors from the fail channel in case the
+		// server's Closer was not closed yet.
 		fail := make(chan error, 1)
 		go func() {
 			select {
@@ -203,11 +207,8 @@ func (s *server) Shutdown() {
 		go func() {
 			// Stop the gRPC server gracefully and wait some time for open
 			// connections to be closed. Then force it to be stopped.
-			//
-			// TODO we are not stopping the server gracefully right now due to this
-			// issue: https://github.com/grpc/grpc-go/issues/848.
-			//go s.GRPCServer.GracefulStop()
-			//time.Sleep(3 * time.Second)
+			go s.GRPCServer.GracefulStop()
+			time.Sleep(3 * time.Second)
 			//
 			s.GRPCServer.Stop()
 			wg.Done()
