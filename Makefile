@@ -13,13 +13,13 @@ VERSION := $(shell git rev-parse --short HEAD)
 
 all: annactl anna
 
-anna: goget gogenerate
+anna: gogenerate
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/anna
 
-annactl: goget gogenerate
+annactl: gogenerate
 	@go build \
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=${VERSION}" \
@@ -58,7 +58,7 @@ goget:
 gotest: gogenerate
 	@./go.test.sh
 
-setup: protoc
+setup: goget protoc
 
 projectcheck:
 	@./project.check.sh
@@ -66,8 +66,5 @@ projectcheck:
 protoc:
 	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
-	echo ${PWD}
-	ls -lah
-	env
 	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
