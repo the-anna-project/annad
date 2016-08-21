@@ -11,9 +11,9 @@ import (
 type distributionClone distribution
 
 func (d *distribution) MarshalJSON() ([]byte, error) {
-	newDistribution := distributionClone(*d)
+	newDistribution := distributionClone(d)
 
-	raw, err := json.Marshal(newDistribution)
+	raw, err := json.Marshal(&newDistribution)
 	if err != nil {
 		return nil, maskAny(err)
 	}
