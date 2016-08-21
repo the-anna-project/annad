@@ -3,7 +3,9 @@
 
 
 GOPATH := ${PWD}/.workspace
+PATH := ${PATH}:${GOPATH}
 export GOPATH
+export PATH
 
 
 
