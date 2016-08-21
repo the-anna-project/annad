@@ -16,14 +16,12 @@ VERSION := $(shell git rev-parse --short HEAD)
 all: annactl anna
 
 anna: gogenerate
-	env
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/anna
 
 annactl: gogenerate
-	env
 	@go build \
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=${VERSION}" \
