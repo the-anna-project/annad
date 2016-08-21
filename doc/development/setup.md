@@ -24,6 +24,28 @@ the setup will be similar to this.
     └── ...
 ```
 
+### install protocol-buffers
+
+In order to install `protoc`, simply download a prebuild binary from here:
+https://github.com/google/protobuf/releases.
+```
+wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+unzip protoc-3.0.0-linux-x86_64.zip -d protoc
+mv protoc/bin/protoc /usr/local/bin/protoc
+rm -rf protoc protoc-3.0.0-linux-x86_64.zip
+```
+
+When executing the `protoc` library you might experience the following error.
+```
+protoc: error while loading shared libraries: libprotoc.so.10: cannot open shared object file: No such file or directory
+```
+
+In such a case the following command fixed this issue for me. See also
+http://stackoverflow.com/questions/25518701/protobuf-cannot-find-shared-libraries.
+```
+sudo ldconfig
+```
+
 ### clone repository
 To setup the project I am creating the working directory and go into it. It
 holds the source code of the Anna project.

@@ -9,7 +9,9 @@ type InterfaceTextReadPlainFlags struct {
 
 // Flags represents the flags of the command line object.
 type Flags struct {
-	Addr                string
+	GRPCAddr string
+	HTTPAddr string
+
 	ControlLogLevels    string
 	ControlLogVerbosity int
 

@@ -165,7 +165,8 @@ func New(config Config) (spec.Anna, error) {
 
 			// server.
 			newServerConfig := server.DefaultConfig()
-			newServerConfig.Addr = newAnna.Flags.Addr
+			newServerConfig.GRPCAddr = newAnna.Flags.GRPCAddr
+			newServerConfig.HTTPAddr = newAnna.Flags.HTTPAddr
 			newServerConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
 			panicOnError(err)
 			newServerConfig.Log = newAnna.Log
@@ -181,8 +182,9 @@ func New(config Config) (spec.Anna, error) {
 		},
 	}
 
-	// Flags.
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to bind Anna's server to")
+	// Flags. TODO autocomplete
+	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
+	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
 
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network,impulse)")

@@ -13,6 +13,7 @@ type TextRequest interface {
 	// GetInput returns the input of the current text request.
 	GetInput() string
 
+	// TODO remove
 	json.Unmarshaler
 
 	// IsEmpty checks whether the current text request is empty. An empty text
@@ -26,6 +27,7 @@ type TextResponse interface {
 	// GetOutput returns the output of the current text response.
 	GetOutput() string
 
+	// TODO remove
 	json.Unmarshaler
 }
 

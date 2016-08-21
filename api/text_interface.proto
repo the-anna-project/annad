@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package api;
+
+service TextInterface {
+  rpc StreamText(stream StreamTextRequest) returns (stream StreamTextResponse) {}
+}
+
+message StreamTextRequest {
+  string Input = 1;
+}
+
+message StreamTextResponse {
+  string Output = 1;
+}

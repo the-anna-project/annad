@@ -3,7 +3,6 @@
 package main
 
 import (
-	"net"
 	"sync"
 
 	"github.com/spf13/cobra"
@@ -129,20 +128,15 @@ func New(config Config) (spec.Annactl, error) {
 			// File system.
 			newFileSystem := osfilesystem.NewFileSystem(osfilesystem.DefaultConfig())
 
-			// host and port.
-			host, port, err := net.SplitHostPort(newAnnactl.Flags.Addr)
-			panicOnError(err)
-			hostport := net.JoinHostPort(host, port)
-
 			// Log control.
 			newLogControlConfig := logcontrol.DefaultControlConfig()
-			newLogControlConfig.URL.Host = hostport
+			newLogControlConfig.URL.Host = newAnnactl.Flags.HTTPAddr
 			newLogControl, err := logcontrol.NewControl(newLogControlConfig)
 			panicOnError(err)
 
 			// Text interface.
 			newTextInterfaceConfig := text.DefaultInterfaceConfig()
-			newTextInterfaceConfig.URL.Host = hostport
+			newTextInterfaceConfig.GRPCAddr = newAnnactl.Flags.GRPCAddr
 			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
 			panicOnError(err)
 
@@ -154,7 +148,8 @@ func New(config Config) (spec.Annactl, error) {
 	}
 
 	// Flags.
-	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
+	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
+	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
 
 	newAnnactl.Cmd.PersistentFlags().StringVarP(&newAnnactl.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
 	newAnnactl.Cmd.PersistentFlags().IntVarP(&newAnnactl.Flags.ControlLogVerbosity, "control-log-verbosity", "v", 10, "set log verbosity for log control")

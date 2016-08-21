@@ -1,4 +1,4 @@
-# data flow
+# data flow TODO rename api ?
 To understand how Anna works it is mandatory to understand the data flow within
 her various components. We need clean interfaces between these components to
 ease the development of their specific business logic.
@@ -24,5 +24,7 @@ very left is described in which layer the shown data flow actually happens.
   payloads through the neural network. At some point the neural network decides
   to stop processing and returns the output as shown below until data is flown
   back to the user.
+
+  TODO gRPC protobuf
 
 ![data flow](image/data_flow.png)

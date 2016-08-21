@@ -62,7 +62,7 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 	out := make(chan spec.TextResponse, 1000)
 
 	go func() {
-		// TODO stream continuously
+		// TODO stream stdin
 		in <- newTextRequest
 	}()
 

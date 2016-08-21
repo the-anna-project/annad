@@ -7,3 +7,5 @@ server to ask for any kind of operation of Anna's [interface](interface.md) or
 or to [control](control.md) certain administrative behavior. The current
 implementation of the client and the server makes use of
 https://github.com/go-kit/kit.
+
+TODO gRPC
