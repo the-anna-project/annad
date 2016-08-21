@@ -74,6 +74,7 @@ func New(config Config) (spec.Network, error) {
 		Config: config,
 
 		BootOnce:     sync.Once{},
+		CLGIDs:       map[string]spec.ObjectID{},
 		CLGs:         newCLGs(),
 		ID:           id.MustNew(),
 		Mutex:        sync.Mutex{},
@@ -103,11 +104,12 @@ type network struct {
 	Config
 
 	BootOnce sync.Once
-	CLGs     map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG
 	// ID.
-	CLGIDs       map[string]spec.ObjectID
+	CLGIDs map[string]spec.ObjectID
+
+	CLGs         map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 	ID           spec.ObjectID
 	Mutex        sync.Mutex
 	ShutdownOnce sync.Once

@@ -5,6 +5,7 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
+	"github.com/xh3b4sd/anna/clg/input"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -33,7 +34,7 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 }
 
 func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.ObjectID {
-	var clgIDs map[string]spec.ObjectID
+	clgIDs := map[string]spec.ObjectID{}
 
 	for ID, CLG := range CLGs {
 		clgIDs[CLG.GetName()] = ID
@@ -146,6 +147,7 @@ func membersToTypes(members []interface{}) ([]reflect.Type, error) {
 func newCLGs() map[spec.ObjectID]spec.CLG {
 	newList := []spec.CLG{
 		divide.MustNew(),
+		input.MustNew(),
 	}
 
 	newCLGs := map[spec.ObjectID]spec.CLG{}
