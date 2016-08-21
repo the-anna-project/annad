@@ -3,7 +3,7 @@
 
 
 GOPATH := ${PWD}/.workspace
-PATH := ${PATH}:${GOPATH}
+PATH := ${PATH}:${GOPATH}/bin/
 export GOPATH
 export PATH
 
@@ -16,6 +16,7 @@ VERSION := $(shell git rev-parse --short HEAD)
 all: annactl anna
 
 anna: gogenerate
+	env
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
