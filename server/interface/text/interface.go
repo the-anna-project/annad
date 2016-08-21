@@ -120,6 +120,7 @@ func (i *tinterface) StreamText(stream api.TextInterface_StreamTextServer) error
 	for {
 		select {
 		case <-stream.Context().Done():
+			close(done)
 			return maskAny(stream.Context().Err())
 		case <-done:
 			return nil

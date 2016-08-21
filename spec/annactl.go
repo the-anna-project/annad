@@ -120,4 +120,10 @@ type Annactl interface {
 
 	// InitVersionCmd initializes the version command.
 	InitVersionCmd() *cobra.Command
+
+	// Shutdown ends all processes of the command line tool like shutting down a
+	// machine. The call to Shutdown blocks until the command line tool is
+	// completely shut down, so you might want to call it in a separate
+	// goroutine.
+	Shutdown()
 }

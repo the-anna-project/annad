@@ -191,9 +191,14 @@ func (s *server) Shutdown() {
 		go func() {
 			// Stop the gRPC server gracefully and wait some time for open
 			// connections to be closed. Then force it to be stopped.
-			go s.GRPCServer.GracefulStop()
-			time.Sleep(3 * time.Second)
+			//
+			// TODO we are not stopping the server gracefully right now due to this
+			// issue: https://github.com/grpc/grpc-go/issues/848.
+			//go s.GRPCServer.GracefulStop()
+			//time.Sleep(3 * time.Second)
+			//
 			s.GRPCServer.Stop()
+			wg.Done()
 		}()
 
 		wg.Add(1)
@@ -202,6 +207,7 @@ func (s *server) Shutdown() {
 			// connections to be closed. Then force it to be stopped.
 			s.HTTPServer.Stop(s.HTTPServer.Timeout)
 			<-s.HTTPServer.StopChan()
+			wg.Done()
 		}()
 
 		wg.Wait()
