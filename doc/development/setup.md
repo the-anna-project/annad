@@ -24,6 +24,19 @@ the setup will be similar to this.
     └── ...
 ```
 
+### clone repository
+To setup the project I am creating the working directory and go into it. It
+holds the source code of the Anna project.
+```
+mkdir -p ~/projects/private/anna/
+cd ~/projects/private/anna/
+```
+
+Then, I clone the repository. Note the `.` at the end of the command.
+```
+git clone git@github.com:xh3b4sd/anna.git .
+```
+
 ### prerequisites
 The Anna project requires
 [protocol-buffers](https://developers.google.com/protocol-buffers/). In order
@@ -41,19 +54,6 @@ In such a case the following command fixed this issue for me. See also
 http://stackoverflow.com/questions/25518701/protobuf-cannot-find-shared-libraries.
 ```
 sudo ldconfig
-```
-
-### clone repository
-To setup the project I am creating the working directory and go into it. It
-holds the source code of the Anna project.
-```
-mkdir -p ~/projects/private/anna/
-cd ~/projects/private/anna/
-```
-
-Then, I clone the repository. Note the `.` at the end of the command.
-```
-git clone git@github.com:xh3b4sd/anna.git .
 ```
 
 ### build
