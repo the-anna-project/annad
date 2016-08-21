@@ -11,15 +11,15 @@ VERSION := $(shell git rev-parse --short HEAD)
 
 
 
-all: goget annactl anna
+all: annactl anna
 
-anna: gogenerate
+anna: goget gogenerate
 	@go build \
 		-o .workspace/bin/anna \
 		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/anna
 
-annactl: gogenerate
+annactl: goget gogenerate
 	@go build \
 		-o .workspace/bin/annactl \
 		-ldflags "-X main.version=${VERSION}" \
