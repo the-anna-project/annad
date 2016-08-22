@@ -182,7 +182,6 @@ func New(config Config) (spec.Anna, error) {
 		},
 	}
 
-	// Flags. TODO autocomplete
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
 	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
 
