@@ -1,7 +1,6 @@
 package text
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/juju/errgo"
