@@ -10,9 +10,9 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// InterfaceConfig represents the configuration used to create a new text interface
-// object.
-type InterfaceConfig struct {
+// ClientConfig represents the configuration used to create a new text
+// interface object.
+type ClientConfig struct {
 	// Settings.
 
 	// GRPCAddr is the host:port representation based on the golang convention
@@ -20,10 +20,10 @@ type InterfaceConfig struct {
 	GRPCAddr string
 }
 
-// DefaultInterfaceConfig provides a default configuration to create a new text
+// DefaultClientConfig provides a default configuration to create a new text
 // interface object by best effort.
-func DefaultInterfaceConfig() InterfaceConfig {
-	newConfig := InterfaceConfig{
+func DefaultClientConfig() ClientConfig {
+	newConfig := ClientConfig{
 		// Settings.
 		GRPCAddr: "127.0.0.1:9119",
 	}
@@ -31,39 +31,34 @@ func DefaultInterfaceConfig() InterfaceConfig {
 	return newConfig
 }
 
-// NewInterface creates a new configured text interface object.
-func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
-	newInterface := &tinterface{
-		InterfaceConfig: config,
+// NewClient creates a new configured text interface object.
+func NewClient(config ClientConfig) (spec.TextInterfaceClient, error) {
+	newClient := &client{
+		ClientConfig: config,
 	}
 
 	// Settings.
 
-	if newInterface.GRPCAddr == "" {
+	if newClient.GRPCAddr == "" {
 		return nil, maskAnyf(invalidConfigError, "gRPC address must not be empty")
 	}
 
-	return newInterface, nil
+	return newClient, nil
 }
 
-type tinterface struct {
-	InterfaceConfig
+type client struct {
+	ClientConfig
 }
 
-func (i tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
+func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
 
-	conn, err := grpc.Dial(i.GRPCAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(c.GRPCAddr, grpc.WithInsecure())
 	if err != nil {
 		return maskAny(err)
 	}
-	defer func() {
-		err := conn.Close()
-		if err != nil {
-			fail <- maskAny(err)
-		}
-	}()
+	defer conn.Close()
 
 	client := api.NewTextInterfaceClient(conn)
 	stream, err := client.StreamText(ctx)
