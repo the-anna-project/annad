@@ -74,6 +74,7 @@ func New(config Config) (spec.Network, error) {
 		Config: config,
 
 		BootOnce:     sync.Once{},
+		CLGIDs:       map[string]spec.ObjectID{},
 		CLGs:         newCLGs(),
 		ID:           id.MustNew(),
 		Mutex:        sync.Mutex{},
@@ -103,11 +104,12 @@ type network struct {
 	Config
 
 	BootOnce sync.Once
-	CLGs     map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG
 	// ID.
-	CLGIDs       map[string]spec.ObjectID
+	CLGIDs map[string]spec.ObjectID
+
+	CLGs         map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 	ID           spec.ObjectID
 	Mutex        sync.Mutex
 	ShutdownOnce sync.Once
@@ -237,6 +239,20 @@ func (n *network) Listen() error {
 		for {
 			select {
 			case textRequest := <-n.TextInput:
+				// TODO this is only used for testing to bypass the neural network and
+				// directly respond with the received input.
+
+				//newTextResponseConfig := api.DefaultTextResponseConfig()
+				//newTextResponseConfig.Output = textRequest.GetInput()
+				//newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+				//if err != nil {
+				//	n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+				//}
+				//n.TextOutput <- newTextResponse
+				//continue
+
+				// TODO
+
 				newPayloadConfig := api.DefaultNetworkPayloadConfig()
 				newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
 				newPayloadConfig.Destination = clgID

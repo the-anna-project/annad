@@ -3,7 +3,6 @@
 package main
 
 import (
-	"net"
 	"sync"
 
 	"github.com/spf13/cobra"
@@ -52,10 +51,6 @@ func DefaultConfig() Config {
 	if err != nil {
 		panic(err)
 	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
 
 	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
 	if err != nil {
@@ -74,7 +69,7 @@ func DefaultConfig() Config {
 		LogControl:    newLogControl,
 		TextInterface: newTextInterface,
 
-		SessionID: string(newID),
+		SessionID: string(id.MustNew()),
 		Version:   version,
 	}
 
@@ -83,22 +78,15 @@ func DefaultConfig() Config {
 
 // New creates a new configured command line object.
 func New(config Config) (spec.Annactl, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	// annactl
 	newAnnactl := &annactl{
 		Config: config,
 
-		BootOnce: sync.Once{},
-		ID:       newID,
-		Type:     spec.ObjectType(ObjectTypeAnnactl),
+		BootOnce:     sync.Once{},
+		Closer:       make(chan struct{}, 1),
+		ID:           id.MustNew(),
+		ShutdownOnce: sync.Once{},
+		Type:         spec.ObjectType(ObjectTypeAnnactl),
 	}
 
 	if newAnnactl.Log == nil {
@@ -118,6 +106,8 @@ func New(config Config) (spec.Annactl, error) {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 
+			go newAnnactl.listenToSignal()
+
 			// Log.
 			err = newAnnactl.Log.SetLevels(newAnnactl.Flags.ControlLogLevels)
 			panicOnError(err)
@@ -129,20 +119,15 @@ func New(config Config) (spec.Annactl, error) {
 			// File system.
 			newFileSystem := osfilesystem.NewFileSystem(osfilesystem.DefaultConfig())
 
-			// host and port.
-			host, port, err := net.SplitHostPort(newAnnactl.Flags.Addr)
-			panicOnError(err)
-			hostport := net.JoinHostPort(host, port)
-
 			// Log control.
 			newLogControlConfig := logcontrol.DefaultControlConfig()
-			newLogControlConfig.URL.Host = hostport
+			newLogControlConfig.URL.Host = newAnnactl.Flags.HTTPAddr
 			newLogControl, err := logcontrol.NewControl(newLogControlConfig)
 			panicOnError(err)
 
 			// Text interface.
 			newTextInterfaceConfig := text.DefaultInterfaceConfig()
-			newTextInterfaceConfig.URL.Host = hostport
+			newTextInterfaceConfig.GRPCAddr = newAnnactl.Flags.GRPCAddr
 			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
 			panicOnError(err)
 
@@ -154,7 +139,8 @@ func New(config Config) (spec.Annactl, error) {
 	}
 
 	// Flags.
-	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.Addr, "addr", "127.0.0.1:9119", "host:port to connect to Anna's server")
+	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
+	newAnnactl.Cmd.PersistentFlags().StringVar(&newAnnactl.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
 
 	newAnnactl.Cmd.PersistentFlags().StringVarP(&newAnnactl.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
 	newAnnactl.Cmd.PersistentFlags().IntVarP(&newAnnactl.Flags.ControlLogVerbosity, "control-log-verbosity", "v", 10, "set log verbosity for log control")
@@ -165,10 +151,12 @@ func New(config Config) (spec.Annactl, error) {
 type annactl struct {
 	Config
 
-	Cmd      *cobra.Command
-	BootOnce sync.Once
-	ID       spec.ObjectID
-	Type     spec.ObjectType
+	BootOnce     sync.Once
+	Closer       chan struct{}
+	Cmd          *cobra.Command
+	ID           spec.ObjectID
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (a *annactl) Boot() {
@@ -182,6 +170,14 @@ func (a *annactl) Boot() {
 
 		// execute
 		a.Cmd.Execute()
+	})
+}
+
+func (a *annactl) Shutdown() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+
+	a.ShutdownOnce.Do(func() {
+		close(a.Closer)
 	})
 }
 

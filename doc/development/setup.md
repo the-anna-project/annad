@@ -37,6 +37,25 @@ Then, I clone the repository. Note the `.` at the end of the command.
 git clone git@github.com:xh3b4sd/anna.git .
 ```
 
+### prerequisites
+The Anna project requires
+[protocol-buffers](https://developers.google.com/protocol-buffers/). In order
+to install `protoc`, simply execute the following command.
+```
+make setup
+```
+
+When executing the `protoc` library you might experience the following error.
+```
+protoc: error while loading shared libraries: libprotoc.so.10: cannot open shared object file: No such file or directory
+```
+
+In such a case the following command fixed this issue for me. See also
+http://stackoverflow.com/questions/25518701/protobuf-cannot-find-shared-libraries.
+```
+sudo ldconfig
+```
+
 ### build
 I am building the project using the [makefile](makefile.md). See its
 documentation for more information on how to use it.

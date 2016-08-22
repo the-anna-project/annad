@@ -4,6 +4,7 @@
 package api
 
 // Response is the response type each API call should return.
+// TODO use this structure for gRPC streams?
 type Response struct {
 	Code int         `json:"code,omitempty"`
 	Data interface{} `json:"data,omitempty"`

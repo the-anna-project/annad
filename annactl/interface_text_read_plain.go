@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
@@ -36,45 +35,56 @@ func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
 func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string) {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadPlainCmd")
 
-	if len(args) == 0 {
-		cmd.HelpFunc()(cmd, nil)
-		os.Exit(1)
-	}
-
 	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
 
-	var expectationRequest api.ExpectationRequest
-	err := json.Unmarshal([]byte(a.Flags.InterfaceTextReadPlain.Expectation), &expectationRequest)
-	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
-	}
-
-	newTextRequestConfig := api.DefaultTextRequestConfig()
-	newTextRequestConfig.ExpectationRequest = expectationRequest
-	newTextRequestConfig.Input = strings.Join(args, " ")
-	newTextRequestConfig.SessionID = a.SessionID
-	newTextRequest, err := api.NewTextRequest(newTextRequestConfig)
-	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
-	}
-
-	in := make(chan spec.TextRequest, 1)
+	in := make(chan spec.TextRequest, 1000)
 	out := make(chan spec.TextResponse, 1000)
 
 	go func() {
-		// TODO stream continuously
-		in <- newTextRequest
+		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "Waiting for input.\n")
+
+		scanner := bufio.NewScanner(os.Stdin)
+		for scanner.Scan() {
+			newTextRequestConfig := api.DefaultTextRequestConfig()
+			newTextRequestConfig.Input = scanner.Text()
+			newTextRequestConfig.SessionID = a.SessionID
+			newTextRequest, err := api.NewTextRequest(newTextRequestConfig)
+			if err != nil {
+				a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+			}
+
+			in <- newTextRequest
+
+			err = scanner.Err()
+			if err != nil {
+				a.Log.WithTags(spec.Tags{L: "E", O: a, T: nil, V: 4}, "%#v", maskAny(err))
+			}
+		}
 	}()
 
-	err = a.TextInterface.StreamText(ctx, in, out)
-	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
-	}
-
-	for {
-		select {
-		case textResponse := <-out:
-			fmt.Printf("%s\n", textResponse.GetOutput())
+	go func() {
+		for {
+			select {
+			case textResponse := <-out:
+				fmt.Printf("%s\n", textResponse.GetOutput())
+			}
 		}
+	}()
+
+	fail := make(chan error, 1)
+
+	go func() {
+		select {
+		case <-a.Closer:
+			cancel()
+		case err := <-fail:
+			a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		}
+	}()
+
+	err := a.TextInterface.StreamText(ctx, in, out)
+	if err != nil {
+		fail <- maskAny(err)
 	}
 }

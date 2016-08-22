@@ -1,10 +1,10 @@
 package text
 
 import (
+	"io"
 	"sync"
 
-	"golang.org/x/net/context"
-
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -37,7 +37,7 @@ func DefaultInterfaceConfig() InterfaceConfig {
 }
 
 // NewInterface creates a new configured text interface object.
-func NewInterface(config InterfaceConfig) (spec.TextInterface, error) {
+func NewInterface(config InterfaceConfig) (api.TextInterfaceServer, error) {
 	newInterface := &tinterface{
 		InterfaceConfig: config,
 		ID:              id.MustNew(),
@@ -63,32 +63,72 @@ type tinterface struct {
 	Type  spec.ObjectType
 }
 
-func (i *tinterface) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
+func (i *tinterface) StreamText(stream api.TextInterface_StreamTextServer) error {
 	i.Log.WithTags(spec.Tags{L: "D", O: i, T: nil, V: 13}, "call StreamText")
 
-	fail := make(chan error, 1000)
+	done := make(chan struct{}, 1)
+	fail := make(chan error, 1)
 
-	// Start processing the text request through the text input channel.
+	// Listen on the server input stream and forward it to the neural network.
+	go func() {
+		for {
+			streamTextRequest, err := stream.Recv()
+			if err == io.EOF {
+				// The stream ended. We broadcast to all goroutines by closing the done
+				// channel.
+				close(done)
+				return
+			} else if err != nil {
+				fail <- maskAny(err)
+				return
+			}
+
+			textRequestConfig := api.DefaultTextRequestConfig()
+			//newTextRequestConfig.ExpectationRequest = expectationRequest
+			textRequestConfig.Input = streamTextRequest.Input
+			//newTextRequestConfig.SessionID = a.SessionID
+			textRequest, err := api.NewTextRequest(textRequestConfig)
+			if err != nil {
+				fail <- maskAny(err)
+				return
+			}
+
+			i.TextInput <- textRequest
+		}
+	}()
+
+	// Listen on the outout of the text interface and stream it back to the
+	// client.
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
-				fail <- maskAny(ctx.Err())
+			case <-done:
 				return
-			case textRequest := <-in:
-				i.TextInput <- textRequest
+			case textResponse := <-i.TextOutput:
+				streamTextResponse := &api.StreamTextResponse{
+					Output: textResponse.GetOutput(),
+				}
+				err := stream.Send(streamTextResponse)
+				if err != nil {
+					fail <- maskAny(err)
+					return
+				}
 			}
 		}
 	}()
 
 	for {
 		select {
+		case <-stream.Context().Done():
+			close(done)
+			return maskAny(stream.Context().Err())
+		case <-done:
+			return nil
 		case err := <-fail:
-			return maskAny(err)
-		case <-ctx.Done():
-			return maskAny(ctx.Err())
-		case textResponse := <-i.TextOutput:
-			out <- textResponse
+			if err != nil {
+				close(done)
+				return maskAny(err)
+			}
 		}
 	}
 }

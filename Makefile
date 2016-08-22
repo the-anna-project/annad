@@ -3,7 +3,9 @@
 
 
 GOPATH := ${PWD}/.workspace
+PATH := ${PATH}:${GOPATH}/bin/
 export GOPATH
+export PATH
 
 
 
@@ -11,7 +13,7 @@ VERSION := $(shell git rev-parse --short HEAD)
 
 
 
-all: goget annactl anna
+all: annactl anna
 
 anna: gogenerate
 	@go build \
@@ -39,6 +41,7 @@ gofmt:
 
 gogenerate:
 	@go generate ./...
+	@protoc api/text_interface.proto --go_out=plugins=grpc:.
 
 goget:
 	@# Setup workspace.
@@ -46,14 +49,24 @@ goget:
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@# Install project dependencies.
 	@go get -d -v ./...
-	@go get -u github.com/xh3b4sd/clggen
+	@go get github.com/xh3b4sd/clggen
 	@# Install dev dependencies.
-	@go get -u github.com/client9/misspell/cmd/misspell
-	@go get -u github.com/fzipp/gocyclo
-	@go get -u github.com/golang/lint/golint
+	@go get github.com/client9/misspell/cmd/misspell
+	@go get github.com/fzipp/gocyclo
+	@go get github.com/golang/lint/golint
+	@go get github.com/golang/protobuf/proto
+	@go get github.com/golang/protobuf/protoc-gen-go
 
 gotest: gogenerate
 	@./go.test.sh
 
+setup: goget protoc
+
 projectcheck:
 	@./project.check.sh
+
+protoc:
+	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
+	@unzip /tmp/protoc.zip -d /tmp/protoc/
+	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
+	@rm -rf /tmp/protoc/ /tmp/protoc.zip

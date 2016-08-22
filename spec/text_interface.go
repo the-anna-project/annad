@@ -1,8 +1,6 @@
 package spec
 
 import (
-	"encoding/json"
-
 	"golang.org/x/net/context"
 )
 
@@ -12,8 +10,6 @@ import (
 type TextRequest interface {
 	// GetInput returns the input of the current text request.
 	GetInput() string
-
-	json.Unmarshaler
 
 	// IsEmpty checks whether the current text request is empty. An empty text
 	// request can be considered invalid.
@@ -25,8 +21,6 @@ type TextRequest interface {
 type TextResponse interface {
 	// GetOutput returns the output of the current text response.
 	GetOutput() string
-
-	json.Unmarshaler
 }
 
 // TextInterface provides a way to feed neural networks with text input.

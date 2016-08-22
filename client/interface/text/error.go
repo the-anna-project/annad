@@ -1,7 +1,6 @@
 package text
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/juju/errgo"
@@ -23,18 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var invalidAPIResponseError = errgo.New("invalid api response")
+var invalidConfigError = errgo.New("invalid config")
 
-// IsInvalidAPIResponse asserts invalidAPIResponseError.
-func IsInvalidAPIResponse(err error) bool {
-	return errgo.Cause(err) == invalidAPIResponseError
-}
-
-// IsUnsupportedType asserts json.UnsupportedTypeError.
-func IsUnsupportedType(err error) bool {
-	if _, ok := errgo.Cause(err).(*json.UnsupportedTypeError); ok {
-		return true
-	}
-
-	return false
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return errgo.Cause(err) == invalidConfigError
 }
