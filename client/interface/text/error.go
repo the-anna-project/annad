@@ -29,19 +29,3 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
-
-var invalidAPIResponseError = errgo.New("invalid api response")
-
-// IsInvalidAPIResponse asserts invalidAPIResponseError.
-func IsInvalidAPIResponse(err error) bool {
-	return errgo.Cause(err) == invalidAPIResponseError
-}
-
-// IsUnsupportedType asserts json.UnsupportedTypeError.
-func IsUnsupportedType(err error) bool {
-	if _, ok := errgo.Cause(err).(*json.UnsupportedTypeError); ok {
-		return true
-	}
-
-	return false
-}
