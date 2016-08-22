@@ -36,7 +36,7 @@ type Config struct {
 	IDFactory     spec.IDFactory
 	Log           spec.Log
 	LogControl    spec.LogControl
-	TextInterface spec.TextInterface
+	TextInterface spec.TextInterfaceClient
 
 	// Settings.
 	Flags     Flags
@@ -57,7 +57,7 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newTextInterface, err := text.NewInterface(text.DefaultInterfaceConfig())
+	newTextInterface, err := text.NewClient(text.DefaultClientConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -126,9 +126,9 @@ func New(config Config) (spec.Annactl, error) {
 			panicOnError(err)
 
 			// Text interface.
-			newTextInterfaceConfig := text.DefaultInterfaceConfig()
+			newTextInterfaceConfig := text.DefaultClientConfig()
 			newTextInterfaceConfig.GRPCAddr = newAnnactl.Flags.GRPCAddr
-			newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
+			newTextInterface, err := text.NewClient(newTextInterfaceConfig)
 			panicOnError(err)
 
 			// Annactl.
