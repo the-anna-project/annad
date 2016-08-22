@@ -27,10 +27,11 @@ in best case even fast. The last point is in most cases contradictionary.
 Anyway [make gotest](makefile.md#gotest) is your friend. Further code coverage
 is tracked at https://codecov.io/github/xh3b4sd/anna.
 
-### data format TODO
+### data format
 Data formats depend on the use case. E.g. for simplicity of some network API,
-JSON should be good enough in the first place. Config files may or may not want
-to make use of a JSON encoded format.
+JSON should be good enough in the first place. Where required other data
+formats like protocol-buffers for gRPC API's can also be used. Config files may
+or may not want to make use of a JSON encoded format.
 
 ### interface
 There are two types of API's we want to care about here. Library interfaces and
