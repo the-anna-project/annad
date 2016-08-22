@@ -6,6 +6,5 @@ business logic from remote. The [client](client.md) may communicate with the
 server to ask for any kind of operation of Anna's [interface](interface.md) or
 or to [control](control.md) certain administrative behavior. The current
 implementation of the client and the server makes use of
-https://github.com/go-kit/kit.
-
-TODO gRPC
+https://github.com/go-kit/kit for the HTTP endpoints and
+https://github.com/grpc/grpc-go for the gRPC endpoints.
