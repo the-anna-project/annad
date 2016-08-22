@@ -209,7 +209,6 @@ func (s *server) Shutdown() {
 			// connections to be closed. Then force it to be stopped.
 			go s.GRPCServer.GracefulStop()
 			time.Sleep(3 * time.Second)
-			//
 			s.GRPCServer.Stop()
 			wg.Done()
 		}()
