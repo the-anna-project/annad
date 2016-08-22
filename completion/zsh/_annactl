@@ -2,8 +2,10 @@
 
 local -a options
 options=(
+  '--grpc-addr'
   '-h'
   '--help'
+  '--http-addr'
   'help'
 )
 _describe 'values' options

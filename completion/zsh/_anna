@@ -10,7 +10,8 @@ _describe 'values' options
 
 _arguments \
   '1: :->business-logic' \
-  '--addr[host:port to bind Anna`s server to]:addr:->addr' \
+  '--grpc-addr[host:port to bind Anna`s gRPC server to]:grpc-addr:->grpc-addr' \
+  '--http-addr[host:port to bind Anna`s HTTP server to]:http-addr:->http-addr' \
   '--control-log-levels[set log levels for log control]:level:->levels' \
   '--control-log-objects[set log objects for log control]:object:->objects' \
   '--control-log-verbosity[set log verbosity for log control]:verbosity:->verbosity' \
@@ -21,8 +22,11 @@ case "$state" in
   business-logic)
     _arguments '1:business logic:(version)'
   ;;
-  addr)
-    _values 'addr' '127.0.0.1\:9119'
+  grpc-addr)
+    _values 'grpc-addr' '127.0.0.1\:9119'
+  ;;
+  http-addr)
+    _values 'http-addr' '127.0.0.1\:9120'
   ;;
   levels)
     _values -s , 'levels' D E F I W
