@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -64,36 +62,4 @@ func (tr *textRequest) GetInput() string {
 
 func (tr *textRequest) IsEmpty() bool {
 	return tr.Input == "" || tr.SessionID == ""
-}
-
-// textRequestClone is for making use of the stdlib json implementation. The
-// textRequest object implements its own marshaler and unmarshaler but only to
-// provide json implementations for spec.TextRequest. Note, not redirecting
-// the type will cause infinite recursion.
-type textRequestClone textRequest
-
-func (tr *textRequest) MarshalJSON() ([]byte, error) {
-	newTextRequest := textRequestClone(*tr)
-
-	raw, err := json.Marshal(newTextRequest)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return raw, nil
-}
-
-func (tr *textRequest) UnmarshalJSON(b []byte) error {
-	newTextRequest := textRequestClone{}
-
-	err := json.Unmarshal(b, &newTextRequest)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	tr.ExpectationRequest = newTextRequest.ExpectationRequest
-	tr.Input = newTextRequest.Input
-	tr.SessionID = newTextRequest.SessionID
-
-	return nil
 }

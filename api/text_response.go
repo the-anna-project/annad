@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -46,34 +44,4 @@ type textResponse struct {
 
 func (tr *textResponse) GetOutput() string {
 	return tr.Output
-}
-
-// textResponseClone is for making use of the stdlib json implementation. The
-// textResponse object implements its own marshaler and unmarshaler but only to
-// provide json implementations for spec.TextResponse. Note, not redirecting
-// the type will cause infinite recursion.
-type textResponseClone textResponse
-
-func (tr *textResponse) MarshalJSON() ([]byte, error) {
-	newTextResponse := textResponseClone(*tr)
-
-	raw, err := json.Marshal(newTextResponse)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return raw, nil
-}
-
-func (tr *textResponse) UnmarshalJSON(b []byte) error {
-	newTextResponse := textResponseClone{}
-
-	err := json.Unmarshal(b, &newTextResponse)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	tr.Output = newTextResponse.Output
-
-	return nil
 }
