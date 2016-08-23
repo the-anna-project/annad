@@ -217,6 +217,13 @@ func (a *anna) Boot() {
 	})
 }
 
+func (a *anna) ForceShutdown() {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ForceShutdown")
+
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "force shutting down Anna")
+	os.Exit(0)
+}
+
 func (a *anna) Shutdown() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
 
