@@ -53,12 +53,12 @@ goget:
 	@go get -d -v ./...
 
 gotest: gogenerate
-	@./go.test.sh
+	@gotest
 
 setup: goget protoc
 
 projectcheck:
-	@./project.check.sh
+	@projectcheck
 
 protoc:
 	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
