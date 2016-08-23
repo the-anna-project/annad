@@ -4,6 +4,6 @@
 // Note that this package defines a go generate statement to generate fully
 // functional source code for all CLGs.
 //
-//go:generate ${GOPATH}/bin/clggen generate --clg-dir=. --template-dir=../template
+//go:generate clggen generate --clg-dir=. --template-dir=../template
 //
 package clg

@@ -48,10 +48,10 @@ interesting for the maintainers.
 make dockerpush
 ```
 
-### goclean
-This removes dependencies to cleanup the `.workspace/` directory.
+### clean
+This removes the `.workspace/` directory and other files maybe flying around.
 ```
-make goclean
+make clean
 ```
 
 ### gofmt

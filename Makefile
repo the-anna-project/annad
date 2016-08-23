@@ -1,9 +1,9 @@
-.PHONY: all anna annactl dockerimage dockerpush goclean gofmt gogenerate goget gotest projectcheck
+.PHONY: all anna annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck
 
 
 
 GOPATH := ${PWD}/.workspace
-PATH := ${PATH}:${GOPATH}/bin/
+PATH := ${PATH}:${PWD}/.workspace/bin:${PWD}/bin
 export GOPATH
 export PATH
 
@@ -27,14 +27,14 @@ annactl: gogenerate
 		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/annactl
 
+clean:
+	@rm -rf coverage.txt profile.out .workspace/
+
 dockerimage: all
 	@docker build -t xh3b4sd/anna:${VERSION} .
 
 dockerpush:
 	docker push xh3b4sd/anna:${VERSION}
-
-goclean:
-	@rm -rf coverage.txt profile.out .workspace/
 
 gofmt:
 	@go fmt ./...
@@ -47,23 +47,18 @@ goget:
 	@# Setup workspace.
 	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
-	@# Install project dependencies.
+	@# Pin project dependencies.
+	@goget ${PWD}/Gofile
+	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
-	@go get github.com/xh3b4sd/clggen
-	@# Install dev dependencies.
-	@go get github.com/client9/misspell/cmd/misspell
-	@go get github.com/fzipp/gocyclo
-	@go get github.com/golang/lint/golint
-	@go get github.com/golang/protobuf/proto
-	@go get github.com/golang/protobuf/protoc-gen-go
 
 gotest: gogenerate
-	@./go.test.sh
+	@gotest
 
 setup: goget protoc
 
 projectcheck:
-	@./project.check.sh
+	@projectcheck
 
 protoc:
 	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
