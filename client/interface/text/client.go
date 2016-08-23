@@ -50,6 +50,31 @@ type client struct {
 	ClientConfig
 }
 
+func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (spec.TextResponse, error) {
+	if streamTextResponse.Code != api.CodeData {
+		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
+	}
+
+	textResponseConfig := api.DefaultTextResponseConfig()
+	textResponseConfig.Output = streamTextResponse.Data.Output
+	textResponse, err := api.NewTextResponse(textResponseConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return textResponse, nil
+}
+
+func (c client) EncodeRequest(textRequest spec.TextRequest) *api.StreamTextRequest {
+	streamTextRequest := &api.StreamTextRequest{
+		Echo:      textRequest.GetEcho(),
+		Input:     textRequest.GetInput(),
+		SessionID: textRequest.GetSessionID(),
+	}
+
+	return streamTextRequest
+}
+
 func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
@@ -81,14 +106,11 @@ func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out ch
 				return
 			}
 
-			textResponseConfig := api.DefaultTextResponseConfig()
-			textResponseConfig.Output = streamTextResponse.Output
-			textResponse, err := api.NewTextResponse(textResponseConfig)
+			textResponse, err := c.DecodeResponse(streamTextResponse)
 			if err != nil {
 				fail <- maskAny(err)
 				return
 			}
-
 			out <- textResponse
 		}
 	}()
@@ -96,18 +118,12 @@ func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out ch
 	// Listen on the client input channel and forward it to the server stream.
 	go func() {
 		for {
-			select {
-			case <-done:
+			textRequest := <-in
+			streamTextRequest := c.EncodeRequest(textRequest)
+			err := stream.Send(streamTextRequest)
+			if err != nil {
+				fail <- maskAny(err)
 				return
-			case textRequest := <-in:
-				streamTextRequest := &api.StreamTextRequest{
-					Input: textRequest.GetInput(),
-				}
-				err := stream.Send(streamTextRequest)
-				if err != nil {
-					fail <- maskAny(err)
-					return
-				}
 			}
 		}
 	}()
@@ -119,7 +135,6 @@ func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out ch
 		case <-done:
 			return nil
 		case err := <-fail:
-			close(done)
 			return maskAny(err)
 		}
 	}

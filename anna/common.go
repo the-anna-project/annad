@@ -17,12 +17,16 @@ func panicOnError(err error) {
 func (a *anna) listenToSignal() {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call listenToSignal")
 
-	listener := make(chan os.Signal, 1)
+	listener := make(chan os.Signal, 2)
 	signal.Notify(listener, os.Interrupt, os.Kill)
 
 	<-listener
 
-	a.Shutdown()
+	go a.Shutdown()
+
+	<-listener
+
+	a.ForceShutdown()
 }
 
 // writeStateInfo writes state information to the configured storage. The

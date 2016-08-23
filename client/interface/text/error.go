@@ -28,3 +28,10 @@ var invalidConfigError = errgo.New("invalid config")
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
+
+var invalidAPIResponseError = errgo.New("invalid API response")
+
+// IsInvalidAPIResponse asserts invalidAPIResponseError.
+func IsInvalidAPIResponse(err error) bool {
+	return errgo.Cause(err) == invalidAPIResponseError
+}

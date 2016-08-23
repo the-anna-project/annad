@@ -7,11 +7,11 @@ import (
 )
 
 func createTextInterface(newLog spec.Log, newTextInput chan spec.TextRequest, newTextOutput chan spec.TextResponse) (api.TextInterfaceServer, error) {
-	newTextInterfaceConfig := text.DefaultInterfaceConfig()
+	newTextInterfaceConfig := text.DefaultServerConfig()
 	newTextInterfaceConfig.Log = newLog
 	newTextInterfaceConfig.TextInput = newTextInput
 	newTextInterfaceConfig.TextOutput = newTextOutput
-	newTextInterface, err := text.NewInterface(newTextInterfaceConfig)
+	newTextInterface, err := text.NewServer(newTextInterfaceConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

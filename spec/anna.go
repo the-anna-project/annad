@@ -15,6 +15,9 @@ type Anna interface {
 	// ExecVersionCmd executes the version command.
 	ExecVersionCmd(cmd *cobra.Command, args []string)
 
+	// ForceShutdown ends all processes of Anna immediately.
+	ForceShutdown()
+
 	// InitVersionCmd initializes the version command.
 	InitVersionCmd() *cobra.Command
 
