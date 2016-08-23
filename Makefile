@@ -1,4 +1,4 @@
-.PHONY: all anna annactl dockerimage dockerpush goclean gofmt gogenerate goget gotest projectcheck
+.PHONY: all anna annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck
 
 
 
@@ -27,14 +27,14 @@ annactl: gogenerate
 		-ldflags "-X main.version=${VERSION}" \
 		github.com/xh3b4sd/anna/annactl
 
+clean:
+	@rm -rf coverage.txt profile.out .workspace/
+
 dockerimage: all
 	@docker build -t xh3b4sd/anna:${VERSION} .
 
 dockerpush:
 	docker push xh3b4sd/anna:${VERSION}
-
-goclean:
-	@rm -rf coverage.txt profile.out .workspace/
 
 gofmt:
 	@go fmt ./...
