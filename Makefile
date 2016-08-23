@@ -47,15 +47,10 @@ goget:
 	@# Setup workspace.
 	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
-	@# Install project dependencies.
+	@# Pin project dependencies.
+	@bin/goget ${PWD}/Gofile
+	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
-	@go get github.com/xh3b4sd/clggen
-	@# Install dev dependencies.
-	@go get github.com/client9/misspell/cmd/misspell
-	@go get github.com/fzipp/gocyclo
-	@go get github.com/golang/lint/golint
-	@go get github.com/golang/protobuf/proto
-	@go get github.com/golang/protobuf/protoc-gen-go
 
 gotest: gogenerate
 	@./go.test.sh
