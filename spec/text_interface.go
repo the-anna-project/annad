@@ -11,6 +11,9 @@ type TextRequest interface {
 	// GetInput returns the input of the current text request.
 	GetInput() string
 
+	// GetSessionID returns the session ID of the current text request.
+	GetSessionID() string
+
 	// IsEmpty checks whether the current text request is empty. An empty text
 	// request can be considered invalid.
 	IsEmpty() bool

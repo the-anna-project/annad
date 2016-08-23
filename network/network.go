@@ -21,9 +21,9 @@ import (
 )
 
 const (
-	// ObjectTypeNetwork represents the object type of the network object. This
-	// is used e.g. to register itself to the logger.
-	ObjectTypeNetwork spec.ObjectType = "network"
+	// ObjectType represents the object type of the network object. This is used
+	// e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "network"
 )
 
 // Config represents the configuration used to create a new network object.
@@ -79,7 +79,7 @@ func New(config Config) (spec.Network, error) {
 		ID:           id.MustNew(),
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
-		Type:         ObjectTypeNetwork,
+		Type:         ObjectType,
 	}
 
 	if newNetwork.Log == nil {

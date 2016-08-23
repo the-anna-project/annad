@@ -3,10 +3,15 @@
 // scheme.
 package api
 
+var (
+	CodeData, TextData       = "10001", "data"
+	CodeSuccess, TextSuccess = "10002", "success"
+	CodeError, TextError     = "10003", "error"
+)
+
 // Response is the response type each API call should return.
-// TODO use this structure for gRPC streams?
 type Response struct {
-	Code int         `json:"code,omitempty"`
+	Code string      `json:"code,omitempty"`
 	Data interface{} `json:"data,omitempty"`
 	Text string      `json:"text,omitempty"`
 }
@@ -15,9 +20,9 @@ type Response struct {
 // translates to the Code 10001.
 func WithData(data interface{}) Response {
 	return Response{
-		Code: 10001,
+		Code: CodeData,
 		Data: data,
-		Text: "data",
+		Text: TextData,
 	}
 }
 
@@ -25,9 +30,9 @@ func WithData(data interface{}) Response {
 // action. Text 'success' translates to the Code 10002.
 func WithSuccess() Response {
 	return Response{
-		Code: 10002,
+		Code: CodeSuccess,
 		Data: "",
-		Text: "success",
+		Text: TextSuccess,
 	}
 }
 
@@ -39,8 +44,8 @@ func WithError(err error) Response {
 		msg = err.Error()
 	}
 	return Response{
-		Code: 10003,
+		Code: CodeError,
 		Data: msg,
-		Text: "error",
+		Text: TextError,
 	}
 }

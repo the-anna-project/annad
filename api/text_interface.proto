@@ -8,8 +8,15 @@ service TextInterface {
 
 message StreamTextRequest {
   string Input = 1;
+  string SessionID = 2;
 }
 
 message StreamTextResponse {
+  string Code = 1;
+  StreamTextResponseData Data = 2;
+  string Text = 3;
+}
+
+message StreamTextResponseData {
   string Output = 1;
 }

@@ -59,7 +59,7 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newTextInterface, err := text.NewInterface(text.DefaultInterfaceConfig())
+	newTextInterface, err := text.NewServer(text.DefaultServerConfig())
 	if err != nil {
 		panic(err)
 	}

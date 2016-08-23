@@ -60,6 +60,10 @@ func (tr *textRequest) GetInput() string {
 	return tr.Input
 }
 
+func (tr *textRequest) GetSessionID() string {
+	return tr.SessionID
+}
+
 func (tr *textRequest) IsEmpty() bool {
 	return tr.Input == "" || tr.SessionID == ""
 }
