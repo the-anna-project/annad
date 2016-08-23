@@ -76,6 +76,7 @@ func (s *server) DecodeResponse(textResponse spec.TextResponse) *api.StreamTextR
 
 func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (spec.TextRequest, error) {
 	textRequestConfig := api.DefaultTextRequestConfig()
+	textRequestConfig.Echo = streamTextRequest.Echo
 	//newTextRequestConfig.ExpectationRequest = expectationRequest
 	textRequestConfig.Input = streamTextRequest.Input
 	textRequestConfig.SessionID = streamTextRequest.SessionID

@@ -239,19 +239,18 @@ func (n *network) Listen() error {
 		for {
 			select {
 			case textRequest := <-n.TextInput:
-				// TODO this is only used for testing to bypass the neural network and
-				// directly respond with the received input.
-
-				//newTextResponseConfig := api.DefaultTextResponseConfig()
-				//newTextResponseConfig.Output = textRequest.GetInput()
-				//newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-				//if err != nil {
-				//	n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-				//}
-				//n.TextOutput <- newTextResponse
-				//continue
-
-				// TODO
+				// This should only be used for testing to bypass the neural network
+				// and directly respond with the received input.
+				if textRequest.GetEcho() {
+					newTextResponseConfig := api.DefaultTextResponseConfig()
+					newTextResponseConfig.Output = textRequest.GetInput()
+					newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+					if err != nil {
+						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+					}
+					n.TextOutput <- newTextResponse
+					continue
+				}
 
 				newPayloadConfig := api.DefaultNetworkPayloadConfig()
 				newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}

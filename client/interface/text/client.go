@@ -67,6 +67,7 @@ func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (spec
 
 func (c client) EncodeRequest(textRequest spec.TextRequest) *api.StreamTextRequest {
 	streamTextRequest := &api.StreamTextRequest{
+		Echo:      textRequest.GetEcho(),
 		Input:     textRequest.GetInput(),
 		SessionID: textRequest.GetSessionID(),
 	}

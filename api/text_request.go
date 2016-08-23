@@ -9,26 +9,33 @@ import (
 type TextRequestConfig struct {
 	// Settings.
 
+	// Echo being set to true causes the provided input simply to be echoed back.
+	// The provided input goes through the whole stack and is streamed back and
+	// forth, but bypasses neural network. This is useful to test the
+	// client/server integration of the gRPC stream implementation.
+	Echo bool
+
 	// ExpectationRequest represents the expectation object. This is used to
 	// match against the calculated output. In case there is an expectation
 	// given, the neural network tries to calculate an output until it generated
 	// one that matches the given expectation.
-	ExpectationRequest ExpectationRequest `json:"expectation,omitempty"`
+	ExpectationRequest ExpectationRequest
 
 	// Input represents the input being fed into the neural network. There must
 	// be a none empty input given when requesting calculations from the neural
 	// network.
-	Input string `json:"input"`
+	Input string
 
 	// SessionID represents the session the current text request is associated
 	// with. This is provided to differentiate streams between different users.
-	SessionID string `json:"session_id,omitempty"`
+	SessionID string
 }
 
 // DefaultTextRequestConfig provides a default configuration to create a new
 // text request object by best effort.
 func DefaultTextRequestConfig() TextRequestConfig {
 	newConfig := TextRequestConfig{
+		Echo:               false,
 		ExpectationRequest: ExpectationRequest{},
 		Input:              "",
 		SessionID:          "",
@@ -54,6 +61,10 @@ func NewEmptyTextRequest() spec.TextRequest {
 
 type textRequest struct {
 	TextRequestConfig
+}
+
+func (tr *textRequest) GetEcho() bool {
+	return tr.Echo
 }
 
 func (tr *textRequest) GetInput() string {

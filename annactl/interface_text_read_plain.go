@@ -27,7 +27,8 @@ func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
 		},
 	}
 
-	newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expectation, "expectation", "", "expectation object in JSON format")
+	newCmd.PersistentFlags().BoolVar(&a.Flags.InterfaceTextReadPlain.Echo, "echo", false, "echo input by bypassing the neural network")
+	//newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expectation, "expectation", "", "expectation object in JSON format")
 
 	return newCmd
 }
@@ -47,6 +48,7 @@ func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []strin
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			newTextRequestConfig := api.DefaultTextRequestConfig()
+			newTextRequestConfig.Echo = a.Flags.InterfaceTextReadPlain.Echo
 			newTextRequestConfig.Input = scanner.Text()
 			newTextRequestConfig.SessionID = a.SessionID
 			newTextRequest, err := api.NewTextRequest(newTextRequestConfig)

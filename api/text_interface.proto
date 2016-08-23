@@ -7,8 +7,9 @@ service TextInterface {
 }
 
 message StreamTextRequest {
-  string Input = 1;
-  string SessionID = 2;
+  bool Echo = 1;
+  string Input = 2;
+  string SessionID = 3;
 }
 
 message StreamTextResponse {
