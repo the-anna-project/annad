@@ -4,9 +4,23 @@
 package api
 
 var (
-	CodeData, TextData       = "10001", "data"
-	CodeSuccess, TextSuccess = "10002", "success"
-	CodeError, TextError     = "10003", "error"
+	// CodeData represents the API response code of a data response.
+	CodeData = "10001"
+
+	// TextData represents the API response text of a data response.
+	TextData = "data"
+
+	// CodeSuccess represents the API response code of a success response.
+	CodeSuccess = "10002"
+
+	// TextSuccess represents the API response text of a success response.
+	TextSuccess = "success"
+
+	// CodeError represents the API response code of a error response.
+	CodeError = "10003"
+
+	// TextError represents the API response text of a error response.
+	TextError = "error"
 )
 
 // Response is the response type each API call should return.
