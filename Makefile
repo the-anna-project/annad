@@ -3,7 +3,7 @@
 
 
 GOPATH := ${PWD}/.workspace
-PATH := ${PATH}:${PWD}/.workspace/bin
+PATH := ${PATH}:${PWD}/.workspace/bin:${PWD}/bin
 export GOPATH
 export PATH
 
@@ -48,7 +48,7 @@ goget:
 	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
 	@# Pin project dependencies.
-	@bin/goget ${PWD}/Gofile
+	@goget ${PWD}/Gofile
 	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
 
