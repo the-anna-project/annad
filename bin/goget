@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script was heavily copied from https://github.com/joewalnes/go-getter.
+
 set -e
 
 : ${GOPATH?"GOPATH not set"}
