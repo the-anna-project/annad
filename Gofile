@@ -3,4 +3,4 @@ github.com/fzipp/gocyclo                    master
 github.com/golang/lint/golint               master
 github.com/golang/protobuf/proto            master
 github.com/golang/protobuf/protoc-gen-go    master
-github.com/xh3b4sd/clggen                   foo
+github.com/xh3b4sd/clggen                   master
