@@ -97,6 +97,7 @@ func New(config Config) (spec.Anna, error) {
 		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
 	}
 
+	// TODO refactor like annactl
 	newAnna.Cmd = &cobra.Command{
 		Use:   "anna",
 		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
