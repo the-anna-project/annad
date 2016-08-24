@@ -12,14 +12,14 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitInterfaceTextReadPlainCmd")
+func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextReadPlainCmd")
 
 	newCmd := &cobra.Command{
 		Use:   "plain <input>",
 		Short: "Make Anna read plain text.",
 		Long:  "Make Anna read plain text.",
-		Run:   a.ExecInterfaceTextReadPlainCmd,
+		Run:   a.ExecAnnactlInterfaceTextReadPlainCmd,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 			a.SessionID, err = a.GetSessionID()
@@ -33,8 +33,8 @@ func (a *annactl) InitInterfaceTextReadPlainCmd() *cobra.Command {
 	return newCmd
 }
 
-func (a *annactl) ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadPlainCmd")
+func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlInterfaceTextReadPlainCmd")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

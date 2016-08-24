@@ -10,21 +10,21 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) InitControlLogSetLevelsCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogSetLevelsCmd")
+func (a *annactl) InitAnnactlControlLogSetLevelsCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetLevelsCmd")
 
 	newCmd := &cobra.Command{
 		Use:   "levels [level] ...",
 		Short: "Make Anna set log levels.",
 		Long:  "Make Anna set log levels.",
-		Run:   a.ExecControlLogSetLevelsCmd,
+		Run:   a.ExecAnnactlControlLogSetLevelsCmd,
 	}
 
 	return newCmd
 }
 
-func (a *annactl) ExecControlLogSetLevelsCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogSetLevelsCmd")
+func (a *annactl) ExecAnnactlControlLogSetLevelsCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogSetLevelsCmd")
 
 	if len(args) == 0 {
 		cmd.HelpFunc()(cmd, nil)

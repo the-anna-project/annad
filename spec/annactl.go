@@ -11,115 +11,123 @@ type Annactl interface {
 	// Boot initializes and executes the command line tool.
 	Boot()
 
-	// ExecControlCmd executes the control command.
-	ExecControlCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlCmd executes the root command.
+	ExecAnnactlCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogCmd executes the control log
-	ExecControlLogCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlCmd executes the control command.
+	ExecAnnactlControlCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogResetCmd executes the control log
-	ExecControlLogResetCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogCmd executes the control log
+	ExecAnnactlControlLogCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogResetLevelsCmd executes the control log
-	ExecControlLogResetLevelsCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogResetCmd executes the control log
+	ExecAnnactlControlLogResetCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogResetObjectsCmd executes the control log
-	ExecControlLogResetObjectsCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogResetLevelsCmd executes the control log
+	ExecAnnactlControlLogResetLevelsCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogResetVerbosityCmd executes the control log
-	ExecControlLogResetVerbosityCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogResetObjectsCmd executes the control log
+	ExecAnnactlControlLogResetObjectsCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogSetCmd executes the control log
-	ExecControlLogSetCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogResetVerbosityCmd executes the control log
+	ExecAnnactlControlLogResetVerbosityCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogSetLevelsCmd executes the control log
-	ExecControlLogSetLevelsCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogSetCmd executes the control log
+	ExecAnnactlControlLogSetCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogSetObjectsCmd executes the control log
-	ExecControlLogSetObjectsCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogSetLevelsCmd executes the control log
+	ExecAnnactlControlLogSetLevelsCmd(cmd *cobra.Command, args []string)
 
-	// ExecControlLogSetVerbosityCmd executes the control log
-	ExecControlLogSetVerbosityCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogSetObjectsCmd executes the control log
+	ExecAnnactlControlLogSetObjectsCmd(cmd *cobra.Command, args []string)
 
-	// ExecInterfaceCmd executes the interface command.
-	ExecInterfaceCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlControlLogSetVerbosityCmd executes the control log
+	ExecAnnactlControlLogSetVerbosityCmd(cmd *cobra.Command, args []string)
 
-	// ExecInterfaceTextCmd executes the interface text command.
-	ExecInterfaceTextCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlInterfaceCmd executes the interface command.
+	ExecAnnactlInterfaceCmd(cmd *cobra.Command, args []string)
 
-	// ExecInterfaceTextReadCmd executes the interface text read command.
-	ExecInterfaceTextReadCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlInterfaceTextCmd executes the interface text command.
+	ExecAnnactlInterfaceTextCmd(cmd *cobra.Command, args []string)
 
-	// ExecInterfaceTextReadFileCmd executes the interface text read file
+	// ExecAnnactlInterfaceTextReadCmd executes the interface text read command.
+	ExecAnnactlInterfaceTextReadCmd(cmd *cobra.Command, args []string)
+
+	// ExecAnnactlInterfaceTextReadFileCmd executes the interface text read file
 	// command.
-	ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string)
+	ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args []string)
 
-	// ExecInterfaceTextReadPlainCmd executes the interface text read plain
-	// command.
-	ExecInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlInterfaceTextReadPlainCmd executes the interface text read
+	// plain command.
+	ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string)
 
-	// ExecVersionCmd executes the version command.
-	ExecVersionCmd(cmd *cobra.Command, args []string)
+	// ExecAnnactlVersionCmd executes the version command.
+	ExecAnnactlVersionCmd(cmd *cobra.Command, args []string)
 
 	// GetSessionID returns the current session ID. It looks up the configured
 	// session file path to read the session from there. If there is none, a new
 	// session is be created and the session file is written using it.
 	GetSessionID() (string, error)
 
-	// InitControlCmd initializes the control command.
-	InitControlCmd() *cobra.Command
+	// InitAnnactlCmd initializes the root command.
+	InitAnnactlCmd() *cobra.Command
 
-	// InitControlLogCmd initializes the control log command.
-	InitControlLogCmd() *cobra.Command
+	// InitAnnactlControlCmd initializes the control command.
+	InitAnnactlControlCmd() *cobra.Command
 
-	// InitControlLogResetCmd initializes the control log reset command.
-	InitControlLogResetCmd() *cobra.Command
+	// InitAnnactlControlLogCmd initializes the control log command.
+	InitAnnactlControlLogCmd() *cobra.Command
 
-	// InitControlLogResetLevelsCmd initializes the control log reset levels
-	// command.
-	InitControlLogResetLevelsCmd() *cobra.Command
+	// InitAnnactlControlLogResetCmd initializes the control log reset command.
+	InitAnnactlControlLogResetCmd() *cobra.Command
 
-	// InitControlLogResetObjectsCmd initializes the control log reset objects
-	// command.
-	InitControlLogResetObjectsCmd() *cobra.Command
+	// InitAnnactlControlLogResetLevelsCmd initializes the control log reset
+	// levels command.
+	InitAnnactlControlLogResetLevelsCmd() *cobra.Command
 
-	// InitControlLogResetVerbosityCmd initializes the control log reset
+	// InitAnnactlControlLogResetObjectsCmd initializes the control log reset
+	// objects command.
+	InitAnnactlControlLogResetObjectsCmd() *cobra.Command
+
+	// InitAnnactlControlLogResetVerbosityCmd initializes the control log reset
 	// verbosity command.
-	InitControlLogResetVerbosityCmd() *cobra.Command
+	InitAnnactlControlLogResetVerbosityCmd() *cobra.Command
 
-	// InitControlLogSetCmd initializes the control log set command.
-	InitControlLogSetCmd() *cobra.Command
+	// InitAnnactlControlLogSetCmd initializes the control log set command.
+	InitAnnactlControlLogSetCmd() *cobra.Command
 
-	// InitControlLogSetLevelsCmd initializes the control log set levels command.
-	InitControlLogSetLevelsCmd() *cobra.Command
-
-	// InitControlLogSetObjectsCmd initializes the control log set objects
+	// InitAnnactlControlLogSetLevelsCmd initializes the control log set levels
 	// command.
-	InitControlLogSetObjectsCmd() *cobra.Command
+	InitAnnactlControlLogSetLevelsCmd() *cobra.Command
 
-	// InitControlLogSetVerbosityCmd initializes the control log set verbosity
+	// InitAnnactlControlLogSetObjectsCmd initializes the control log set objects
 	// command.
-	InitControlLogSetVerbosityCmd() *cobra.Command
+	InitAnnactlControlLogSetObjectsCmd() *cobra.Command
 
-	// InitInterfaceCmd initializes the interface command.
-	InitInterfaceCmd() *cobra.Command
+	// InitAnnactlControlLogSetVerbosityCmd initializes the control log set
+	// verbosity command.
+	InitAnnactlControlLogSetVerbosityCmd() *cobra.Command
 
-	// InitInterfaceTextCmd initializes the interface text command.
-	InitInterfaceTextCmd() *cobra.Command
+	// InitAnnactlInterfaceCmd initializes the interface command.
+	InitAnnactlInterfaceCmd() *cobra.Command
 
-	// InitInterfaceTextReadCmd initializes the interface text read command.
-	InitInterfaceTextReadCmd() *cobra.Command
+	// InitAnnactlInterfaceTextCmd initializes the interface text command.
+	InitAnnactlInterfaceTextCmd() *cobra.Command
 
-	// InitInterfaceTextReadFileCmd initializes the interface text read file
+	// InitAnnactlInterfaceTextReadCmd initializes the interface text read
 	// command.
-	InitInterfaceTextReadFileCmd() *cobra.Command
+	InitAnnactlInterfaceTextReadCmd() *cobra.Command
 
-	// InitInterfaceTextReadPlainCmd initializes the interface text read plain
-	// command.
-	InitInterfaceTextReadPlainCmd() *cobra.Command
+	// InitAnnactlInterfaceTextReadFileCmd initializes the interface text read
+	// file command.
+	InitAnnactlInterfaceTextReadFileCmd() *cobra.Command
 
-	// InitVersionCmd initializes the version command.
-	InitVersionCmd() *cobra.Command
+	// InitAnnactlInterfaceTextReadPlainCmd initializes the interface text read
+	// plain command.
+	InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command
+
+	// InitAnnactlVersionCmd initializes the version command.
+	InitAnnactlVersionCmd() *cobra.Command
 
 	// Shutdown ends all processes of the command line tool like shutting down a
 	// machine. The call to Shutdown blocks until the command line tool is
