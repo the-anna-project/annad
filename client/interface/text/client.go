@@ -118,12 +118,16 @@ func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out ch
 	// Listen on the client input channel and forward it to the server stream.
 	go func() {
 		for {
-			textRequest := <-in
-			streamTextRequest := c.EncodeRequest(textRequest)
-			err := stream.Send(streamTextRequest)
-			if err != nil {
-				fail <- maskAny(err)
+			select {
+			case <-done:
 				return
+			case textRequest := <-in:
+				streamTextRequest := c.EncodeRequest(textRequest)
+				err := stream.Send(streamTextRequest)
+				if err != nil {
+					fail <- maskAny(err)
+					return
+				}
 			}
 		}
 	}()
@@ -131,6 +135,7 @@ func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out ch
 	for {
 		select {
 		case <-stream.Context().Done():
+			close(done)
 			return maskAny(stream.Context().Err())
 		case <-done:
 			return nil

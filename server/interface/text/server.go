@@ -121,12 +121,16 @@ func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
 	// client.
 	go func() {
 		for {
-			textResponse := <-s.TextOutput
-			streamTextResponse := s.DecodeResponse(textResponse)
-			err := stream.Send(streamTextResponse)
-			if err != nil {
-				fail <- maskAny(err)
+			select {
+			case <-done:
 				return
+			case textResponse := <-s.TextOutput:
+				streamTextResponse := s.DecodeResponse(textResponse)
+				err := stream.Send(streamTextResponse)
+				if err != nil {
+					fail <- maskAny(err)
+					return
+				}
 			}
 		}
 	}()
@@ -134,6 +138,7 @@ func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
 	for {
 		select {
 		case <-stream.Context().Done():
+			close(done)
 			return maskAny(stream.Context().Err())
 		case <-done:
 			return nil
