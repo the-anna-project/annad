@@ -22,17 +22,17 @@ input sequences. Each vector, that is represented by coordinates, reflects a
 specific character of a specific input sequence. You can think of the joined
 coordinates of an input sequence as a drawn information path in the connection
 space. Information paths in the surrounding area are evidence of some kind of
-similarity input wise. Over time the information paths are transformed when
-each dimension is pulling it's coordinates into their own direction. That way a
-balanced alignment is achieved that makes each information path unique and
-comparable against other information paths in the surrounding area. The same
-concept that applies to information paths also applies to behavior paths, but
-only on a different problem domain and in more complex structure. This is
-because information paths are represented by linear input sequences, and
-behavior paths are represented by CLG trees. Here behavior is mapped to an
-executable CLG tree, which coordinates are mapped onto the connection space.
-The relationship between an input sequence and a CLG tree that solved a problem
-for this input sequence creates the link between information and behavior.
+similarity. Over time the information paths are transformed when each dimension
+is pulling it's coordinates into their own direction. That way a balanced
+alignment is achieved that makes each information path unique and comparable
+against other information paths in the surrounding area. The same concept that
+applies to information paths also applies to behavior paths, but only on a
+different problem domain and in more complex structure. This is because
+information paths are represented by linear input sequences, and behavior paths
+are represented by CLG trees. Here behavior is mapped to an executable CLG
+tree, which coordinates are mapped onto the connection space. The relationship
+between an input sequence and a CLG tree that solved a problem for this input
+sequence creates the link between information and behavior.
 
 The following picture illustrates the connection space. For simplicity it only
 shows two dimensions, `x` and `y`. We see two different paths within the
@@ -45,6 +45,21 @@ time.
 ![connection space](image/connection_space.png)
 
 ### balance
+[The balance system](distribution.md#balance-system) is used to make dimensions
+create tensions on coordinates within the connection space. Each dimension is
+pulling into its own direction based on learned patterns. The important idea
+behind the tensions created here is that they are balanced. One dimension
+pulling coordinates spontaniously into a certain direction makes another
+dimension move into the same direction. This creates a simulation of
+psychological interactions on different levels. Like disgust and attraction
+cannot go together. Aim of such a balance system is to provide buildin
+mechanisms of leveraging event interactions.
+
+Spontanious modificatins of connections lead to variances within applied
+behaviors. Leads some behavior to successful results, slight adjustments of a
+connection path's coordinates can be stored, which cause the connection path to
+be updated. This will lead connection paths to be improved over time, because
+behavior was adjusted to the given environmental feedback Anna is receiving.
 
 ### creation
 When creating new connections it is important not to create weak connections.
