@@ -8,21 +8,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *anna) InitVersionCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitVersionCmd")
+func (a *anna) InitAnnaVersionCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnaVersionCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Show current version of the binary.",
 		Long:  "Show current version of the binary.",
-		Run:   a.ExecVersionCmd,
+		Run:   a.ExecAnnaVersionCmd,
 	}
 
 	return newCmd
 }
 
-func (a *anna) ExecVersionCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecVersionCmd")
+func (a *anna) ExecAnnaVersionCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnaVersionCmd")
 
 	fmt.Printf("%s\n", a.Version)
 }

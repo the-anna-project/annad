@@ -1,260 +1,108 @@
-// Package main implements a command line for Anna. Cobra CLI is used as
-// framework.
 package main
 
 import (
 	"os"
-	"sync"
 
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
 )
 
-const (
-	// ObjectTypeAnna represents the object type of the anna object. This is used
-	// e.g. to register itself to the logger.
-	ObjectTypeAnna spec.ObjectType = "anna"
-)
+func (a *anna) InitAnnaCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnaCmd")
 
-var (
-	// version is the project version. It is given via buildflags that inject the
-	// commit hash.
-	version string
-)
-
-// Config represents the configuration used to create a new anna object.
-type Config struct {
-	// Dependencies.
-	Network spec.Network
-	Log     spec.Log
-	Server  spec.Server
-	Storage spec.Storage
-
-	// Settings.
-	Flags   Flags
-	Version string
-}
-
-// DefaultConfig provides a default configuration to create a new anna object
-// by best effort.
-func DefaultConfig() Config {
-	newNetwork, err := network.New(network.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newServer, err := server.New(server.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newConfig := Config{
-		// Dependencies.
-		Network: newNetwork,
-		Log:     log.NewLog(log.DefaultConfig()),
-		Server:  newServer,
-		Storage: newStorage,
-
-		// Settings.
-		Version: version,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured anna object.
-func New(config Config) (spec.Anna, error) {
-	newAnna := &anna{
-		Config: config,
-
-		BootOnce:     sync.Once{},
-		ID:           id.MustNew(),
-		ShutdownOnce: sync.Once{},
-		Type:         spec.ObjectType(ObjectTypeAnna),
-	}
-
-	if newAnna.Network == nil {
-		return nil, maskAnyf(invalidConfigError, "network must not be empty")
-	}
-	if newAnna.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if newAnna.Server == nil {
-		return nil, maskAnyf(invalidConfigError, "server must not be empty")
-	}
-	if newAnna.Storage == nil {
-		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
-	}
-
-	// TODO refactor like annactl
-	newAnna.Cmd = &cobra.Command{
+	// Create new command.
+	newCmd := &cobra.Command{
 		Use:   "anna",
 		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
 		Long:  "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
-
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) > 0 {
-				cmd.HelpFunc()(cmd, nil)
-				os.Exit(1)
-			}
-
-			// Boot.
-			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting Anna")
-
-			go newAnna.listenToSignal()
-			go newAnna.writeStateInfo()
-
-			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting network")
-			go newAnna.Network.Boot()
-
-			newAnna.Log.WithTags(spec.Tags{L: "I", O: newAnna, T: nil, V: 10}, "booting server")
-			go newAnna.Server.Boot()
-
-			// Block the main goroutine forever. The process is only supposed to be
-			// ended by a call to Shutdown.
-			select {}
-		},
-
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 
 			// log.
-			err = newAnna.Log.SetLevels(newAnna.Flags.ControlLogLevels)
+			err = a.Log.SetLevels(a.Flags.ControlLogLevels)
 			panicOnError(err)
-			err = newAnna.Log.SetObjects(newAnna.Flags.ControlLogObejcts)
+			err = a.Log.SetObjects(a.Flags.ControlLogObejcts)
 			panicOnError(err)
-			err = newAnna.Log.SetVerbosity(newAnna.Flags.ControlLogVerbosity)
+			err = a.Log.SetVerbosity(a.Flags.ControlLogVerbosity)
 			panicOnError(err)
 
-			newAnna.Log.Register(newAnna.GetType())
+			a.Log.Register(a.GetType())
 
 			// text input/output channel.
 			newTextInput := make(chan spec.TextRequest, 1000)
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
 			// storage.
-			newStorage, err := newAnna.createStorage(newAnna.Log)
+			a.Storage, err = a.createStorage(a.Log)
 			panicOnError(err)
 
 			// network.
-			newNetworkConfig := network.DefaultConfig()
-			newNetworkConfig.Log = newAnna.Log
-			newNetworkConfig.Storage = newStorage
-			newNetworkConfig.TextInput = newTextInput
-			newNetworkConfig.TextOutput = newTextOutput
-			newNetwork, err := network.New(newNetworkConfig)
+			networkConfig := network.DefaultConfig()
+			networkConfig.Log = a.Log
+			networkConfig.Storage = a.Storage
+			networkConfig.TextInput = newTextInput
+			networkConfig.TextOutput = newTextOutput
+			a.Network, err = network.New(networkConfig)
 			panicOnError(err)
 
 			// log control.
-			newLogControl, err := createLogControl(newAnna.Log)
+			logControl, err := createLogControl(a.Log)
 			panicOnError(err)
 
 			// text interface.
-			newTextInterface, err := createTextInterface(newAnna.Log, newTextInput, newTextOutput)
+			textInterface, err := createTextInterface(a.Log, newTextInput, newTextOutput)
 			panicOnError(err)
 
 			// server.
-			newServerConfig := server.DefaultConfig()
-			newServerConfig.GRPCAddr = newAnna.Flags.GRPCAddr
-			newServerConfig.HTTPAddr = newAnna.Flags.HTTPAddr
-			newServerConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
+			serverConfig := server.DefaultConfig()
+			serverConfig.GRPCAddr = a.Flags.GRPCAddr
+			serverConfig.HTTPAddr = a.Flags.HTTPAddr
+			serverConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
 			panicOnError(err)
-			newServerConfig.Log = newAnna.Log
-			newServerConfig.LogControl = newLogControl
-			newServerConfig.TextInterface = newTextInterface
-			newServer, err := server.New(newServerConfig)
+			serverConfig.Log = a.Log
+			serverConfig.LogControl = logControl
+			serverConfig.TextInterface = textInterface
+			a.Server, err = server.New(serverConfig)
 			panicOnError(err)
-
-			// Anna.
-			newAnna.Network = newNetwork
-			newAnna.Server = newServer
-			newAnna.Storage = newStorage
 		},
+		Run: a.ExecAnnaCmd,
 	}
 
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
+	// Add sub commands.
+	newCmd.AddCommand(a.InitAnnaVersionCmd())
 
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network,impulse)")
-	newAnna.Cmd.PersistentFlags().IntVar(&newAnna.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
+	// Define command line flags.
+	newCmd.PersistentFlags().StringVar(&a.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
+	newCmd.PersistentFlags().StringVar(&a.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
+	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
+	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network,impulse)")
+	newCmd.PersistentFlags().IntVar(&a.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
+	newCmd.PersistentFlags().StringVar(&a.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
+	newCmd.PersistentFlags().StringVar(&a.Flags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")
 
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
-	newAnna.Cmd.PersistentFlags().StringVar(&newAnna.Flags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")
-
-	return newAnna, nil
+	return newCmd
 }
 
-type anna struct {
-	Config
+func (a *anna) ExecAnnaCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnaCmd")
 
-	Cmd          *cobra.Command
-	BootOnce     sync.Once
-	ID           spec.ObjectID
-	ShutdownOnce sync.Once
-	Type         spec.ObjectType
-}
+	if len(args) > 0 {
+		cmd.HelpFunc()(cmd, nil)
+		os.Exit(1)
+	}
 
-func (a *anna) Boot() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting Anna")
 
-	a.BootOnce.Do(func() {
-		// init
-		a.Cmd.AddCommand(a.InitVersionCmd())
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting network")
+	go a.Network.Boot()
 
-		// execute
-		a.Cmd.Execute()
-	})
-}
+	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting server")
+	go a.Server.Boot()
 
-func (a *anna) ForceShutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ForceShutdown")
-
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "force shutting down Anna")
-	os.Exit(0)
-}
-
-func (a *anna) Shutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
-
-	a.ShutdownOnce.Do(func() {
-		var wg sync.WaitGroup
-
-		wg.Add(1)
-		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down network")
-			a.Network.Shutdown()
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down server")
-			a.Server.Shutdown()
-			wg.Done()
-		}()
-
-		wg.Wait()
-
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down Anna")
-		os.Exit(0)
-	})
-}
-
-func main() {
-	newAnna, err := New(DefaultConfig())
-	panicOnError(err)
-
-	newAnna.Boot()
+	// Block the main goroutine forever. The process is only supposed to be ended
+	// by a call to Shutdown or ForceShutdown.
+	select {}
 }
