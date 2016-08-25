@@ -9,21 +9,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) InitControlLogResetObjectsCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogResetObjectsCmd")
+func (a *annactl) InitAnnactlControlLogResetObjectsCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogResetObjectsCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "objects",
 		Short: "Make Anna reset log objects.",
 		Long:  "Make Anna reset log objects.",
-		Run:   a.ExecControlLogResetObjectsCmd,
+		Run:   a.ExecAnnactlControlLogResetObjectsCmd,
 	}
 
 	return newCmd
 }
 
-func (a *annactl) ExecControlLogResetObjectsCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogResetObjectsCmd")
+func (a *annactl) ExecAnnactlControlLogResetObjectsCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogResetObjectsCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)

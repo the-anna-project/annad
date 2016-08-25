@@ -12,14 +12,20 @@ type Anna interface {
 	// in a separate goroutine.
 	Boot()
 
-	// ExecVersionCmd executes the version command.
-	ExecVersionCmd(cmd *cobra.Command, args []string)
+	// ExecAnnaCmd executes the root command.
+	ExecAnnaCmd(cmd *cobra.Command, args []string)
+
+	// ExecAnnaVersionCmd executes the version command.
+	ExecAnnaVersionCmd(cmd *cobra.Command, args []string)
 
 	// ForceShutdown ends all processes of Anna immediately.
 	ForceShutdown()
 
-	// InitVersionCmd initializes the version command.
-	InitVersionCmd() *cobra.Command
+	// InitAnnaCmd initializes the root command.
+	InitAnnaCmd() *cobra.Command
+
+	// InitAnnaVersionCmd initializes the version command.
+	InitAnnaVersionCmd() *cobra.Command
 
 	Object
 

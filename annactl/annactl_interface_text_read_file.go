@@ -12,14 +12,15 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) InitInterfaceTextReadFileCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitInterfaceTextReadFileCmd")
+func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextReadFileCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "file <file>",
 		Short: "Make Anna read plain a file.",
 		Long:  "Make Anna read plain a file.",
-		Run:   a.ExecInterfaceTextReadFileCmd,
+		Run:   a.ExecAnnactlInterfaceTextReadFileCmd,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 			a.SessionID, err = a.GetSessionID()
@@ -30,8 +31,8 @@ func (a *annactl) InitInterfaceTextReadFileCmd() *cobra.Command {
 	return newCmd
 }
 
-func (a *annactl) ExecInterfaceTextReadFileCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecInterfaceTextReadFileCmd")
+func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlInterfaceTextReadFileCmd")
 
 	if len(args) == 0 || len(args) >= 2 {
 		cmd.HelpFunc()(cmd, nil)

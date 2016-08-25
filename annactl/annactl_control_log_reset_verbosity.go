@@ -9,21 +9,22 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) InitControlLogResetVerbosityCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitControlLogResetVerbosityCmd")
+func (a *annactl) InitAnnactlControlLogResetVerbosityCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogResetVerbosityCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "verbosity",
 		Short: "Make Anna reset log verbosity.",
 		Long:  "Make Anna reset log verbosity.",
-		Run:   a.ExecControlLogResetVerbosityCmd,
+		Run:   a.ExecAnnactlControlLogResetVerbosityCmd,
 	}
 
 	return newCmd
 }
 
-func (a *annactl) ExecControlLogResetVerbosityCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecControlLogResetVerbosityCmd")
+func (a *annactl) ExecAnnactlControlLogResetVerbosityCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogResetVerbosityCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)
