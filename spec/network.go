@@ -78,8 +78,8 @@ type Network interface {
 	Forward(clg CLG, payload NetworkPayload) error
 
 	// Listen makes the network listen on requests from the outside. Here each
-	// CLG input channel is managed. This models Listen as kind of cortex in
-	// which impulses are dispatched into all possible direction and finally flow
+	// CLG input channel is managed. This way Listen acts as kind of cortex in
+	// which signals are dispatched into all possible direction and finally flow
 	// back again. Listen only returns an error in case the initialization of all
 	// listeners failed. Errors during processing of the neural network will be
 	// logged to the provided logger.

@@ -77,8 +77,8 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 	// Define command line flags.
 	newCmd.PersistentFlags().StringVar(&a.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
 	newCmd.PersistentFlags().StringVar(&a.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
-	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E,F)")
-	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network,impulse)")
+	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E)")
+	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network)")
 	newCmd.PersistentFlags().IntVar(&a.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 	newCmd.PersistentFlags().StringVar(&a.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
 	newCmd.PersistentFlags().StringVar(&a.Flags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")

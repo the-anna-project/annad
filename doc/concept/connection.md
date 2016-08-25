@@ -67,12 +67,12 @@ connection is represented as single key-value pair where it's key being the
 string representation of coordinates links to another string representation of
 coordinates. A CLG is identified using its unique coordinates within the multi
 dimensional connection space in combination with its very unique connection
-path, which in turn is a represented by a CLG tree ID. A reference from
+path, which in turn is represented by a CLG tree ID. A reference from
 coordinates to an actual CLG ID is also stored for mapping of coordinates to
 actual behavior later on. This is then the connection path of behaviors.
 
 At some point, each single CLG needs to decide where to forward its own signal
-to. Once forwarded, the coordinates of the CLG receiving the forwarded impulse
+to. Once forwarded, the coordinates of the CLG receiving the forwarded signal
 are randomly created with some offset. The offset of the CLG's coordinates is
 orientated to the coordinates of the CLG actually being forwarding the signal.
 All newly created connections are persisted within a trial scope in the first
@@ -211,7 +211,7 @@ Having behavior coordinates indexed as keys enables fast scans when it needs to
 be found out which behaviors are near to the surrounding area of a given
 behavior within the multi dimensional connection space. That way behavior can
 be mapped and aligned to matching behaviors. Further it needs to be known where
-to forward impulses to when walking through connection paths. The following key
+to forward signals to when walking through connection paths. The following key
 maps behavior coordinates to it's CLG ID.
 
 ```

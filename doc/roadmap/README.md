@@ -47,9 +47,9 @@ objects interacting within the sorounding environment. See the evaluation about
 ---
 
 ### make Anna able to find the balance
-A ballance system describes the amount of impulses and how harmonic or extreme
+A ballance system describes the amount of signals and how harmonic or extreme
 the distribution of these currently is within the system. That way the state of
-an organism can be represented. Extremes of impulse occurrence cause the
+an organism can be represented. Extremes of signal occurrence cause the
 organism to die. Extremes can be seen as low or high. See the concept about
 [the balance system](/doc/evaluation/imagination.md#balance_system).
 
