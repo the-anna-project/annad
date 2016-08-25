@@ -44,6 +44,8 @@ time.
 
 ![connection space](image/connection_space.png)
 
+### balance
+
 ### creation
 When creating new connections it is important not to create weak connections.
 Each connection that exists only exists because it brought some kind of value
