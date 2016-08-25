@@ -36,11 +36,10 @@ sequence creates the link between information and behavior.
 
 The following picture illustrates the connection space. For simplicity it only
 shows two dimensions, `x` and `y`. We see two different paths within the
-coordinate system like space. It doesn't matter if the paths are information or
-behavior paths. The same principle applies to both of these concepts. We see
-some peers which are pretty near to each other. We assume that a smaller
-distance is an indicator for common connection patterns which are aligned over
-time.
+coordinate system. It doesn't matter if the paths are information or behavior
+paths. The same principle applies to both of these concepts. We see some peers
+which are pretty near to each other. We assume that a smaller distance is an
+indicator for common connection patterns which are aligned over time.
 
 ![connection space](image/connection_space.png)
 
@@ -62,10 +61,12 @@ be updated. This will lead connection paths to be improved over time, because
 behavior was adjusted to the given environmental feedback Anna is receiving.
 
 ### creation
-When creating new connections it is important not to create weak connections.
+When creating new connections it is important to not create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
 fully dynamic and learned by experience and can be described as follows.
+
+TODO ??? creation of new coorindates opinionated based on known connections ???
 
 When information is provided in the form of input, and no connection path for
 the current input sequence exists yet, it is mapped onto the connection space.
@@ -86,8 +87,15 @@ CLG ID is also stored for mapping of coordinates to actual behavior later on.
 This is then the connection path of behaviors.
 
 At some point, each single CLG needs to decide where to forward its own signal
-to. Once forwarded, the coordinates of the CLG receiving the forwarded signal
-are randomly created with some offset. The offset of the CLG's coordinates is
+to.
+
+TODO this is a too complicated description
+
+Once forwarded, the coordinates of the CLG receiving the forwarded signal
+are randomly created with some offset.
+
+
+The offset of the CLG's coordinates is
 orientated to the coordinates of the CLG actually being forwarding the signal.
 All newly created connections are persisted within a trial scope in the first
 place. Such trial scope is basically realized by some specific storage prefix
@@ -97,7 +105,7 @@ connections to something that is volatile. If the neural network succeeds to
 solve a problem with some newly created connection path, the behavior
 connections stored and marked within a trial scope are persisted as regular
 connections. In case the created connection path did not lead to some
-successful operation, all behaior connections marked within a trial scope are
+successful operation, all behavior connections marked within a trial scope are
 simply removed again. Anyway, there needs a decision to be made to forward to
 some CLG. These strategies are considered when it comes to draw new connections
 within the connection space.
