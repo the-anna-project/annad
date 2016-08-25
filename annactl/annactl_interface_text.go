@@ -9,6 +9,7 @@ import (
 func (a *annactl) InitAnnactlInterfaceTextCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "text",
 		Short: "Text interface for Anna.",
@@ -16,6 +17,7 @@ func (a *annactl) InitAnnactlInterfaceTextCmd() *cobra.Command {
 		Run:   a.ExecAnnactlInterfaceTextCmd,
 	}
 
+	// Add sub commands.
 	newCmd.AddCommand(a.InitAnnactlInterfaceTextReadCmd())
 
 	return newCmd

@@ -15,6 +15,7 @@ import (
 func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextReadPlainCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "plain <input>",
 		Short: "Make Anna read plain text.",
@@ -27,6 +28,7 @@ func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
 		},
 	}
 
+	// Define command line flags.
 	newCmd.PersistentFlags().BoolVar(&a.Flags.InterfaceTextReadPlain.Echo, "echo", false, "echo input by bypassing the neural network")
 	//newCmd.PersistentFlags().StringVar(&a.Flags.InterfaceTextReadPlain.Expectation, "expectation", "", "expectation object in JSON format")
 

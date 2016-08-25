@@ -13,6 +13,7 @@ import (
 func (a *annactl) InitAnnactlControlLogSetLevelsCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetLevelsCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "levels [level] ...",
 		Short: "Make Anna set log levels.",

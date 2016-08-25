@@ -13,6 +13,7 @@ import (
 func (a *annactl) InitAnnactlControlLogSetVerbosityCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetVerbosityCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "verbosity [verbosity]",
 		Short: "Make Anna set log verbosity.",

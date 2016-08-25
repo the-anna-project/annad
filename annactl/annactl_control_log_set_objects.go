@@ -13,6 +13,7 @@ import (
 func (a *annactl) InitAnnactlControlLogSetObjectsCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetObjectsCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "objects [object] ...",
 		Short: "Make Anna set log objects.",

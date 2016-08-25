@@ -9,6 +9,7 @@ import (
 func (a *annactl) InitAnnactlControlLogResetCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogResetCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "reset",
 		Short: "Make Anna reset log configuration.",
@@ -16,6 +17,7 @@ func (a *annactl) InitAnnactlControlLogResetCmd() *cobra.Command {
 		Run:   a.ExecAnnactlControlLogResetCmd,
 	}
 
+	// Add sub commands.
 	newCmd.AddCommand(a.InitAnnactlControlLogResetLevelsCmd())
 	newCmd.AddCommand(a.InitAnnactlControlLogResetObjectsCmd())
 	newCmd.AddCommand(a.InitAnnactlControlLogResetVerbosityCmd())

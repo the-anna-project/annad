@@ -11,6 +11,7 @@ import (
 func (a *annactl) InitAnnactlVersionCmd() *cobra.Command {
 	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlVersionCmd")
 
+	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Show current version of the binary.",
