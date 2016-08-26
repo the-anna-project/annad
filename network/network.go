@@ -178,12 +178,8 @@ func (n *network) Boot() {
 		n.CLGs = n.configureCLGs(n.CLGs)
 		n.CLGIDs = n.mapCLGIDs(n.CLGs)
 
-		go func() {
-			err := n.Listen()
-			if err != nil {
-				n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-			}
-		}()
+		go n.Listen()
+		go n.listenCLGs()
 	})
 }
 
@@ -223,106 +219,46 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	return nil
 }
 
-func (n *network) Listen() error {
+func (n *network) Listen() {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
 
 	// Listen on TextInput from the outside to receive text requests.
 	CLG, err := n.clgByName("input")
 	if err != nil {
-		return maskAny(err)
+		n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 	}
-	go func() {
-		clgID := CLG.GetID()
-		networkID := n.GetID()
-		clgChannel := CLG.GetInputChannel()
 
-		for {
-			textRequest := <-n.TextInput
+	clgID := CLG.GetID()
+	networkID := n.GetID()
+	clgChannel := CLG.GetInputChannel()
 
-			// This should only be used for testing to bypass the neural network
-			// and directly respond with the received input.
-			if textRequest.GetEcho() {
-				newTextResponseConfig := api.DefaultTextResponseConfig()
-				newTextResponseConfig.Output = textRequest.GetInput()
-				newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-				if err != nil {
-					n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-				}
-				n.TextOutput <- newTextResponse
-				continue
-			}
+	for {
+		textRequest := <-n.TextInput
 
-			newPayloadConfig := api.DefaultNetworkPayloadConfig()
-			newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
-			newPayloadConfig.Destination = clgID
-			newPayloadConfig.Sources = []spec.ObjectID{networkID}
-			newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+		// This should only be used for testing to bypass the neural network
+		// and directly respond with the received input.
+		if textRequest.GetEcho() {
+			newTextResponseConfig := api.DefaultTextResponseConfig()
+			newTextResponseConfig.Output = textRequest.GetInput()
+			newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
 			if err != nil {
 				n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
 			}
-
-			clgChannel <- newPayload
+			n.TextOutput <- newTextResponse
+			continue
 		}
-	}()
 
-	// Make all CLGs listening in their specific input channel.
-	for ID, CLG := range n.CLGs {
-		go func(ID spec.ObjectID, CLG spec.CLG) {
-			var queue []spec.NetworkPayload
-			clgChannel := CLG.GetInputChannel()
+		newPayloadConfig := api.DefaultNetworkPayloadConfig()
+		newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
+		newPayloadConfig.Destination = clgID
+		newPayloadConfig.Sources = []spec.ObjectID{networkID}
+		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+		if err != nil {
+			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+		}
 
-			for {
-				payload := <-clgChannel
-
-				go func(payload spec.NetworkPayload) {
-					// Activate if the CLG's interface is satisfied by the given
-					// network payload.
-					newPayload, newQueue, err := n.Activate(CLG, payload, queue)
-					if IsInvalidInterface(err) {
-						// The interface of the requested CLG was not fulfilled. We
-						// continue listening for the next network payload without doing
-						// any work.
-						return
-					} else if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-					}
-					queue = newQueue
-
-					// Calculate based on the CLG's implemented business logic.
-					calculatedPayload, err := n.Calculate(CLG, newPayload)
-					if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-					}
-
-					// Forward to other CLG's, if necessary.
-					err = n.Forward(CLG, calculatedPayload)
-					if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-					}
-
-					// Return the calculated output to the requesting client, if the
-					// current CLG is the output CLG.
-					if CLG.GetName() == "output" {
-						var output string
-						// The first argument is always a context, which is ignored,
-						// because it only serves internal purposes.
-						for _, v := range calculatedPayload.GetArgs()[1:] {
-							output += v.String()
-						}
-						newTextResponseConfig := api.DefaultTextResponseConfig()
-						newTextResponseConfig.Output = output
-						newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-						if err != nil {
-							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
-						}
-						n.TextOutput <- newTextResponse
-					}
-				}(payload)
-			}
-		}(ID, CLG)
+		clgChannel <- newPayload
 	}
-
-	return nil
 }
 
 func (n *network) Shutdown() {

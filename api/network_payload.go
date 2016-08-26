@@ -94,6 +94,18 @@ func (np *networkPayload) GetSources() []spec.ObjectID {
 	return np.Sources
 }
 
+func (np *networkPayload) String() string {
+	var s string
+
+	// The first argument is always a context, which is ignored,
+	// because it only serves internal purposes.
+	for _, v := range np.GetArgs()[1:] {
+		s += v.String()
+	}
+
+	return s
+}
+
 func (np *networkPayload) Validate() error {
 	// Check if the network payload has invalid properties.
 	if np.Args == nil {
