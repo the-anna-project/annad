@@ -66,8 +66,6 @@ Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
 fully dynamic and learned by experience and can be described as follows.
 
-TODO ??? creation of new coorindates opinionated based on known connections ???
-
 When information is provided in the form of input, and no connection path for
 the current input sequence exists yet, it is mapped onto the connection space.
 Each character of the input sequence is represented by their own coordinates.
@@ -82,21 +80,11 @@ connection is represented as single key-value pair where it's key being the
 string representation of coordinates links to another string representation of
 coordinates. A CLG is identified using its unique coordinates within the
 connection space in combination with its very unique connection path, which in
-turn is represented by a CLG tree ID. A reference from coordinates to an actual
-CLG ID is also stored for mapping of coordinates to actual behavior later on.
-This is then the connection path of behaviors.
+turn is represented by a CLG tree ID. New coordinates are randomly created with
+some offset to the coordinates of the requesting CLG. A reference from
+coordinates to an actual CLG ID is also stored for mapping of coordinates to
+actual behavior later on. This is then the connection path of behaviors.
 
-At some point, each single CLG needs to decide where to forward its own signal
-to.
-
-TODO this is a too complicated description
-
-Once forwarded, the coordinates of the CLG receiving the forwarded signal
-are randomly created with some offset.
-
-
-The offset of the CLG's coordinates is
-orientated to the coordinates of the CLG actually being forwarding the signal.
 All newly created connections are persisted within a trial scope in the first
 place. Such trial scope is basically realized by some specific storage prefix
 that simply identifies certain key-value pairs as being part of such a trial
