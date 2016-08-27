@@ -6,7 +6,12 @@ import (
 	"golang.org/x/net/context"
 )
 
-// calculate currently only returns the given input. TODO change this
+// calculate tries to map the given input sequence to a CLG tree ID within the
+// available storage.
 func (c *clg) calculate(ctx context.Context, input string) string {
+	// create lookup key
+	// lookup in storage
+	// set to context
+	// TODO
 	return input
 }
