@@ -10,9 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/net/context"
-
 	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/log"
@@ -58,11 +57,15 @@ func DefaultConfig() Config {
 	}
 
 	newConfig := Config{
+		// Dependencies.
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
 		TextInput:          make(chan spec.TextRequest, 1000),
 		TextOutput:         make(chan spec.TextResponse, 1000),
+
+		// Settings.
+		Delay: 0,
 	}
 
 	return newConfig
@@ -194,27 +197,22 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 	return calculatedPayload, nil
 }
 
-// Forward to other CLGs
-// Split the neural connection path
 // TODO
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
 
-	// Check if the given context provides a CLG tree ID.
+	// Check if the given spec.Context provides a CLG tree ID.
+	ctx, err := payload.GetContext()
+	if err != nil {
+		return maskAny(err)
+	}
+	clgTreeID := ctx.GetCLGTreeID()
 
-	clgTreeID := ""
 	if clgTreeID == "" {
 		// create new
 	} else {
 		// lookup existing
 	}
-
-	// for _, r := range requests {
-	// 	err := n.Send(r) send does not exist anymore
-	// 	if err != nil {
-	// 		return maskAny(err)
-	// 	}
-	// }
 
 	return nil
 }
@@ -248,13 +246,22 @@ func (n *network) Listen() {
 			continue
 		}
 
-		newPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(context.Background()), reflect.ValueOf(textRequest.GetInput())}
-		newPayloadConfig.Destination = clgID
-		newPayloadConfig.Sources = []spec.ObjectID{networkID}
-		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+		ctxConfig := context.DefaultConfig()
+		ctxConfig.SessionID = textRequest.GetSessionID()
+		ctx, err := context.New(ctxConfig)
 		if err != nil {
 			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+			continue
+		}
+
+		payloadConfig := api.DefaultNetworkPayloadConfig()
+		payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
+		payloadConfig.Destination = clgID
+		payloadConfig.Sources = []spec.ObjectID{networkID}
+		newPayload, err := api.NewNetworkPayload(payloadConfig)
+		if err != nil {
+			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+			continue
 		}
 
 		clgChannel <- newPayload

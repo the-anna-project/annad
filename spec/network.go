@@ -2,8 +2,6 @@ package spec
 
 import (
 	"reflect"
-
-	"golang.org/x/net/context"
 )
 
 // NetworkPayload represents the data container carried around within the
@@ -12,9 +10,9 @@ type NetworkPayload interface {
 	// GetArgs returns the arguments of the current network payload.
 	GetArgs() []reflect.Value
 
-	// GetContext returns the context the current network payload holds as first
-	// argument. If no context can be found, an error is returned.
-	GetContext() (context.Context, error)
+	// GetContext returns the Context the current network payload holds as first
+	// argument. If no Context can be found, an error is returned.
+	GetContext() (Context, error)
 
 	// GetArgs returns the destination of the current network payload.
 	GetDestination() ObjectID
@@ -31,9 +29,8 @@ type NetworkPayload interface {
 
 	// Validate throws an error if the current network payload is not valid. An
 	// network payload is not valid if it is empty, or if it does not satisfy the
-	// convention of the CLG interface to have a proper context as first input
-	// and output parameter. For more information about the context being passed
-	// through see https://godoc.org/golang.org/x/net/context.
+	// convention of the CLG interface to have a proper Context as first input
+	// parameter.
 	Validate() error
 }
 

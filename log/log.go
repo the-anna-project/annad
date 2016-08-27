@@ -59,7 +59,7 @@ type Config struct {
 
 	// TraceID is used to only log messages emitted by requests matching this
 	// given trace ID.
-	TraceID spec.TraceID
+	TraceID string
 
 	// Verbosity is used to only log messages emitted with this given verbosity.
 	// By convention this can be between 0 and 15. Reason for that are the 5
@@ -85,7 +85,7 @@ func DefaultConfig() Config {
 		Levels:     []string{},
 		RootLogger: builtnlog.New(os.Stdout, "", 0),
 		Objects:    []spec.ObjectType{},
-		TraceID:    spec.TraceID(""),
+		TraceID:    "",
 		Verbosity:  10,
 	}
 
@@ -214,8 +214,8 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 		}
 	}
 
-	if tags.T != nil && l.TraceID != spec.TraceID("") {
-		if tags.T.GetTraceID() != l.TraceID {
+	if tags.T != nil && l.TraceID != "" {
+		if tags.T.GetID() != l.TraceID {
 			return
 		}
 	}

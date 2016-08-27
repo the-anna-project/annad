@@ -35,7 +35,7 @@ func extendFormatWithTags(f string, tags spec.Tags) string {
 		newFormat += fmt.Sprintf("[O: %s / %s] ", tags.O.GetType(), tags.O.GetID())
 	}
 	if tags.T != nil {
-		newFormat += fmt.Sprintf("[T: %s] ", tags.T.GetTraceID())
+		newFormat += fmt.Sprintf("[T: %s] ", tags.T.GetID()) // TODO
 	}
 	newFormat += fmt.Sprintf("[V: %2d] ", tags.V)
 	newFormat += f

@@ -12,7 +12,8 @@ type Tags struct {
 
 	// Tracer represents some tracable context passed through. Logs related to a
 	// specific trace ID should be caused by a common request.
-	T Tracer
+	// TODO
+	T Context
 
 	// V is the verbosity used to log messages.
 	V int
