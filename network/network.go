@@ -120,7 +120,7 @@ type network struct {
 }
 
 func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Activate")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
 	queue = append(queue, payload)
 
@@ -175,7 +175,7 @@ func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []sp
 }
 
 func (n *network) Boot() {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Boot")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Boot")
 
 	n.BootOnce.Do(func() {
 		n.CLGs = n.configureCLGs(n.CLGs)
@@ -187,7 +187,7 @@ func (n *network) Boot() {
 }
 
 func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Calculate")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
 	calculatedPayload, err := CLG.Calculate(payload)
 	if err != nil {
@@ -199,7 +199,7 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 
 // TODO
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Forward")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
 	// Check if the given spec.Context provides a CLG tree ID.
 	ctx, err := payload.GetContext()
@@ -218,12 +218,12 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 }
 
 func (n *network) Listen() {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Listen")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Listen")
 
 	// Listen on TextInput from the outside to receive text requests.
 	CLG, err := n.clgByName("input")
 	if err != nil {
-		n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+		n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 	}
 
 	clgID := CLG.GetID()
@@ -240,7 +240,7 @@ func (n *network) Listen() {
 			newTextResponseConfig.Output = textRequest.GetInput()
 			newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
 			if err != nil {
-				n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			n.TextOutput <- newTextResponse
 			continue
@@ -250,7 +250,7 @@ func (n *network) Listen() {
 		ctxConfig.SessionID = textRequest.GetSessionID()
 		ctx, err := context.New(ctxConfig)
 		if err != nil {
-			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+			n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			continue
 		}
 
@@ -260,7 +260,7 @@ func (n *network) Listen() {
 		payloadConfig.Sources = []spec.ObjectID{networkID}
 		newPayload, err := api.NewNetworkPayload(payloadConfig)
 		if err != nil {
-			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+			n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			continue
 		}
 
@@ -269,9 +269,10 @@ func (n *network) Listen() {
 }
 
 func (n *network) Shutdown() {
-	n.Log.WithTags(spec.Tags{L: "D", O: n, T: nil, V: 13}, "call Shutdown")
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Shutdown")
 
 	n.ShutdownOnce.Do(func() {
-		//
+		// TODO shutdown CLG listeners
+		// TODO stop listening on text requests
 	})
 }

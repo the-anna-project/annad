@@ -9,7 +9,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlVersionCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlVersionCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlVersionCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -23,7 +23,7 @@ func (a *annactl) InitAnnactlVersionCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlVersionCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlVersionCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlVersionCmd")
 
 	fmt.Printf("%s\n", a.Version)
 }

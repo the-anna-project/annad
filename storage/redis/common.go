@@ -7,5 +7,5 @@ import (
 )
 
 func (s *storage) retryErrorLogger(err error, d time.Duration) {
-	s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "retry error: %#v", maskAny(err))
+	s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "retry error: %#v", maskAny(err))
 }

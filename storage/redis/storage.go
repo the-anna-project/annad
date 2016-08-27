@@ -106,7 +106,7 @@ type storage struct {
 }
 
 func (s *storage) Get(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Get")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
 
 	var result string
 	action := func() error {
@@ -131,7 +131,7 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetElementsByScore")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
 
 	var result []string
 	action := func() error {
@@ -159,7 +159,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 }
 
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetStringMap")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
 
 	var result map[string]string
 	var err error
@@ -184,7 +184,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call GetHighestScoredElements")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
 
 	var result []string
 	action := func() error {
@@ -212,7 +212,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 }
 
 func (s *storage) PushToSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call PushToSet")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -235,7 +235,7 @@ func (s *storage) PushToSet(key string, element string) error {
 }
 
 func (s *storage) RemoveFromSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveFromSet")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveFromSet")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -258,7 +258,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 }
 
 func (s *storage) RemoveScoredElement(key string, element string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call RemoveScoredElement")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveScoredElement")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -281,7 +281,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 }
 
 func (s *storage) Set(key, value string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Set")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -308,7 +308,7 @@ func (s *storage) Set(key, value string) error {
 }
 
 func (s *storage) SetElementByScore(key, element string, score float64) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetElementByScore")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetElementByScore")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -331,7 +331,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 }
 
 func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call SetStringMap")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetStringMap")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -358,7 +358,7 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 }
 
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkScoredElements")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -423,7 +423,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call WalkSet")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkSet")
 
 	action := func() error {
 		conn := s.Pool.Get()

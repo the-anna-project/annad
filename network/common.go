@@ -53,20 +53,20 @@ func (n *network) listenCLGs() {
 						// any work.
 						return
 					} else if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 					}
 					queue = newQueue
 
 					// Calculate based on the CLG's implemented business logic.
 					calculatedPayload, err := n.Calculate(CLG, newPayload)
 					if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 					}
 
 					// Forward to other CLG's, if necessary.
 					err = n.Forward(CLG, calculatedPayload)
 					if err != nil {
-						n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 					}
 
 					// Return the calculated output to the requesting client, if the
@@ -76,7 +76,7 @@ func (n *network) listenCLGs() {
 						newTextResponseConfig.Output = calculatedPayload.String()
 						newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
 						if err != nil {
-							n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 						}
 						n.TextOutput <- newTextResponse
 					}

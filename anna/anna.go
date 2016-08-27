@@ -11,7 +11,7 @@ import (
 )
 
 func (a *anna) InitAnnaCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnaCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnaCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -87,19 +87,19 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 }
 
 func (a *anna) ExecAnnaCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnaCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnaCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting Anna")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting Anna")
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting network")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting network")
 	go a.Network.Boot()
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "booting server")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting server")
 	go a.Server.Boot()
 
 	// Block the main goroutine forever. The process is only supposed to be ended

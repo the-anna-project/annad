@@ -67,7 +67,7 @@ type memoryFileSystem struct {
 }
 
 func (mfs *memoryFileSystem) ReadFile(filename string) ([]byte, error) {
-	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call ReadFile")
+	mfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: mfs, V: 13}, "call ReadFile")
 
 	if bytes, ok := mfs.Storage[filename]; ok {
 		return bytes, nil
@@ -83,7 +83,7 @@ func (mfs *memoryFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 func (mfs *memoryFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call WriteFile")
+	mfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: mfs, V: 13}, "call WriteFile")
 
 	mfs.Storage[filename] = bytes
 	return nil

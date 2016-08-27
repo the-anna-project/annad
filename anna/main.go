@@ -109,7 +109,7 @@ type anna struct {
 }
 
 func (a *anna) Boot() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -120,35 +120,35 @@ func (a *anna) Boot() {
 }
 
 func (a *anna) ForceShutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ForceShutdown")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ForceShutdown")
 
-	a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "force shutting down Anna")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "force shutting down Anna")
 	os.Exit(0)
 }
 
 func (a *anna) Shutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down network")
+			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down network")
 			a.Network.Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down server")
+			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down server")
 			a.Server.Shutdown()
 			wg.Done()
 		}()
 
 		wg.Wait()
 
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "shutting down Anna")
+		a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down Anna")
 		os.Exit(0)
 	})
 }

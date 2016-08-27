@@ -17,7 +17,7 @@ func panicOnError(err error) {
 }
 
 func (a *annactl) listenToSignal() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call listenToSignal")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call listenToSignal")
 
 	listener := make(chan os.Signal, 1)
 	signal.Notify(listener, os.Interrupt, os.Kill)
@@ -33,7 +33,7 @@ const (
 )
 
 func (a *annactl) GetSessionID() (string, error) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call GetSession")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call GetSession")
 
 	// Read session ID.
 	raw, err := a.FileSystem.ReadFile(SessionFilePath)

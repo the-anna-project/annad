@@ -107,7 +107,7 @@ type annactl struct {
 }
 
 func (a *annactl) Boot() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -117,7 +117,7 @@ func (a *annactl) Boot() {
 }
 
 func (a *annactl) Shutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		close(a.Closer)

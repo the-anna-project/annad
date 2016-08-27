@@ -10,7 +10,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlControlLogResetObjectsCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogResetObjectsCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlControlLogResetObjectsCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -24,7 +24,7 @@ func (a *annactl) InitAnnactlControlLogResetObjectsCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlControlLogResetObjectsCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogResetObjectsCmd")
+	a.Log.WithTags(spec.Tags{L: "D", O: a, C: nil, V: 13}, "call ExecAnnactlControlLogResetObjectsCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)
@@ -35,6 +35,6 @@ func (a *annactl) ExecAnnactlControlLogResetObjectsCmd(cmd *cobra.Command, args 
 
 	err := a.LogControl.ResetObjects(ctx)
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 }

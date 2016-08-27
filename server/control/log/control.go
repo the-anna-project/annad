@@ -11,14 +11,15 @@ import (
 )
 
 const (
-	// ObjectTypeLogControl represents the object type of the log control object.
-	// This is used e.g. to register itself to the logger.
-	ObjectTypeLogControl spec.ObjectType = "log-control"
+	// ObjectType represents the object type of the log control object. This is
+	// used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "log-control"
 )
 
 // ControlConfig represents the configuration used to create a new log control
 // object.
 type ControlConfig struct {
+	// Dependencies.
 	Log spec.Log
 }
 
@@ -26,26 +27,22 @@ type ControlConfig struct {
 // object by best effort.
 func DefaultControlConfig() ControlConfig {
 	return ControlConfig{
+		// Dependencies.
 		Log: log.NewLog(log.DefaultConfig()),
 	}
 }
 
 // NewControl creates a new configured log control object.
 func NewControl(config ControlConfig) (spec.LogControl, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
 	newControl := &control{
 		ControlConfig: config,
-		ID:            newID,
+		ID:            id.MustNew(),
 		Mutex:         sync.Mutex{},
-		Type:          spec.ObjectType(ObjectTypeLogControl),
+		Type:          ObjectType,
+	}
+
+	if newControl.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 
 	newControl.Log.Register(newControl.GetType())
@@ -64,7 +61,7 @@ type control struct {
 }
 
 func (c *control) ResetLevels(ctx context.Context) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call ResetLevels")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call ResetLevels")
 
 	err := c.Log.ResetLevels()
 	if err != nil {
@@ -75,7 +72,7 @@ func (c *control) ResetLevels(ctx context.Context) error {
 }
 
 func (c *control) ResetObjects(ctx context.Context) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call ResetObjects")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call ResetObjects")
 
 	err := c.Log.ResetObjects()
 	if err != nil {
@@ -86,7 +83,7 @@ func (c *control) ResetObjects(ctx context.Context) error {
 }
 
 func (c *control) ResetVerbosity(ctx context.Context) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call ResetVerbosity")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call ResetVerbosity")
 
 	err := c.Log.ResetVerbosity()
 	if err != nil {
@@ -97,7 +94,7 @@ func (c *control) ResetVerbosity(ctx context.Context) error {
 }
 
 func (c *control) SetLevels(ctx context.Context, levels string) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call SetLevels")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call SetLevels")
 
 	err := c.Log.SetLevels(levels)
 	if err != nil {
@@ -108,7 +105,7 @@ func (c *control) SetLevels(ctx context.Context, levels string) error {
 }
 
 func (c *control) SetObjects(ctx context.Context, objectTypes string) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call SetObjects")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call SetObjects")
 
 	err := c.Log.SetObjects(objectTypes)
 	if err != nil {
@@ -119,7 +116,7 @@ func (c *control) SetObjects(ctx context.Context, objectTypes string) error {
 }
 
 func (c *control) SetVerbosity(ctx context.Context, verbosity int) error {
-	c.Log.WithTags(spec.Tags{L: "D", O: c, T: nil, V: 13}, "call SetVerbosity")
+	c.Log.WithTags(spec.Tags{C: nil, L: "D", O: c, V: 13}, "call SetVerbosity")
 
 	err := c.Log.SetVerbosity(verbosity)
 	if err != nil {

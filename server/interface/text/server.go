@@ -89,7 +89,7 @@ func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (spec.T
 }
 
 func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call StreamText")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call StreamText")
 
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)

@@ -68,7 +68,7 @@ type osFileSystem struct {
 }
 
 func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
-	osfs.Log.WithTags(spec.Tags{L: "D", O: osfs, T: nil, V: 13}, "call ReadFile")
+	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call ReadFile")
 
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -79,7 +79,7 @@ func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 func (osfs *osFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	osfs.Log.WithTags(spec.Tags{L: "D", O: osfs, T: nil, V: 13}, "call WriteFile")
+	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call WriteFile")
 
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {
