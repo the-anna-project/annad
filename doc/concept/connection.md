@@ -48,13 +48,13 @@ indicator for common connection patterns which are aligned over time.
 create tensions on coordinates within the connection space. Each dimension is
 pulling into its own direction based on learned patterns. The important idea
 behind the tensions created here is that they are balanced. One dimension
-pulling coordinates spontaniously into a certain direction makes another
+pulling coordinates spontaneously into a certain direction makes another
 dimension move into the same direction. This creates a simulation of
 psychological interactions on different levels. Like disgust and attraction
 cannot go together. Aim of such a balance system is to provide buildin
 mechanisms of leveraging event interactions.
 
-Spontanious modificatins of connections lead to variances within applied
+Spontaneous modificatins of connections lead to variances within applied
 behaviors. Leads some behavior to successful results, slight adjustments of a
 connection path's coordinates can be stored, which cause the connection path to
 be updated. This will lead connection paths to be improved over time, because
