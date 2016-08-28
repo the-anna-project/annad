@@ -95,7 +95,7 @@ func (s *storage) Get(key string) (string, error) {
 		return value, nil
 	}
 
-	return "", nil
+	return "", notFoundError
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
@@ -103,7 +103,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	weighted, ok := s.Weighted[key]
 	s.Mutex.Unlock()
 	if !ok {
-		return nil, nil
+		return nil, notFoundError
 	}
 
 	if elements, ok := weighted.ScoreElements[score]; ok {
@@ -115,7 +115,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		return elements[:n], nil
 	}
 
-	return nil, nil
+	return nil, notFoundError
 }
 
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
@@ -126,7 +126,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 		return value, nil
 	}
 
-	return nil, nil
+	return nil, notFoundError
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
@@ -134,7 +134,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	weighted, ok := s.Weighted[key]
 	s.Mutex.Unlock()
 	if !ok {
-		return nil, nil
+		return nil, notFoundError
 	}
 
 	var t int
@@ -188,7 +188,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 
 	set, ok := s.MathSet[key]
 	if !ok {
-		return nil
+		return notFoundError
 	}
 	delete(set, element)
 
@@ -201,10 +201,13 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 
 	weighted, ok := s.Weighted[key]
 	if !ok {
-		return nil
+		return notFoundError
 	}
 
-	score := weighted.ElementScores[element]
+	score, ok := weighted.ElementScores[element]
+	if !ok {
+		return notFoundError
+	}
 	delete(weighted.ElementScores, element)
 
 	elements := weighted.ScoreElements[score]
@@ -308,7 +311,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 	weighted, ok := s.Weighted[key]
 	s.Mutex.Unlock()
 	if !ok {
-		return nil
+		return notFoundError
 	}
 
 	for _, score := range weighted.Scores {
@@ -334,7 +337,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 	set, ok := s.MathSet[key]
 	s.Mutex.Unlock()
 	if !ok {
-		return nil
+		return notFoundError
 	}
 
 	for element := range set {

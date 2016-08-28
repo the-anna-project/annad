@@ -30,11 +30,8 @@ func Test_Memory_KeyValue(t *testing.T) {
 	newStorage := testMaybeNewStorage(t)
 
 	value, err := newStorage.Get("foo")
-	if err != nil {
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
-	}
-	if value != "" {
-		t.Fatal("expected", "empty string", "got", value)
 	}
 
 	err = newStorage.Set("foo", "bar")
@@ -46,7 +43,6 @@ func Test_Memory_KeyValue(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-
 	if value != "bar" {
 		t.Fatal("expected", "bar", "got", value)
 	}
@@ -56,11 +52,8 @@ func Test_Memory_StringMap(t *testing.T) {
 	newStorage := testMaybeNewStorage(t)
 
 	value, err := newStorage.GetStringMap("foo")
-	if err != nil {
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
-	}
-	if value != nil {
-		t.Fatal("expected", nil, "got", value)
 	}
 
 	err = newStorage.SetStringMap("foo", map[string]string{"bar": "baz"})
@@ -72,7 +65,6 @@ func Test_Memory_StringMap(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-
 	if !reflect.DeepEqual(value, map[string]string{"bar": "baz"}) {
 		t.Fatal("expected", map[string]string{"bar": "baz"}, "got", value)
 	}
@@ -222,23 +214,20 @@ func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
 func Test_Memory_GetHighestScoredElements_NotFound(t *testing.T) {
 	newStorage := testMaybeNewStorage(t)
 
-	output, err := newStorage.GetHighestScoredElements("not-found", 3)
-	if err != nil {
+	_, err := newStorage.GetHighestScoredElements("not-found", 3)
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
-	}
-
-	if len(output) != 0 {
-		t.Fatal("expected", 0, "got", len(output))
 	}
 }
 
 func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 	testCases := []struct {
-		Key         string
-		Score       float64
-		MaxElements int
-		Elements    map[string]float64
-		Expected    []string
+		Key          string
+		Score        float64
+		MaxElements  int
+		Elements     map[string]float64
+		Expected     []string
+		ErrorMatcher func(err error) bool
 	}{
 		{
 			Key:         "mykey",
@@ -250,6 +239,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 			Expected: []string{
 				"zero.five",
 			},
+			ErrorMatcher: nil,
 		},
 		{
 			Key:         "mykey",
@@ -261,6 +251,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 			Expected: []string{
 				"zero.five",
 			},
+			ErrorMatcher: nil,
 		},
 		{
 			Key:         "mykey",
@@ -272,6 +263,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 			Expected: []string{
 				"zero.five",
 			},
+			ErrorMatcher: nil,
 		},
 		{
 			Key:         "mykey",
@@ -280,7 +272,8 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 			Elements: map[string]float64{
 				"zero.five": 0.5,
 			},
-			Expected: []string{},
+			Expected:     []string{},
+			ErrorMatcher: IsNotFound,
 		},
 		{
 			Key:         "mykey",
@@ -299,6 +292,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 				"zero.eight.three",
 				"zero.eight.two",
 			},
+			ErrorMatcher: nil,
 		},
 		{
 			Key:         "mykey",
@@ -311,7 +305,8 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 				"zero.eight.three": 0.8,
 				"zero.one":         0.1,
 			},
-			Expected: []string{},
+			Expected:     []string{},
+			ErrorMatcher: IsNotFound,
 		},
 		{
 			Key:         "mykey",
@@ -329,10 +324,12 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 				"zero.eight.one",
 				"zero.eight.three",
 			},
+			ErrorMatcher: nil,
 		},
 		{
-			Key:         "mykey",
-			Score:       0.8,
+			Key:   "mykey",
+			Score: 0.8,
+			// Note we set MaxElements to zero, so nothing should be returned.
 			MaxElements: 0,
 			Elements: map[string]float64{
 				"zero.five":        0.5,
@@ -341,7 +338,8 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 				"zero.eight.three": 0.8,
 				"zero.one":         0.1,
 			},
-			Expected: []string{},
+			Expected:     []string{},
+			ErrorMatcher: nil,
 		},
 		{
 			Key:         "mykey",
@@ -357,6 +355,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 			Expected: []string{
 				"zero.five",
 			},
+			ErrorMatcher: nil,
 		},
 	}
 
@@ -373,18 +372,20 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 
 		// Test
 		output, err := newStorage.GetElementsByScore(testCase.Key, testCase.Score, testCase.MaxElements)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 
 		// Assert
-		if len(output) != len(testCase.Expected) {
-			t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
-		}
+		if testCase.ErrorMatcher == nil {
+			if len(output) != len(testCase.Expected) {
+				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
+			}
 
-		for i, e := range testCase.Expected {
-			if output[i] != e {
-				t.Fatal("case", i+1, "expected", e, "got", output[i])
+			for i, e := range testCase.Expected {
+				if output[i] != e {
+					t.Fatal("case", i+1, "expected", e, "got", output[i])
+				}
 			}
 		}
 	}
@@ -393,22 +394,17 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 func Test_Memory_GetElementsByScore_NotFound(t *testing.T) {
 	newStorage := testMaybeNewStorage(t)
 
-	output, err := newStorage.GetElementsByScore("not-found", 0.8, 3)
-	if err != nil {
+	_, err := newStorage.GetElementsByScore("not-found", 0.8, 3)
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
-	}
-
-	if len(output) != 0 {
-		t.Fatal("expected", 0, "got", len(output))
 	}
 }
 
 func Test_Memory_RemoveFromSet_Empty(t *testing.T) {
 	newStorage := testMaybeNewStorage(t)
 
-	// Removing something that is not there should not be a problem.
 	err := newStorage.RemoveFromSet("test-key", "test-value")
-	if err != nil {
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
@@ -418,13 +414,15 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 		Elements      map[string]float64
 		RemoveElement string
 		Expected      []string
+		ErrorMatcher  func(err error) bool
 	}{
 		{
 			RemoveElement: "zero.five",
 			Elements: map[string]float64{
 				"zero.five": 0.5,
 			},
-			Expected: []string{},
+			Expected:     []string{},
+			ErrorMatcher: nil,
 		},
 		{
 			RemoveElement: "zero.five",
@@ -436,11 +434,13 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 				"three.four",
 				"3.4",
 			},
+			ErrorMatcher: nil,
 		},
 		{
 			RemoveElement: "zero.five",
 			Elements:      map[string]float64{},
 			Expected:      []string{},
+			ErrorMatcher:  IsNotFound,
 		},
 		{
 			RemoveElement: "invalid",
@@ -451,6 +451,7 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 				"zero.five",
 				"0.5",
 			},
+			ErrorMatcher: IsNotFound,
 		},
 		{
 			RemoveElement: "zero.eight.one",
@@ -472,6 +473,7 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 				"zero.one",
 				"0.1",
 			},
+			ErrorMatcher: nil,
 		},
 	}
 
@@ -488,22 +490,25 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 
 		// Test
 		err := newStorage.RemoveScoredElement("test-key", testCase.RemoveElement)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-		values, err := newStorage.GetHighestScoredElements("test-key", -1)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 
 		// Assert
-		if len(values) != len(testCase.Expected) {
-			t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(values))
-		}
+		if testCase.ErrorMatcher == nil {
+			values, err := newStorage.GetHighestScoredElements("test-key", -1)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
 
-		for i, e := range testCase.Expected {
-			if values[i] != e {
-				t.Fatal("case", i+1, "expected", e, "got", values[i])
+			if len(values) != len(testCase.Expected) {
+				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(values))
+			}
+
+			for i, e := range testCase.Expected {
+				if values[i] != e {
+					t.Fatal("case", i+1, "expected", e, "got", values[i])
+				}
 			}
 		}
 	}
@@ -520,7 +525,7 @@ func Test_Memory_WalkScoredElements_Empty(t *testing.T) {
 		score1 = score
 		return nil
 	})
-	if err != nil {
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 	if element1 != "" {
@@ -613,7 +618,7 @@ func Test_Memory_Push_WalkSet_Remove(t *testing.T) {
 		element1 = element
 		return nil
 	})
-	if err != nil {
+	if !IsNotFound(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 	if element1 != "" {
