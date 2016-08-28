@@ -3,11 +3,11 @@
 package isbetween
 
 import (
-	"golang.org/x/net/context"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // calculate checks whether a given number lies between two given numbers.
-func (c *clg) calculate(ctx context.Context, n, min, max float64) bool {
+func (c *clg) calculate(ctx spec.Context, n, min, max float64) bool {
 	if n < min {
 		return false
 	}

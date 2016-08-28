@@ -3,17 +3,15 @@
 package input
 
 import (
-	"fmt"
-	"golang.org/x/net/context"
-
-	"github.com/xh3b4sd/anna/id"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/key"
+	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
 
 // calculate tries to map the given input sequence to a CLG tree ID within the
 // available storage.
-func (c *clg) calculate(ctx context.Context, input string) error {
+func (c *clg) calculate(ctx spec.Context, input string) error {
 	informationIDKey := key.NewCLGKey(c, "input-sequence:information-id:%s", input)
 	informationID, err := c.Storage.Get(informationIDKey)
 	if storage.IsNotFound(err) {
@@ -23,7 +21,7 @@ func (c *clg) calculate(ctx context.Context, input string) error {
 		if err != nil {
 			return maskAny(err)
 		}
-		err := c.Storage.Set(informationIDKey, newID)
+		err = c.Storage.Set(informationIDKey, string(newID))
 		if err != nil {
 			return maskAny(err)
 		}

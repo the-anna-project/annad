@@ -24,8 +24,9 @@ const (
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	Log     spec.Log
-	Storage spec.Storage
+	IDFactory spec.IDFactory
+	Log       spec.Log
+	Storage   spec.Storage
 
 	// Settings.
 	InputChannel chan spec.NetworkPayload
@@ -122,6 +123,10 @@ func (c *clg) GetInputTypes() []reflect.Type {
 	}
 
 	return inputType
+}
+
+func (c *clg) SetIDFactory(idFactory spec.IDFactory) {
+	c.IDFactory = idFactory
 }
 
 func (c *clg) SetLog(log spec.Log) {

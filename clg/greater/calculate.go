@@ -3,11 +3,11 @@
 package greater
 
 import (
-	"golang.org/x/net/context"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 // calculate returns the number that is greater than the other.
-func (c *clg) calculate(ctx context.Context, a, b float64) float64 {
+func (c *clg) calculate(ctx spec.Context, a, b float64) float64 {
 	if a > b {
 		return a
 	}
