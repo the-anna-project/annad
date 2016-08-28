@@ -4,9 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"golang.org/x/net/context"
-
 	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -98,7 +97,7 @@ func Test_CLG_IsBetween(t *testing.T) {
 	}
 
 	newCLG := MustNew()
-	ctx := context.Background()
+	ctx := context.MustNew()
 
 	for i, testCase := range testCases {
 		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
