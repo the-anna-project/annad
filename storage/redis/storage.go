@@ -14,10 +14,12 @@ import (
 )
 
 const (
-	// ObjectTypeRedisStorage represents the object type of the redis storage
-	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeRedisStorage spec.ObjectType = "redis-storage"
+	// ObjectType represents the object type of the redis storage object. This is
+	// used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "redis-storage"
 )
+
+// TODO add prefix
 
 // StorageConfig represents the configuration used to create a new redis
 // storage object.
@@ -79,7 +81,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 
 		ID:    id.MustNew(),
 		Mutex: sync.Mutex{},
-		Type:  ObjectTypeRedisStorage,
+		Type:  ObjectType,
 	}
 
 	if newStorage.BackOffFactory == nil {

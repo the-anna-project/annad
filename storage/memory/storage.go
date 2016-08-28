@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	// ObjectTypeMemoryStorage represents the object type of the memory storage
-	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeMemoryStorage spec.ObjectType = "memory-storage"
+	// ObjectType represents the object type of the memory storage object. This
+	// is used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "memory-storage"
 )
 
 type scoredElements struct {
@@ -61,7 +61,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 
 		ID:    id.MustNew(),
 		Mutex: sync.Mutex{},
-		Type:  ObjectTypeMemoryStorage,
+		Type:  ObjectType,
 	}
 
 	newStorage.Log.Register(newStorage.GetType())
