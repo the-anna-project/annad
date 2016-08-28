@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	// ObjectTypeOSFileSystem represents the object type of the OS file system
-	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeOSFileSystem spec.ObjectType = "os-file-system"
+	// ObjectType represents the object type of the OS file system object. This
+	// is used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "os-file-system"
 )
 
 // Config represents the configuration used to create a new OS file system
@@ -38,20 +38,11 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured real OS file system.
 func NewFileSystem(config Config) spec.FileSystem {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFileSystem := &osFileSystem{
 		Config: config,
-		ID:     newID,
+		ID:     id.MustNew(),
 		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeOSFileSystem,
+		Type:   ObjectType,
 	}
 
 	newFileSystem.Log.Register(newFileSystem.GetType())

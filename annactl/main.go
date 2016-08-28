@@ -44,11 +44,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new command line
 // object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
 	if err != nil {
 		panic(err)
@@ -62,7 +57,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
-		IDFactory:     newIDFactory,
+		IDFactory:     id.MustNewFactory(),
 		Log:           log.NewLog(log.DefaultConfig()),
 		LogControl:    newLogControl,
 		TextInterface: newTextInterface,

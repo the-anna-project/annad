@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	// ObjectTypeMemoryFileSystem represents the object type of the memory file
-	// system object. This is used e.g. to register itself to the logger.
-	ObjectTypeMemoryFileSystem spec.ObjectType = "memory-file-system"
+	// ObjectType represents the object type of the memory file system object.
+	// This is used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "memory-file-system"
 )
 
 // Config represents the configuration used to create a new memory file system
@@ -37,21 +37,12 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured memory file system.
 func NewFileSystem(config Config) spec.FileSystem {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFileSystem := &memoryFileSystem{
 		Config:  config,
-		ID:      newID,
+		ID:      id.MustNew(),
 		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
-		Type:    ObjectTypeMemoryFileSystem,
+		Type:    ObjectType,
 	}
 
 	return newFileSystem

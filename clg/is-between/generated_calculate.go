@@ -35,14 +35,9 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new CLG object by
 // best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
-		IDFactory: newIDFactory,
+		IDFactory: id.MustNewFactory(),
 		Log:       log.NewLog(log.DefaultConfig()),
 		Storage:   memory.MustNew(),
 

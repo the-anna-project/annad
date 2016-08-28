@@ -47,11 +47,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new network
 // object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)
@@ -64,7 +59,7 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		IDFactory:          newIDFactory,
+		IDFactory:          id.MustNewFactory(),
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
