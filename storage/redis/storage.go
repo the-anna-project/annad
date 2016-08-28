@@ -117,7 +117,7 @@ func (s *storage) Get(key string) (string, error) {
 
 		var err error
 		result, err = redis.String(conn.Do("GET", key))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -141,7 +141,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		defer conn.Close()
 
 		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", key, score, score, "LIMIT", 0, maxElements))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -170,7 +170,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 		defer conn.Close()
 
 		result, err = redis.StringMap(conn.Do("HGETALL", key))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -194,7 +194,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 		defer conn.Close()
 
 		values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -221,7 +221,7 @@ func (s *storage) PushToSet(key string, element string) error {
 		defer conn.Close()
 
 		_, err := redis.Int(conn.Do("SADD", key, element))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -244,7 +244,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 		defer conn.Close()
 
 		_, err := redis.Int(conn.Do("SREM", key, element))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -267,7 +267,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 		defer conn.Close()
 
 		_, err := redis.Int(conn.Do("ZREM", key, element))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -290,7 +290,7 @@ func (s *storage) Set(key, value string) error {
 		defer conn.Close()
 
 		reply, err := redis.String(conn.Do("SET", key, value))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -317,7 +317,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 		defer conn.Close()
 
 		_, err := redis.Int(conn.Do("ZADD", key, score, element))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -340,7 +340,7 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 		defer conn.Close()
 
 		reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
-		if !IsNil(err) {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -380,7 +380,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 			}
 
 			reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
-			if !IsNil(err) {
+			if err != nil {
 				return maskAny(err)
 			}
 
@@ -445,7 +445,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 			}
 
 			reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
-			if !IsNil(err) {
+			if err != nil {
 				return maskAny(err)
 			}
 

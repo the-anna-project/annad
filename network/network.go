@@ -28,6 +28,7 @@ const (
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
+	IDFactory          spec.IDFactory
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
 	Storage            spec.Storage
@@ -46,6 +47,11 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new network
 // object by best effort.
 func DefaultConfig() Config {
+	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)
@@ -58,6 +64,7 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
+		IDFactory:          newIDFactory,
 		Log:                log.NewLog(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
@@ -85,8 +92,14 @@ func New(config Config) (spec.Network, error) {
 		Type:         ObjectType,
 	}
 
+	if newNetwork.IDFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
+	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newNetwork.PermutationFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "permutation factory must not be empty")
 	}
 	if newNetwork.Storage == nil {
 		return nil, maskAnyf(invalidConfigError, "storage must not be empty")

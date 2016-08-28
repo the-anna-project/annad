@@ -24,6 +24,10 @@ type CLG interface {
 
 	Object
 
+	// SetIDFactory configures the CLG's id factory. This is done for all CLGs,
+	// regardless if a CLG is making use of the logger or not.
+	SetIDFactory(idFactory IDFactory)
+
 	// SetLog configures the CLG's logger. This is done for all CLGs, regardless
 	// if a CLG is making use of the logger or not.
 	SetLog(log Log)

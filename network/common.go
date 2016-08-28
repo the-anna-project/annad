@@ -26,6 +26,7 @@ func (n *network) clgByName(name string) (spec.CLG, error) {
 
 func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.ObjectID]spec.CLG {
 	for ID := range CLGs {
+		CLGs[ID].SetIDFactory(n.IDFactory)
 		CLGs[ID].SetLog(n.Log)
 		CLGs[ID].SetStorage(n.Storage)
 	}
