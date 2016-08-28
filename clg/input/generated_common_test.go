@@ -11,6 +11,17 @@ import (
 	"testing"
 )
 
+func Test_CLG_filterError_noValues(t *testing.T) {
+	out, err := filterError(nil)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	if len(out) != 0 {
+		t.Fatal("expected", 2, "got", len(out))
+	}
+}
+
 func Test_CLG_filterError_noError(t *testing.T) {
 	in := []reflect.Value{
 		reflect.ValueOf("one"),
