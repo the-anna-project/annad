@@ -58,6 +58,16 @@ func New(config Config) (spec.Context, error) {
 	return newContext, nil
 }
 
+// MustNew creates either a new default configured context object, or panics.
+func MustNew() spec.Context {
+	newContext, err := New(DefaultConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newContext
+}
+
 type context struct {
 	Config
 

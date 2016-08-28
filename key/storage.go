@@ -19,7 +19,7 @@ const (
 // scope. This can be e.g. each CLG. These objects generate and structure
 // dynamic information used to learn.
 func NewCLGKey(o spec.Object, f string, v ...interface{}) string {
-	return fmt.Sprintf(CLGKeyFormat, o, fmt.Sprintf(f, v...))
+	return fmt.Sprintf(CLGKeyFormat, o.GetType(), fmt.Sprintf(f, v...))
 }
 
 const (
