@@ -10,15 +10,6 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func testMaybeNewStorage(t *testing.T) spec.Storage {
-	newStorage, err := NewStorage(DefaultStorageConfig())
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newStorage
-}
-
 func testMaybeNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
 	newStorage, err := NewStorage(DefaultStorageConfigWithConn(c))
 	if err != nil {
