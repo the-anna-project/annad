@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	// ObjectType represents the object type of the CLG object. This is used
-	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "clg"
+	// ObjectType represents the object type of the CLG object. This is used e.g.
+	// to register itself to the logger.
+	ObjectType spec.ObjectType = "is-between-clg"
 )
 
 // Config represents the configuration used to create a new CLG object.
