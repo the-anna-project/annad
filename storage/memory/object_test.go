@@ -1,4 +1,4 @@
-package redis
+package memory
 
 import (
 	"testing"
