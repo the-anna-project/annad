@@ -243,7 +243,7 @@ func Test_Log_001(t *testing.T) {
 		newLogConfig.Levels = testCase.LogLevels
 		newLogConfig.RootLogger = newRootLogger
 		newLogConfig.Verbosity = testCase.LogVerbosity
-		newLog := NewLog(newLogConfig)
+		newLog := New(newLogConfig)
 
 		newLog.WithTags(testCase.Tags, testCase.F, testCase.V...)
 
@@ -261,7 +261,7 @@ func Test_Log_002(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -304,7 +304,7 @@ func Test_Log_003(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -329,7 +329,7 @@ func Test_Log_004(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -360,7 +360,7 @@ func Test_Log_005(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -406,7 +406,7 @@ func Test_Log_006(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -431,7 +431,7 @@ func Test_Log_007(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "W", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
@@ -462,7 +462,7 @@ func Test_Log_008(t *testing.T) {
 
 	newLogConfig := DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := NewLog(newLogConfig)
+	newLog := New(newLogConfig)
 
 	// Logging a normal log message should work.
 	newLog.WithTags(spec.Tags{C: nil, L: "I", O: testMustNewObject(t), V: newLogConfig.Verbosity}, "test message")
