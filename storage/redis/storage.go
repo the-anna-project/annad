@@ -19,8 +19,6 @@ const (
 	ObjectType spec.ObjectType = "redis-storage"
 )
 
-// TODO add prefix
-
 // StorageConfig represents the configuration used to create a new redis
 // storage object.
 type StorageConfig struct {
@@ -34,6 +32,8 @@ type StorageConfig struct {
 	// BackOffFactory is supposed to be able to create a new spec.BackOff. Retry
 	// implementations can make use of this to decide when to retry.
 	BackOffFactory func() spec.BackOff
+
+	Prefix string
 }
 
 // DefaultStorageConfigWithConn provides a configuration that can be mocked
@@ -69,6 +69,7 @@ func DefaultStorageConfig() StorageConfig {
 		BackOffFactory: func() spec.BackOff {
 			return &backoff.StopBackOff{}
 		},
+		Prefix: "prefix",
 	}
 
 	return newConfig
@@ -84,14 +85,19 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 		Type:  ObjectType,
 	}
 
-	if newStorage.BackOffFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
-	}
+	// Dependencies.
 	if newStorage.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 	if newStorage.Pool == nil {
 		return nil, maskAnyf(invalidConfigError, "connection pool must not be empty")
+	}
+	// Settings.
+	if newStorage.BackOffFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
+	}
+	if newStorage.Prefix == "" {
+		return nil, maskAnyf(invalidConfigError, "prefix must not be empty")
 	}
 
 	newStorage.Log.Register(newStorage.GetType())
@@ -116,7 +122,7 @@ func (s *storage) Get(key string) (string, error) {
 		defer conn.Close()
 
 		var err error
-		result, err = redis.String(conn.Do("GET", key))
+		result, err = redis.String(conn.Do("GET", s.withPrefix(key)))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -140,7 +146,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", key, score, score, "LIMIT", 0, maxElements))
+		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -169,7 +175,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		result, err = redis.StringMap(conn.Do("HGETALL", key))
+		result, err = redis.StringMap(conn.Do("HGETALL", s.withPrefix(key)))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -193,7 +199,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGE", key, 0, maxElements-1, "WITHSCORES"))
+		values, err := redis.Values(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -220,7 +226,7 @@ func (s *storage) PushToSet(key string, element string) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("SADD", key, element))
+		_, err := redis.Int(conn.Do("SADD", s.withPrefix(key), element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -243,7 +249,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("SREM", key, element))
+		_, err := redis.Int(conn.Do("SREM", s.withPrefix(key), element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -266,7 +272,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("ZREM", key, element))
+		_, err := redis.Int(conn.Do("ZREM", s.withPrefix(key), element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -289,7 +295,7 @@ func (s *storage) Set(key, value string) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		reply, err := redis.String(conn.Do("SET", key, value))
+		reply, err := redis.String(conn.Do("SET", s.withPrefix(key), value))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -316,7 +322,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("ZADD", key, score, element))
+		_, err := redis.Int(conn.Do("ZADD", s.withPrefix(key), score, element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -339,7 +345,7 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(key).AddFlat(stringMap)...))
+		reply, err := redis.String(conn.Do("HMSET", redis.Args{}.Add(s.withPrefix(key)).AddFlat(stringMap)...))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -379,7 +385,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 			default:
 			}
 
-			reply, err := redis.Values(conn.Do("ZSCAN", key, cursor, "COUNT", 100))
+			reply, err := redis.Values(conn.Do("ZSCAN", s.withPrefix(key), cursor, "COUNT", 100))
 			if err != nil {
 				return maskAny(err)
 			}
@@ -444,7 +450,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 			default:
 			}
 
-			reply, err := redis.Values(conn.Do("SSCAN", key, cursor, "COUNT", 100))
+			reply, err := redis.Values(conn.Do("SSCAN", s.withPrefix(key), cursor, "COUNT", 100))
 			if err != nil {
 				return maskAny(err)
 			}

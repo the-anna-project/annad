@@ -36,7 +36,7 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
 			// storage.
-			a.Storage, err = a.createStorage(a.Log)
+			a.Storage, err = a.createStorage(a.Log, a.Flags.StoragePrefix)
 			panicOnError(err)
 
 			// network.
@@ -82,6 +82,7 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 	newCmd.PersistentFlags().IntVar(&a.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
 	newCmd.PersistentFlags().StringVar(&a.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
 	newCmd.PersistentFlags().StringVar(&a.Flags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")
+	newCmd.PersistentFlags().StringVar(&a.Flags.StoragePrefix, "storage-prefix", "anna", "prefix used to prepend to storage keys")
 
 	return newCmd
 }

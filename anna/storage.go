@@ -8,7 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-func (a *anna) createStorage(newLog spec.Log) (spec.Storage, error) {
+func (a *anna) createStorage(newLog spec.Log, prefix string) (spec.Storage, error) {
 	var newStorage spec.Storage
 	var err error
 
@@ -31,6 +31,7 @@ func (a *anna) createStorage(newLog spec.Log) (spec.Storage, error) {
 			return nil, maskAny(err)
 		}
 		newStorageConfig.Pool = redis.NewPool(newPoolConfig)
+		newStorageConfig.Prefix = prefix
 		newStorage, err = redis.NewStorage(newStorageConfig)
 		if err != nil {
 			return nil, maskAny(err)

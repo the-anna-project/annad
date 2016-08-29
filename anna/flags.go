@@ -9,6 +9,7 @@ type Flags struct {
 	ControlLogObejcts   string
 	ControlLogVerbosity int
 
-	Storage     string
-	StorageAddr string
+	Storage       string
+	StorageAddr   string
+	StoragePrefix string
 }
