@@ -15,7 +15,7 @@ func panicOnError(err error) {
 }
 
 func (a *anna) listenToSignal() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call listenToSignal")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call listenToSignal")
 
 	listener := make(chan os.Signal, 2)
 	signal.Notify(listener, os.Interrupt, os.Kill)
@@ -36,7 +36,7 @@ func (a *anna) listenToSignal() {
 //     "version": "84ehdv0"
 //
 func (a *anna) writeStateInfo() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call writeStateInfo")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call writeStateInfo")
 
 	err := a.Storage.Set("version", version)
 	panicOnError(err)
@@ -45,7 +45,7 @@ func (a *anna) writeStateInfo() {
 		dateTime := time.Now().Format("06/01/02 15:04:05")
 		err := a.Storage.Set("time", dateTime)
 		if err != nil {
-			a.Log.WithTags(spec.Tags{L: "E", O: a, T: nil, V: 4}, "%#v", maskAny(err))
+			a.Log.WithTags(spec.Tags{C: nil, L: "E", O: a, V: 4}, "%#v", maskAny(err))
 		}
 
 		time.Sleep(5 * time.Second)

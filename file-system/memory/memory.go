@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	// ObjectTypeMemoryFileSystem represents the object type of the memory file
-	// system object. This is used e.g. to register itself to the logger.
-	ObjectTypeMemoryFileSystem spec.ObjectType = "memory-file-system"
+	// ObjectType represents the object type of the memory file system object.
+	// This is used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "memory-file-system"
 )
 
 // Config represents the configuration used to create a new memory file system
@@ -29,7 +29,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log: log.NewLog(log.DefaultConfig()),
+		Log: log.New(log.DefaultConfig()),
 	}
 
 	return newConfig
@@ -37,21 +37,12 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured memory file system.
 func NewFileSystem(config Config) spec.FileSystem {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFileSystem := &memoryFileSystem{
 		Config:  config,
-		ID:      newID,
+		ID:      id.MustNew(),
 		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
-		Type:    ObjectTypeMemoryFileSystem,
+		Type:    ObjectType,
 	}
 
 	return newFileSystem
@@ -67,7 +58,7 @@ type memoryFileSystem struct {
 }
 
 func (mfs *memoryFileSystem) ReadFile(filename string) ([]byte, error) {
-	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call ReadFile")
+	mfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: mfs, V: 13}, "call ReadFile")
 
 	if bytes, ok := mfs.Storage[filename]; ok {
 		return bytes, nil
@@ -83,7 +74,7 @@ func (mfs *memoryFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 func (mfs *memoryFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	mfs.Log.WithTags(spec.Tags{L: "D", O: mfs, T: nil, V: 13}, "call WriteFile")
+	mfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: mfs, V: 13}, "call WriteFile")
 
 	mfs.Storage[filename] = bytes
 	return nil

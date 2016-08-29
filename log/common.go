@@ -28,14 +28,14 @@ func extendFormatWithTags(f string, tags spec.Tags) string {
 	newFormat := ""
 
 	newFormat += fmt.Sprintf("[%s] ", time.Now().Format(dateTimeMilli))
+	if tags.C != nil {
+		newFormat += fmt.Sprintf("[C: %s] ", tags.C.GetID())
+	}
 	if tags.L != "" {
 		newFormat += fmt.Sprintf("[L: %s] ", tags.L)
 	}
 	if tags.O != nil {
 		newFormat += fmt.Sprintf("[O: %s / %s] ", tags.O.GetType(), tags.O.GetID())
-	}
-	if tags.T != nil {
-		newFormat += fmt.Sprintf("[T: %s] ", tags.T.GetTraceID())
 	}
 	newFormat += fmt.Sprintf("[V: %2d] ", tags.V)
 	newFormat += f

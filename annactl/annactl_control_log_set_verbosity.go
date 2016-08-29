@@ -11,7 +11,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlControlLogSetVerbosityCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetVerbosityCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlControlLogSetVerbosityCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -25,7 +25,7 @@ func (a *annactl) InitAnnactlControlLogSetVerbosityCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlControlLogSetVerbosityCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogSetVerbosityCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlControlLogSetVerbosityCmd")
 
 	if len(args) != 1 {
 		cmd.HelpFunc()(cmd, nil)
@@ -36,11 +36,11 @@ func (a *annactl) ExecAnnactlControlLogSetVerbosityCmd(cmd *cobra.Command, args 
 
 	v, err := strconv.Atoi(args[0])
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: nil, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: nil, V: 1}, "%#v", maskAny(err))
 	}
 
 	err = a.LogControl.SetVerbosity(ctx, v)
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: nil, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: nil, V: 1}, "%#v", maskAny(err))
 	}
 }

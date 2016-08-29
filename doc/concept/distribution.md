@@ -7,21 +7,21 @@ implementation details.
 
 ### balance system
 The distribution can be used as balance system. That describes the amount of
-impulses and how harmonic or extreme the distribution of these currently is
+signals and how harmonic or extreme the distribution of these currently is
 within a system. That way the state of an organism can be represented. Extremes
-of impulse occurrence cause imbalance within the organism. Extremes can be seen
+of signal occurrence cause imbalance within the organism. Extremes can be seen
 as low or high.
 
-No impulses at all represent a low extreme. This is the bar chart
-representation of no impulses.
+No signals at all represent a low extreme. This is the bar chart representation
+of no signals.
 ```
 x  x  x
 
 1  2  3
 ```
 
-To many impulses at the same time represent a high extreme. This is the bar
-chart representation of too many impulses.
+To many signals at the same time represent a high extreme. This is the bar
+chart representation of too many signals.
 ```
       x
       x
@@ -32,8 +32,8 @@ x  x  x
 1  2  3
 ```
 
-The organism's motivation is the balance of the impulse distribution. This is
-the bar chart representation of a more balanced distribution of impulses.
+The organism's motivation is the balance of the signal distribution. This is
+the bar chart representation of a more balanced distribution of signals.
 ```
       x
 x     x
@@ -44,19 +44,19 @@ x  x  x
 1  2  3
 ```
 
-As we see there are different channels obtaining their own impulse population.
+As we see there are different channels obtaining their own signal population.
 This can indicate different evaluations of whatever is going on within the
-organism. Each channel has an separate input and an separate output. Pushing
-an impulse to the input of one channel causes the impulse distribution for the
-given channel to increase. The whole impulse population within a balance
-system is capped. In case the overall impulse population is already saturated,
-an adaption of the other channels happens automatically. That means, that at
-the same time some input is received on one channel, some output is received on
-the other channels. The population of one channel increases and the population
-of the other channels decreases symmetrically. Having three saturated channels
-and one channel pushes an impulse, the value of it is divided by two and
-population worth the half of the pushed impulse is decreased from the other two
-channels, causing a balance or imbalance.
+organism. Each channel has an separate input and an separate output. Pushing an
+signal to the input of one channel causes the signal distribution for the given
+channel to increase. The whole signal population within a balance system is
+capped. In case the overall signal population is already saturated, an adaption
+of the other channels happens automatically. That means, that at the same time
+some input is received on one channel, some output is received on the other
+channels. The population of one channel increases and the population of the
+other channels decreases symmetrically. Having three saturated channels and one
+channel pushes an signal, the value of it is divided by two and population
+worth the half of the pushed signal is decreased from the other two channels,
+causing a balance or imbalance.
 
 # weighted analysis
 Weighted analysis can represent vector population within space. The more

@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	// ObjectTypeOSFileSystem represents the object type of the OS file system
-	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeOSFileSystem spec.ObjectType = "os-file-system"
+	// ObjectType represents the object type of the OS file system object. This
+	// is used e.g. to register itself to the logger.
+	ObjectType spec.ObjectType = "os-file-system"
 )
 
 // Config represents the configuration used to create a new OS file system
@@ -30,7 +30,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log: log.NewLog(log.DefaultConfig()),
+		Log: log.New(log.DefaultConfig()),
 	}
 
 	return newConfig
@@ -38,20 +38,11 @@ func DefaultConfig() Config {
 
 // NewFileSystem creates a new configured real OS file system.
 func NewFileSystem(config Config) spec.FileSystem {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDFactory.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFileSystem := &osFileSystem{
 		Config: config,
-		ID:     newID,
+		ID:     id.MustNew(),
 		Mutex:  sync.Mutex{},
-		Type:   ObjectTypeOSFileSystem,
+		Type:   ObjectType,
 	}
 
 	newFileSystem.Log.Register(newFileSystem.GetType())
@@ -68,7 +59,7 @@ type osFileSystem struct {
 }
 
 func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
-	osfs.Log.WithTags(spec.Tags{L: "D", O: osfs, T: nil, V: 13}, "call ReadFile")
+	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call ReadFile")
 
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -79,7 +70,7 @@ func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 func (osfs *osFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	osfs.Log.WithTags(spec.Tags{L: "D", O: osfs, T: nil, V: 13}, "call WriteFile")
+	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call WriteFile")
 
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {

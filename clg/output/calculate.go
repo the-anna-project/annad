@@ -12,7 +12,7 @@ import (
 )
 
 // TODO
-func (c *clg) TODOcalculate() error {
+func (c *clg) TODOcalculate(ctx spec.Context) error {
 	var e spec.Expectation
 
 	// Check the calculated output aganst the provided expectation, if any. In

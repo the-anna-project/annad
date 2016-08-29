@@ -50,6 +50,17 @@ func NewFactory(config FactoryConfig) (spec.IDFactory, error) {
 	return newFactory, nil
 }
 
+// MustNewFactory creates either a new default configured id factory object, or
+// panics.
+func MustNewFactory() spec.IDFactory {
+	newIDFactory, err := NewFactory(DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newIDFactory
+}
+
 type factory struct {
 	FactoryConfig
 }

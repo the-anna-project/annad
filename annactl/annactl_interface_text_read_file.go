@@ -13,7 +13,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextReadFileCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlInterfaceTextReadFileCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -32,7 +32,7 @@ func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlInterfaceTextReadFileCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceTextReadFileCmd")
 
 	if len(args) == 0 || len(args) >= 2 {
 		cmd.HelpFunc()(cmd, nil)
@@ -43,13 +43,13 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 
 	b, err := a.FileSystem.ReadFile(args[0])
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
 	textRequest := api.NewEmptyTextRequest()
 	err = json.Unmarshal(b, &textRequest)
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
 	in := make(chan spec.TextRequest, 1)
@@ -61,7 +61,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 	}()
 	err = a.TextInterface.StreamText(ctx, in, out)
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
 	for {

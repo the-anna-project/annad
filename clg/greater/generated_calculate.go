@@ -16,16 +16,17 @@ import (
 )
 
 const (
-	// ObjectType represents the object type of the CLG object. This is used
-	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "clg"
+	// ObjectType represents the object type of the CLG object. This is used e.g.
+	// to register itself to the logger.
+	ObjectType spec.ObjectType = "greater-clg"
 )
 
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	Log     spec.Log
-	Storage spec.Storage
+	IDFactory spec.IDFactory
+	Log       spec.Log
+	Storage   spec.Storage
 
 	// Settings.
 	InputChannel chan spec.NetworkPayload
@@ -36,8 +37,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log:     log.NewLog(log.DefaultConfig()),
-		Storage: memory.MustNew(),
+		IDFactory: id.MustNewFactory(),
+		Log:       log.New(log.DefaultConfig()),
+		Storage:   memory.MustNew(),
 
 		// Settings.
 		InputChannel: make(chan spec.NetworkPayload, 1000),
@@ -122,6 +124,10 @@ func (c *clg) GetInputTypes() []reflect.Type {
 	}
 
 	return inputType
+}
+
+func (c *clg) SetIDFactory(idFactory spec.IDFactory) {
+	c.IDFactory = idFactory
 }
 
 func (c *clg) SetLog(log spec.Log) {

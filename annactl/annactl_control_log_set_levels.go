@@ -11,7 +11,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlControlLogSetLevelsCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlControlLogSetLevelsCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlControlLogSetLevelsCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -25,7 +25,7 @@ func (a *annactl) InitAnnactlControlLogSetLevelsCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlControlLogSetLevelsCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlControlLogSetLevelsCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlControlLogSetLevelsCmd")
 
 	if len(args) == 0 {
 		cmd.HelpFunc()(cmd, nil)
@@ -36,6 +36,6 @@ func (a *annactl) ExecAnnactlControlLogSetLevelsCmd(cmd *cobra.Command, args []s
 
 	err := a.LogControl.SetLevels(ctx, strings.Join(args, ","))
 	if err != nil {
-		a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 }

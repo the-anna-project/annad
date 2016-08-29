@@ -16,26 +16,35 @@ import (
 )
 
 const (
-	// ObjectTypeLog represents the object type of the log object. This is used
-	// e.g. to register itself to the logger.
-	ObjectTypeLog spec.ObjectType = "log"
+	// ObjectType represents the object type of the log object. This is used e.g.
+	// to register itself to the logger.
+	ObjectType spec.ObjectType = "log"
 )
 
 // Config represents the configuration used to create a new log object.
 type Config struct {
+	// Dependencies.
+
+	// RootLogger is the underlying logger actually logging messages.
+	RootLogger spec.RootLogger
+
+	// Settings.
+
 	// Color decides to whether color log output or not.
 	Color bool
+
+	// ContextID is used to only log messages matching this configured context ID.
+	ContextID string
 
 	// Format describes how to structure log output. The log output format should
 	// be simple and clean. In the first iteration the log format looks like
 	// this.
 	//
-	//   [yyyy-mm-dd hh:mm:ss] [L: short level] [O: object type / object ID] [V: verbosity] message
+	//   [yyyy-mm-dd hh:mm:ss] [C: context-ID] [L: short-level] [O: object-type / object-ID] [V: verbosity] message
 	//
-	// For example a log line then looks like this. Nothe that there is a padding
-	// of 16 characters to align log lines.
+	// For example a log line then looks like this.
 	//
-	//   [16/02/09 12:05:52.628] [L: I] [O: anna / 56139b39e2f979be] [V: 10] hello, I am Anna
+	//   [16/02/09 12:05:52.628] [C: 104042f6cbdc7bc9] [L: I] [O: anna / 56139b39e2f979be] [V: 10] hello, I am Anna
 	//
 	Format string
 
@@ -50,16 +59,9 @@ type Config struct {
 	//
 	Levels []string
 
-	// RootLogger is the underlying logger actually logging messages.
-	RootLogger spec.RootLogger
-
 	// Objects is used to only log messages emitted by objects matching this
 	// given object type.
 	Objects []spec.ObjectType
-
-	// TraceID is used to only log messages emitted by requests matching this
-	// given trace ID.
-	TraceID spec.TraceID
 
 	// Verbosity is used to only log messages emitted with this given verbosity.
 	// By convention this can be between 0 and 15. Reason for that are the 5
@@ -81,25 +83,29 @@ type Config struct {
 // best effort.
 func DefaultConfig() Config {
 	newDefaultConfig := Config{
-		Color:      true,
-		Levels:     []string{},
+		// Dependencies.
 		RootLogger: builtnlog.New(os.Stdout, "", 0),
-		Objects:    []spec.ObjectType{},
-		TraceID:    spec.TraceID(""),
-		Verbosity:  10,
+
+		// Settings.
+		Color:     true,
+		ContextID: "",
+		Levels:    []string{},
+		Objects:   []spec.ObjectType{},
+		Verbosity: 10,
 	}
 
 	return newDefaultConfig
 }
 
-// NewLog creates a new configured log object.
-func NewLog(config Config) spec.Log {
+// New creates a new configured log object.
+func New(config Config) spec.Log {
 	newLog := log{
-		Config:            config,
+		Config: config,
+
 		ID:                id.MustNew(),
 		Mutex:             sync.Mutex{},
 		RegisteredObjects: []spec.ObjectType{},
-		Type:              spec.ObjectType(ObjectTypeLog),
+		Type:              ObjectType,
 	}
 
 	newLog.Register(newLog.GetType())
@@ -214,8 +220,8 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 		}
 	}
 
-	if tags.T != nil && l.TraceID != spec.TraceID("") {
-		if tags.T.GetTraceID() != l.TraceID {
+	if tags.C != nil && l.ContextID != "" {
+		if tags.C.GetID() != l.ContextID {
 			return
 		}
 	}
@@ -229,7 +235,7 @@ func (l *log) WithTags(tags spec.Tags, f string, v ...interface{}) {
 	if l.Color {
 		color, err := colorForLevel(tags.L)
 		if err != nil {
-			l.WithTags(spec.Tags{L: "E", O: l, T: nil, V: 4}, "%#v", maskAnyf(err, tags.L))
+			l.WithTags(spec.Tags{C: nil, L: "E", O: l, V: 4}, "%#v", maskAnyf(err, tags.L))
 			return
 		}
 		msg = ansi.Color(msg, color)

@@ -4,15 +4,15 @@ package spec
 // logged. Emitted logs not matching the given criteria by Tags are not supposed
 // to be logged.
 type Tags struct {
+	// C represents the context passed through. Logs related to a specific
+	// context ID should be related to a common request.
+	C Context
+
 	// L is the log level. E.g. debug or error.
 	L string
 
 	// O represents the object emitting the log message.
 	O Object
-
-	// Tracer represents some tracable context passed through. Logs related to a
-	// specific trace ID should be caused by a common request.
-	T Tracer
 
 	// V is the verbosity used to log messages.
 	V int

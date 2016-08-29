@@ -3,8 +3,6 @@ package api
 import (
 	"reflect"
 
-	"golang.org/x/net/context"
-
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -16,11 +14,10 @@ type NetworkPayloadConfig struct {
 
 	// Args represents the arguments intended to be used for the requested CLG
 	// execution, or the output values being calculated during the requested CLG
-	// execution. By convention this list must always contain a context as first
-	// argument, otherwise the network payload is considered invalid. In this
-	// case all calls to Validate would throw errors which can be asserted using
-	// IsInvalidInterface. For more information about the context being used here
-	// see https://godoc.org/golang.org/x/net/context.
+	// execution. By convention this list must always contain a spec.Context as
+	// first argument, otherwise the network payload is considered invalid. In
+	// this case all calls to Validate would throw errors which can be asserted
+	// using IsInvalidInterface.
 	Args []reflect.Value
 
 	// Destination represents the object ID of the CLG receiving the current
@@ -70,11 +67,11 @@ func (np *networkPayload) GetArgs() []reflect.Value {
 	return np.Args
 }
 
-func (np *networkPayload) GetContext() (context.Context, error) {
+func (np *networkPayload) GetContext() (spec.Context, error) {
 	if len(np.Args) < 1 {
 		return nil, maskAnyf(invalidConfigError, "arguments must have context")
 	}
-	ctx, ok := np.Args[0].Interface().(context.Context)
+	ctx, ok := np.Args[0].Interface().(spec.Context)
 	if !ok {
 		return nil, maskAnyf(invalidInterfaceError, "arguments must have context")
 	}
@@ -94,6 +91,18 @@ func (np *networkPayload) GetSources() []spec.ObjectID {
 	return np.Sources
 }
 
+func (np *networkPayload) String() string {
+	var s string
+
+	// The first argument is always a spec.Context, which is ignored, because it
+	// only serves internal purposes.
+	for _, v := range np.GetArgs()[1:] {
+		s += v.String()
+	}
+
+	return s
+}
+
 func (np *networkPayload) Validate() error {
 	// Check if the network payload has invalid properties.
 	if np.Args == nil {
@@ -106,7 +115,7 @@ func (np *networkPayload) Validate() error {
 		return maskAnyf(invalidConfigError, "sources must not be empty")
 	}
 
-	// Check if the network payload has an context as first argument.
+	// Check if the network payload has an spec.Context as first argument.
 	_, err := np.GetContext()
 	if err != nil {
 		return maskAny(err)

@@ -7,7 +7,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlInterfaceCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlInterfaceCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -24,7 +24,7 @@ func (a *annactl) InitAnnactlInterfaceCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlInterfaceCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlInterfaceCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceCmd")
 
 	cmd.HelpFunc()(cmd, nil)
 }

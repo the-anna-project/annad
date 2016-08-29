@@ -2,8 +2,6 @@ package spec
 
 import (
 	"reflect"
-
-	"golang.org/x/net/context"
 )
 
 // NetworkPayload represents the data container carried around within the
@@ -12,9 +10,9 @@ type NetworkPayload interface {
 	// GetArgs returns the arguments of the current network payload.
 	GetArgs() []reflect.Value
 
-	// GetContext returns the context the current network payload holds as first
-	// argument. If no context can be found, an error is returned.
-	GetContext() (context.Context, error)
+	// GetContext returns the Context the current network payload holds as first
+	// argument. If no Context can be found, an error is returned.
+	GetContext() (Context, error)
 
 	// GetArgs returns the destination of the current network payload.
 	GetDestination() ObjectID
@@ -25,11 +23,14 @@ type NetworkPayload interface {
 	// GetArgs returns the sources of the current network payload.
 	GetSources() []ObjectID
 
+	// String returns the concatenated string representations of the currently
+	// configured arguments.
+	String() string
+
 	// Validate throws an error if the current network payload is not valid. An
 	// network payload is not valid if it is empty, or if it does not satisfy the
-	// convention of the CLG interface to have a proper context as first input
-	// and output parameter. For more information about the context being passed
-	// through see https://godoc.org/golang.org/x/net/context.
+	// convention of the CLG interface to have a proper Context as first input
+	// parameter.
 	Validate() error
 }
 
@@ -78,12 +79,11 @@ type Network interface {
 	Forward(clg CLG, payload NetworkPayload) error
 
 	// Listen makes the network listen on requests from the outside. Here each
-	// CLG input channel is managed. This models Listen as kind of cortex in
-	// which impulses are dispatched into all possible direction and finally flow
-	// back again. Listen only returns an error in case the initialization of all
-	// listeners failed. Errors during processing of the neural network will be
-	// logged to the provided logger.
-	Listen() error
+	// CLG input channel is managed. This way Listen acts as kind of cortex in
+	// which signals are dispatched into all possible direction and finally flow
+	// back again. Errors during processing of the neural network will be logged
+	// to the provided logger.
+	Listen()
 
 	Object
 

@@ -13,7 +13,7 @@ import (
 )
 
 func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call InitAnnactlInterfaceTextReadPlainCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlInterfaceTextReadPlainCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -36,7 +36,7 @@ func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call ExecAnnactlInterfaceTextReadPlainCmd")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceTextReadPlainCmd")
 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -45,7 +45,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 	out := make(chan spec.TextResponse, 1000)
 
 	go func() {
-		a.Log.WithTags(spec.Tags{L: "I", O: a, T: nil, V: 10}, "Waiting for input.\n")
+		a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "Waiting for input.\n")
 
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
@@ -55,14 +55,14 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 			newTextRequestConfig.SessionID = a.SessionID
 			newTextRequest, err := api.NewTextRequest(newTextRequestConfig)
 			if err != nil {
-				a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+				a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 			}
 
 			in <- newTextRequest
 
 			err = scanner.Err()
 			if err != nil {
-				a.Log.WithTags(spec.Tags{L: "E", O: a, T: nil, V: 4}, "%#v", maskAny(err))
+				a.Log.WithTags(spec.Tags{C: nil, L: "E", O: a, V: 4}, "%#v", maskAny(err))
 			}
 		}
 	}()
@@ -83,7 +83,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 		case <-a.Closer:
 			cancel()
 		case err := <-fail:
-			a.Log.WithTags(spec.Tags{L: "F", O: a, T: nil, V: 1}, "%#v", maskAny(err))
+			a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 		}
 	}()
 

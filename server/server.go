@@ -68,7 +68,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 
 		Instrumentation: newInstrumentation,
-		Log:             log.NewLog(log.DefaultConfig()),
+		Log:             log.New(log.DefaultConfig()),
 		LogControl:      newLogControl,
 		TextInterface:   newTextInterface,
 
@@ -142,7 +142,7 @@ type server struct {
 }
 
 func (s *server) Boot() {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Boot")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Boot")
 
 	s.BootOnce.Do(func() {
 		ctx := context.Background()
@@ -169,14 +169,14 @@ func (s *server) Boot() {
 			select {
 			case <-s.Closer:
 			case err := <-fail:
-				s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
+				s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
 			}
 		}()
 		go func() {
-			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
+			s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
 			listener, err := net.Listen("tcp", s.GRPCAddr)
 			if err != nil {
-				s.Log.WithTags(spec.Tags{L: "F", O: s, T: nil, V: 1}, "%#v", maskAny(err))
+				s.Log.WithTags(spec.Tags{C: nil, L: "F", O: s, V: 1}, "%#v", maskAny(err))
 			}
 			err = s.GRPCServer.Serve(listener)
 			if err != nil {
@@ -186,17 +186,17 @@ func (s *server) Boot() {
 
 		// HTTP server.
 		go func() {
-			s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 14}, "HTTP server starts to listen on '%s'", s.HTTPAddr)
+			s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 14}, "HTTP server starts to listen on '%s'", s.HTTPAddr)
 			err := s.HTTPServer.ListenAndServe()
 			if err != nil {
-				s.Log.WithTags(spec.Tags{L: "E", O: s, T: nil, V: 4}, "%#v", maskAny(err))
+				s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
 			}
 		}()
 	})
 }
 
 func (s *server) Shutdown() {
-	s.Log.WithTags(spec.Tags{L: "D", O: s, T: nil, V: 13}, "call Shutdown")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		close(s.Closer)

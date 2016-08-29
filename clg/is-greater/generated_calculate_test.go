@@ -70,6 +70,29 @@ func Test_CLG_GetInputTypes(t *testing.T) {
 	}
 }
 
+func Test_CLG_SetIDFactory(t *testing.T) {
+	newCLG := MustNew()
+	var rawCLG *clg
+
+	switch c := newCLG.(type) {
+	case *clg:
+		// all good
+		rawCLG = newCLG.(*clg)
+	default:
+		t.Fatal("expected", "*clg", "got", c)
+	}
+
+	if rawCLG.IDFactory == nil {
+		t.Fatal("expected", "spec.IDFactory", "got", nil)
+	}
+
+	newCLG.SetIDFactory(nil)
+
+	if rawCLG.IDFactory != nil {
+		t.Fatal("expected", nil, "got", "spec.IDFactory")
+	}
+}
+
 func Test_CLG_SetLog(t *testing.T) {
 	newCLG := MustNew()
 	var rawCLG *clg

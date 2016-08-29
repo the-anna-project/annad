@@ -44,11 +44,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new command line
 // object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
 	if err != nil {
 		panic(err)
@@ -62,8 +57,8 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
-		IDFactory:     newIDFactory,
-		Log:           log.NewLog(log.DefaultConfig()),
+		IDFactory:     id.MustNewFactory(),
+		Log:           log.New(log.DefaultConfig()),
 		LogControl:    newLogControl,
 		TextInterface: newTextInterface,
 
@@ -107,7 +102,7 @@ type annactl struct {
 }
 
 func (a *annactl) Boot() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Boot")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -117,7 +112,7 @@ func (a *annactl) Boot() {
 }
 
 func (a *annactl) Shutdown() {
-	a.Log.WithTags(spec.Tags{L: "D", O: a, T: nil, V: 13}, "call Shutdown")
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		close(a.Closer)
