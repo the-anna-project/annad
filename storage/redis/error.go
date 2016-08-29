@@ -28,7 +28,7 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 //     ErrNil indicates that a reply value is nil.
 //
 func IsNotFound(err error) bool {
-	return err == redis.ErrNil
+	return errgo.Cause(err) == redis.ErrNil
 }
 
 var invalidConfigError = errgo.New("invalid config")
