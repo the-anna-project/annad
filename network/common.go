@@ -42,46 +42,50 @@ func (n *network) listenCLGs() {
 			clgChannel := CLG.GetInputChannel()
 
 			for {
-				payload := <-clgChannel
+				select {
+				case <-n.Closer:
+					break
+				case payload := <-clgChannel:
 
-				go func(payload spec.NetworkPayload) {
-					// Activate if the CLG's interface is satisfied by the given
-					// network payload.
-					newPayload, newQueue, err := n.Activate(CLG, payload, queue)
-					if IsInvalidInterface(err) {
-						// The interface of the requested CLG was not fulfilled. We
-						// continue listening for the next network payload without doing
-						// any work.
-						return
-					} else if err != nil {
-						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-					}
-					queue = newQueue
+					go func(payload spec.NetworkPayload) {
+						// Activate if the CLG's interface is satisfied by the given
+						// network payload.
+						newPayload, newQueue, err := n.Activate(CLG, payload, queue)
+						if IsInvalidInterface(err) {
+							// The interface of the requested CLG was not fulfilled. We
+							// continue listening for the next network payload without doing
+							// any work.
+							return
+						} else if err != nil {
+							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+						}
+						queue = newQueue
 
-					// Calculate based on the CLG's implemented business logic.
-					calculatedPayload, err := n.Calculate(CLG, newPayload)
-					if err != nil {
-						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-					}
-
-					// Forward to other CLG's, if necessary.
-					err = n.Forward(CLG, calculatedPayload)
-					if err != nil {
-						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-					}
-
-					// Return the calculated output to the requesting client, if the
-					// current CLG is the output CLG.
-					if CLG.GetName() == "output" {
-						newTextResponseConfig := api.DefaultTextResponseConfig()
-						newTextResponseConfig.Output = calculatedPayload.String()
-						newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+						// Calculate based on the CLG's implemented business logic.
+						calculatedPayload, err := n.Calculate(CLG, newPayload)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 						}
-						n.TextOutput <- newTextResponse
-					}
-				}(payload)
+
+						// Forward to other CLG's, if necessary.
+						err = n.Forward(CLG, calculatedPayload)
+						if err != nil {
+							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+						}
+
+						// Return the calculated output to the requesting client, if the
+						// current CLG is the output CLG.
+						if CLG.GetName() == "output" {
+							newTextResponseConfig := api.DefaultTextResponseConfig()
+							newTextResponseConfig.Output = calculatedPayload.String()
+							newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+							if err != nil {
+								n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+							}
+							n.TextOutput <- newTextResponse
+						}
+					}(payload)
+				}
 			}
 		}(ID, CLG)
 	}

@@ -81,6 +81,7 @@ func New(config Config) (spec.Network, error) {
 		BootOnce:     sync.Once{},
 		CLGIDs:       map[string]spec.ObjectID{},
 		CLGs:         newCLGs(),
+		Closer:       make(chan struct{}, 1),
 		ID:           id.MustNew(),
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
@@ -121,6 +122,7 @@ type network struct {
 	CLGIDs map[string]spec.ObjectID
 
 	CLGs         map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
+	Closer       chan struct{}
 	ID           spec.ObjectID
 	Mutex        sync.Mutex
 	ShutdownOnce sync.Once
@@ -239,40 +241,44 @@ func (n *network) Listen() {
 	clgChannel := CLG.GetInputChannel()
 
 	for {
-		textRequest := <-n.TextInput
+		select {
+		case <-n.Closer:
+			break
+		case textRequest := <-n.TextInput:
 
-		// This should only be used for testing to bypass the neural network
-		// and directly respond with the received input.
-		if textRequest.GetEcho() {
-			newTextResponseConfig := api.DefaultTextResponseConfig()
-			newTextResponseConfig.Output = textRequest.GetInput()
-			newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+			// This should only be used for testing to bypass the neural network
+			// and directly respond with the received input.
+			if textRequest.GetEcho() {
+				newTextResponseConfig := api.DefaultTextResponseConfig()
+				newTextResponseConfig.Output = textRequest.GetInput()
+				newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+				if err != nil {
+					n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				}
+				n.TextOutput <- newTextResponse
+				continue
+			}
+
+			ctxConfig := context.DefaultConfig()
+			ctxConfig.SessionID = textRequest.GetSessionID()
+			ctx, err := context.New(ctxConfig)
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				continue
 			}
-			n.TextOutput <- newTextResponse
-			continue
-		}
 
-		ctxConfig := context.DefaultConfig()
-		ctxConfig.SessionID = textRequest.GetSessionID()
-		ctx, err := context.New(ctxConfig)
-		if err != nil {
-			n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-			continue
-		}
+			payloadConfig := api.DefaultNetworkPayloadConfig()
+			payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
+			payloadConfig.Destination = clgID
+			payloadConfig.Sources = []spec.ObjectID{networkID}
+			newPayload, err := api.NewNetworkPayload(payloadConfig)
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				continue
+			}
 
-		payloadConfig := api.DefaultNetworkPayloadConfig()
-		payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
-		payloadConfig.Destination = clgID
-		payloadConfig.Sources = []spec.ObjectID{networkID}
-		newPayload, err := api.NewNetworkPayload(payloadConfig)
-		if err != nil {
-			n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-			continue
+			clgChannel <- newPayload
 		}
-
-		clgChannel <- newPayload
 	}
 }
 
@@ -280,7 +286,6 @@ func (n *network) Shutdown() {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Shutdown")
 
 	n.ShutdownOnce.Do(func() {
-		// TODO shutdown CLG listeners
-		// TODO stop listening on text requests
+		close(n.Closer)
 	})
 }
