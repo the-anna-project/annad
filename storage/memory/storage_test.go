@@ -4,30 +4,10 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
-func testMaybeNewStorage(t *testing.T) spec.Storage {
-	newStorage, err := NewStorage(DefaultStorageConfig())
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newStorage
-}
-
-func Test_Memory_GetID(t *testing.T) {
-	firstStorage := testMaybeNewStorage(t)
-	secondStorage := testMaybeNewStorage(t)
-
-	if firstStorage.GetID() == secondStorage.GetID() {
-		t.Fatal("expected", "different IDs", "got", "equal IDs")
-	}
-}
-
 func Test_Memory_KeyValue(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	value, err := newStorage.Get("foo")
 	if !IsNotFound(err) {
@@ -49,7 +29,7 @@ func Test_Memory_KeyValue(t *testing.T) {
 }
 
 func Test_Memory_StringMap(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	value, err := newStorage.GetStringMap("foo")
 	if !IsNotFound(err) {
@@ -183,7 +163,7 @@ func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := testMaybeNewStorage(t)
+		newStorage := MustNew()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore(testCase.Key, e, s)
@@ -212,7 +192,7 @@ func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
 }
 
 func Test_Memory_GetHighestScoredElements_NotFound(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	_, err := newStorage.GetHighestScoredElements("not-found", 3)
 	if !IsNotFound(err) {
@@ -361,7 +341,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := testMaybeNewStorage(t)
+		newStorage := MustNew()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore(testCase.Key, e, s)
@@ -392,7 +372,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 }
 
 func Test_Memory_GetElementsByScore_NotFound(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	_, err := newStorage.GetElementsByScore("not-found", 0.8, 3)
 	if !IsNotFound(err) {
@@ -401,7 +381,7 @@ func Test_Memory_GetElementsByScore_NotFound(t *testing.T) {
 }
 
 func Test_Memory_RemoveFromSet_Empty(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.RemoveFromSet("test-key", "test-value")
 	if !IsNotFound(err) {
@@ -479,7 +459,7 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := testMaybeNewStorage(t)
+		newStorage := MustNew()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore("test-key", e, s)
@@ -515,7 +495,7 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 }
 
 func Test_Memory_WalkScoredElements_Empty(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	// Check the set is empty by default
 	var element1 string
@@ -537,7 +517,7 @@ func Test_Memory_WalkScoredElements_Empty(t *testing.T) {
 }
 
 func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
 	if err != nil {
@@ -610,7 +590,7 @@ func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
 }
 
 func Test_Memory_Push_WalkSet_Remove(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	// Check the set is empty by default
 	var element1 string
@@ -662,7 +642,7 @@ func Test_Memory_Push_WalkSet_Remove(t *testing.T) {
 }
 
 func Test_Memory_WalkScoredElements_Closer(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.SetElementByScore("test-key", "test-value", 0.8)
 	if err != nil {
@@ -693,7 +673,7 @@ func Test_Memory_WalkScoredElements_Closer(t *testing.T) {
 }
 
 func Test_Memory_WalkScoredElements_Error(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.SetElementByScore("test-key", "test-value", 0.8)
 	if err != nil {
@@ -710,7 +690,7 @@ func Test_Memory_WalkScoredElements_Error(t *testing.T) {
 }
 
 func Test_Memory_WalkSet_Closer(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.PushToSet("test-key", "test-value")
 	if err != nil {
@@ -736,7 +716,7 @@ func Test_Memory_WalkSet_Closer(t *testing.T) {
 }
 
 func Test_Memory_WalkSet_Error(t *testing.T) {
-	newStorage := testMaybeNewStorage(t)
+	newStorage := MustNew()
 
 	err := newStorage.PushToSet("test-key", "test-value")
 	if err != nil {
