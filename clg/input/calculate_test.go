@@ -169,7 +169,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
 
 	c := redigomock.NewConn()
-	c.Command("GET", informationIDKey).ExpectError(redigo.ErrNil)
+	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
 	c.Command("SET").ExpectError(invalidConfigError)
 	newStorage := testMustNewStorageWithConn(t, c)
 
@@ -247,7 +247,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()
-	c.Command("GET", informationIDKey).ExpectError(invalidConfigError)
+	c.Command("GET", "prefix:"+informationIDKey).ExpectError(invalidConfigError)
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
@@ -278,8 +278,8 @@ func Test_CLG_Input_GetCLGTreeIDError(t *testing.T) {
 	clgTreeIDKey := key.NewCLGKey(newCLG, "information-id:clg-tree-id:%s", "456")
 
 	c := redigomock.NewConn()
-	c.Command("GET", informationIDKey).Expect("456")
-	c.Command("GET", clgTreeIDKey).ExpectError(invalidConfigError)
+	c.Command("GET", "prefix:"+informationIDKey).Expect("456")
+	c.Command("GET", "prefix:"+clgTreeIDKey).ExpectError(invalidConfigError)
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
