@@ -30,7 +30,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log: log.NewLog(log.DefaultConfig()),
+		Log: log.New(log.DefaultConfig()),
 	}
 
 	return newConfig

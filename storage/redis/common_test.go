@@ -40,7 +40,7 @@ func Test_RedisStorage_retryErrorLogger(t *testing.T) {
 
 	newLogConfig := log.DefaultConfig()
 	newLogConfig.RootLogger = newRootLogger
-	newLog := log.NewLog(newLogConfig)
+	newLog := log.New(newLogConfig)
 
 	newConfig := DefaultStorageConfig()
 	newConfig.Log = newLog

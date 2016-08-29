@@ -60,7 +60,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Network: newNetwork,
-		Log:     log.NewLog(log.DefaultConfig()),
+		Log:     log.New(log.DefaultConfig()),
 		Server:  newServer,
 		Storage: newStorage,
 

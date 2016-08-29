@@ -38,7 +38,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		IDFactory: id.MustNewFactory(),
-		Log:       log.NewLog(log.DefaultConfig()),
+		Log:       log.New(log.DefaultConfig()),
 		Storage:   memory.MustNew(),
 
 		// Settings.

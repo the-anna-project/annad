@@ -62,7 +62,7 @@ func DefaultStorageConfig() StorageConfig {
 	newConfig := StorageConfig{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
-		Log:             log.NewLog(log.DefaultConfig()),
+		Log:             log.New(log.DefaultConfig()),
 		Pool:            NewPool(DefaultPoolConfig()),
 
 		// Settings.

@@ -46,7 +46,7 @@ func DefaultStorageConfig() StorageConfig {
 	newConfig := StorageConfig{
 		KeyValue:  map[string]string{},
 		StringMap: map[string]map[string]string{},
-		Log:       log.NewLog(log.DefaultConfig()),
+		Log:       log.New(log.DefaultConfig()),
 		MathSet:   map[string]map[string]struct{}{},
 		Weighted:  map[string]scoredElements{},
 	}

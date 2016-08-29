@@ -28,7 +28,7 @@ type ControlConfig struct {
 func DefaultControlConfig() ControlConfig {
 	return ControlConfig{
 		// Dependencies.
-		Log: log.NewLog(log.DefaultConfig()),
+		Log: log.New(log.DefaultConfig()),
 	}
 }
 

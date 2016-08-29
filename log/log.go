@@ -97,10 +97,11 @@ func DefaultConfig() Config {
 	return newDefaultConfig
 }
 
-// NewLog creates a new configured log object.
-func NewLog(config Config) spec.Log {
+// New creates a new configured log object.
+func New(config Config) spec.Log {
 	newLog := log{
-		Config:            config,
+		Config: config,
+
 		ID:                id.MustNew(),
 		Mutex:             sync.Mutex{},
 		RegisteredObjects: []spec.ObjectType{},

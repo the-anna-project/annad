@@ -28,7 +28,7 @@ type ServerConfig struct {
 // interface object by best effort.
 func DefaultServerConfig() ServerConfig {
 	newConfig := ServerConfig{
-		Log:        log.NewLog(log.DefaultConfig()),
+		Log:        log.New(log.DefaultConfig()),
 		TextInput:  make(chan spec.TextRequest, 1000),
 		TextOutput: make(chan spec.TextResponse, 1000),
 	}

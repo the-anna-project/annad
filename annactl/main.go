@@ -58,7 +58,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
 		IDFactory:     id.MustNewFactory(),
-		Log:           log.NewLog(log.DefaultConfig()),
+		Log:           log.New(log.DefaultConfig()),
 		LogControl:    newLogControl,
 		TextInterface: newTextInterface,
 

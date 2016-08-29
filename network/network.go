@@ -60,7 +60,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		IDFactory:          id.MustNewFactory(),
-		Log:                log.NewLog(log.DefaultConfig()),
+		Log:                log.New(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
 		Storage:            newStorage,
 		TextInput:          make(chan spec.TextRequest, 1000),

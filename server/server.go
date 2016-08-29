@@ -68,7 +68,7 @@ func DefaultConfig() Config {
 		// Dependencies.
 
 		Instrumentation: newInstrumentation,
-		Log:             log.NewLog(log.DefaultConfig()),
+		Log:             log.New(log.DefaultConfig()),
 		LogControl:      newLogControl,
 		TextInterface:   newTextInterface,
 
