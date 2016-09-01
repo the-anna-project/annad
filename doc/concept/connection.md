@@ -11,35 +11,13 @@ The connection space can be seen as a multi dimensional vector space. In theory
 it's dimensions can represent everything: space, time or even conceptional
 weights representing something like emotions. Information and behaviors are
 mapped onto the connection space. Here similarities between information, and
-similarities between behaviors can be calculated, because they are represented
-by connection paths. These connection paths consist of coordinates, which
-identify the connection path's location within the connection space.
-Coordinates can be used to calculate distances to other coordinates in the
-surrounding area. Close connection paths can indicate some kind of similarity.
-
-In the connection space, information are represented by the coordinates of
-input sequences. Each vector, that is represented by coordinates, reflects a
-specific character of a specific input sequence. You can think of the joined
-coordinates of an input sequence as a drawn information path in the connection
-space. Information paths in the surrounding area are evidence of some kind of
-similarity. Over time the information paths are transformed when each dimension
-is pulling it's coordinates into their own direction. That way a balanced
-alignment is achieved that makes each information path unique and comparable
-against other information paths in the surrounding area. The same concept that
-applies to information paths also applies to behavior paths, but only on a
-different problem domain and in more complex structure. This is because
-information paths are represented by linear input sequences, and behavior paths
-are represented by CLG trees. Here behavior is mapped to an executable CLG
-tree, which coordinates are mapped onto the connection space. The relationship
-between an input sequence and a CLG tree that solved a problem for this input
-sequence creates the link between information and behavior.
+similarities between behaviors can be calculated.
 
 The following picture illustrates the connection space. For simplicity it only
-shows two dimensions, `x` and `y`. We see two different paths within the
-coordinate system. It doesn't matter if the paths are information or behavior
-paths. The same principle applies to both of these concepts. We see some peers
-which are pretty near to each other. We assume that a smaller distance is an
-indicator for common connection patterns which are aligned over time.
+shows two dimensions, `x` and `y`. We see two different connection paths within
+the connection space. Here some peers are pretty near to each other. We assume
+that a smaller distance is an indicator for common connection patterns which
+are aligned over time under the effect of pulling dimensions.
 
 ![connection space](image/connection_space.png)
 
@@ -60,7 +38,7 @@ connection path's coordinates can be stored, which cause the connection path to
 be updated. This will lead connection paths to be improved over time, because
 behavior was adjusted to the given environmental feedback Anna is receiving.
 
-### creation
+### creation TODO
 When creating new connections it is important to not create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
@@ -114,17 +92,7 @@ within the connection space.
    available. This is the most weak way to create new connections, because it
    does not consider any additional information.
 
-Following is a picture describing the process of connection creation within the
-neural network. `[0]` marks the point at which it is tried to map the given
-input sequence to a CLG tree ID in the available storage. This information is
-attached to the current context. `[1]` marks the points at which it is tried to
-lookup connections of the current CLG tree. This is only possible in case there
-is a CLG tree ID known. If there is no CLG tree ID available, connections are
-created as described above.
-
-![connection creation](image/connection_creation.png)
-
-### lookup
+### lookup TODO
 The process of looking up connections is triggered on demand and thus must be
 optimized for fast execution.
 
