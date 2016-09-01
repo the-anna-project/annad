@@ -147,82 +147,59 @@ relations between objects where possible because of simplicity and speed.
 The notation of the described data structures reads as follows. Everything
 within angle brackets (`<>`) reads as variable. On the left is the key, on the
 right is the value of the key-value pairs. `<prefix>` represents some internal
-storage prefix simply used to prefix data structures to a certain scope.
+storage prefix simply used to prefix data structures to a certain scope. When
+talking about a `behavior-coordinate`, we talk about a single point within the
+connection space, which represents one single CLG associated with a very
+specific connection path.
 
 ---
 
-###### map input sequence to information ID
-When having an input sequence given it needs to be mapped to an information ID.
-An input sequence represents some externally provided information. The
-following key maps an input sequence to an information ID.
+###### map behavior coordinate to behavior coordinates
+When having a single behavior coordinate given it needs to be mapped to
+multiple behavior coordinates. This mapping represents connections linking to N
+behaviors within the connection space. That way dynamic CLG trees can be
+formed. CLGs can lookup connections using their own coordinates. The found
+connections are supposed to be used to forward signals to. The following key
+maps a single behavior coordinate to multiple behavior coordinates.
 
 ```
-<prefix>:input-sequence:information-id:<input-sequence>    <information-id>
+<prefix>:behavior-coordinate:behavior-coordinates:<behavior-coordinate>    <behavior-coordinate>,<behavior-coordinate>,...
 ```
 
----
-
-###### map information ID to input object
-When having an information ID given it needs to be mapped to an input object.
-That way accociated meta data of an input sequences can be tracked by one
-reference object. The following key maps an information ID to an input object.
-
-```
-<prefix>:information-id:input-object:<information-id>    {input-sequence: <input-sequence>, information-coordinates: <information-coordinates>}
-```
-
----
-
-###### map information ID to CLG tree IDs
-When having an information ID given it needs to be mapped to CLG tree IDs.
-Here we make use of sets being able to create intersections with other sets, or
-being able to weight the set members for other sophisticated lookups. Note that
-this key-value pair represents a link between information and behavior due to
-the reference from an information ID to CLG tree IDs. The following key maps an
-information ID to CLG tree IDs.
+###### map behavior coordinate and information sequence to behavior coordinates
+When having a single behavior coordinate and an information sequence given,
+this combination needs to be mapped to multiple behavior coordinates. This
+mapping represents connections linking to N behaviors within the connection
+space. That way dynamic CLG trees can be formed. CLGs can lookup connections
+using their own coordinates and provided information sequences. The found
+connections are supposed to be used to forward signals to. The following key
+maps a single behavior coordinate an information sequence to multiple behavior
+coordinates.
 
 ```
-<prefix>:information-id:clg-tree-id:<information-id>    <clg-tree-id>,<clg-tree-id>,...
+<prefix>:behavior-coordinate:information-sequence:behavior-coordinates:<behavior-coordinate>:<information-sequence>    <behavior-coordinate>,<behavior-coordinate>,...
 ```
 
 ---
 
-###### map information coordinates to information ID
-When having information coordinates given they need to be mapped to their
-information ID. Having information coordinates indexed as keys enables fast
-scans when it needs to be found out which information are near to the
-surrounding area of a given information within the connection space. That way
-information can be mapped and aligned to other matching information. The
-following key maps information coordinates to it's information ID.
+###### map behavior coordinate to CLG name
+When having a single behavior coordinate given it needs to be mapped to its
+unique CLG name. That way behavior can be resolved from its very unique
+coordinate to some actual functionality. This works even across reboots,
+because CLG IDs change where their names don't. The following key maps a single
+behavior coordinate to its CLG name.
 
 ```
-<prefix>:information-coordinates:information-id:<information-coordinates>    <information-id>
+<prefix>:behavior-coordinate:behavior-name:<behavior-coordinate>    <CLG-name>
 ```
 
----
-
-###### map behavior coordinates to behavior coordinates
-When having behavior coordinates given they need to be mapped to behavior
-coordinates. This mapping represents a single connection of behaviors within
-the connection space. CLGs can lookup connections supposed to be used to
-forward signals to their peers using their own coordinates. The following key
-maps behavior coordinates to behavior coordinates.
-
-```
-<prefix>:behavior-coordinates:behavior-coordinates:<behavior-coordinates>    <behavior-coordinates>,<behavior-coordinates>,...
-```
-
----
-
-###### map behavior coordinates to CLG ID
-When having behavior coordinates given they need to be mapped to their CLG ID.
-Having behavior coordinates indexed as keys enables fast scans when it needs to
-be found out which behaviors are near to the surrounding area of a given
-behavior within the connection space. That way behavior can be mapped and
-aligned to matching behaviors. Further it needs to be known where to forward
-signals to when walking through connection paths. The following key maps
-behavior coordinates to it's CLG ID.
-
-```
-<prefix>:behavior-coordinates:behavior-id:<behavior-coordinates>    <CLG-id>
-```
+### abstraction
+The described model above can be abstracted and used for other different things
+as well. E.g. a mapping of conceptional ideas can be achieved by implementing
+certain CLGs. For instance one CLG which adds a mapping between two given
+strings, where these strings represent some concepts like `tree` or `house`.
+Another CLG reads such mappings and acts according to some pattern it decided
+for. Having enough entropy and time given this behavior will lead to
+surprisingly results. The important thing for on this level of abstraction is
+simplicity. We only use very simple key-pairs to represent connections, which
+gives the neural network enough room to figure itself out how to act best.
