@@ -10,8 +10,12 @@ a dynamic fashion form Anna's neural [network](network.md).
 The connection space can be seen as a multi dimensional vector space. In theory
 it's dimensions can represent everything: space, time or even conceptional
 weights representing something like emotions. Information and behaviors are
-mapped onto the connection space. Here similarities between information, and
-similarities between behaviors can be calculated.
+mapped onto the connection space by having coordinates applied. These
+coordinates act as connection weights, which are calculated by interacting with
+the balance system described below. That means the balance system influences
+connections within the connection space, and thus behavior of the whole neural
+network. Using coordinates also certain similarities between information, and
+certain similarities between behaviors can be calculated each.
 
 The following picture illustrates the connection space. For simplicity it only
 shows two dimensions, `x` and `y`. We see two different connection paths within
@@ -27,10 +31,12 @@ create tensions on coordinates within the connection space. Each dimension is
 pulling into its own direction based on learned patterns. The important idea
 behind the tensions created here is that they are balanced. One dimension
 pulling coordinates spontaneously into a certain direction makes another
-dimension move into the same direction. This creates a simulation of
-psychological interactions on different levels. Like disgust and attraction
-cannot go together. Aim of such a balance system is to provide buildin
-mechanisms of leveraging event interactions.
+dimension move proportionaly into another direction. If one dimension goes up,
+another dimension goes down. Thus a balance is created. This creates a
+simulation of psychological interactions on different levels. Like disgust and
+attraction cannot go together. Aim of such a balance system is to provide
+buildin mechanisms of leveraging event interactions and calculating connection
+weights.
 
 Spontaneous modificatins of connections lead to variances within applied
 behaviors. Leads some behavior to successful results, slight adjustments of a
@@ -42,39 +48,27 @@ behavior was adjusted to the given environmental feedback Anna is receiving.
 When creating new connections it is important to not create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
-fully dynamic and learned by experience and can be described as follows.
+fully dynamic and learned by experience.
 
-When information is provided in the form of input, and no connection path for
-the current input sequence exists yet, it is mapped onto the connection space.
-Each character of the input sequence is represented by their own coordinates.
-That way an input sequence draws a connection path within the connection space.
-This is then the connection path of information.
-
-The creation of behavior connections takes place on the CLG level. Connections
-of behaviors are only persisted in case they belong to a successful behavior
-connection path that in turn helped to solve some problem. So, the connection
-path of behaviors is made out of connections that belong to behaviors. Here a
-connection is represented as single key-value pair where it's key being the
-string representation of coordinates links to another string representation of
-coordinates. A CLG is identified using its unique coordinates within the
-connection space in combination with its very unique connection path, which in
-turn is represented by a CLG tree ID. New coordinates are randomly created with
-some offset to the coordinates of the requesting CLG. A reference from
-coordinates to an actual CLG ID is also stored for mapping of coordinates to
-actual behavior later on. This is then the connection path of behaviors.
+When information is provided in the form of input, it is stored within the
+underlying storage. The creation of behavior connections takes place on the CLG
+level. A connection is represented as single key-value pair. The key of such a
+key-value pairs consists of multiple information like the clg tree-ID, the
+behavior coordinate and an information sequence, if any. The value of such a
+key-value pair is a list of behavior IDs.
 
 All newly created connections are persisted within a trial scope in the first
 place. Such trial scope is basically realized by some specific storage prefix
 that simply identifies certain key-value pairs as being part of such a trial
 scope. This is done to label the current creation process of behavior
 connections to something that is volatile. If the neural network succeeds to
-solve a problem with some newly created connection path, the behavior
-connections stored and marked within a trial scope are persisted as regular
-connections. In case the created connection path did not lead to some
-successful operation, all behavior connections marked within a trial scope are
-simply removed again. Anyway, there needs a decision to be made to forward to
-some CLG. These strategies are considered when it comes to draw new connections
-within the connection space.
+solve a problem with some newly created connections, the behavior connections
+stored and marked within a trial scope are persisted as regular connections and
+thus not considered volatile anymore. In case the created connections did not
+lead to some successful operation, all volatile connections marked within a
+trial scope are simply removed again. Anyway, there needs a decision to be made
+to forward signals to some CLGs. The following strategies are considered when
+it comes to create new connections within the connection space.
 
 1. *Bias* is some manually provided hint, intended to guide some connection path
    into a certain direction. Read more on this in this issue:
@@ -92,17 +86,15 @@ within the connection space.
    available. This is the most weak way to create new connections, because it
    does not consider any additional information.
 
-### lookup TODO
+### lookup
 The process of looking up connections is triggered on demand and thus must be
 optimized for fast execution.
 
-When information is provided in the form of input, and there does a connection
-path for the current input sequence exist, the information ID of the input
-sequence is fetched. This information ID links to some meta data associated
-with this input sequence, which also contains CLG tree IDs. Using such CLG tree
-IDs it is possible to lookup the connection path of behaviors. Within each
-CLG's scope a lookup happens to fetch all the peers that needs to be known to
-forward signals to.
+The lookup of connections happens within each CLG's execution scope to fetch
+all the peers that needs to be known to forward signals to. Connections will be
+looked up, eventually using provided input, if any. The decision about which
+connections to use will be calculated based on weights being applied on the
+connections.
 
 ### data structure
 Designing a data structure is quite important. Smart systems need to store
@@ -110,42 +102,51 @@ information efficiently. The wrong data structures will cause huge amounts of
 data or cause high latency for business logic tasks. The following data
 structure design aims to be efficient and fast while meeting the requirements
 of Anna's business logic. We use key-value pairs to store data and describe
-relations between objects where possible because of simplicity and speed.
+relations between objects where possible because of simplicity and speed. The
+notation of the described data structures reads as follows.
 
-The notation of the described data structures reads as follows. Everything
-within angle brackets (`<>`) reads as variable. On the left is the key, on the
-right is the value of the key-value pairs. `<prefix>` represents some internal
-storage prefix simply used to prefix data structures to a certain scope. When
-talking about a `behavior-coordinate`, we talk about a single point within the
-connection space, which represents one single CLG associated with a very
-specific connection path.
+- Everything within angle brackets (`<>`) reads as variable.
+- On the left is the key, on the right is the value of the key-value pairs.
+- `<prefix>` represents some internal storage prefix simply used to prefix data
+  structures to a certain scope.
+- When talking about a `<clg-tree-ID>`, we talk about an identifier for
+  combined, executable behavior.
+- When talking about a `<behavior-coordinate>`, we talk about a single point
+  within the connection space, which represents one single CLG associated with
+  a very specific connection path. A CLG's coordinate represents its connection
+  weight, which is calculated by interacting with the balance system.
+
+TODO
+
+- explain behavior ID
+- explain information coordinate
+- explain information sequence
 
 ---
 
-###### map behavior coordinate to behavior coordinates
-When having a single behavior coordinate given it needs to be mapped to
-multiple behavior coordinates. This mapping represents connections linking to N
-behaviors within the connection space. That way dynamic CLG trees can be
-formed. CLGs can lookup connections using their own coordinates. The found
-connections are supposed to be used to forward signals to. The following key
-maps a single behavior coordinate to multiple behavior coordinates.
+###### map behavior ID to behavior IDs
+When having a single behavior ID given it needs to be mapped to multiple
+behavior IDs. This mapping represents connections linking to N behaviors within
+the connection space. That way dynamic CLG trees can be formed. CLGs can lookup
+connections using their own IDs. The found connections are supposed to be used
+to forward signals to. The following key maps a single behavior ID to multiple
+behavior IDs.
 
 ```
-<prefix>:behavior-coordinate:behavior-coordinates:<behavior-coordinate>    <behavior-coordinate>,<behavior-coordinate>,...
+<prefix>:clg-tree-ID:<clg-tree-id>:behavior-coordinate:<behavior-coordinate>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
 ```
 
-###### map behavior coordinate and information sequence to behavior coordinates
-When having a single behavior coordinate and an information sequence given,
-this combination needs to be mapped to multiple behavior coordinates. This
-mapping represents connections linking to N behaviors within the connection
-space. That way dynamic CLG trees can be formed. CLGs can lookup connections
-using their own coordinates and provided information sequences. The found
-connections are supposed to be used to forward signals to. The following key
-maps a single behavior coordinate an information sequence to multiple behavior
-coordinates.
+###### map behavior ID and information sequence to behavior IDs
+When having a single behavior ID and an information sequence given, this
+combination needs to be mapped to multiple behavior IDs. This mapping
+represents connections linking to N behaviors within the connection space. That
+way dynamic CLG trees can be formed. CLGs can lookup connections using their
+own IDs and provided information sequences. The found connections are supposed
+to be used to forward signals to. The following key maps a single behavior ID
+an information sequence to multiple behavior IDs.
 
 ```
-<prefix>:behavior-coordinate:information-sequence:behavior-coordinates:<behavior-coordinate>:<information-sequence>    <behavior-coordinate>,<behavior-coordinate>,...
+<prefix>:clg-tree-ID:<clg-tree-id>:behavior-coordinate:<behavior-coordinate>:information-sequence:<information-sequence>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
 ```
 
 ---
@@ -158,7 +159,7 @@ because CLG IDs change where their names don't. The following key maps a single
 behavior coordinate to its CLG name.
 
 ```
-<prefix>:behavior-coordinate:behavior-name:<behavior-coordinate>    <CLG-name>
+<prefix>:behavior-coordinate:<behavior-coordinate>:behavior-name    <CLG-name>
 ```
 
 ### abstraction
