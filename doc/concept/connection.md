@@ -107,20 +107,42 @@ notation of the described data structures reads as follows.
 
 - Everything within angle brackets (`<>`) reads as variable.
 - On the left is the key, on the right is the value of the key-value pairs.
-- `<prefix>` represents some internal storage prefix simply used to prefix data
-  structures to a certain scope.
+- When talking about a `<prefix>`, we talk about some internal storage prefix,
+  which is simply used to prefix data structures to a certain scope. This
+  prefix might also indicate a relation to some `<trial-scope>`.
 - When talking about a `<clg-tree-ID>`, we talk about an identifier for
   combined, executable behavior.
 - When talking about a `<behavior-coordinate>`, we talk about a single point
   within the connection space, which represents one single CLG associated with
   a very specific connection path. A CLG's coordinate represents its connection
-  weight, which is calculated by interacting with the balance system.
+  weight, which is calculated by interacting with the balance system. These
+  coordinates might be recalculated to align them to successful connection
+  paths.
+- When talking about a `<behavior-ID>`, we talk about a very unique identifier
+  of a CLG, which is generated for each CLG execution that is not related to an
+  already known CLG tree ID. That way a single CLG can be represented as unique
+  CLG with its own very unique connections and behaviors.
+- When talking about an `<information-coordinate>`, we talk about a single
+  point within the connection space, which represents one single information
+  sequence. An information sequence's coordinate represents its weight, which
+  is calculated by interacting with the balance system. These coordinates might
+  be recalculated to align them to successful connection paths.
+- When talking about an `<information-sequence>`, we talk about a single piece
+  of information, which is either provided from the outside, or generated
+  internally.
 
-TODO
+---
 
-- explain behavior ID
-- explain information coordinate
-- explain information sequence
+###### index information sequence
+When having an information sequence given it needs to be indexed. This happens
+by storing received and calculated information sequences as keys. Their
+coordinates might be used to calculate additional weights, which can also be
+applied to weights of the actually resolved connections. The following key
+indexes information sequences.
+
+```
+<prefix>:information-coordinate:<information-coordinate>:information-sequence:<information-sequence>    {}
+```
 
 ---
 
@@ -128,25 +150,15 @@ TODO
 When having a single behavior ID given it needs to be mapped to multiple
 behavior IDs. This mapping represents connections linking to N behaviors within
 the connection space. That way dynamic CLG trees can be formed. CLGs can lookup
-connections using their own IDs. The found connections are supposed to be used
-to forward signals to. The following key maps a single behavior ID to multiple
+connections using their own IDs. Additionally, connections can be looked up by
+information sequences, if any given. Their coordinates might be used to
+calculate additional weights, which can also be applied to weights of the
+actually resolved connections. The found connections are supposed to be used to
+forward signals to. The following key maps a single behavior ID to multiple
 behavior IDs.
 
 ```
 <prefix>:clg-tree-ID:<clg-tree-id>:behavior-coordinate:<behavior-coordinate>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
-```
-
-###### map behavior ID and information sequence to behavior IDs
-When having a single behavior ID and an information sequence given, this
-combination needs to be mapped to multiple behavior IDs. This mapping
-represents connections linking to N behaviors within the connection space. That
-way dynamic CLG trees can be formed. CLGs can lookup connections using their
-own IDs and provided information sequences. The found connections are supposed
-to be used to forward signals to. The following key maps a single behavior ID
-an information sequence to multiple behavior IDs.
-
-```
-<prefix>:clg-tree-ID:<clg-tree-id>:behavior-coordinate:<behavior-coordinate>:information-sequence:<information-sequence>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
 ```
 
 ---
