@@ -44,31 +44,31 @@ path.
 
 ![connection space](image/connection_space.png)
 
-### creation TODO
+### creation
 When creating new connections it is important to not create weak connections.
 Each connection that exists only exists because it brought some kind of value
 in the past. The process of creating connections is a continuous task, that is
 fully dynamic and learned by experience.
 
-When information is provided in the form of input, it is stored within the
-underlying storage. The creation of behavior connections takes place on the CLG
-level. A connection is represented as single key-value pair. The key of such a
-key-value pairs consists of multiple information like the clg tree-ID, the
-behavior coordinate and an information sequence, if any. The value of such a
-key-value pair is a list of behavior IDs.
+When information is provided, it is stored within the underlying storage. The
+creation of behavior connections takes place on the CLG level. A connection is
+represented as single key-value pair. The key of such a key-value pair consists
+of multiple information like the clg tree-ID, the behavior coordinate and an
+information sequence, if any given. The value of such a key-value pair is a
+list of behavior IDs. All newly created connections are persisted within a
+trial scope in the first place. The purpose of such a trial scope is to label
+all persisted data within the current creation process as volatile. This is
+done by simply putting some identifier which represents the trial scope into
+the storage key's prefix. If the neural network succeeds to solve a problem
+with some newly created connections, the connections stored within a trial
+scope are persisted as regular connections and thus not considered volatile
+anymore. In case the created connections did not lead to some successful
+operation, all volatile connections stored within a trial scope are simply
+removed.
 
-All newly created connections are persisted within a trial scope in the first
-place. Such trial scope is basically realized by some specific storage prefix
-that simply identifies certain key-value pairs as being part of such a trial
-scope. This is done to label the current creation process of behavior
-connections to something that is volatile. If the neural network succeeds to
-solve a problem with some newly created connections, the behavior connections
-stored and marked within a trial scope are persisted as regular connections and
-thus not considered volatile anymore. In case the created connections did not
-lead to some successful operation, all volatile connections marked within a
-trial scope are simply removed again. Anyway, there needs a decision to be made
-to forward signals to some CLGs. The following strategies are considered when
-it comes to create new connections within the connection space.
+Anyway, there needs a decision to be made to forward signals to some CLGs. The
+following strategies are considered when it comes to create new connections
+within the connection space.
 
 1. *Bias* is some manually provided hint, intended to guide some connection path
    into a certain direction. Read more on this in this issue:
@@ -94,7 +94,8 @@ The lookup of connections happens within each CLG's execution scope to fetch
 all the peers that needs to be known to forward signals to. Connections will be
 looked up, eventually using provided input, if any. The decision about which
 connections to use will be calculated based on weights being applied on the
-connections.
+connections. Weights in turn are calculated by applying the balance system to a
+connections coordinates.
 
 ### data structure
 Designing a data structure is quite important. Smart systems need to store
