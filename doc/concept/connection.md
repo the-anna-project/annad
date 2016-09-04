@@ -17,7 +17,7 @@ used to make dimensions create tensions on coordinates within the connection
 space. Each dimension is pulling into its own direction based on learned
 patterns. The important idea behind the tensions created here is that they are
 balanced. One dimension pulling coordinates spontaneously into a certain
-direction makes another dimension move proportionaly into another direction. If
+direction makes another dimension move proportionally into another direction. If
 one dimension goes up, another dimension goes down. Thus a balance is created.
 This creates a simulation of psychological interactions on different levels.
 Like disgust and attraction cannot go together. Aim of such a balance system is
