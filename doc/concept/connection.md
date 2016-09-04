@@ -3,8 +3,8 @@ The connection model is the most important concept of the Anna project. A
 connection can be seen as a neural connection. Such connections represent
 relationships between certain information and behaviors, represented in a multi
 dimensional space. [Inputs](input.md), [outputs](output.md) and [CLGs](clg.md)
-are wired together that way. Many of these connections interacting together in
-a dynamic fashion form Anna's neural [network](network.md).
+are wired together that way. Many of these connections interacting together
+dynamically, represent Anna's neural [network](network.md).
 
 ### space
 The connection space can be seen as a multi dimensional vector space. In theory
@@ -12,37 +12,37 @@ it's dimensions can represent everything: space, time or even conceptional
 weights representing something like emotions. Information and behaviors are
 mapped onto the connection space by having coordinates applied. These
 coordinates act as connection weights, which are calculated by interacting with
-the balance system described below. That means the balance system influences
-connections within the connection space, and thus behavior of the whole neural
-network. Using coordinates also certain similarities between information, and
-certain similarities between behaviors can be calculated each.
-
-The following picture illustrates the connection space. For simplicity it only
-shows two dimensions, `x` and `y`. We see two different connection paths within
-the connection space. Here some peers are pretty near to each other. We assume
-that a smaller distance is an indicator for common connection patterns which
-are aligned over time under the effect of pulling dimensions.
-
-![connection space](image/connection_space.png)
-
-### balance
-[The balance system](distribution.md#balance-system) is used to make dimensions
-create tensions on coordinates within the connection space. Each dimension is
-pulling into its own direction based on learned patterns. The important idea
-behind the tensions created here is that they are balanced. One dimension
-pulling coordinates spontaneously into a certain direction makes another
-dimension move proportionaly into another direction. If one dimension goes up,
-another dimension goes down. Thus a balance is created. This creates a
-simulation of psychological interactions on different levels. Like disgust and
-attraction cannot go together. Aim of such a balance system is to provide
-buildin mechanisms of leveraging event interactions and calculating connection
-weights.
+[the balance system](distribution.md#balance-system). The balance system is
+used to make dimensions create tensions on coordinates within the connection
+space. Each dimension is pulling into its own direction based on learned
+patterns. The important idea behind the tensions created here is that they are
+balanced. One dimension pulling coordinates spontaneously into a certain
+direction makes another dimension move proportionaly into another direction. If
+one dimension goes up, another dimension goes down. Thus a balance is created.
+This creates a simulation of psychological interactions on different levels.
+Like disgust and attraction cannot go together. Aim of such a balance system is
+to provide buildin mechanisms of leveraging event interactions and calculating
+connection weights.
 
 Spontaneous modificatins of connections lead to variances within applied
 behaviors. Leads some behavior to successful results, slight adjustments of a
 connection path's coordinates can be stored, which cause the connection path to
 be updated. This will lead connection paths to be improved over time, because
-behavior was adjusted to the given environmental feedback Anna is receiving.
+behavior was adjusted to the given environmental feedback that Anna has
+received. That means the balance system influences connections within the
+connection space, and thus behavior of the whole neural network. Thus
+coordinates are used to calculate dynamic and individual connection weights.
+They are also used to calculate certain similarities between information, and
+certain similarities between behaviors.
+
+The following picture illustrates the connection space. For simplicity it only
+shows two dimensions, `x` and `y`. We see two different connection paths within
+the connection space. Here some peers are pretty near to each other. We can
+calculate a similarity based on the distances between peers. An indicator for
+common connection patterns can also be derived from the form of a connection
+path.
+
+![connection space](image/connection_space.png)
 
 ### creation TODO
 When creating new connections it is important to not create weak connections.
