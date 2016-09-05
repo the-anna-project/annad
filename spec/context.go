@@ -6,6 +6,9 @@ import (
 
 // Context represents a container holding scope specific information.
 type Context interface {
+	// Clone returns an exact copy of the current Context.
+	Clone() Context
+
 	context.Context
 
 	// GetCLGTreeID returns the clg tree ID of the current Context.

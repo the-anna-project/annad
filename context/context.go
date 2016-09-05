@@ -6,7 +6,7 @@ package context
 import (
 	"time"
 
-	contextpkg "golang.org/x/net/context"
+	netcontext "golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
@@ -23,7 +23,7 @@ const (
 type Config struct {
 	// Settings.
 
-	Context   contextpkg.Context
+	Context   netcontext.Context
 	SessionID string
 }
 
@@ -32,7 +32,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context:   contextpkg.Background(),
+		Context:   netcontext.Background(),
 		SessionID: "",
 	}
 
@@ -47,6 +47,9 @@ func New(config Config) (spec.Context, error) {
 		ID: string(id.MustNew()),
 	}
 
+	// If there is a session ID configured, we set it to the underlying context.
+	// That way our standard configuration interface is obtained and the data
+	// structures of the underlying implementation consistent.
 	if config.SessionID != "" {
 		newContext.SetSessionID(config.SessionID)
 	}
@@ -72,6 +75,17 @@ type context struct {
 	Config
 
 	ID string
+}
+
+func (c *context) Clone() spec.Context {
+	specContext := MustNew()
+
+	specContext.(*context).Context = netcontext.Background()
+	specContext.(*context).SessionID = c.GetSessionID()
+	specContext.SetSessionID(c.GetSessionID())
+	specContext.SetCLGTreeID(c.GetCLGTreeID())
+
+	return specContext
 }
 
 func (c *context) Deadline() (time.Time, bool) {
@@ -109,11 +123,11 @@ func (c *context) GetSessionID() string {
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
-	c.Context = contextpkg.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
 }
 
 func (c *context) SetSessionID(sessionID string) {
-	c.Context = contextpkg.WithValue(c.Context, sessionIDKey, sessionID)
+	c.Context = netcontext.WithValue(c.Context, sessionIDKey, sessionID)
 }
 
 func (c *context) Value(key interface{}) interface{} {
