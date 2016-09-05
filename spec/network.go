@@ -23,6 +23,11 @@ type NetworkPayload interface {
 	// GetArgs returns the sources of the current network payload.
 	GetSources() []ObjectID
 
+	// SetArgs returns the arguments of the current network payload. In case the
+	// given arguments are not valid, SetArgs returns an error. See Validate for
+	// more information.
+	SetArgs(args []reflect.Value) error
+
 	// String returns the concatenated string representations of the currently
 	// configured arguments.
 	String() string

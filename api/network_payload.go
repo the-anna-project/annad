@@ -3,6 +3,8 @@ package api
 import (
 	"reflect"
 
+	"golang.org/x/net/context"
+
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -38,7 +40,7 @@ type NetworkPayloadConfig struct {
 // network payload object by best effort.
 func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
 	newConfig := NetworkPayloadConfig{
-		Args:        nil,
+		Args:        []reflect.Value{reflect.ValueOf(context.Background())},
 		Destination: "",
 		Sources:     nil,
 	}
@@ -89,6 +91,17 @@ func (np *networkPayload) GetID() spec.ObjectID {
 
 func (np *networkPayload) GetSources() []spec.ObjectID {
 	return np.Sources
+}
+
+func (np *networkPayload) SetArgs(args []reflect.Value) error {
+	np.Args = args
+
+	err := np.Validate()
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (np *networkPayload) String() string {
