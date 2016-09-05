@@ -6,6 +6,7 @@
 package network
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -211,17 +212,28 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
-	// Check if the given spec.Context provides a CLG tree ID.
-	ctx, err := payload.GetContext()
+	oldCtx, err := payload.GetContext()
 	if err != nil {
 		return maskAny(err)
 	}
-	clgTreeID := ctx.GetCLGTreeID()
+	newCtx := oldCtx.Clone()
+	// TODO apply behavior ID to new context
 
-	if clgTreeID == "" {
-		// create new
-	} else {
-		// lookup existing
+	// TODO fetch destinations
+	var destinations []spec.ObjectID
+
+	for _, d := range destinations {
+		newPayloadConfig := api.DefaultNetworkPayloadConfig()
+		newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
+		newPayloadConfig.Destination = d
+		newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
+		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		// TODO send payload
+		fmt.Printf("%#v\n", newPayload)
 	}
 
 	return nil
