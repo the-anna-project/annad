@@ -53,17 +53,12 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
 		IDFactory:          id.MustNewFactory(),
 		Log:                log.New(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
-		Storage:            newStorage,
+		Storage:            memory.MustNew(),
 		TextInput:          make(chan spec.TextRequest, 1000),
 		TextOutput:         make(chan spec.TextResponse, 1000),
 
@@ -216,13 +211,15 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	if err != nil {
 		return maskAny(err)
 	}
-	newCtx := oldCtx.Clone()
-	// TODO apply behavior ID to new context
 
 	// TODO fetch destinations
 	var destinations []spec.ObjectID
 
 	for _, d := range destinations {
+		// TODO apply behavior ID to new context
+		newCtx := oldCtx.Clone()
+
+		// TODO comment
 		newPayloadConfig := api.DefaultNetworkPayloadConfig()
 		newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
 		newPayloadConfig.Destination = d
@@ -232,7 +229,8 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 			return maskAny(err)
 		}
 
-		// TODO send payload
+		// TODO find CLG based on behavior ID
+		// TODO send payload to CLG InputChannel
 		fmt.Printf("%#v\n", newPayload)
 	}
 
@@ -248,7 +246,6 @@ func (n *network) Listen() {
 		n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 	}
 
-	clgID := CLG.GetID()
 	networkID := n.GetID()
 	clgChannel := CLG.GetInputChannel()
 
@@ -271,6 +268,7 @@ func (n *network) Listen() {
 				continue
 			}
 
+			// Prepare the context and a unique behaviour ID for the input CLG.
 			ctxConfig := context.DefaultConfig()
 			ctxConfig.SessionID = textRequest.GetSessionID()
 			ctx, err := context.New(ctxConfig)
@@ -278,10 +276,30 @@ func (n *network) Listen() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
 			}
+			destination, err := n.IDFactory.WithType(id.Hex128)
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				continue
+			}
 
+			// We transform the received input to a network payload to have a
+			// conventional data structure within the neural network. Note the
+			// following details.
+			//
+			//     The list of arguments always contains a context as first argument.
+			//
+			//     Destination is always the behavior ID of the input CLG, since this
+			//     one is the connecting building block to other CLGs within the
+			//     neural network. This behavior ID is always a new one, because it
+			//     will eventually be part of a completely new CLG tree within the
+			//     connection space.
+			//
+			//     Sources is here only the individual network ID to have at least
+			//     any reference of origin.
+			//
 			payloadConfig := api.DefaultNetworkPayloadConfig()
 			payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
-			payloadConfig.Destination = clgID
+			payloadConfig.Destination = destination
 			payloadConfig.Sources = []spec.ObjectID{networkID}
 			newPayload, err := api.NewNetworkPayload(payloadConfig)
 			if err != nil {
