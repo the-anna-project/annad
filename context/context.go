@@ -15,8 +15,9 @@ import (
 type key string
 
 const (
-	clgTreeIDKey key = "clg-tree-id"
-	sessionIDKey key = "session-id"
+	behaviorIDKey key = "behavior-id"
+	clgTreeIDKey  key = "clg-tree-id"
+	sessionIDKey  key = "session-id"
 )
 
 // Config represents the configuration used to create a new context object.
@@ -104,6 +105,15 @@ func (c *context) Err() error {
 	return c.Context.Err()
 }
 
+func (c *context) GetBehaviorID() string {
+	behaviorID, ok := c.Context.Value(behaviorIDKey).(string)
+	if ok {
+		return behaviorID
+	}
+
+	return ""
+}
+
 func (c *context) GetCLGTreeID() string {
 	clgTreeID, ok := c.Context.Value(clgTreeIDKey).(string)
 	if ok {
@@ -124,6 +134,10 @@ func (c *context) GetSessionID() string {
 	}
 
 	return ""
+}
+
+func (c *context) SetBehaviorID(behaviorID string) {
+	c.Context = netcontext.WithValue(c.Context, behaviorIDKey, behaviorID)
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {

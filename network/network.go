@@ -6,7 +6,6 @@
 package network
 
 import (
-	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -203,35 +203,44 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 	return calculatedPayload, nil
 }
 
-// TODO
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
+	// Try to find the best connections.
 	oldCtx, err := payload.GetContext()
 	if err != nil {
 		return maskAny(err)
 	}
+	behaviorIDs, err := n.findConnections(oldCtx.GetCLGTreeID())
+	if err != nil {
+		return maskAny(err)
+	}
 
-	// TODO fetch destinations
-	var destinations []spec.ObjectID
-
-	for _, d := range destinations {
-		// TODO apply behavior ID to new context
+	for _, ID := range behaviorIDs {
+		// Prepare a new context for the new connection path.
 		newCtx := oldCtx.Clone()
+		newCtx.SetBehaviorID(ID)
 
-		// TODO comment
+		// Create a new network payload
 		newPayloadConfig := api.DefaultNetworkPayloadConfig()
 		newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
-		newPayloadConfig.Destination = d
+		newPayloadConfig.Destination = spec.ObjectID(ID)
 		newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
 		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
 		if err != nil {
 			return maskAny(err)
 		}
 
-		// TODO find CLG based on behavior ID
-		// TODO send payload to CLG InputChannel
-		fmt.Printf("%#v\n", newPayload)
+		// Find the actual CLG based on its behavior ID.
+		clgName, err := n.Storage.Get(key.NewNetKey(n, "behavior-id:%s:behavior-name", ID))
+		if err != nil {
+			return maskAny(err)
+		}
+		CLG, err := n.clgByName(clgName)
+		if err != nil {
+			return maskAny(err)
+		}
+		CLG.GetInputChannel() <- newPayload
 	}
 
 	return nil

@@ -164,15 +164,14 @@ behavior IDs.
 
 ---
 
-###### map behavior coordinate to CLG name
-When having a single behavior coordinate given it needs to be mapped to its
-unique CLG name. That way behavior can be resolved from its very unique
-coordinate to some actual functionality. This works even across reboots,
-because CLG IDs change where their names don't. The following key maps a single
-behavior coordinate to its CLG name.
+###### map behavior ID to CLG name
+When having a single behavior ID given it needs to be mapped to its unique CLG
+name. That way behavior can be resolved from its very unique ID to some actual
+functionality. This works even across reboots, because CLG IDs change where
+their names don't. The following key maps a single behavior ID to its CLG name.
 
 ```
-<prefix>:behavior-coordinate:<behavior-coordinate>:behavior-name    <CLG-name>
+<prefix>:behavior-id:<behavior-id>:behavior-name    <CLG-name>
 ```
 
 ### abstraction

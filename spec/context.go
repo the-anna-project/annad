@@ -11,6 +11,9 @@ type Context interface {
 
 	context.Context
 
+	// GetBehaviorID returns the behavior ID of the current Context.
+	GetBehaviorID() string
+
 	// GetCLGTreeID returns the clg tree ID of the current Context.
 	GetCLGTreeID() string
 
@@ -21,6 +24,9 @@ type Context interface {
 
 	// GetSessionID returns the session ID of the current Context.
 	GetSessionID() string
+
+	// SetBehaviorID sets the given behavior ID to the current Context.
+	SetBehaviorID(behaviorID string)
 
 	// SetCLGTreeID sets the given clg tree ID to the current Context.
 	SetCLGTreeID(clgTreeID string)

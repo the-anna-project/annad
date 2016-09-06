@@ -34,6 +34,15 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	return CLGs
 }
 
+func (n *network) findConnections(clgTreeID string) ([]string, error) {
+	// TODO must return behavior IDs
+	// TODO lookup known
+	// TODO CLG tree ID might be empty
+	// TODO create new
+
+	return nil, nil
+}
+
 func (n *network) listenCLGs() {
 	// Make all CLGs listening in their specific input channel.
 	for ID, CLG := range n.CLGs {
