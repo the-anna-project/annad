@@ -231,8 +231,11 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 			return maskAny(err)
 		}
 
-		// Find the actual CLG based on its behavior ID.
-		clgName, err := n.Storage.Get(key.NewNetKey(n, "behavior-id:%s:behavior-name", ID))
+		// Find the actual CLG based on its behavior ID. Therefore we lookup the
+		// behavior name by the given behavior ID. Data we read here is written
+		// within several CLGs. That way the network creates its own connections
+		// based on learned experiences.
+		clgName, err := n.Storage.Get(key.NewCLGKey("behavior-id:%s:behavior-name", ID))
 		if err != nil {
 			return maskAny(err)
 		}
