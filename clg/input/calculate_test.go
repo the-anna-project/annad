@@ -17,10 +17,14 @@ import (
 
 type testIDFactory struct{}
 
-// WithType is only a test implementation of spec.IDFactory to do nothing but
+// New is only a test implementation of spec.IDFactory to do nothing but
 // returning some error we can check against.
-func (f *testIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
+func (f *testIDFactory) New() (spec.ObjectID, error) {
 	return "", maskAny(invalidConfigError)
+}
+
+func (f *testIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
+	return "", nil
 }
 
 func testMustNewIDFactory(t *testing.T) spec.IDFactory {

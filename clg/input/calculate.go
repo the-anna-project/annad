@@ -17,7 +17,7 @@ func (c *clg) calculate(ctx spec.Context, input string) error {
 	if storage.IsNotFound(err) {
 		// The given input was never seen before. Thus we register it now with its
 		// own very unique information ID.
-		newID, err := c.IDFactory.WithType(id.Hex128)
+		newID, err := c.IDFactory.New()
 		if err != nil {
 			return maskAny(err)
 		}

@@ -248,7 +248,7 @@ func (n *network) Listen() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
 			}
-			behaviorID, err := n.IDFactory.WithType(id.Hex128) // TODO configure ID factory upfront with desired type
+			behaviorID, err := n.IDFactory.New()
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
