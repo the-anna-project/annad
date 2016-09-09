@@ -6,6 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/input"
+	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/spec"
 )
 

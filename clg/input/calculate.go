@@ -12,7 +12,7 @@ import (
 // calculate tries to map the given input sequence to a CLG tree ID within the
 // available storage.
 func (c *clg) calculate(ctx spec.Context, input string) error {
-	informationIDKey := key.NewCLGKey(c, "information-sequence:%s:information-id", input)
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
 	informationID, err := c.Storage.Get(informationIDKey)
 	if storage.IsNotFound(err) {
 		// The given input was never seen before. Thus we register it now with its
@@ -34,7 +34,7 @@ func (c *clg) calculate(ctx spec.Context, input string) error {
 	}
 
 	// TODO separate CLG
-	clgTreeID, err := c.Storage.Get(key.NewCLGKey(c, "information-id:clg-tree-id:%s", informationID))
+	clgTreeID, err := c.Storage.Get(key.NewCLGKey("information-id:clg-tree-id:%s", informationID))
 	if storage.IsNotFound(err) {
 		// We do not know any useful CLG tree for the given input. Thus we cannot
 		// set any to the current context.
