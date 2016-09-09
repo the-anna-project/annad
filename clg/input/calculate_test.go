@@ -48,7 +48,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	// Create record for the test input.
 	informationID := "123"
 	input := "test input"
-	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
 	err := newStorage.Set(informationIDKey, informationID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -56,7 +56,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 
 	// Create record for the clg tree ID.
 	clgTreeID := "456"
-	clgTreeIDKey := key.NewCLGKey(newCLG, "information-id:clg-tree-id:%s", informationID)
+	clgTreeIDKey := key.NewCLGKey("information-id:clg-tree-id:%s", informationID)
 	err = newStorage.Set(clgTreeIDKey, clgTreeID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -79,12 +79,14 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check calculated payload. The input CLG only returns an error. This error
-	// is filtered to be handled during the call to Calculate. Thus it is removed
-	// from the calculated payload.
+	// Check the calculated payload. The interface of the input CLG only returns
+	// an error. This error is filtered to be handled during the call to
+	// Calculate. Thus it is removed from the calculated payload. Anyway there is
+	// the original context be obtained as first argument within the network
+	// payload.
 	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 0 {
-		t.Fatal("expected", 0, "got", len(args))
+	if len(args) != 1 {
+		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	// Check if clg tree ID was set to the context.
@@ -120,12 +122,14 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check calculated payload. The input CLG only returns an error. This error
-	// is filtered to be handled during the call to Calculate. Thus it is removed
-	// from the calculated payload.
+	// Check the calculated payload. The interface of the input CLG only returns
+	// an error. This error is filtered to be handled during the call to
+	// Calculate. Thus it is removed from the calculated payload. Anyway there is
+	// the original context be obtained as first argument within the network
+	// payload.
 	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 0 {
-		t.Fatal("expected", 0, "got", len(args))
+	if len(args) != 1 {
+		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	// Check if clg tree ID was set to the context.
@@ -170,7 +174,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	input := "test input"
-	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
 
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
@@ -204,7 +208,7 @@ func Test_CLG_Input_UnknownCLGTree(t *testing.T) {
 	// unknown clg tree.
 	informationID := "123"
 	input := "test input"
-	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
 	err := newStorage.Set(informationIDKey, informationID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -227,12 +231,14 @@ func Test_CLG_Input_UnknownCLGTree(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check calculated payload. The input CLG only returns an error. This error
-	// is filtered to be handled during the call to Calculate. Thus it is removed
-	// from the calculated payload.
+	// Check the calculated payload. The interface of the input CLG only returns
+	// an error. This error is filtered to be handled during the call to
+	// Calculate. Thus it is removed from the calculated payload. Anyway there is
+	// the original context be obtained as first argument within the network
+	// payload.
 	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 0 {
-		t.Fatal("expected", 0, "got", len(args))
+	if len(args) != 1 {
+		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	// Check if clg tree ID was set to the context.
@@ -247,7 +253,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCtx := context.MustNew()
 
 	input := "test input"
-	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
 
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()
@@ -278,8 +284,8 @@ func Test_CLG_Input_GetCLGTreeIDError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	input := "test input"
-	informationIDKey := key.NewCLGKey(newCLG, "input-sequence:information-id:%s", input)
-	clgTreeIDKey := key.NewCLGKey(newCLG, "information-id:clg-tree-id:%s", "456")
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
+	clgTreeIDKey := key.NewCLGKey("information-id:clg-tree-id:%s", "456")
 
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).Expect("456")
