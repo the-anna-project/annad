@@ -316,6 +316,7 @@ func (n *network) Listen() {
 				continue
 			}
 
+			// Send the new network payload to the input CLG.
 			clgChannel <- newPayload
 		}
 	}
