@@ -34,11 +34,11 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	return CLGs
 }
 
-func (n *network) findConnections(clgTreeID string) ([]string, error) {
+// TODO
+func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
 	// TODO must return behavior IDs
 	// TODO lookup known
 	// TODO CLG tree ID might be empty
-	// TODO create new
 
 	return nil, nil
 }
@@ -108,6 +108,59 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.Obj
 	}
 
 	return clgIDs
+}
+
+func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+	queue = append(queue, payload)
+
+	// Prepare the permutation list to find out which combination of payloads
+	// satisfies the requested CLG's interface.
+	newConfig := permutation.DefaultListConfig()
+	newConfig.MaxGrowth = len(CLG.GetInputTypes())
+	newConfig.Values = queueToValues(queue)
+	newPermutationList, err := permutation.NewList(newConfig)
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+
+	for {
+		err := n.PermutationFactory.MapTo(newPermutationList)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+
+		// Check if the given payload satisfies the requested CLG's interface.
+		members := newPermutationList.GetMembers()
+		types, err := membersToTypes(members)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
+			newPayload, err := membersToPayload(members)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+			newQueue, err := filterMembersFromQueue(members, queue)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+
+			// In case the current queue exeeds the interface of the requested CLG, it is
+			// trimmed to cause a more strict behaviour of the neural network.
+			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
+				newQueue = newQueue[1:]
+			}
+
+			return newPayload, newQueue, nil
+		}
+
+		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
+		if err != nil {
+			// Note that also an error is thrown when the maximum growth of the
+			// permutation list was reached.
+			return nil, nil, maskAny(err)
+		}
+	}
 }
 
 // helper

@@ -128,56 +128,16 @@ type network struct {
 func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	queue = append(queue, payload)
-
-	// Prepare the permutation list to find out which combination of payloads
-	// satisfies the requested CLG's interface.
-	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(CLG.GetInputTypes())
-	newConfig.Values = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newConfig)
-	if err != nil {
+	payload, queue, err := n.permutePayload(CLG, payload, queue)
+	if permutation.IsMaxGrowthReached(err) {
+		// We could not find a sufficient payload for the requsted CLG by permuting
+		// the queue of network payloads.
+		return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+	} else if err != nil {
 		return nil, nil, maskAny(err)
 	}
 
-	for {
-		err := n.PermutationFactory.MapTo(newPermutationList)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-
-		// Check if the given payload satisfies the requested CLG's interface.
-		members := newPermutationList.GetMembers()
-		types, err := membersToTypes(members)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
-			newPayload, err := membersToPayload(members)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-			newQueue, err := filterMembersFromQueue(members, queue)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-
-			// In case the current queue exeeds the interface of the requested CLG, it is
-			// trimmed to cause a more strict behaviour of the neural network.
-			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
-				newQueue = newQueue[1:]
-			}
-
-			return newPayload, newQueue, nil
-		}
-
-		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
-		if permutation.IsMaxGrowthReached(err) {
-			// We cannot permute the given list anymore. So far the requested CLG's
-			// interface could not be satisfied.
-			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
-		}
-	}
+	return payload, queue, nil
 }
 
 func (n *network) Boot() {
@@ -211,7 +171,7 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	if err != nil {
 		return maskAny(err)
 	}
-	behaviorIDs, err := n.findConnections(oldCtx.GetCLGTreeID())
+	behaviorIDs, err := n.findConnections(oldCtx, payload)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -288,7 +248,7 @@ func (n *network) Listen() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
 			}
-			destination, err := n.IDFactory.WithType(id.Hex128)
+			behaviorID, err := n.IDFactory.WithType(id.Hex128) // TODO configure ID factory upfront with desired type
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
@@ -311,7 +271,7 @@ func (n *network) Listen() {
 			//
 			payloadConfig := api.DefaultNetworkPayloadConfig()
 			payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
-			payloadConfig.Destination = destination
+			payloadConfig.Destination = behaviorID
 			payloadConfig.Sources = []spec.ObjectID{networkID}
 			newPayload, err := api.NewNetworkPayload(payloadConfig)
 			if err != nil {
