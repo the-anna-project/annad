@@ -1,4 +1,4 @@
-.PHONY: all anna annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck
+.PHONY: all anna annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck protoc setup
 
 
 
@@ -55,8 +55,6 @@ goget:
 gotest: gogenerate
 	@gotest
 
-setup: goget protoc
-
 projectcheck:
 	@projectcheck
 
@@ -65,3 +63,5 @@ protoc:
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
 	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
+
+setup: goget protoc
