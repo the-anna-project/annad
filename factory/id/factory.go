@@ -5,6 +5,23 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
+const (
+	// Hex128 creates a new hexa decimal encoded, pseudo random, 128 bit hash.
+	Hex128 spec.IDType = 16
+
+	// Hex512 creates a new hexa decimal encoded, pseudo random, 512 bit hash.
+	Hex512 spec.IDType = 64
+
+	// Hex1024 creates a new hexa decimal encoded, pseudo random, 1024 bit hash.
+	Hex1024 spec.IDType = 128
+
+	// Hex2048 creates a new hexa decimal encoded, pseudo random, 2048 bit hash.
+	Hex2048 spec.IDType = 256
+
+	// Hex4096 creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
+	Hex4096 spec.IDType = 512
+)
+
 // FactoryConfig represents the configuration used to create a new ID factory
 // object.
 type FactoryConfig struct {
@@ -15,6 +32,8 @@ type FactoryConfig struct {
 
 	// RandomFactory represents a factory returning random numbers.
 	RandomFactory spec.RandomFactory
+
+	Type spec.IDType
 }
 
 // DefaultFactoryConfig provides a default configuration to create a new ID factory
@@ -29,6 +48,7 @@ func DefaultFactoryConfig() FactoryConfig {
 		// Settings.
 		HashChars:     "abcdef0123456789", // hex character set
 		RandomFactory: newRandomFactory,
+		Type:          Hex128,
 	}
 
 	return newConfig
@@ -45,6 +65,9 @@ func NewFactory(config FactoryConfig) (spec.IDFactory, error) {
 	}
 	if newFactory.RandomFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "random factory must not be empty")
+	}
+	if newFactory.Type == 0 {
+		return nil, maskAnyf(invalidConfigError, "ID type must not be empty")
 	}
 
 	return newFactory, nil
@@ -63,6 +86,15 @@ func MustNewFactory() spec.IDFactory {
 
 type factory struct {
 	FactoryConfig
+}
+
+func (f *factory) New() (spec.ObjectID, error) {
+	ID, err := f.WithType(f.Type)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return ID, nil
 }
 
 func (f *factory) WithType(idType spec.IDType) (spec.ObjectID, error) {

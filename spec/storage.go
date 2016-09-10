@@ -59,19 +59,19 @@ type Storage interface {
 	// score order.
 	//
 	// The walk is throttled. That means some amount of elements are fetched at
-	// once from the storage. After all fetched elements iterated, the next batch
-	// of elements is fetched to continue iteration, until the given set is
-	// walked completely. The given closer can be used to end the walk
-	// immediately.
+	// once from the storage. After all fetched elements are iterated, the next
+	// batch of elements is fetched to continue the next iteration, until the
+	// given set is walked completely. The given closer can be used to end the
+	// walk immediately.
 	WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
 
 	// WalkSet scans the set given by key and executes the callback for each
 	// found element.
 	//
 	// The walk is throttled. That means some amount of elements are fetched at
-	// once from the storage. After all fetched elements iterated, the next batch
-	// of elements is fetched to continue iteration, until the given set is
-	// walked completely. The given closer can be used to end the walk
-	// immediately.
+	// once from the storage. After all fetched elements are iterated, the next
+	// batch of elements is fetched to continue the next iteration, until the
+	// given set is walked completely. The given closer can be used to end the
+	// walk immediately.
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
 }

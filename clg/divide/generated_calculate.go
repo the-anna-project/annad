@@ -8,7 +8,6 @@ package divide
 import (
 	"reflect"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -94,16 +93,12 @@ type clg struct {
 func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	outputs := reflect.ValueOf(c.calculate).Call(payload.GetArgs())
 
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = outputs
-	newNetworkPayloadConfig.Destination = "must be set by spec.Network.Forward"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	modifiedPayload, err := injectValues(payload, outputs)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return newNetworkPayload, nil
+	return modifiedPayload, nil
 }
 
 func (c *clg) GetName() string {

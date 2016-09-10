@@ -70,10 +70,10 @@ func Test_CLG_IsGreater(t *testing.T) {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 1 {
-			t.Fatal("case", i+1, "expected", 1, "got", len(args))
+		if len(args) != 2 {
+			t.Fatal("case", i+1, "expected", 2, "got", len(args))
 		}
-		result := args[0].Bool()
+		result := args[1].Bool()
 
 		if result != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)

@@ -6,6 +6,8 @@ import (
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/input"
+	"github.com/xh3b4sd/anna/factory/permutation"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -32,6 +34,26 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	}
 
 	return CLGs
+}
+
+func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
+	var behaviorIDs []string
+
+	behaviorID := ctx.GetBehaviorID()
+	if behaviorID == "" {
+		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
+	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
+
+	err := n.Storage.WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
+		behaviorIDs = append(behaviorIDs, element)
+		return nil
+	})
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return behaviorIDs, nil
 }
 
 func (n *network) listenCLGs() {
@@ -99,6 +121,59 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.Obj
 	}
 
 	return clgIDs
+}
+
+func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+	queue = append(queue, payload)
+
+	// Prepare the permutation list to find out which combination of payloads
+	// satisfies the requested CLG's interface.
+	newConfig := permutation.DefaultListConfig()
+	newConfig.MaxGrowth = len(CLG.GetInputTypes())
+	newConfig.Values = queueToValues(queue)
+	newPermutationList, err := permutation.NewList(newConfig)
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
+
+	for {
+		err := n.PermutationFactory.MapTo(newPermutationList)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+
+		// Check if the given payload satisfies the requested CLG's interface.
+		members := newPermutationList.GetMembers()
+		types, err := membersToTypes(members)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
+		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
+			newPayload, err := membersToPayload(members)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+			newQueue, err := filterMembersFromQueue(members, queue)
+			if err != nil {
+				return nil, nil, maskAny(err)
+			}
+
+			// In case the current queue exeeds the interface of the requested CLG, it is
+			// trimmed to cause a more strict behaviour of the neural network.
+			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
+				newQueue = newQueue[1:]
+			}
+
+			return newPayload, newQueue, nil
+		}
+
+		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
+		if err != nil {
+			// Note that also an error is thrown when the maximum growth of the
+			// permutation list was reached.
+			return nil, nil, maskAny(err)
+		}
+	}
 }
 
 // helper

@@ -75,10 +75,10 @@ func Test_CLG_Sum(t *testing.T) {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
 		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 1 {
-			t.Fatal("case", i+1, "expected", 1, "got", len(args))
+		if len(args) != 2 {
+			t.Fatal("case", i+1, "expected", 2, "got", len(args))
 		}
-		result := args[0].Float()
+		result := args[1].Float()
 
 		if result != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)

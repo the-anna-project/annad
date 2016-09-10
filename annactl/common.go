@@ -6,7 +6,6 @@ import (
 
 	"github.com/juju/errgo"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -48,7 +47,7 @@ func (a *annactl) GetSessionID() (string, error) {
 	}
 
 	// Create session ID.
-	newSessionID, err := a.IDFactory.WithType(id.Hex128)
+	newSessionID, err := a.IDFactory.New()
 	if err != nil {
 		return "", maskAny(err)
 	}

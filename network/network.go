@@ -14,6 +14,7 @@ import (
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
@@ -52,17 +53,12 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
 		IDFactory:          id.MustNewFactory(),
 		Log:                log.New(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
-		Storage:            newStorage,
+		Storage:            memory.MustNew(),
 		TextInput:          make(chan spec.TextRequest, 1000),
 		TextOutput:         make(chan spec.TextResponse, 1000),
 
@@ -132,56 +128,16 @@ type network struct {
 func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	queue = append(queue, payload)
-
-	// Prepare the permutation list to find out which combination of payloads
-	// satisfies the requested CLG's interface.
-	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(CLG.GetInputTypes())
-	newConfig.Values = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newConfig)
-	if err != nil {
+	payload, queue, err := n.permutePayload(CLG, payload, queue)
+	if permutation.IsMaxGrowthReached(err) {
+		// We could not find a sufficient payload for the requsted CLG by permuting
+		// the queue of network payloads.
+		return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+	} else if err != nil {
 		return nil, nil, maskAny(err)
 	}
 
-	for {
-		err := n.PermutationFactory.MapTo(newPermutationList)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-
-		// Check if the given payload satisfies the requested CLG's interface.
-		members := newPermutationList.GetMembers()
-		types, err := membersToTypes(members)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
-			newPayload, err := membersToPayload(members)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-			newQueue, err := filterMembersFromQueue(members, queue)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-
-			// In case the current queue exeeds the interface of the requested CLG, it is
-			// trimmed to cause a more strict behaviour of the neural network.
-			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
-				newQueue = newQueue[1:]
-			}
-
-			return newPayload, newQueue, nil
-		}
-
-		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
-		if permutation.IsMaxGrowthReached(err) {
-			// We cannot permute the given list anymore. So far the requested CLG's
-			// interface could not be satisfied.
-			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
-		}
-	}
+	return payload, queue, nil
 }
 
 func (n *network) Boot() {
@@ -207,21 +163,47 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 	return calculatedPayload, nil
 }
 
-// TODO
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
-	// Check if the given spec.Context provides a CLG tree ID.
-	ctx, err := payload.GetContext()
+	// Try to find the best connections.
+	oldCtx, err := payload.GetContext()
 	if err != nil {
 		return maskAny(err)
 	}
-	clgTreeID := ctx.GetCLGTreeID()
+	behaviorIDs, err := n.findConnections(oldCtx, payload)
+	if err != nil {
+		return maskAny(err)
+	}
 
-	if clgTreeID == "" {
-		// create new
-	} else {
-		// lookup existing
+	for _, ID := range behaviorIDs {
+		// Prepare a new context for the new connection path.
+		newCtx := oldCtx.Clone()
+		newCtx.SetBehaviorID(ID)
+
+		// Create a new network payload
+		newPayloadConfig := api.DefaultNetworkPayloadConfig()
+		newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
+		newPayloadConfig.Destination = spec.ObjectID(ID)
+		newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
+		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		// Find the actual CLG based on its behavior ID. Therefore we lookup the
+		// behavior name by the given behavior ID. Data we read here is written
+		// within several CLGs. That way the network creates its own connections
+		// based on learned experiences.
+		clgName, err := n.Storage.Get(key.NewCLGKey("behavior-id:%s:behavior-name", ID))
+		if err != nil {
+			return maskAny(err)
+		}
+		CLG, err := n.clgByName(clgName)
+		if err != nil {
+			return maskAny(err)
+		}
+		CLG.GetInputChannel() <- newPayload
 	}
 
 	return nil
@@ -236,7 +218,6 @@ func (n *network) Listen() {
 		n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 	}
 
-	clgID := CLG.GetID()
 	networkID := n.GetID()
 	clgChannel := CLG.GetInputChannel()
 
@@ -259,6 +240,7 @@ func (n *network) Listen() {
 				continue
 			}
 
+			// Prepare the context and a unique behaviour ID for the input CLG.
 			ctxConfig := context.DefaultConfig()
 			ctxConfig.SessionID = textRequest.GetSessionID()
 			ctx, err := context.New(ctxConfig)
@@ -266,10 +248,30 @@ func (n *network) Listen() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
 			}
+			behaviorID, err := n.IDFactory.New()
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				continue
+			}
 
+			// We transform the received input to a network payload to have a
+			// conventional data structure within the neural network. Note the
+			// following details.
+			//
+			//     The list of arguments always contains a context as first argument.
+			//
+			//     Destination is always the behavior ID of the input CLG, since this
+			//     one is the connecting building block to other CLGs within the
+			//     neural network. This behavior ID is always a new one, because it
+			//     will eventually be part of a completely new CLG tree within the
+			//     connection space.
+			//
+			//     Sources is here only the individual network ID to have at least
+			//     any reference of origin.
+			//
 			payloadConfig := api.DefaultNetworkPayloadConfig()
 			payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
-			payloadConfig.Destination = clgID
+			payloadConfig.Destination = behaviorID
 			payloadConfig.Sources = []spec.ObjectID{networkID}
 			newPayload, err := api.NewNetworkPayload(payloadConfig)
 			if err != nil {
@@ -277,6 +279,7 @@ func (n *network) Listen() {
 				continue
 			}
 
+			// Send the new network payload to the input CLG.
 			clgChannel <- newPayload
 		}
 	}

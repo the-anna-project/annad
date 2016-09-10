@@ -134,45 +134,103 @@ notation of the described data structures reads as follows.
 
 ---
 
-###### index information sequence
-When having an information sequence given it needs to be indexed. This happens
-by storing received and calculated information sequences as keys. Their
-coordinates might be used to calculate additional weights, which can also be
-applied to weights of the actually resolved connections. The following key
-indexes information sequences.
+###### map information sequence to information ID
+When having an information sequence given it needs to be mapped to its
+information ID. This mapping resolves a single information ID from its
+information sequence. The following key maps an information sequence to its
+information ID.
 
 ```
-<prefix>:information-coordinate:<information-coordinate>:information-sequence:<information-sequence>    {}
+<prefix>:information-sequence:<information-sequence>:information-id    <information-id>
+```
+
+---
+
+###### map information ID to information coordinate
+When having an information ID given it needs to be mapped to its information
+coordinate. This mapping resolves a single information coordinate from its
+information ID. A coordinate might be used to calculate additional weights. The
+following key maps an information ID to its information coordinate.
+
+```
+<prefix>:information-id:<information-id>:information-coordinate    <information-coordinate>
+```
+
+---
+
+###### map information coordinate to information ID
+When having an information coordinate given it needs to be mapped to its
+information ID. This mapping resolves a single information ID from its
+information coordinate. A coordinate might be used to calculate additional
+weights. The following key maps an information coordinate to its information
+ID.
+
+```
+<prefix>:information-coordinate:<information-coordinate>:information-id    <information-id>
+```
+
+---
+
+###### map behavior coordinate to behavior ID
+When having a behavior coordinate given it needs to be mapped to its behavior
+ID. This mapping resolves a single behavior ID from its own coordinate within
+the connection space. Having the behavior coordinate indexed as key enables
+lookups based on similarities when scanning the key space within the underlying
+storage. A coordinate might be used to calculate additional weights. The
+following key maps a behavior coordinate to its behavior ID.
+
+```
+<prefix>:behavior-coordinate:<behavior-coordinate>:behavior-id    <behavior-id>
+```
+
+---
+
+###### map behavior ID to behavior coordinate
+When having a behavior ID given it needs to be mapped to its behavior
+coordinate. This mapping resolves a single behavior coordinate from its own ID
+within the connection space. A coordinate might be used to calculate additional
+weights. The following key maps a behavior ID to its behavior coordinate.
+
+```
+<prefix>:behavior-id:<behavior-id>:behavior-coordinate    <behavior-coordinate>
+```
+
+---
+
+###### map CLG tree ID to behavior ID
+When having a CLG tree ID given it needs to be mapped to the very first CLG
+within a specific CLG tree. This very first CLG is represented by a behavior
+ID. This mapping resolves all behaviors of a whole CLG tree. The following key
+maps a CLG tree ID to the very first behavior within this specific CLG tree.
+
+```
+<prefix>:clg-tree-ID:<clg-tree-id>:behavior-id    <behavior-id>
 ```
 
 ---
 
 ###### map behavior ID to behavior IDs
 When having a single behavior ID given it needs to be mapped to multiple
-behavior IDs. This mapping represents connections linking to N behaviors within
-the connection space. That way dynamic CLG trees can be formed. CLGs can lookup
-connections using their own IDs. Additionally, connections can be looked up by
-information sequences, if any given. Their coordinates might be used to
-calculate additional weights, which can also be applied to weights of the
-actually resolved connections. The found connections are supposed to be used to
-forward signals to. The following key maps a single behavior ID to multiple
-behavior IDs.
+behavior IDs. This mapping represents connections linking from one behavior to
+other behaviors within the connection space. That way dynamic CLG trees can be
+referenced. CLGs can lookup connections using their own behavior IDs. The
+following key maps a single behavior ID to multiple behavior IDs.
 
 ```
-<prefix>:clg-tree-ID:<clg-tree-id>:behavior-coordinate:<behavior-coordinate>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
+<prefix>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
 ```
 
 ---
 
-###### map behavior coordinate to CLG name
-When having a single behavior coordinate given it needs to be mapped to its
-unique CLG name. That way behavior can be resolved from its very unique
-coordinate to some actual functionality. This works even across reboots,
-because CLG IDs change where their names don't. The following key maps a single
-behavior coordinate to its CLG name.
+###### map behavior ID to CLG name
+When having a single behavior ID given it needs to be mapped to its unique CLG
+name. That way behavior can be resolved from its very unique ID to some actual
+functionality. This works even across reboots, because CLG IDs change where
+their names don't. The following key maps a single behavior ID to its unique
+CLG name.
 
 ```
-<prefix>:behavior-coordinate:<behavior-coordinate>:behavior-name    <CLG-name>
+<prefix>:behavior-id:<behavior-id>:behavior-name    <CLG-name>
 ```
 
 ### abstraction

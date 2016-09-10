@@ -6,7 +6,7 @@ package context
 import (
 	"time"
 
-	contextpkg "golang.org/x/net/context"
+	netcontext "golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/spec"
@@ -15,16 +15,21 @@ import (
 type key string
 
 const (
-	clgTreeIDKey key = "clg-tree-id"
-	sessionIDKey key = "session-id"
+	behaviorIDKey key = "behavior-id"
+	clgTreeIDKey  key = "clg-tree-id"
+	sessionIDKey  key = "session-id"
 )
 
 // Config represents the configuration used to create a new context object.
 type Config struct {
 	// Settings.
 
-	Context   contextpkg.Context
+	Context   netcontext.Context
 	SessionID string
+
+	// TODO we want to track the original input that was provided from the
+	// outside. Further it would probably be interesting to also track the last 3
+	// arguments of the current connection path.
 }
 
 // DefaultConfig provides a default configuration to create a new context
@@ -32,7 +37,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context:   contextpkg.Background(),
+		Context:   netcontext.Background(),
 		SessionID: "",
 	}
 
@@ -47,6 +52,9 @@ func New(config Config) (spec.Context, error) {
 		ID: string(id.MustNew()),
 	}
 
+	// If there is a session ID configured, we set it to the underlying context.
+	// That way our standard configuration interface is obtained and the data
+	// structures of the underlying implementation consistent.
 	if config.SessionID != "" {
 		newContext.SetSessionID(config.SessionID)
 	}
@@ -74,6 +82,17 @@ type context struct {
 	ID string
 }
 
+func (c *context) Clone() spec.Context {
+	specContext := MustNew()
+
+	specContext.(*context).Context = netcontext.Background()
+	specContext.(*context).SessionID = c.GetSessionID()
+	specContext.SetSessionID(c.GetSessionID())
+	specContext.SetCLGTreeID(c.GetCLGTreeID())
+
+	return specContext
+}
+
 func (c *context) Deadline() (time.Time, bool) {
 	return c.Context.Deadline()
 }
@@ -84,6 +103,15 @@ func (c *context) Done() <-chan struct{} {
 
 func (c *context) Err() error {
 	return c.Context.Err()
+}
+
+func (c *context) GetBehaviorID() string {
+	behaviorID, ok := c.Context.Value(behaviorIDKey).(string)
+	if ok {
+		return behaviorID
+	}
+
+	return ""
 }
 
 func (c *context) GetCLGTreeID() string {
@@ -108,12 +136,16 @@ func (c *context) GetSessionID() string {
 	return ""
 }
 
+func (c *context) SetBehaviorID(behaviorID string) {
+	c.Context = netcontext.WithValue(c.Context, behaviorIDKey, behaviorID)
+}
+
 func (c *context) SetCLGTreeID(clgTreeID string) {
-	c.Context = contextpkg.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
 }
 
 func (c *context) SetSessionID(sessionID string) {
-	c.Context = contextpkg.WithValue(c.Context, sessionIDKey, sessionID)
+	c.Context = netcontext.WithValue(c.Context, sessionIDKey, sessionID)
 }
 
 func (c *context) Value(key interface{}) interface{} {

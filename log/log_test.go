@@ -60,6 +60,10 @@ type context struct {
 	SessionID string
 }
 
+func (c *context) Clone() spec.Context {
+	return c
+}
+
 func (c *context) Deadline() (time.Time, bool) {
 	return time.Time{}, false
 }
@@ -72,6 +76,10 @@ func (c *context) Err() error {
 	return nil
 }
 
+func (c *context) GetBehaviorID() string {
+	return ""
+}
+
 func (c *context) GetCLGTreeID() string {
 	return c.CLGTreeID
 }
@@ -82,6 +90,10 @@ func (c *context) GetID() string {
 
 func (c *context) GetSessionID() string {
 	return c.SessionID
+}
+
+func (c *context) SetBehaviorID(behaviorID string) {
+
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
