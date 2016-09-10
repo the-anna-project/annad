@@ -198,8 +198,8 @@ weights. The following key maps a behavior ID to its behavior coordinate.
 ---
 
 ###### map CLG tree ID to behavior ID
-When having a CLG tree ID given it needs to be mapped to the very first
-behavior within this specific CLG tree's, which is represented by a behavior
+When having a CLG tree ID given it needs to be mapped to the very first CLG
+within a specific CLG tree. This very first CLG is represented by a behavior
 ID. This mapping resolves all behaviors of a whole CLG tree. The following key
 maps a CLG tree ID to the very first behavior within this specific CLG tree.
 

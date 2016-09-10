@@ -7,6 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/input"
 	"github.com/xh3b4sd/anna/factory/permutation"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -35,13 +36,24 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	return CLGs
 }
 
-// TODO
 func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
-	// TODO must return behavior IDs
-	// TODO lookup known
-	// TODO CLG tree ID might be empty
+	var behaviorIDs []string
 
-	return nil, nil
+	behaviorID := ctx.GetBehaviorID()
+	if behaviorID == "" {
+		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
+	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
+
+	err := n.Storage.WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
+		behaviorIDs = append(behaviorIDs, element)
+		return nil
+	})
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return behaviorIDs, nil
 }
 
 func (n *network) listenCLGs() {

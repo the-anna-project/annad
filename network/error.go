@@ -42,3 +42,10 @@ var invalidInterfaceError = errgo.New("invalid interface")
 func IsInvalidInterface(err error) bool {
 	return errgo.Cause(err) == invalidInterfaceError
 }
+
+var invalidBehaviorIDError = errgo.New("invalid behavior ID")
+
+// IsInvalidBehaviorID asserts invalidBehaviorIDError.
+func IsInvalidBehaviorID(err error) bool {
+	return errgo.Cause(err) == invalidBehaviorIDError
+}
