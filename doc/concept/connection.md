@@ -53,7 +53,7 @@ fully dynamic and learned by experience.
 When information is provided, it is stored within the underlying storage. The
 creation of behavior connections takes place on the CLG level. A connection is
 represented as single key-value pair. The key of such a key-value pair consists
-of multiple information like the clg tree-ID, the behavior coordinate and an
+of multiple information like the CLG tree-ID, the behavior coordinate and an
 information sequence, if any given. The value of such a key-value pair is a
 list of behavior IDs. All newly created connections are persisted within a
 trial scope in the first place. The purpose of such a trial scope is to label
@@ -111,7 +111,7 @@ notation of the described data structures reads as follows.
 - When talking about a `<prefix>`, we talk about some internal storage prefix,
   which is simply used to prefix data structures to a certain scope. This
   prefix might also indicate a relation to some `<trial-scope>`.
-- When talking about a `<clg-tree-ID>`, we talk about an identifier for
+- When talking about a `<clg-tree-id>`, we talk about an identifier for
   combined, executable behavior.
 - When talking about a `<behavior-coordinate>`, we talk about a single point
   within the connection space, which represents one single CLG associated with
@@ -155,6 +155,9 @@ following key maps an information ID to its information coordinate.
 ```
 <prefix>:information-id:<information-id>:information-coordinate    <information-coordinate>
 ```
+
+TODO map information ID to certenty
+TODO map information ID to CLG tree ID
 
 ---
 
@@ -204,7 +207,7 @@ ID. This mapping resolves all behaviors of a whole CLG tree. The following key
 maps a CLG tree ID to the very first behavior within this specific CLG tree.
 
 ```
-<prefix>:clg-tree-ID:<clg-tree-id>:behavior-id    <behavior-id>
+<prefix>:clg-tree-id:<clg-tree-id>:behavior-id    <behavior-id>
 ```
 
 ---

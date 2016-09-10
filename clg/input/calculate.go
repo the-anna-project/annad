@@ -32,6 +32,8 @@ func (c *clg) calculate(ctx spec.Context, input string) error {
 		return maskAny(err)
 	}
 
+	// TODO set information ID to context
+
 	// TODO separate CLG
 	clgTreeID, err := c.Storage.Get(key.NewCLGKey("information-id:clg-tree-id:%s", informationID))
 	if storage.IsNotFound(err) {

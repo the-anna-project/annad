@@ -7,3 +7,5 @@
 //go:generate clggen generate --clg-dir=. --template-dir=../template
 //
 package clg
+
+// TODO create CLGs based on evaluation notes in black book

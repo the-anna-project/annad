@@ -19,6 +19,10 @@ func maskAny(error) error {
 }
 
 // TODO
+//
+//    read from the top of the certenty pyramid
+//    use scope from context
+//
 func (c *clg) TODOcalculate(ctx spec.Context) error {
 	var e spec.Expectation
 
