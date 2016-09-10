@@ -12,6 +12,13 @@ import (
 )
 
 // TODO
+type clg struct{}
+
+func maskAny(error) error {
+	return nil
+}
+
+// TODO
 func (c *clg) TODOcalculate(ctx spec.Context) error {
 	var e spec.Expectation
 
