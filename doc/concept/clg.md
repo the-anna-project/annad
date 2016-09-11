@@ -52,3 +52,67 @@ intelligence gap, to make artificial intelligence work. The intelligence gap
 describes the gap between information and behavior. This gap needs to be filled
 to make the intelligence equation work. This technical issue is solved by the
 concept of CLGs.
+
+### implementation
+The following describes implementation details necessary to consider to make
+the neural network work. The described details intend to suggest one possible
+approach. There are maybe others which have not ben found yet.
+
+###### input (4)
+- receive user provided input
+- write user provided input into storage
+
+###### read input
+- lookup information ID from context
+- read user provided input from storage
+- return user provided input
+
+###### feature size (1)
+- check when feature size was last updated
+- if last updated is long enough ago, increment or decrement feature size by 1
+- store feature size into storage
+- write last updated into storage
+
+###### split features (2)
+- receive information
+- read feature size from storage
+- split information into features
+- write features into storage
+
+###### pair syntactic (5)
+- read features from storage
+- lookup syntactic relations of features
+- combine features that belong together
+- write pair into storage
+
+###### pair semantic (3)
+- read features from storage
+- lookup conceptual relations of features
+- combine features that belong together
+- write pair into storage
+
+###### evaluate certenty (7)
+- read pairs from storage
+- lookup relations of pair and user input
+- calculate certenty
+- remove pair from current key
+- store pair with key having certenty applied
+
+###### derive behavior (8)
+- read information from certenty level
+- lookup relations of information and behavior
+- write spontanious connection into storage
+
+###### maximum certenty
+- read maximum certenty from information pyramid
+- write maximum certenty into storage, if maximum certenty is bigger than the current one
+
+###### output (6)
+- read information from certenty level
+- read certenty range from storage
+- write minimum certenty into storage, if expectation matches and minimum certenty is smaller than current one
+- if information is within certenty range, return information, otherwise return error to keep neural activity up
+
+### unknown
+- how to get brain waves in sync?
+- how to obtain persistent neural activity?
