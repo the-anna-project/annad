@@ -8,7 +8,7 @@ dynamically, represent Anna's neural [network](network.md).
 
 ### space
 The connection space can be seen as a multi dimensional vector space. In theory
-it's dimensions can represent everything: space, time or even conceptional
+it's dimensions can represent everything: space, time or even conceptual
 weights representing something like emotions. Information and behaviors are
 mapped onto the connection space by having coordinates applied. These
 coordinates act as connection weights, which are calculated by interacting with
@@ -17,12 +17,12 @@ used to make dimensions create tensions on coordinates within the connection
 space. Each dimension is pulling into its own direction based on learned
 patterns. The important idea behind the tensions created here is that they are
 balanced. One dimension pulling coordinates spontaneously into a certain
-direction makes another dimension move proportionally into another direction. If
-one dimension goes up, another dimension goes down. Thus a balance is created.
-This creates a simulation of psychological interactions on different levels.
-Like disgust and attraction cannot go together. Aim of such a balance system is
-to provide buildin mechanisms of leveraging event interactions and calculating
-connection weights.
+direction makes another dimension move proportionally into another direction.
+If one dimension goes up, another dimension goes down. Thus a balance is
+created.  This creates a simulation of psychological interactions on different
+levels.  Like disgust and attraction cannot go together. Aim of such a balance
+system is to provide buildin mechanisms of leveraging event interactions and
+calculating connection weights.
 
 Spontaneous modificatins of connections lead to variances within applied
 behaviors. Leads some behavior to successful results, slight adjustments of a
@@ -156,8 +156,16 @@ following key maps an information ID to its information coordinate.
 <prefix>:information-id:<information-id>:information-coordinate    <information-coordinate>
 ```
 
-TODO map information ID to certenty
-TODO map information ID to CLG tree ID
+---
+
+###### map information ID to CLG tree IDs
+When having an information ID given it needs to be mapped to CLG tree IDs. This
+mapping resolves CLG tree IDs from an information ID. The following key maps an
+information ID to its information coordinate.
+
+```
+<prefix>:information-id:<information-id>:clg-tree-ids    <clg-tree-id>,<clg-tree-id>,...
+```
 
 ---
 
@@ -165,8 +173,9 @@ TODO map information ID to CLG tree ID
 When having an information coordinate given it needs to be mapped to its
 information ID. This mapping resolves a single information ID from its
 information coordinate. A coordinate might be used to calculate additional
-weights. The following key maps an information coordinate to its information
-ID.
+weights. The keyscan is very slow and only supposed to be done in the background
+as persistent neural activity. The following key maps an information coordinate
+to its information ID.
 
 ```
 <prefix>:information-coordinate:<information-coordinate>:information-id    <information-id>
@@ -179,8 +188,9 @@ When having a behavior coordinate given it needs to be mapped to its behavior
 ID. This mapping resolves a single behavior ID from its own coordinate within
 the connection space. Having the behavior coordinate indexed as key enables
 lookups based on similarities when scanning the key space within the underlying
-storage. A coordinate might be used to calculate additional weights. The
-following key maps a behavior coordinate to its behavior ID.
+storage. A coordinate might be used to calculate additional weights. The keyscan
+is very slow and only supposed to be done in the background as persistent neural
+activity. The following key maps a behavior coordinate to its behavior ID.
 
 ```
 <prefix>:behavior-coordinate:<behavior-coordinate>:behavior-id    <behavior-id>
@@ -216,7 +226,10 @@ maps a CLG tree ID to the very first behavior within this specific CLG tree.
 When having a single behavior ID given it needs to be mapped to multiple
 behavior IDs. This mapping represents connections linking from one behavior to
 other behaviors within the connection space. That way dynamic CLG trees can be
-referenced. CLGs can lookup connections using their own behavior IDs. The
+referenced. CLGs can lookup connections using their own behavior IDs. In case an
+exact expectation is known, the behavior should change slightly over time to
+find more optimized ways of solving problems. In case a problem was able to be
+solved using some modifications, the behavior can be updated completely. The
 following key maps a single behavior ID to multiple behavior IDs.
 
 ```
@@ -234,6 +247,18 @@ CLG name.
 
 ```
 <prefix>:behavior-id:<behavior-id>:behavior-name    <CLG-name>
+```
+
+---
+
+###### map behavior name to weighted behavior names
+When having a single behavior name given it needs to be mapped to multiple
+weighted bahavior names. That way patterns of behavior connections can be
+tracked. The following key maps a single behavior name to multiple behavior
+weighted names.
+
+```
+<prefix>:behavior-name:<behavior-name>:weighted-behavior-names    <behavior-name>:<weight>,<behavior-name>:<weight>,...
 ```
 
 ### abstraction

@@ -114,5 +114,4 @@ approach. There are maybe others which have not ben found yet.
 - if information is within certenty range, return information, otherwise return error to keep neural activity up
 
 ### unknown
-- how to get brain waves in sync?
-- how to obtain persistent neural activity?
+- how to learn across CLG trees?
