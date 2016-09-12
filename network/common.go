@@ -46,6 +46,7 @@ func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload)
 	}
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
 
+	// TODO GetAllElements
 	err := n.Storage.WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
 		behaviorIDs = append(behaviorIDs, element)
 		return nil
