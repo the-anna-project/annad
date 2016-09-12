@@ -101,7 +101,7 @@ approach. There are maybe others which have not ben found yet.
 ###### derive behavior (8)
 - read information from certenty level
 - lookup relations of information and behavior
-- write spontanious connection into storage
+- write spontaneous connection into storage
 
 ###### maximum certenty
 - read maximum certenty from information pyramid
