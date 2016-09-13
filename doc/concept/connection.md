@@ -26,18 +26,18 @@ within the connection space.
 
 Spontaneous modificatins of connections lead to variances within applied
 behaviors. Leads some behavior to successful results, slight adjustments of a
-connection path's coordinates can be stored, which causes the connection path to
-be updated. This will improve connection paths over time, because behavior was
-adjusted to the given environmental feedback that Anna has received. That means
-the balance system influences connections within the connection space, and thus
-behavior of the whole neural network. Thus coordinates are used to calculate
-dynamic and individual connection locations within the connection space. They
-are also used to calculate certain similarities between information, and certain
-similarities between behaviors.
+CLG tree's coordinates can be stored, which causes the CLG tree to be updated.
+This will improve CLG trees over time, because behavior was adjusted to the
+given environmental feedback that Anna has received. That means the balance
+system influences connections within the connection space, and thus behavior of
+the whole neural network. Thus coordinates are used to calculate dynamic and
+individual connection locations within the connection space. They are also used
+to calculate certain similarities between information, and certain similarities
+between behaviors.
 
 The following picture illustrates the connection space. For simplicity it only
-shows two dimensions, `x` and `y`. We see two different connection paths within
-the connection space. Here some peers are pretty near to each other. We can
+shows two dimensions, `x` and `y`. We see two different CLG trees within the
+connection space. Here some peers are pretty near to each other. We can
 calculate a similarity based on the distances between peers. An indicator for
 common connection patterns can also be derived from the shape of a connection
 path.
@@ -69,17 +69,17 @@ Anyway, there needs a decision to be made to forward signals to some CLGs. The
 following strategies are considered when it comes to create new connections
 within the connection space.
 
-1. *Bias* is some manually provided hint, intended to guide some connection path
-   into a certain direction. Read more on this in this issue:
+1. *Bias* is some manually provided hint, intended to guide some CLG tree into a
+   certain direction. Read more on this in this issue:
    https://github.com/xh3b4sd/anna/issues/44.
 
 2. *Intuition* is some sort of vague feeling that points into a certain
    direction. Drawing distantly related connections across multiple levels can
    gather information and generate new relations between peers.
 
-3. *Copy* connections from other branches looks up possible connection structures
-   from different problem domains. Connections that have been useful in one
-   problem domain might be useful as well in another.
+3. *Copy* connections from other branches looks up possible connection
+   structures from different problem domains. Connections that have been useful
+   in one problem domain might be useful as well in another.
 
 4. *Random* connections can be drawn if none of the preceding options are
    available. This is the most weak way to create new connections, because it
@@ -103,8 +103,6 @@ Anna's business logic. We use key-value pairs to store data and describe
 relations between objects where possible because of simplicity and speed. The
 notation of the described data structures reads as follows.
 
-TODO rename connection path to CLG tree
-
 - Everything within angle brackets (`<>`) reads as variable.
 - On the left is the key, on the right is the value of the key-value pairs.
 - When talking about a `<prefix>`, we talk about some internal storage prefix,
@@ -117,7 +115,7 @@ TODO rename connection path to CLG tree
   very specific CLG tree. A CLG's coordinate represents its location within the
   connection space. This representation of a CLG's location is calculated
   continuously by interacting with the balance system. Thus coordinates might be
-  recalculated to align them to successful connection paths.
+  recalculated to align them to successful CLG trees.
 - When talking about a `<behavior-ID>`, we talk about a very unique identifier
   of a CLG, which is generated for each CLG execution that is not related to an
   already known CLG tree ID. That way a single CLG can be represented as unique
