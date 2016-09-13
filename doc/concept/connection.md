@@ -52,18 +52,21 @@ fully dynamic and learned by experience.
 
 When information is provided, it is stored within the underlying storage. The
 creation of behavior connections takes place on the CLG level. A connection is
-represented as single key-value pair. The key of such a key-value pair consists
-of multiple information like the CLG tree-ID, the behavior coordinate and an
-information sequence, if any given. The value of such a key-value pair is a list
-of behavior IDs. All newly created connections are persisted within a trial
-scope in the first place. The purpose of such a trial scope is to label all
-persisted data within the current creation process as volatile. This is done by
-simply putting some identifier which represents the trial scope into the storage
-key's prefix. If the neural network succeeds to solve a problem with some newly
-created connections, the connections stored within a trial scope are persisted
-as regular connections and thus not considered volatile anymore. In case the
-created connections did not lead to some successful operation, all volatile
-connections stored within a trial scope are simply removed.
+represented as single key-value pair. The key of such a key-value pair simply
+consists of a behavior ID. The value of such a key-value pair is a list of
+behavior IDs. All newly created connections are persisted within a trial scope
+in the first place. The purpose of such a trial scope is to label all stored
+data within the current creation process as volatile. If the neural network
+succeeds to solve a problem with some newly created connections, the connections
+stored within a trial scope are persisted as regular connections and thus not
+considered volatile anymore. In case the created connections did not lead to
+some successful operation, all volatile connections stored within a trial scope
+are simply removed.
+
+A connection can also have a TTL. In this case the connection itself is somehow
+volatile on purpose, because it is supposed to connect peers only for a certain
+amount of time. Why this is done and how long such a connection exists is up to
+the neural network itself.
 
 Anyway, there needs a decision to be made to forward signals to some CLGs. The
 following strategies are considered when it comes to create new connections

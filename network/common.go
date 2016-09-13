@@ -36,7 +36,6 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	return CLGs
 }
 
-// TODO find spontaneous connections
 func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
 	var behaviorIDs []string
 
