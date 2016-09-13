@@ -12,14 +12,6 @@ const (
 	CLGKeyFormat = "s:clg:%s"
 )
 
-// TODO
-//
-//     add scope to CLG keys to identify current basics
-//     e.g. output CLG reads from basic having most important certenty
-//
-//     add context to interface
-//
-
 // NewCLGKey returns a well configured key used to store and fetch data. Keys
 // generated with NewCLGKey should only be used by objects related to the CLG
 // scope. This can be e.g. each CLG. These objects generate and structure
