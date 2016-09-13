@@ -8,43 +8,31 @@ import (
 	"github.com/xh3b4sd/anna/storage"
 )
 
-// calculate tries to map the given input sequence to a CLG tree ID within the
-// available storage.
-func (c *clg) calculate(ctx spec.Context, input string) error {
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
+// calculate fetches the information ID associated with the given information
+// sequence. In case the information sequence is not found within the underlying
+// storage, a new information ID is generated and used to store the given
+// information sequence. In any case the information ID is added to the given
+// context.
+func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", informationSequence)
 	informationID, err := c.Storage.Get(informationIDKey)
 	if storage.IsNotFound(err) {
-		// The given input was never seen before. Thus we register it now with its
-		// own very unique information ID.
+		// The given information sequence was never seen before. Thus we register it
+		// now with its own very unique information ID.
 		newID, err := c.IDFactory.New()
 		if err != nil {
 			return maskAny(err)
 		}
-		err = c.Storage.Set(informationIDKey, string(newID))
+		informationID = string(newID)
+		err = c.Storage.Set(informationIDKey, informationID)
 		if err != nil {
 			return maskAny(err)
 		}
-
-		// The given input is completely new, so we are not able to set a CLG tree
-		// ID to the context. Thus we simply return here.
-		return nil
 	} else if err != nil {
 		return maskAny(err)
 	}
 
-	// TODO set information ID to context
-
-	// TODO separate CLG
-	clgTreeID, err := c.Storage.Get(key.NewCLGKey("information-id:clg-tree-id:%s", informationID))
-	if storage.IsNotFound(err) {
-		// We do not know any useful CLG tree for the given input. Thus we cannot
-		// set any to the current context.
-		return nil
-	} else if err != nil {
-		return maskAny(err)
-	}
-
-	ctx.SetCLGTreeID(clgTreeID)
+	ctx.SetInformationID(informationID)
 
 	return nil
 }

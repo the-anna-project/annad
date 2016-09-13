@@ -15,9 +15,10 @@ import (
 type key string
 
 const (
-	behaviorIDKey key = "behavior-id"
-	clgTreeIDKey  key = "clg-tree-id"
-	sessionIDKey  key = "session-id"
+	behaviorIDKey    key = "behavior-id"
+	clgTreeIDKey     key = "clg-tree-id"
+	informationIDKey key = "information-id"
+	sessionIDKey     key = "session-id"
 )
 
 // Config represents the configuration used to create a new context object.
@@ -85,9 +86,15 @@ type context struct {
 func (c *context) Clone() spec.Context {
 	specContext := MustNew()
 
+	// At first we prepare a new underlying context to have a fresh storage.
 	specContext.(*context).Context = netcontext.Background()
+
+	// We set the session ID to our own context object and also make the
+	// underlying context aware of it.
 	specContext.(*context).SessionID = c.GetSessionID()
 	specContext.SetSessionID(c.GetSessionID())
+
+	// Add other information to the underlying context.
 	specContext.SetCLGTreeID(c.GetCLGTreeID())
 
 	return specContext
@@ -127,6 +134,15 @@ func (c *context) GetID() string {
 	return c.ID
 }
 
+func (c *context) GetInformationID() string {
+	informationID, ok := c.Context.Value(informationIDKey).(string)
+	if ok {
+		return informationID
+	}
+
+	return ""
+}
+
 func (c *context) GetSessionID() string {
 	sessionID, ok := c.Context.Value(sessionIDKey).(string)
 	if ok {
@@ -142,6 +158,10 @@ func (c *context) SetBehaviorID(behaviorID string) {
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+}
+
+func (c *context) SetInformationID(informationID string) {
+	c.Context = netcontext.WithValue(c.Context, informationIDKey, informationID)
 }
 
 func (c *context) SetSessionID(sessionID string) {

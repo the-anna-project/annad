@@ -60,11 +60,12 @@ approach. There are maybe others which have not ben found yet.
 
 ###### input (4)
 - receive user provided input
-- write user provided input into storage
+- write user provided input into storage using information ID
+- add information ID to current context
 
 ###### read input
 - lookup information ID from context
-- read user provided input from storage
+- read user provided input from storage by information ID
 - return user provided input
 
 ###### feature size (1)
