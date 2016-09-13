@@ -14,8 +14,6 @@ import (
 
 type key string
 
-// TODO add canceler which can be passed through all contexted that are involved in responding to current request
-
 const (
 	behaviorIDKey key = "behavior-id"
 	clgTreeIDKey  key = "clg-tree-id"
