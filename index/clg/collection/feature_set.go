@@ -147,7 +147,7 @@ func (c *collection) GetNewFeatureSet(args ...interface{}) ([]interface{}, error
 		return nil, maskAnyf(tooManyArgumentsError, "expected 5 got %d", len(args))
 	}
 
-	newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+	newFeatureSet, err := featureset.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
