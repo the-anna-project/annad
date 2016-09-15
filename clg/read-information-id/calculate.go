@@ -1,5 +1,5 @@
-// Package informationid implements spec.CLG and provides functionality to read
-// the information sequence stored under a specific information ID.
+// Package readinformationid implements spec.CLG and provides functionality to
+// read the information sequence stored under a specific information ID.
 package readinformationid
 
 import (
