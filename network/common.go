@@ -5,7 +5,16 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
+	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
+	"github.com/xh3b4sd/anna/clg/is-between"
+	"github.com/xh3b4sd/anna/clg/is-greater"
+	"github.com/xh3b4sd/anna/clg/multiply"
+	//"github.com/xh3b4sd/anna/clg/output"
+	"github.com/xh3b4sd/anna/clg/read-information-id"
+	"github.com/xh3b4sd/anna/clg/split-features"
+	"github.com/xh3b4sd/anna/clg/subtract"
+	"github.com/xh3b4sd/anna/clg/sum"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
@@ -281,6 +290,17 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 	newList := []spec.CLG{
 		divide.MustNew(),
 		input.MustNew(),
+		divide.MustNew(),
+		greater.MustNew(),
+		input.MustNew(),
+		isbetween.MustNew(),
+		isgreater.MustNew(),
+		multiply.MustNew(),
+		//output.MustNew(),
+		readinformationid.MustNew(),
+		splitfeatures.MustNew(),
+		subtract.MustNew(),
+		sum.MustNew(),
 	}
 
 	newCLGs := map[spec.ObjectID]spec.CLG{}
