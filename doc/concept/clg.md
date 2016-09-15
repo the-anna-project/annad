@@ -58,23 +58,23 @@ The following describes implementation details necessary to consider to make
 the neural network work. The described details intend to suggest one possible
 approach. There are maybe others which have not ben found yet.
 
-###### input (4)
+###### input (4) done
 - receive user provided input
 - write user provided input into storage using information ID
 - add information ID to current context
 
-###### read input
+###### read input done
 - lookup information ID from context
 - read user provided input from storage by information ID
 - return user provided input
 
-###### feature size (1)
+###### feature size (1) wontfix
 - check when feature size was last updated
 - if last updated is long enough ago, increment or decrement feature size by 1
 - store feature size into storage
 - write last updated into storage
 
-###### split features (2)
+###### split features (2) done
 - receive information
 - read feature size from storage
 - split information into features
