@@ -12,7 +12,7 @@ import (
 
 const (
 	// FeatureSize represents the number of characters a feature consists of. E.g.
-	// a FeatureSize of 4 results in features being registerd which are 4
+	// a FeatureSize of 4 results in features being registered which are 4
 	// characters long. Features are detected by a window sliding over an
 	// information sequence. Once a feature is detected the window slides one
 	// character farther.
