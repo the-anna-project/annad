@@ -148,6 +148,18 @@ information ID.
 
 ---
 
+###### map information ID to information sequence
+When having an information ID given it needs to be mapped to its information
+sequence. This mapping resolves a single information sequence from its
+information ID. The following key maps an information ID to its information
+sequence.
+
+```
+<prefix>:information-id:<information-id>:information-sequence    <information-sequence>
+```
+
+---
+
 ###### map information ID to information coordinate
 When having an information ID given it needs to be mapped to its information
 coordinate. This mapping resolves a single information coordinate from its
