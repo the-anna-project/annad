@@ -55,7 +55,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	}
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -98,7 +98,7 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	input := "test input"
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -143,7 +143,7 @@ func Test_CLG_Input_IDFactoryError(t *testing.T) {
 
 	// Set prepared storage to CLG we want to test.
 	newCLG.(*clg).IDFactory = newIDFactory
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -174,7 +174,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -207,7 +207,7 @@ func Test_CLG_Input_UnknownCLGTree(t *testing.T) {
 	}
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -253,7 +253,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).GeneralStorage = newStorage
 
 	// Execute CLG.
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
