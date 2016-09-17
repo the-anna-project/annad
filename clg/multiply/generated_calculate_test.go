@@ -14,18 +14,27 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func Test_CLG_New_LogError(t *testing.T) {
+func Test_CLG_New_FeatureStorageError(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Log = nil
+	newConfig.FeatureStorage = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_CLG_New_StorageError(t *testing.T) {
+func Test_CLG_New_GeneralStorageError(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Storage = nil
+	newConfig.GeneralStorage = nil
+	_, err := New(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_New_LogError(t *testing.T) {
+	newConfig := DefaultConfig()
+	newConfig.Log = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -67,6 +76,52 @@ func Test_CLG_GetInputTypes(t *testing.T) {
 	var ctx context.Context
 	if !inputTypes[0].Implements(reflect.TypeOf(&ctx).Elem()) {
 		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_SetFeatureStorage(t *testing.T) {
+	newCLG := MustNew()
+	var rawCLG *clg
+
+	switch c := newCLG.(type) {
+	case *clg:
+		// all good
+		rawCLG = newCLG.(*clg)
+	default:
+		t.Fatal("expected", "*clg", "got", c)
+	}
+
+	if rawCLG.FeatureStorage == nil {
+		t.Fatal("expected", "spec.FeatureStorage", "got", nil)
+	}
+
+	newCLG.SetFeatureStorage(nil)
+
+	if rawCLG.FeatureStorage != nil {
+		t.Fatal("expected", nil, "got", "spec.FeatureStorage")
+	}
+}
+
+func Test_CLG_SetGeneralStorage(t *testing.T) {
+	newCLG := MustNew()
+	var rawCLG *clg
+
+	switch c := newCLG.(type) {
+	case *clg:
+		// all good
+		rawCLG = newCLG.(*clg)
+	default:
+		t.Fatal("expected", "*clg", "got", c)
+	}
+
+	if rawCLG.GeneralStorage == nil {
+		t.Fatal("expected", "spec.GeneralStorage", "got", nil)
+	}
+
+	newCLG.SetGeneralStorage(nil)
+
+	if rawCLG.GeneralStorage != nil {
+		t.Fatal("expected", nil, "got", "spec.GeneralStorage")
 	}
 }
 
@@ -113,28 +168,5 @@ func Test_CLG_SetLog(t *testing.T) {
 
 	if rawCLG.Log != nil {
 		t.Fatal("expected", nil, "got", "spec.Log")
-	}
-}
-
-func Test_CLG_SetStorage(t *testing.T) {
-	newCLG := MustNew()
-	var rawCLG *clg
-
-	switch c := newCLG.(type) {
-	case *clg:
-		// all good
-		rawCLG = newCLG.(*clg)
-	default:
-		t.Fatal("expected", "*clg", "got", c)
-	}
-
-	if rawCLG.Storage == nil {
-		t.Fatal("expected", "spec.Storage", "got", nil)
-	}
-
-	newCLG.SetStorage(nil)
-
-	if rawCLG.Storage != nil {
-		t.Fatal("expected", nil, "got", "spec.Storage")
 	}
 }
