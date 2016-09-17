@@ -15,7 +15,7 @@ import (
 // context.
 func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", informationSequence)
-	informationID, err := c.Storage.Get(informationIDKey)
+	informationID, err := c.GeneralStorage.Get(informationIDKey)
 	if storage.IsNotFound(err) {
 		// The given information sequence was never seen before. Thus we register it
 		// now with its own very unique information ID.
@@ -27,12 +27,12 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 
 		// TODO test
 		informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
-		err = c.Storage.Set(informationSequenceKey, informationSequence)
+		err = c.GeneralStorage.Set(informationSequenceKey, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
 
-		err = c.Storage.Set(informationIDKey, informationID)
+		err = c.GeneralStorage.Set(informationIDKey, informationID)
 		if err != nil {
 			return maskAny(err)
 		}

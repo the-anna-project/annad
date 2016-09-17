@@ -29,10 +29,11 @@ var (
 // Config represents the configuration used to create a new anna object.
 type Config struct {
 	// Dependencies.
-	Network spec.Network
-	Log     spec.Log
-	Server  spec.Server
-	Storage spec.Storage
+	FeatureStorage spec.Storage
+	GeneralStorage spec.Storage
+	Log            spec.Log
+	Network        spec.Network
+	Server         spec.Server
 
 	// Settings.
 	Flags   Flags
@@ -52,17 +53,13 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
-		Network: newNetwork,
-		Log:     log.New(log.DefaultConfig()),
-		Server:  newServer,
-		Storage: newStorage,
+		FeatureStorage: memory.MustNew(),
+		GeneralStorage: memory.MustNew(),
+		Log:            log.New(log.DefaultConfig()),
+		Network:        newNetwork,
+		Server:         newServer,
 
 		// Settings.
 		Flags:   Flags{},
@@ -83,17 +80,20 @@ func New(config Config) (spec.Anna, error) {
 		Type:         ObjectType,
 	}
 
-	if newAnna.Network == nil {
-		return nil, maskAnyf(invalidConfigError, "network must not be empty")
+	if newAnna.FeatureStorage == nil {
+		return nil, maskAnyf(invalidConfigError, "feature storage must not be empty")
+	}
+	if newAnna.GeneralStorage == nil {
+		return nil, maskAnyf(invalidConfigError, "generale storage must not be empty")
 	}
 	if newAnna.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
+	if newAnna.Network == nil {
+		return nil, maskAnyf(invalidConfigError, "network must not be empty")
+	}
 	if newAnna.Server == nil {
 		return nil, maskAnyf(invalidConfigError, "server must not be empty")
-	}
-	if newAnna.Storage == nil {
-		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
 	}
 
 	return newAnna, nil

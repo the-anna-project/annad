@@ -14,9 +14,6 @@ type Storage interface {
 	//
 	GetElementsByScore(key string, score float64, maxElements int) ([]string, error)
 
-	// GetStringMap returns the hash map stored under the given key.
-	GetStringMap(key string) (map[string]string, error)
-
 	// GetHighestScoredElements searches a list that is ordered by their
 	// element's score, and returns the elements and their corresponding scores,
 	// where the highest scored element is the first in the returned list. Note
@@ -28,6 +25,13 @@ type Storage interface {
 	// because the list contains the elements and their scores.
 	//
 	GetHighestScoredElements(key string, maxElements int) ([]string, error)
+
+	// GetRandomKey returns a random key which was formerly stored within the
+	// underlying storage.
+	GetRandomKey() (string, error)
+
+	// GetStringMap returns the hash map stored under the given key.
+	GetStringMap(key string) (map[string]string, error)
 
 	Object
 

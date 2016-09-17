@@ -29,21 +29,21 @@ func (a *anna) listenToSignal() {
 	a.ForceShutdown()
 }
 
-// writeStateInfo writes state information to the configured storage. The
-// information look like this.
+// writeStateInfo writes state information to the configured general storage.
+// The information look like this.
 //
-//     "time":    "16/03/27 21:14:35"
-//     "version": "84ehdv0"
+//     "time":       "16/03/27 21:14:35"
+//     "version":    "84ehdv0"
 //
 func (a *anna) writeStateInfo() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call writeStateInfo")
 
-	err := a.Storage.Set("version", version)
+	err := a.GeneralStorage.Set("version", version)
 	panicOnError(err)
 
 	for {
 		dateTime := time.Now().Format("06/01/02 15:04:05")
-		err := a.Storage.Set("time", dateTime)
+		err := a.GeneralStorage.Set("time", dateTime)
 		if err != nil {
 			a.Log.WithTags(spec.Tags{C: nil, L: "E", O: a, V: 4}, "%#v", maskAny(err))
 		}

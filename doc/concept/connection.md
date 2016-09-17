@@ -102,7 +102,11 @@ Designing a data structure is quite important. Smart systems need to store
 information efficiently. The wrong data structures will cause huge amounts of
 data or cause high latency for business logic tasks. The following data
 structure design aims to be efficient and fast while meeting the requirements of
-Anna's business logic. We use key-value pairs to store data and describe
+Anna's business logic. Note that the following documentation does not aim to
+track a complete list of all data structures used for the Anna project. We only
+try to document the most important key-value pairs to transport ideas. It might
+happen that some information are missing. In this case the missing information
+should be added below. Anyway, we use key-value pairs to store data and describe
 relations between objects where possible because of simplicity and speed. The
 notation of the described data structures reads as follows.
 

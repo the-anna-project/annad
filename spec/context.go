@@ -6,7 +6,8 @@ import (
 
 // Context represents a container holding scope specific information.
 type Context interface {
-	// Clone returns an exact copy of the current Context.
+	// Clone returns an exact copy of the current Context. The only exception of
+	// copied fields is the context ID, which must be unique for each context.
 	Clone() Context
 
 	context.Context

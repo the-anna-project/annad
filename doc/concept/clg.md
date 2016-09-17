@@ -113,6 +113,3 @@ approach. There are maybe others which have not ben found yet.
 - read certenty range from storage
 - write minimum certenty into storage, if expectation matches and minimum certenty is smaller than current one
 - if information is within certenty range, return information, otherwise return error to keep neural activity up
-
-### unknown
-- how to learn across CLG trees?

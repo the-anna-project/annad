@@ -84,9 +84,11 @@ type context struct {
 }
 
 func (c *context) Clone() spec.Context {
+	// At first we create a new context with its own very unique ID, which will
+	// not be cloned. All properties but the context ID must be cloned below.
 	specContext := MustNew()
 
-	// At first we prepare a new underlying context to have a fresh storage.
+	// We prepare a new underlying context to have a fresh storage.
 	specContext.(*context).Context = netcontext.Background()
 
 	// We set the session ID to our own context object and also make the

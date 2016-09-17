@@ -118,17 +118,6 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return nil, notFoundError
 }
 
-func (s *storage) GetStringMap(key string) (map[string]string, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-
-	if value, ok := s.StringMap[key]; ok {
-		return value, nil
-	}
-
-	return nil, notFoundError
-}
-
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	s.Mutex.Lock()
 	weighted, ok := s.Weighted[key]
@@ -163,6 +152,26 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	}
 
 	return scoredElements, nil
+}
+
+func (s *storage) GetRandomKey() (string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	// TODO
+
+	return "", notFoundError
+}
+
+func (s *storage) GetStringMap(key string) (map[string]string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if value, ok := s.StringMap[key]; ok {
+		return value, nil
+	}
+
+	return nil, notFoundError
 }
 
 func (s *storage) PushToSet(key string, element string) error {

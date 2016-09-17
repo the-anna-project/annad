@@ -9,7 +9,8 @@ type Flags struct {
 	ControlLogObejcts   string
 	ControlLogVerbosity int
 
-	Storage       string
-	StorageAddr   string
-	StoragePrefix string
+	Storage                 string
+	RedisFeatureStorageAddr string
+	RedisGeneralStorageAddr string
+	RedisStoragePrefix      string
 }

@@ -23,9 +23,10 @@ const (
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	IDFactory spec.IDFactory
-	Log       spec.Log
-	Storage   spec.Storage
+	FeatureStorage spec.Storage
+	GeneralStorage spec.Storage
+	IDFactory      spec.IDFactory
+	Log            spec.Log
 
 	// Settings.
 	InputChannel chan spec.NetworkPayload
@@ -36,9 +37,10 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		IDFactory: id.MustNewFactory(),
-		Log:       log.New(log.DefaultConfig()),
-		Storage:   memory.MustNew(),
+		FeatureStorage: memory.MustNew(),
+		GeneralStorage: memory.MustNew(),
+		IDFactory:      id.MustNewFactory(),
+		Log:            log.New(log.DefaultConfig()),
 
 		// Settings.
 		InputChannel: make(chan spec.NetworkPayload, 1000),
@@ -56,11 +58,17 @@ func New(config Config) (spec.CLG, error) {
 	}
 
 	// Dependencies.
+	if newCLG.FeatureStorage == nil {
+		return nil, maskAnyf(invalidConfigError, "feature storage must not be empty")
+	}
+	if newCLG.GeneralStorage == nil {
+		return nil, maskAnyf(invalidConfigError, "general storage must not be empty")
+	}
+	if newCLG.IDFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
+	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if newCLG.Storage == nil {
-		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
 	}
 
 	// Settings.
@@ -124,14 +132,18 @@ func (c *clg) GetInputTypes() []reflect.Type {
 	return inputType
 }
 
+func (c *clg) SetFeatureStorage(storage spec.Storage) {
+	c.FeatureStorage = storage
+}
+
+func (c *clg) SetGeneralStorage(storage spec.Storage) {
+	c.GeneralStorage = storage
+}
+
 func (c *clg) SetIDFactory(idFactory spec.IDFactory) {
 	c.IDFactory = idFactory
 }
 
 func (c *clg) SetLog(log spec.Log) {
 	c.Log = log
-}
-
-func (c *clg) SetStorage(storage spec.Storage) {
-	c.Storage = storage
 }

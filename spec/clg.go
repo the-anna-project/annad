@@ -24,6 +24,14 @@ type CLG interface {
 
 	Object
 
+	// SetFeatureStorage configures the CLG's feature storage. This is done for
+	// all CLGs, regardless if a CLG is making use of the logger or not.
+	SetFeatureStorage(storage Storage)
+
+	// SetGeneralStorage configures the CLG's feature storage. This is done for
+	// all CLGs, regardless if a CLG is making use of the logger or not.
+	SetGeneralStorage(storage Storage)
+
 	// SetIDFactory configures the CLG's id factory. This is done for all CLGs,
 	// regardless if a CLG is making use of the logger or not.
 	SetIDFactory(idFactory IDFactory)
@@ -31,8 +39,4 @@ type CLG interface {
 	// SetLog configures the CLG's logger. This is done for all CLGs, regardless
 	// if a CLG is making use of the logger or not.
 	SetLog(log Log)
-
-	// SetStorage configures the CLG's storage. This is done for all CLGs,
-	// regardless if a CLG is making use of the logger or not.
-	SetStorage(storage Storage)
 }
