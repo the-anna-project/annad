@@ -184,7 +184,7 @@ func (s *storage) GetRandomKey() (string, error) {
 		if err != nil {
 			return "", maskAny(err)
 		}
-		for k, _ := range s.KeyValue {
+		for k := range s.KeyValue {
 			if counter == keyIDs[0] {
 				return k, nil
 			}
@@ -196,7 +196,7 @@ func (s *storage) GetRandomKey() (string, error) {
 		if err != nil {
 			return "", maskAny(err)
 		}
-		for k, _ := range s.MathSet {
+		for k := range s.MathSet {
 			if counter == keyIDs[0] {
 				return k, nil
 			}
@@ -208,7 +208,7 @@ func (s *storage) GetRandomKey() (string, error) {
 		if err != nil {
 			return "", maskAny(err)
 		}
-		for k, _ := range s.StringMap {
+		for k := range s.StringMap {
 			if counter == keyIDs[0] {
 				return k, nil
 			}
@@ -220,7 +220,7 @@ func (s *storage) GetRandomKey() (string, error) {
 		if err != nil {
 			return "", maskAny(err)
 		}
-		for k, _ := range s.Weighted {
+		for k := range s.Weighted {
 			if counter == keyIDs[0] {
 				return k, nil
 			}
