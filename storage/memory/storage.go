@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -33,22 +34,29 @@ type scoredElements struct {
 // StorageConfig represents the configuration used to create a new memory storage
 // object.
 type StorageConfig struct {
-	KeyValue  map[string]string
-	StringMap map[string]map[string]string
-	Log       spec.Log
-	MathSet   map[string]map[string]struct{}
-	Weighted  map[string]scoredElements
+	KeyValue      map[string]string
+	Log           spec.Log
+	MathSet       map[string]map[string]struct{}
+	RandomFactory spec.RandomFactory
+	StringMap     map[string]map[string]string
+	Weighted      map[string]scoredElements
 }
 
 // DefaultStorageConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultStorageConfig() StorageConfig {
+	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := StorageConfig{
-		KeyValue:  map[string]string{},
-		StringMap: map[string]map[string]string{},
-		Log:       log.New(log.DefaultConfig()),
-		MathSet:   map[string]map[string]struct{}{},
-		Weighted:  map[string]scoredElements{},
+		KeyValue:      map[string]string{},
+		Log:           log.New(log.DefaultConfig()),
+		MathSet:       map[string]map[string]struct{}{},
+		RandomFactory: newRandomFactory,
+		StringMap:     map[string]map[string]string{},
+		Weighted:      map[string]scoredElements{},
 	}
 
 	return newConfig
@@ -158,7 +166,67 @@ func (s *storage) GetRandomKey() (string, error) {
 	s.Mutex.Lock()
 	defer s.Mutex.Unlock()
 
-	// TODO
+	// Here we create a random number to chose a random map, of which we have 4.
+	// The random numbers starts at 0. So the maximum random number we want to
+	// have is 3. Because the max parameter of CreateNMax is exclusive, we set max
+	// to 4.
+	mapIDs, err := s.RandomFactory.CreateNMax(1, 4)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	var counter int
+
+	switch mapIDs[0] {
+	case 0:
+		l := len(s.KeyValue)
+		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
+		if err != nil {
+			return "", maskAny(err)
+		}
+		for k, _ := range s.KeyValue {
+			if counter == keyIDs[0] {
+				return k, nil
+			}
+			counter++
+		}
+	case 1:
+		l := len(s.MathSet)
+		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
+		if err != nil {
+			return "", maskAny(err)
+		}
+		for k, _ := range s.MathSet {
+			if counter == keyIDs[0] {
+				return k, nil
+			}
+			counter++
+		}
+	case 2:
+		l := len(s.StringMap)
+		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
+		if err != nil {
+			return "", maskAny(err)
+		}
+		for k, _ := range s.StringMap {
+			if counter == keyIDs[0] {
+				return k, nil
+			}
+			counter++
+		}
+	case 3:
+		l := len(s.Weighted)
+		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
+		if err != nil {
+			return "", maskAny(err)
+		}
+		for k, _ := range s.Weighted {
+			if counter == keyIDs[0] {
+				return k, nil
+			}
+			counter++
+		}
+	}
 
 	return "", notFoundError
 }

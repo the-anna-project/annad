@@ -81,8 +81,8 @@ func (f *factory) CreateNMax(n, max int) ([]int, error) {
 
 		go func() {
 			for i := 0; i < n; i++ {
-				max := big.NewInt(int64(n))
-				j, err := f.RandFactory(f.RandReader, max)
+				m := big.NewInt(int64(max))
+				j, err := f.RandFactory(f.RandReader, m)
 				if err != nil {
 					fail <- maskAny(err)
 					return
