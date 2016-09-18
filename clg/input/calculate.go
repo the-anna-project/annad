@@ -25,14 +25,13 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 		}
 		informationID = string(newID)
 
-		// TODO test
-		informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
-		err = c.GeneralStorage.Set(informationSequenceKey, informationSequence)
+		err = c.GeneralStorage.Set(informationIDKey, informationID)
 		if err != nil {
 			return maskAny(err)
 		}
 
-		err = c.GeneralStorage.Set(informationIDKey, informationID)
+		informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
+		err = c.GeneralStorage.Set(informationSequenceKey, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
