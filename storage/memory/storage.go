@@ -175,56 +175,22 @@ func (s *storage) GetRandomKey() (string, error) {
 		return "", maskAny(err)
 	}
 
-	var counter int
-
 	switch mapIDs[0] {
 	case 0:
-		l := len(s.KeyValue)
-		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
-		if err != nil {
-			return "", maskAny(err)
-		}
 		for k := range s.KeyValue {
-			if counter == keyIDs[0] {
-				return k, nil
-			}
-			counter++
+			return k, nil
 		}
 	case 1:
-		l := len(s.MathSet)
-		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
-		if err != nil {
-			return "", maskAny(err)
-		}
 		for k := range s.MathSet {
-			if counter == keyIDs[0] {
-				return k, nil
-			}
-			counter++
+			return k, nil
 		}
 	case 2:
-		l := len(s.StringMap)
-		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
-		if err != nil {
-			return "", maskAny(err)
-		}
 		for k := range s.StringMap {
-			if counter == keyIDs[0] {
-				return k, nil
-			}
-			counter++
+			return k, nil
 		}
 	case 3:
-		l := len(s.Weighted)
-		keyIDs, err := s.RandomFactory.CreateNMax(1, l)
-		if err != nil {
-			return "", maskAny(err)
-		}
 		for k := range s.Weighted {
-			if counter == keyIDs[0] {
-				return k, nil
-			}
-			counter++
+			return k, nil
 		}
 	}
 
