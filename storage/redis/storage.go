@@ -194,7 +194,6 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	return result, nil
 }
 
-// TODO test
 func (s *storage) GetRandomKey() (string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandomKey")
 
