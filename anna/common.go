@@ -38,12 +38,12 @@ func (a *anna) listenToSignal() {
 func (a *anna) writeStateInfo() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call writeStateInfo")
 
-	err := a.GeneralStorage.Set("version", version)
+	err := a.Storage().General().Set("version", version)
 	panicOnError(err)
 
 	for {
 		dateTime := time.Now().Format("06/01/02 15:04:05")
-		err := a.GeneralStorage.Set("time", dateTime)
+		err := a.Storage().General().Set("time", dateTime)
 		if err != nil {
 			a.Log.WithTags(spec.Tags{C: nil, L: "E", O: a, V: 4}, "%#v", maskAny(err))
 		}

@@ -33,4 +33,6 @@ type Anna interface {
 	// to Shutdown blocks until Anna is completely shut down, so you might want
 	// to call it in a separate goroutine.
 	Shutdown()
+
+	StorageProvider
 }

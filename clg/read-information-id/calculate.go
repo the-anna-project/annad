@@ -16,7 +16,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 	}
 
 	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := c.GeneralStorage.Get(informationSequenceKey)
+	informationSequence, err := c.Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return "", maskAny(err)
 	}

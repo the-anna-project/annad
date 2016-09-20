@@ -38,10 +38,9 @@ func (n *network) clgByName(name string) (spec.CLG, error) {
 
 func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.ObjectID]spec.CLG {
 	for ID := range CLGs {
-		CLGs[ID].SetFeatureStorage(n.FeatureStorage)
-		CLGs[ID].SetGeneralStorage(n.GeneralStorage)
 		CLGs[ID].SetIDFactory(n.IDFactory)
 		CLGs[ID].SetLog(n.Log)
+		CLGs[ID].SetStorageCollection(n.StorageCollection)
 	}
 
 	return CLGs
@@ -56,7 +55,7 @@ func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload)
 	}
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
 
-	err := n.GeneralStorage.WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
+	err := n.Storage().General().WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
 		behaviorIDs = append(behaviorIDs, element)
 		return nil
 	})

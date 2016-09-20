@@ -41,7 +41,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 		if err != nil {
 			return maskAny(err)
 		}
-		err = c.FeatureStorage.Set(positionKey, string(raw))
+		err = c.Storage().Feature().Set(positionKey, string(raw))
 		if err != nil {
 			return maskAny(err)
 		}

@@ -17,7 +17,7 @@ import (
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
@@ -29,11 +29,10 @@ const (
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
-	FeatureStorage     spec.Storage
-	GeneralStorage     spec.Storage
 	IDFactory          spec.IDFactory
 	Log                spec.Log
 	PermutationFactory spec.PermutationFactory
+	StorageCollection  spec.StorageCollection
 	TextInput          chan spec.TextRequest
 	TextOutput         chan spec.TextResponse
 
@@ -56,11 +55,10 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		FeatureStorage:     memory.MustNew(),
-		GeneralStorage:     memory.MustNew(),
 		IDFactory:          id.MustNewFactory(),
 		Log:                log.New(log.DefaultConfig()),
 		PermutationFactory: newPermutationFactory,
+		StorageCollection:  storage.MustNewCollection(),
 		TextInput:          make(chan spec.TextRequest, 1000),
 		TextOutput:         make(chan spec.TextResponse, 1000),
 
@@ -86,12 +84,6 @@ func New(config Config) (spec.Network, error) {
 		Type:         ObjectType,
 	}
 
-	if newNetwork.FeatureStorage == nil {
-		return nil, maskAnyf(invalidConfigError, "feature storage must not be empty")
-	}
-	if newNetwork.GeneralStorage == nil {
-		return nil, maskAnyf(invalidConfigError, "general storage must not be empty")
-	}
 	if newNetwork.IDFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
 	}
@@ -100,6 +92,9 @@ func New(config Config) (spec.Network, error) {
 	}
 	if newNetwork.PermutationFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "permutation factory must not be empty")
+	}
+	if newNetwork.StorageCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 	if newNetwork.TextInput == nil {
 		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
@@ -200,7 +195,7 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 		// behavior name by the given behavior ID. Data we read here is written
 		// within several CLGs. That way the network creates its own connections
 		// based on learned experiences.
-		clgName, err := n.GeneralStorage.Get(key.NewCLGKey("behavior-id:%s:behavior-name", ID))
+		clgName, err := n.Storage().General().Get(key.NewCLGKey("behavior-id:%s:behavior-name", ID))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -296,4 +291,8 @@ func (n *network) Shutdown() {
 	n.ShutdownOnce.Do(func() {
 		close(n.Closer)
 	})
+}
+
+func (n *network) Storage() spec.StorageCollection {
+	return n.StorageCollection
 }

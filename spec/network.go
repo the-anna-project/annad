@@ -96,4 +96,6 @@ type Network interface {
 	// The call to Shutdown blocks until the network is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
+
+	StorageProvider
 }

@@ -11,22 +11,21 @@ import (
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
 	// ObjectType represents the object type of the CLG object. This is used e.g.
 	// to register itself to the logger.
-	ObjectType spec.ObjectType = "pair-syntactic-clg"
+	ObjectType spec.ObjectType = "divide-clg"
 )
 
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	FeatureStorage spec.Storage
-	GeneralStorage spec.Storage
-	IDFactory      spec.IDFactory
-	Log            spec.Log
+	IDFactory         spec.IDFactory
+	Log               spec.Log
+	StorageCollection spec.StorageCollection
 
 	// Settings.
 	InputChannel chan spec.NetworkPayload
@@ -37,10 +36,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FeatureStorage: memory.MustNew(),
-		GeneralStorage: memory.MustNew(),
-		IDFactory:      id.MustNewFactory(),
-		Log:            log.New(log.DefaultConfig()),
+		IDFactory:         id.MustNewFactory(),
+		Log:               log.New(log.DefaultConfig()),
+		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.
 		InputChannel: make(chan spec.NetworkPayload, 1000),
@@ -58,17 +56,14 @@ func New(config Config) (spec.CLG, error) {
 	}
 
 	// Dependencies.
-	if newCLG.FeatureStorage == nil {
-		return nil, maskAnyf(invalidConfigError, "feature storage must not be empty")
-	}
-	if newCLG.GeneralStorage == nil {
-		return nil, maskAnyf(invalidConfigError, "general storage must not be empty")
-	}
 	if newCLG.IDFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
 	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newCLG.StorageCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	// Settings.
@@ -132,18 +127,18 @@ func (c *clg) GetInputTypes() []reflect.Type {
 	return inputType
 }
 
-func (c *clg) SetFeatureStorage(storage spec.Storage) {
-	c.FeatureStorage = storage
-}
-
-func (c *clg) SetGeneralStorage(storage spec.Storage) {
-	c.GeneralStorage = storage
-}
-
 func (c *clg) SetIDFactory(idFactory spec.IDFactory) {
 	c.IDFactory = idFactory
 }
 
 func (c *clg) SetLog(log spec.Log) {
 	c.Log = log
+}
+
+func (c *clg) SetStorageCollection(storageCollection spec.StorageCollection) {
+	c.StorageCollection = storageCollection
+}
+
+func (c *clg) Storage() spec.StorageCollection {
+	return c.StorageCollection
 }

@@ -35,17 +35,14 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			newTextInput := make(chan spec.TextRequest, 1000)
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
-			// storage.
-			a.FeatureStorage, err = a.createFeatureStorage(a.Log, a.Flags.RedisStoragePrefix)
-			panicOnError(err)
-			a.GeneralStorage, err = a.createGeneralStorage(a.Log, a.Flags.RedisStoragePrefix)
+			// storage collection.
+			a.StorageCollection, err = createStorageCollection(a.Log, a.Flags)
 			panicOnError(err)
 
 			// network.
 			networkConfig := network.DefaultConfig()
-			networkConfig.FeatureStorage = a.FeatureStorage
-			networkConfig.GeneralStorage = a.GeneralStorage
 			networkConfig.Log = a.Log
+			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.TextInput = newTextInput
 			networkConfig.TextOutput = newTextOutput
 			a.Network, err = network.New(networkConfig)

@@ -1,6 +1,14 @@
 package spec
 
-// Storage represents a persistency management object.
+// Storage represents a persistency management object. Different storages may be
+// provided using StorageCollectionProvider. Within a receiver function the
+// usage of the feature storage may look like this.
+//
+//     func (n *network) Foo() error {
+//       rk, err := n.Storage().Feature().GetRandomKey()
+//       ...
+//     }
+//
 type Storage interface {
 	// Get returns data associated with key. This is a simple key-value
 	// relationship.
@@ -78,4 +86,19 @@ type Storage interface {
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
+}
+
+// StorageCollection represents a collection of Storage instances. This scopes
+// different Storage implementations in a simple container, which can easily be
+// passed around.
+type StorageCollection interface {
+	Feature() Storage
+	General() Storage
+}
+
+// StorageProvider should be implemented by every object which wants to use
+// storages. This then creates an API between storage implementations and
+// storage users.
+type StorageProvider interface {
+	Storage() StorageCollection
 }

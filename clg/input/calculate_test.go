@@ -11,7 +11,7 @@ import (
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
@@ -47,13 +47,35 @@ func testMustNewIDFactory(t *testing.T) spec.IDFactory {
 	return &testIDFactory{}
 }
 
-func testMustNewStorageWithConn(t *testing.T, c redigo.Conn) spec.Storage {
-	newStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
+func testMustNewStorageCollection(t *testing.T) spec.StorageCollection {
+	newCollection, err := storage.NewCollection(storage.DefaultCollectionConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	return newStorage
+	return newCollection
+}
+
+func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.StorageCollection {
+	newFeatureStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	newGeneralStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	newStorageCollectionConfig := storage.DefaultCollectionConfig()
+	newStorageCollectionConfig.FeatureStorage = newFeatureStorage
+	newStorageCollectionConfig.GeneralStorage = newGeneralStorage
+	newStorageCollection, err := storage.NewCollection(newStorageCollectionConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	return newStorageCollection
 }
 
 func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spec.NetworkPayload {
@@ -72,19 +94,19 @@ func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spe
 func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Create record for the test input.
 	informationID := "123"
 	newInput := "test input"
 	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
-	err := newStorage.Set(informationIDKey, informationID)
+	err := newStorageCollection.General().Set(informationIDKey, informationID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
 	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
@@ -112,14 +134,14 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
 	// unknown input sequence.
 	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
 	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
@@ -147,7 +169,7 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
 	newIDFactory := testMustNewIDFactory(t)
 
 	// Note we do not create a record for the test input. This test is about an
@@ -161,7 +183,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	}
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 	newCLG.(*clg).IDFactory = newIDFactory
 
 	// Execute CLG.
@@ -181,7 +203,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	}
 
 	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
-	storedID, err := newStorage.Get(informationIDKey)
+	storedID, err := newStorageCollection.General().Get(informationIDKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -190,7 +212,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	}
 
 	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", newID)
-	storedInput, err := newStorage.Get(informationSequenceKey)
+	storedInput, err := newStorageCollection.General().Get(informationSequenceKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -202,7 +224,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 func Test_CLG_Input_IDFactoryError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
 	newIDFactory := testMustNewErrorIDFactory(t)
 
 	// Note we do not create a record for the test input. This test is about an
@@ -211,7 +233,7 @@ func Test_CLG_Input_IDFactoryError(t *testing.T) {
 
 	// Set prepared storage to CLG we want to test.
 	newCLG.(*clg).IDFactory = newIDFactory
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
 	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
@@ -238,10 +260,10 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
 	c.Command("SET", "prefix:"+informationIDKey, string(newID)).ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 	newCLG.(*clg).IDFactory = newIDFactory
 
 	// Execute CLG.
@@ -271,10 +293,10 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
 	c.Command("SET", "prefix:"+informationIDKey, string(newID)).Expect("OK")
 	c.Command("SET", "prefix:"+informationSequenceKey, newInput).ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 	newCLG.(*clg).IDFactory = newIDFactory
 
 	// Execute CLG.
@@ -294,10 +316,10 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).GeneralStorage = newStorage
+	newCLG.SetStorageCollection(newStorageCollection)
 
 	// Execute CLG.
 	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))

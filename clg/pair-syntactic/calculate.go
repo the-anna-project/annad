@@ -26,11 +26,11 @@ func (c *clg) calculate(ctx spec.Context) error {
 		//
 		//     feature:%s:positions
 		//
-		key1, err := c.FeatureStorage.GetRandomKey()
+		key1, err := c.Storage().Feature().GetRandomKey()
 		if err != nil {
 			return maskAny(err)
 		}
-		key2, err := c.FeatureStorage.GetRandomKey()
+		key2, err := c.Storage().Feature().GetRandomKey()
 		if err != nil {
 			return maskAny(err)
 		}
@@ -53,7 +53,7 @@ func (c *clg) calculate(ctx spec.Context) error {
 
 		// Write the new pair into the general storage.
 		pairIDKey := key.NewCLGKey("pair:%s:pair-id", pair)
-		_, err = c.GeneralStorage.Get(pairIDKey)
+		_, err = c.Storage().General().Get(pairIDKey)
 		if storage.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
@@ -64,7 +64,7 @@ func (c *clg) calculate(ctx spec.Context) error {
 			}
 			pairID := string(newID)
 
-			err = c.GeneralStorage.Set(pairIDKey, pairID)
+			err = c.Storage().General().Set(pairIDKey, pairID)
 			if err != nil {
 				return maskAny(err)
 			}
