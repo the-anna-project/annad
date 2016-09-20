@@ -88,6 +88,10 @@ func (c *context) GetID() string {
 	return c.ID
 }
 
+func (c *context) GetInformationID() string {
+	return ""
+}
+
 func (c *context) GetSessionID() string {
 	return c.SessionID
 }
@@ -98,6 +102,10 @@ func (c *context) SetBehaviorID(behaviorID string) {
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.CLGTreeID = clgTreeID
+}
+
+func (c *context) SetInformationID(informationID string) {
+
 }
 
 func (c *context) SetSessionID(sessionID string) {

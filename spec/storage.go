@@ -1,6 +1,14 @@
 package spec
 
-// Storage represents a persistency management object.
+// Storage represents a persistency management object. Different storages may be
+// provided using StorageCollectionProvider. Within a receiver function the
+// usage of the feature storage may look like this.
+//
+//     func (n *network) Foo() error {
+//       rk, err := n.Storage().Feature().GetRandomKey()
+//       ...
+//     }
+//
 type Storage interface {
 	// Get returns data associated with key. This is a simple key-value
 	// relationship.
@@ -14,9 +22,6 @@ type Storage interface {
 	//
 	GetElementsByScore(key string, score float64, maxElements int) ([]string, error)
 
-	// GetStringMap returns the hash map stored under the given key.
-	GetStringMap(key string) (map[string]string, error)
-
 	// GetHighestScoredElements searches a list that is ordered by their
 	// element's score, and returns the elements and their corresponding scores,
 	// where the highest scored element is the first in the returned list. Note
@@ -28,6 +33,13 @@ type Storage interface {
 	// because the list contains the elements and their scores.
 	//
 	GetHighestScoredElements(key string, maxElements int) ([]string, error)
+
+	// GetRandomKey returns a random key which was formerly stored within the
+	// underlying storage.
+	GetRandomKey() (string, error)
+
+	// GetStringMap returns the hash map stored under the given key.
+	GetStringMap(key string) (map[string]string, error)
 
 	Object
 
@@ -55,8 +67,8 @@ type Storage interface {
 	SetStringMap(key string, stringMap map[string]string) error
 
 	// WalkScoredElements scans the scored set given by key and executes the
-	// callback for each found element. Note that the walk might ignores the
-	// score order.
+	// callback for each found element. Note that the walk might ignores the score
+	// order.
 	//
 	// The walk is throttled. That means some amount of elements are fetched at
 	// once from the storage. After all fetched elements are iterated, the next
@@ -65,8 +77,8 @@ type Storage interface {
 	// walk immediately.
 	WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
 
-	// WalkSet scans the set given by key and executes the callback for each
-	// found element.
+	// WalkSet scans the set given by key and executes the callback for each found
+	// element.
 	//
 	// The walk is throttled. That means some amount of elements are fetched at
 	// once from the storage. After all fetched elements are iterated, the next
@@ -74,4 +86,19 @@ type Storage interface {
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
+}
+
+// StorageCollection represents a collection of Storage instances. This scopes
+// different Storage implementations in a simple container, which can easily be
+// passed around.
+type StorageCollection interface {
+	Feature() Storage
+	General() Storage
+}
+
+// StorageProvider should be implemented by every object which wants to use
+// storages. This then creates an API between storage implementations and
+// storage users.
+type StorageProvider interface {
+	Storage() StorageCollection
 }

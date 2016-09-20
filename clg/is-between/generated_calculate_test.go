@@ -23,18 +23,18 @@ func Test_CLG_New_LogError(t *testing.T) {
 	}
 }
 
-func Test_CLG_New_StorageError(t *testing.T) {
+func Test_CLG_New_InputChannelError(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Storage = nil
+	newConfig.InputChannel = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_CLG_New_InputChannelError(t *testing.T) {
+func Test_CLG_New_StorageCollection_Error(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.InputChannel = nil
+	newConfig.StorageCollection = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -116,7 +116,7 @@ func Test_CLG_SetLog(t *testing.T) {
 	}
 }
 
-func Test_CLG_SetStorage(t *testing.T) {
+func Test_CLG_SetStorageCollection(t *testing.T) {
 	newCLG := MustNew()
 	var rawCLG *clg
 
@@ -128,13 +128,13 @@ func Test_CLG_SetStorage(t *testing.T) {
 		t.Fatal("expected", "*clg", "got", c)
 	}
 
-	if rawCLG.Storage == nil {
-		t.Fatal("expected", "spec.Storage", "got", nil)
+	if rawCLG.StorageCollection == nil {
+		t.Fatal("expected", "spec.StorageCollection", "got", nil)
 	}
 
-	newCLG.SetStorage(nil)
+	newCLG.SetStorageCollection(nil)
 
-	if rawCLG.Storage != nil {
-		t.Fatal("expected", nil, "got", "spec.Storage")
+	if rawCLG.StorageCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.StorageCollection")
 	}
 }

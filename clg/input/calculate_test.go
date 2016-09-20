@@ -11,16 +11,32 @@ import (
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
+
+type testErrorIDFactory struct{}
+
+// New is only a test implementation of spec.IDFactory to do nothing but
+// returning some error we can check against.
+func (f *testErrorIDFactory) New() (spec.ObjectID, error) {
+	return "", maskAny(invalidConfigError)
+}
+
+func (f *testErrorIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
+	return "", nil
+}
+
+func testMustNewErrorIDFactory(t *testing.T) spec.IDFactory {
+	return &testErrorIDFactory{}
+}
 
 type testIDFactory struct{}
 
 // New is only a test implementation of spec.IDFactory to do nothing but
 // returning some error we can check against.
 func (f *testIDFactory) New() (spec.ObjectID, error) {
-	return "", maskAny(invalidConfigError)
+	return "new-ID", nil
 }
 
 func (f *testIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
@@ -31,50 +47,69 @@ func testMustNewIDFactory(t *testing.T) spec.IDFactory {
 	return &testIDFactory{}
 }
 
-func testMustNewStorageWithConn(t *testing.T, c redigo.Conn) spec.Storage {
-	newStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
+func testMustNewStorageCollection(t *testing.T) spec.StorageCollection {
+	newCollection, err := storage.NewCollection(storage.DefaultCollectionConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	return newStorage
+	return newCollection
 }
 
-func Test_CLG_Input_KnownInputSequence(t *testing.T) {
-	newCLG := MustNew()
-	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
-
-	// Create record for the test input.
-	informationID := "123"
-	input := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
-	err := newStorage.Set(informationIDKey, informationID)
+func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.StorageCollection {
+	newFeatureStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Create record for the clg tree ID.
-	clgTreeID := "456"
-	clgTreeIDKey := key.NewCLGKey("information-id:clg-tree-id:%s", informationID)
-	err = newStorage.Set(clgTreeIDKey, clgTreeID)
+	newGeneralStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newStorageCollectionConfig := storage.DefaultCollectionConfig()
+	newStorageCollectionConfig.FeatureStorage = newFeatureStorage
+	newStorageCollectionConfig.GeneralStorage = newGeneralStorage
+	newStorageCollection, err := storage.NewCollection(newStorageCollectionConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
 
-	// Execute CLG.
+	return newStorageCollection
+}
+
+func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spec.NetworkPayload {
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(input)}
 	newNetworkPayloadConfig.Destination = "destination"
 	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
+
+	return newNetworkPayload
+}
+
+func Test_CLG_Input_KnownInputSequence(t *testing.T) {
+	newCLG := MustNew()
+	newCtx := context.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
+
+	// Create record for the test input.
+	informationID := "123"
+	newInput := "test input"
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	err := newStorageCollection.General().Set(informationIDKey, informationID)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	// Set prepared storage to CLG we want to test.
+	newCLG.(*clg).StorageCollection = newStorageCollection
+
+	// Execute CLG.
+	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -89,35 +124,27 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 		t.Fatal("expected", 1, "got", len(args))
 	}
 
-	// Check if clg tree ID was set to the context.
-	injectedCLGTreeID := newCtx.GetCLGTreeID()
-	if clgTreeID != injectedCLGTreeID {
-		t.Fatal("expected", clgTreeID, "got", injectedCLGTreeID)
+	// Check if the information ID was set to the context.
+	injectedInformationID := newCtx.GetInformationID()
+	if informationID != injectedInformationID {
+		t.Fatal("expected", informationID, "got", injectedInformationID)
 	}
 }
 
 func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
 	// unknown input sequence.
-	input := "test input"
+	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
+	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -132,119 +159,150 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 		t.Fatal("expected", 1, "got", len(args))
 	}
 
-	// Check if clg tree ID was set to the context.
-	injectedCLGTreeID := newCtx.GetCLGTreeID()
-	if injectedCLGTreeID != "" {
-		t.Fatal("expected", "", "got", injectedCLGTreeID)
+	// Check if the information ID was set to the context.
+	injectedInformationID := newCtx.GetInformationID()
+	if injectedInformationID == "" {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_Input_DataProperlyStored(t *testing.T) {
+	newCLG := MustNew()
+	newCtx := context.MustNew()
+	newStorageCollection := testMustNewStorageCollection(t)
+	newIDFactory := testMustNewIDFactory(t)
+
+	// Note we do not create a record for the test input. This test is about an
+	// unknown input sequence.
+	newInput := "test input"
+	// Our test ID factory always returns the same ID. That way we are able to
+	// check for the ID being used during the test.
+	newID, err := newIDFactory.New()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	// Set prepared storage to CLG we want to test.
+	newCLG.(*clg).StorageCollection = newStorageCollection
+	newCLG.(*clg).IDFactory = newIDFactory
+
+	// Execute CLG.
+	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	// Check the calculated payload. The interface of the input CLG only returns
+	// an error. This error is filtered to be handled during the call to
+	// Calculate. Thus it is removed from the calculated payload. Anyway there is
+	// the original context be obtained as first argument within the network
+	// payload.
+	args := calculatedNetworkPayload.GetArgs()
+	if len(args) != 1 {
+		t.Fatal("expected", 1, "got", len(args))
+	}
+
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	storedID, err := newStorageCollection.General().Get(informationIDKey)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if storedID != string(newID) {
+		t.Fatal("expected", newID, "got", storedID)
+	}
+
+	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", newID)
+	storedInput, err := newStorageCollection.General().Get(informationSequenceKey)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if storedInput != newInput {
+		t.Fatal("expected", newInput, "got", storedInput)
 	}
 }
 
 func Test_CLG_Input_IDFactoryError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
-	newIDFactory := testMustNewIDFactory(t)
+	newStorageCollection := testMustNewStorageCollection(t)
+	newIDFactory := testMustNewErrorIDFactory(t)
 
 	// Note we do not create a record for the test input. This test is about an
 	// unknown input sequence.
-	input := "test input"
+	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
 	newCLG.(*clg).IDFactory = newIDFactory
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	_, err = newCLG.Calculate(newNetworkPayload)
+	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
 func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
+	newIDFactory := testMustNewIDFactory(t)
 
 	// Prepare the storage connection to fake a returned error.
-	input := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
+	newInput := "test input"
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	// Our test ID factory always returns the same ID. That way we are able to
+	// check for the ID being used during the test.
+	newID, err := newIDFactory.New()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
 
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
-	c.Command("SET").ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
+	c.Command("SET", "prefix:"+informationIDKey, string(newID)).ExpectError(invalidConfigError)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
+	newCLG.(*clg).IDFactory = newIDFactory
 
 	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	_, err = newCLG.Calculate(newNetworkPayload)
+	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_CLG_Input_UnknownCLGTree(t *testing.T) {
+func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newStorage := memory.MustNew()
+	newIDFactory := testMustNewIDFactory(t)
 
-	// Note we do not create a record for the clg tree ID. This test is about an
-	// unknown clg tree.
-	informationID := "123"
-	input := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
-	err := newStorage.Set(informationIDKey, informationID)
+	// Prepare the storage connection to fake a returned error.
+	newInput := "test input"
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	// Our test ID factory always returns the same ID. That way we are able to
+	// check for the ID being used during the test.
+	newID, err := newIDFactory.New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
+	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", newID)
+
+	c := redigomock.NewConn()
+	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
+	c.Command("SET", "prefix:"+informationIDKey, string(newID)).Expect("OK")
+	c.Command("SET", "prefix:"+informationSequenceKey, newInput).ExpectError(invalidConfigError)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.(*clg).StorageCollection = newStorageCollection
+	newCLG.(*clg).IDFactory = newIDFactory
 
 	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
-	}
-
-	// Check if clg tree ID was set to the context.
-	injectedCLGTreeID := newCtx.GetCLGTreeID()
-	if injectedCLGTreeID != "" {
-		t.Fatal("expected", "", "got", injectedCLGTreeID)
+	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
@@ -252,60 +310,20 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
 
-	input := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
+	newInput := "test input"
+	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
 
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
+	newStorageCollection := testMustNewStorageCollectionWithConn(t, c)
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
+	newCLG.SetStorageCollection(newStorageCollection)
 
 	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	_, err = newCLG.Calculate(newNetworkPayload)
+	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_CLG_Input_GetCLGTreeIDError(t *testing.T) {
-	newCLG := MustNew()
-	newCtx := context.MustNew()
-
-	// Prepare the storage connection to fake a returned error.
-	input := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", input)
-	clgTreeIDKey := key.NewCLGKey("information-id:clg-tree-id:%s", "456")
-
-	c := redigomock.NewConn()
-	c.Command("GET", "prefix:"+informationIDKey).Expect("456")
-	c.Command("GET", "prefix:"+clgTreeIDKey).ExpectError(invalidConfigError)
-	newStorage := testMustNewStorageWithConn(t, c)
-
-	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).Storage = newStorage
-
-	// Execute CLG.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(input)}
-	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	_, err = newCLG.Calculate(newNetworkPayload)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
+		t.Fatal("expected", true, "got", false)
 	}
 }

@@ -166,31 +166,6 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return result, nil
 }
 
-func (s *storage) GetStringMap(key string) (map[string]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
-
-	var result map[string]string
-	var err error
-	action := func() error {
-		conn := s.Pool.Get()
-		defer conn.Close()
-
-		result, err = redis.StringMap(conn.Do("HGETALL", s.withPrefix(key)))
-		if err != nil {
-			return maskAny(err)
-		}
-
-		return nil
-	}
-
-	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return result, nil
-}
-
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
 
@@ -212,6 +187,56 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	}
 
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (s *storage) GetRandomKey() (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandomKey")
+
+	var result string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		var err error
+		result, err = redis.String(conn.Do("RANDOMKEY"))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetRandomKey", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (s *storage) GetStringMap(key string) (map[string]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
+
+	var result map[string]string
+	var err error
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		result, err = redis.StringMap(conn.Do("HGETALL", s.withPrefix(key)))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}

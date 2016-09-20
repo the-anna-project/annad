@@ -11,7 +11,7 @@ import (
 	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
@@ -29,10 +29,10 @@ var (
 // Config represents the configuration used to create a new anna object.
 type Config struct {
 	// Dependencies.
-	Network spec.Network
-	Log     spec.Log
-	Server  spec.Server
-	Storage spec.Storage
+	Log               spec.Log
+	Network           spec.Network
+	Server            spec.Server
+	StorageCollection spec.StorageCollection
 
 	// Settings.
 	Flags   Flags
@@ -52,17 +52,12 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newStorage, err := memory.NewStorage(memory.DefaultStorageConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
-		Network: newNetwork,
-		Log:     log.New(log.DefaultConfig()),
-		Server:  newServer,
-		Storage: newStorage,
+		Log:               log.New(log.DefaultConfig()),
+		Network:           newNetwork,
+		Server:            newServer,
+		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.
 		Flags:   Flags{},
@@ -83,17 +78,17 @@ func New(config Config) (spec.Anna, error) {
 		Type:         ObjectType,
 	}
 
-	if newAnna.Network == nil {
-		return nil, maskAnyf(invalidConfigError, "network must not be empty")
-	}
 	if newAnna.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newAnna.Network == nil {
+		return nil, maskAnyf(invalidConfigError, "network must not be empty")
 	}
 	if newAnna.Server == nil {
 		return nil, maskAnyf(invalidConfigError, "server must not be empty")
 	}
-	if newAnna.Storage == nil {
-		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
+	if newAnna.StorageCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return newAnna, nil
@@ -151,6 +146,10 @@ func (a *anna) Shutdown() {
 		a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down Anna")
 		os.Exit(0)
 	})
+}
+
+func (a *anna) Storage() spec.StorageCollection {
+	return a.StorageCollection
 }
 
 func main() {

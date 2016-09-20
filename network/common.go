@@ -5,7 +5,17 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
+	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
+	"github.com/xh3b4sd/anna/clg/is-between"
+	"github.com/xh3b4sd/anna/clg/is-greater"
+	"github.com/xh3b4sd/anna/clg/multiply"
+	//"github.com/xh3b4sd/anna/clg/output"
+	"github.com/xh3b4sd/anna/clg/pair-syntactic"
+	"github.com/xh3b4sd/anna/clg/read-information-id"
+	"github.com/xh3b4sd/anna/clg/split-features"
+	"github.com/xh3b4sd/anna/clg/subtract"
+	"github.com/xh3b4sd/anna/clg/sum"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
@@ -30,7 +40,7 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	for ID := range CLGs {
 		CLGs[ID].SetIDFactory(n.IDFactory)
 		CLGs[ID].SetLog(n.Log)
-		CLGs[ID].SetStorage(n.Storage)
+		CLGs[ID].SetStorageCollection(n.StorageCollection)
 	}
 
 	return CLGs
@@ -45,7 +55,7 @@ func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload)
 	}
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
 
-	err := n.Storage.WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
+	err := n.Storage().General().WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
 		behaviorIDs = append(behaviorIDs, element)
 		return nil
 	})
@@ -281,6 +291,18 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 	newList := []spec.CLG{
 		divide.MustNew(),
 		input.MustNew(),
+		divide.MustNew(),
+		greater.MustNew(),
+		input.MustNew(),
+		isbetween.MustNew(),
+		isgreater.MustNew(),
+		multiply.MustNew(),
+		//output.MustNew(),
+		pairsyntactic.MustNew(),
+		readinformationid.MustNew(),
+		splitfeatures.MustNew(),
+		subtract.MustNew(),
+		sum.MustNew(),
 	}
 
 	newCLGs := map[spec.ObjectID]spec.CLG{}

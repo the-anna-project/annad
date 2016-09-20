@@ -35,14 +35,14 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			newTextInput := make(chan spec.TextRequest, 1000)
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
-			// storage.
-			a.Storage, err = a.createStorage(a.Log, a.Flags.StoragePrefix)
+			// storage collection.
+			a.StorageCollection, err = createStorageCollection(a.Log, a.Flags)
 			panicOnError(err)
 
 			// network.
 			networkConfig := network.DefaultConfig()
 			networkConfig.Log = a.Log
-			networkConfig.Storage = a.Storage
+			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.TextInput = newTextInput
 			networkConfig.TextOutput = newTextOutput
 			a.Network, err = network.New(networkConfig)
@@ -77,12 +77,15 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 	// Define command line flags.
 	newCmd.PersistentFlags().StringVar(&a.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
 	newCmd.PersistentFlags().StringVar(&a.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
+
 	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogLevels, "control-log-levels", "", "set log levels for log control (e.g. E)")
 	newCmd.PersistentFlags().StringVar(&a.Flags.ControlLogObejcts, "control-log-objects", "", "set log objects for log control (e.g. network)")
 	newCmd.PersistentFlags().IntVar(&a.Flags.ControlLogVerbosity, "control-log-verbosity", 10, "set log verbosity for log control")
+
 	newCmd.PersistentFlags().StringVar(&a.Flags.Storage, "storage", "redis", "storage type to use for persistency (e.g. memory)")
-	newCmd.PersistentFlags().StringVar(&a.Flags.StorageAddr, "storage-addr", "127.0.0.1:6379", "host:port to connect to storage")
-	newCmd.PersistentFlags().StringVar(&a.Flags.StoragePrefix, "storage-prefix", "anna", "prefix used to prepend to storage keys")
+	newCmd.PersistentFlags().StringVar(&a.Flags.RedisFeatureStorageAddr, "redis-feature-storage-addr", "127.0.0.1:6380", "host:port to connect to feature storage")
+	newCmd.PersistentFlags().StringVar(&a.Flags.RedisGeneralStorageAddr, "redis-general-storage-addr", "127.0.0.1:6381", "host:port to connect to general storage")
+	newCmd.PersistentFlags().StringVar(&a.Flags.RedisStoragePrefix, "redis-storage-prefix", "anna", "prefix used to prepend to storage keys")
 
 	return newCmd
 }

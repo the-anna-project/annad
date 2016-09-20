@@ -11,7 +11,7 @@ import (
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
@@ -23,9 +23,9 @@ const (
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	IDFactory spec.IDFactory
-	Log       spec.Log
-	Storage   spec.Storage
+	IDFactory         spec.IDFactory
+	Log               spec.Log
+	StorageCollection spec.StorageCollection
 
 	// Settings.
 	InputChannel chan spec.NetworkPayload
@@ -36,9 +36,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		IDFactory: id.MustNewFactory(),
-		Log:       log.New(log.DefaultConfig()),
-		Storage:   memory.MustNew(),
+		IDFactory:         id.MustNewFactory(),
+		Log:               log.New(log.DefaultConfig()),
+		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.
 		InputChannel: make(chan spec.NetworkPayload, 1000),
@@ -56,11 +56,14 @@ func New(config Config) (spec.CLG, error) {
 	}
 
 	// Dependencies.
+	if newCLG.IDFactory == nil {
+		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
+	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
-	if newCLG.Storage == nil {
-		return nil, maskAnyf(invalidConfigError, "storage must not be empty")
+	if newCLG.StorageCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	// Settings.
@@ -129,6 +132,10 @@ func (c *clg) SetLog(log spec.Log) {
 	c.Log = log
 }
 
-func (c *clg) SetStorage(storage spec.Storage) {
-	c.Storage = storage
+func (c *clg) SetStorageCollection(storageCollection spec.StorageCollection) {
+	c.StorageCollection = storageCollection
+}
+
+func (c *clg) Storage() spec.StorageCollection {
+	return c.StorageCollection
 }

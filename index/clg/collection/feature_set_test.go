@@ -11,7 +11,7 @@ import (
 func testFeatureSet(t *testing.T, ss []string) spec.FeatureSet {
 	newConfig := featureset.DefaultConfig()
 	newConfig.Sequences = ss
-	newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+	newFeatureSet, err := featureset.New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -556,7 +556,7 @@ func Test_FeatureSet_GetMaxLengthFeatureSet(t *testing.T) {
 		newConfig := featureset.DefaultConfig()
 		newConfig.MaxLength = maxLength
 		newConfig.Sequences = []string{"a", "b"}
-		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		newFeatureSet, err := featureset.New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -613,7 +613,7 @@ func Test_FeatureSet_GetMinLengthFeatureSet(t *testing.T) {
 		newConfig := featureset.DefaultConfig()
 		newConfig.MinLength = minLength
 		newConfig.Sequences = []string{"a", "b"}
-		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		newFeatureSet, err := featureset.New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -670,7 +670,7 @@ func Test_FeatureSet_GetMinCountFeatureSet(t *testing.T) {
 		newConfig := featureset.DefaultConfig()
 		newConfig.MinCount = minCount
 		newConfig.Sequences = []string{"a", "b"}
-		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		newFeatureSet, err := featureset.New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -859,7 +859,7 @@ func Test_FeatureSet_GetSeparatorFeatureSet(t *testing.T) {
 		newConfig := featureset.DefaultConfig()
 		newConfig.Separator = separator
 		newConfig.Sequences = []string{"a", "b"}
-		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		newFeatureSet, err := featureset.New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -920,7 +920,7 @@ func Test_FeatureSet_GetSequencesFeatureSet(t *testing.T) {
 	testFeatureSet := func(sequences []string) spec.FeatureSet {
 		newConfig := featureset.DefaultConfig()
 		newConfig.Sequences = sequences
-		newFeatureSet, err := featureset.NewFeatureSet(newConfig)
+		newFeatureSet, err := featureset.New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}

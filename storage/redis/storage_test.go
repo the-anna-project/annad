@@ -114,35 +114,6 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	}
 }
 
-// GetStringMap
-
-func Test_RedisStorage_GetStringMap_Success(t *testing.T) {
-	c := redigomock.NewConn()
-	c.Command("HGETALL", "prefix:foo").Expect([]interface{}{[]byte("k1"), []byte("v1")})
-
-	newStorage := testMustNewStorageWithConn(t, c)
-
-	value, err := newStorage.GetStringMap("foo")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if !reflect.DeepEqual(value, map[string]string{"k1": "v1"}) {
-		t.Fatal("expected", map[string]string{"k1": "v1"}, "got", value)
-	}
-}
-
-func Test_RedisStorage_GetStringMap_Error(t *testing.T) {
-	c := redigomock.NewConn()
-	c.Command("HGETALL", "prefix:foo").ExpectError(queryExecutionFailedError)
-
-	newStorage := testMustNewStorageWithConn(t, c)
-
-	_, err := newStorage.GetStringMap("foo")
-	if !IsQueryExecutionFailed(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
 // GetHighestScoredElements
 
 func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
@@ -179,6 +150,64 @@ func Test_RedisStorage_GetHighestScoredElements_Error(t *testing.T) {
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	_, err := newStorage.GetHighestScoredElements("foo", 3)
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// GetRandomKey
+
+func Test_RedisStorage_GetRandomKey_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("RANDOMKEY").Expect("key1")
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	randomKey, err := newStorage.GetRandomKey()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if randomKey != "key1" {
+		t.Fatal("expected", "key1", "got", randomKey)
+	}
+}
+
+func Test_RedisStorage_GetRandomKey_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("RANDOMKEY").ExpectError(queryExecutionFailedError)
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	_, err := newStorage.GetRandomKey()
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+// GetStringMap
+
+func Test_RedisStorage_GetStringMap_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HGETALL", "prefix:foo").Expect([]interface{}{[]byte("k1"), []byte("v1")})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	value, err := newStorage.GetStringMap("foo")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if !reflect.DeepEqual(value, map[string]string{"k1": "v1"}) {
+		t.Fatal("expected", map[string]string{"k1": "v1"}, "got", value)
+	}
+}
+
+func Test_RedisStorage_GetStringMap_Error(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("HGETALL", "prefix:foo").ExpectError(queryExecutionFailedError)
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	_, err := newStorage.GetStringMap("foo")
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}

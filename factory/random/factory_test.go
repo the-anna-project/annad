@@ -95,7 +95,7 @@ func Test_RandomFactory_CreateNBetween_Error_Timeout(t *testing.T) {
 	}
 }
 
-func Test_RandomFactory_CreateNBetween(t *testing.T) {
+func Test_RandomFactory_CreateNBetween_GenerateNNumbers(t *testing.T) {
 	newConfig := DefaultFactoryConfig()
 	newFactory, err := NewFactory(newConfig)
 	if err != nil {
@@ -104,7 +104,6 @@ func Test_RandomFactory_CreateNBetween(t *testing.T) {
 
 	n := 5
 	max := 10
-
 	newRandomNumbers, err := newFactory.CreateNMax(n, max)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -112,5 +111,31 @@ func Test_RandomFactory_CreateNBetween(t *testing.T) {
 
 	if len(newRandomNumbers) != 5 {
 		t.Fatal("expected", 5, "got", len(newRandomNumbers))
+	}
+}
+
+func Test_RandomFactory_CreateNBetween_GenerateRandomNumbers(t *testing.T) {
+	newConfig := DefaultFactoryConfig()
+	newFactory, err := NewFactory(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	n := 100
+	max := 10
+	newRandomNumbers, err := newFactory.CreateNMax(n, max)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	alreadySeen := map[int]struct{}{}
+
+	for _, r := range newRandomNumbers {
+		alreadySeen[r] = struct{}{}
+	}
+
+	l := len(alreadySeen)
+	if l != 10 {
+		t.Fatal("expected", 10, "got", l)
 	}
 }

@@ -63,9 +63,9 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// NewFeatureSet creates a new configured feature set object. A feature set
-// tries to detect all patterns within the configured input sequences.
-func NewFeatureSet(config Config) (spec.FeatureSet, error) {
+// New creates a new configured feature set object. A feature set tries to
+// detect all patterns within the configured input sequences.
+func New(config Config) (spec.FeatureSet, error) {
 	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)

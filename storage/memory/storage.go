@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -33,22 +34,29 @@ type scoredElements struct {
 // StorageConfig represents the configuration used to create a new memory storage
 // object.
 type StorageConfig struct {
-	KeyValue  map[string]string
-	StringMap map[string]map[string]string
-	Log       spec.Log
-	MathSet   map[string]map[string]struct{}
-	Weighted  map[string]scoredElements
+	KeyValue      map[string]string
+	Log           spec.Log
+	MathSet       map[string]map[string]struct{}
+	RandomFactory spec.RandomFactory
+	StringMap     map[string]map[string]string
+	Weighted      map[string]scoredElements
 }
 
 // DefaultStorageConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultStorageConfig() StorageConfig {
+	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
 	newConfig := StorageConfig{
-		KeyValue:  map[string]string{},
-		StringMap: map[string]map[string]string{},
-		Log:       log.New(log.DefaultConfig()),
-		MathSet:   map[string]map[string]struct{}{},
-		Weighted:  map[string]scoredElements{},
+		KeyValue:      map[string]string{},
+		Log:           log.New(log.DefaultConfig()),
+		MathSet:       map[string]map[string]struct{}{},
+		RandomFactory: newRandomFactory,
+		StringMap:     map[string]map[string]string{},
+		Weighted:      map[string]scoredElements{},
 	}
 
 	return newConfig
@@ -118,17 +126,6 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	return nil, notFoundError
 }
 
-func (s *storage) GetStringMap(key string) (map[string]string, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-
-	if value, ok := s.StringMap[key]; ok {
-		return value, nil
-	}
-
-	return nil, notFoundError
-}
-
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	s.Mutex.Lock()
 	weighted, ok := s.Weighted[key]
@@ -163,6 +160,52 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	}
 
 	return scoredElements, nil
+}
+
+func (s *storage) GetRandomKey() (string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	// Here we create a random number to chose a random map, of which we have 4.
+	// The random numbers starts at 0. So the maximum random number we want to
+	// have is 3. Because the max parameter of CreateNMax is exclusive, we set max
+	// to 4.
+	mapIDs, err := s.RandomFactory.CreateNMax(1, 4)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	switch mapIDs[0] {
+	case 0:
+		for k := range s.KeyValue {
+			return k, nil
+		}
+	case 1:
+		for k := range s.MathSet {
+			return k, nil
+		}
+	case 2:
+		for k := range s.StringMap {
+			return k, nil
+		}
+	case 3:
+		for k := range s.Weighted {
+			return k, nil
+		}
+	}
+
+	return "", notFoundError
+}
+
+func (s *storage) GetStringMap(key string) (map[string]string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	if value, ok := s.StringMap[key]; ok {
+		return value, nil
+	}
+
+	return nil, notFoundError
 }
 
 func (s *storage) PushToSet(key string, element string) error {

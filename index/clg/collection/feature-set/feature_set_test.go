@@ -9,7 +9,7 @@ import (
 func Test_NewFeatureSet_Error_Sequences(t *testing.T) {
 	newConfig := DefaultConfig()
 	// Note sequences configuration is missing.
-	_, err := NewFeatureSet(newConfig)
+	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -22,7 +22,7 @@ func Test_FeatureSet_GetFeatures(t *testing.T) {
 		"This is, a test.",
 		"This is, another test.",
 	}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -58,7 +58,7 @@ func Test_FeatureSet_GetFeaturesByCount(t *testing.T) {
 		"This is, a test.",
 		"This is, another test.",
 	}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -136,7 +136,7 @@ func Test_FeatureSet_GetFeaturesByLength(t *testing.T) {
 		newConfig := DefaultConfig()
 		newConfig.MinCount = 2
 		newConfig.Sequences = testCase.Sequences
-		newFeatureSet, err := NewFeatureSet(newConfig)
+		newFeatureSet, err := New(newConfig)
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
@@ -186,7 +186,7 @@ func Test_FeatureSet_GetFeaturesBySequence_Expected(t *testing.T) {
 	for i, testCase := range testCases {
 		newConfig := DefaultConfig()
 		newConfig.Sequences = []string{"This is a test.", "This is another test."}
-		newFeatureSet, err := NewFeatureSet(newConfig)
+		newFeatureSet, err := New(newConfig)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -238,7 +238,7 @@ func Test_FeatureSet_GetFeaturesBySequence_Unexpected(t *testing.T) {
 	for i, testCase := range testCases {
 		newConfig := DefaultConfig()
 		newConfig.Sequences = []string{"This is a test.", "This is another test."}
-		newFeatureSet, err := NewFeatureSet(newConfig)
+		newFeatureSet, err := New(newConfig)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -268,7 +268,7 @@ func Test_FeatureSet_GetMaxLength(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.MaxLength = 3
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -279,7 +279,7 @@ func Test_FeatureSet_GetMaxLength(t *testing.T) {
 	newConfig = DefaultConfig()
 	newConfig.MaxLength = 28
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err = NewFeatureSet(newConfig)
+	newFeatureSet, err = New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -292,7 +292,7 @@ func Test_FeatureSet_GetMinLength(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.MinLength = 3
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -303,7 +303,7 @@ func Test_FeatureSet_GetMinLength(t *testing.T) {
 	newConfig = DefaultConfig()
 	newConfig.MinLength = 28
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err = NewFeatureSet(newConfig)
+	newFeatureSet, err = New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -316,7 +316,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.MinCount = -1
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", false, "got", true)
 	}
@@ -324,7 +324,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 	newConfig = DefaultConfig()
 	newConfig.MinCount = 3
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err = NewFeatureSet(newConfig)
+	newFeatureSet, err = New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -335,7 +335,7 @@ func Test_FeatureSet_GetMinCount(t *testing.T) {
 	newConfig = DefaultConfig()
 	newConfig.MinCount = 28
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err = NewFeatureSet(newConfig)
+	newFeatureSet, err = New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -348,7 +348,7 @@ func Test_FeatureSet_GetSeparator(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.Separator = ","
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -359,7 +359,7 @@ func Test_FeatureSet_GetSeparator(t *testing.T) {
 	newConfig = DefaultConfig()
 	newConfig.Separator = "foo"
 	newConfig.Sequences = []string{"a", "b"}
-	newFeatureSet, err = NewFeatureSet(newConfig)
+	newFeatureSet, err = New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -475,7 +475,7 @@ func Test_FeatureSet_MinLengthMaxLength(t *testing.T) {
 		newConfig.MaxLength = testCase.MaxLength
 		newConfig.MinLength = testCase.MinLength
 		newConfig.Sequences = testCase.Sequences
-		newFeatureSet, err := NewFeatureSet(newConfig)
+		newFeatureSet, err := New(newConfig)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
@@ -507,7 +507,7 @@ func Test_FeatureSet_GetSequences(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.MinCount = 2
 	newConfig.Sequences = newSequences
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -529,7 +529,7 @@ func Test_FeatureSet_Separator(t *testing.T) {
 		"This is, a test.",
 		"This is, another test.",
 	}
-	newFeatureSet, err := NewFeatureSet(newConfig)
+	newFeatureSet, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
