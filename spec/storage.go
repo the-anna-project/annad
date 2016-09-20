@@ -92,7 +92,17 @@ type Storage interface {
 // different Storage implementations in a simple container, which can easily be
 // passed around.
 type StorageCollection interface {
+	// Feature represents a feature storage. It is used to store features of
+	// information sequences separately. Because of the used key structures and
+	// scanning algorithms the feature storage must only be used to store data
+	// serving the same conceptual purpose. For instance random features can be
+	// retreived more efficiently when there are only keys belonging to features.
+	// Other data structures in here would make the scanning algorithms less
+	// efficient.
 	Feature() Storage
+
+	// General represents a general storage. It is used to store general data
+	// which is not stored in specialized storage instances.
 	General() Storage
 }
 
