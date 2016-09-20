@@ -80,13 +80,13 @@ approach. There are maybe others which have not ben found yet.
 - split information into features
 - write features into storage
 
-###### pair syntactic (5)
+###### pair syntactic (5) done
 - read features from storage
 - lookup syntactic relations of features
 - combine features that belong together
 - write pair into storage
 
-###### pair semantic (3)
+###### pair semantic (3) wontfix
 - read features from storage
 - lookup conceptual relations of features
 - combine features that belong together
