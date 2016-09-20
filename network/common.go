@@ -133,6 +133,34 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.Obj
 	return clgIDs
 }
 
+// permutePayload tries to find a combination of payloads which together are
+// able to fulfill the interface of the requested CLG. This mechanism decides
+// how to synchronize the communication between the CLGs within the neural
+// network.
+//
+//
+// TODO the success of the synchronization done here is qualified by the first
+// match found using a permutation factory. Instead of using the first match
+// found, we should store information about combinations being succesful in the
+// past and prefer these, instead of randomly chosen combinations. Imagine the
+// CLG tree below. There the upper CLGs are requesting the lower CLG. Imagine
+// only two out of the five requesting CLGs are supposed to feed the target CLG
+// to solve a specific problem. In fact multiple combinations of CLGs would
+// fulfil the interface of the requested CLG, but not all connections are
+// desired to solve a specific problem. So it would be good to prefer
+// connections we already know they are successful in a certain scope.
+//
+//    |-----|     |-----|     |-----|     |-----|     |-----|
+//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+//    |-----|     |-----|     |-----|     |-----|     |-----|
+//       |           |           |           |           |
+//       -------------------------------------------------
+//                               |
+//                               V
+//                            |-----|
+//                            | CLG |
+//                            |-----|
+//
 func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	queue = append(queue, payload)
 
