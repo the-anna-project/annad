@@ -80,6 +80,8 @@ type Network interface {
 	// does with the provided NetworkPayload.
 	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
 
+	FactoryProvider
+
 	// Forward is triggered after the CLGs calculation. Here is decided what to
 	// do next. Like Activate, it is up to the CLG if it forwards signals to
 	// further CLGs. E.g. a CLG may or may not forward its calculated results to

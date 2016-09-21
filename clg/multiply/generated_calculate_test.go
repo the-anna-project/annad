@@ -70,7 +70,7 @@ func Test_CLG_GetInputTypes(t *testing.T) {
 	}
 }
 
-func Test_CLG_SetIDFactory(t *testing.T) {
+func Test_CLG_SetFactoryCollection(t *testing.T) {
 	newCLG := MustNew()
 	var rawCLG *clg
 
@@ -82,14 +82,14 @@ func Test_CLG_SetIDFactory(t *testing.T) {
 		t.Fatal("expected", "*clg", "got", c)
 	}
 
-	if rawCLG.IDFactory == nil {
-		t.Fatal("expected", "spec.IDFactory", "got", nil)
+	if rawCLG.FactoryCollection == nil {
+		t.Fatal("expected", "spec.FactoryCollection", "got", nil)
 	}
 
-	newCLG.SetIDFactory(nil)
+	newCLG.SetFactoryCollection(nil)
 
-	if rawCLG.IDFactory != nil {
-		t.Fatal("expected", nil, "got", "spec.IDFactory")
+	if rawCLG.FactoryCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.FactoryCollection")
 	}
 }
 

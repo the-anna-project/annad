@@ -34,7 +34,6 @@ const (
 	FeatureSize int = 4
 )
 
-// TODO seperator CLG
 func (c *clg) calculate(ctx spec.Context, informationSequence, separator string) error {
 	newConfig := featureset.DefaultConfig()
 	newConfig.MaxLength = FeatureSize
@@ -55,9 +54,9 @@ func (c *clg) calculate(ctx spec.Context, informationSequence, separator string)
 	for _, f := range features {
 		// Store the detected feature within the feature storage. It is important to
 		// preserve the key structure used here to simply parse the stored features
-		// in other places, like in the pair-syntactic CLG. Changes in the key
-		// structure there must be aligned with implementation details here. The
-		// current key structure looks as follows.
+		// in other places, like in the pair-syntactic and read-separator CLG.
+		// Changes in the key structure there must be aligned with implementation
+		// details here. The current key structure looks as follows.
 		//
 		//     feature:%s:positions
 		//

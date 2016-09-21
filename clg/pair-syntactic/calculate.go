@@ -10,6 +10,7 @@ import (
 	"github.com/xh3b4sd/anna/storage"
 )
 
+// TODO there is nothing that reads pairs
 func (c *clg) calculate(ctx spec.Context) error {
 	// The counter keeps track of the work already being done. We only increment
 	// the counter in case were not able to do our job. As soon as some threshold
@@ -58,7 +59,7 @@ func (c *clg) calculate(ctx spec.Context) error {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
 			// we break the outer loop to be done.
-			newID, err := c.IDFactory.New()
+			newID, err := c.Factory().ID().New()
 			if err != nil {
 				return maskAny(err)
 			}

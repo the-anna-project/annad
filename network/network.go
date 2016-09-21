@@ -12,6 +12,7 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
+	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
@@ -29,38 +30,36 @@ const (
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
-	IDFactory          spec.IDFactory
-	Log                spec.Log
-	PermutationFactory spec.PermutationFactory
-	StorageCollection  spec.StorageCollection
-	TextInput          chan spec.TextRequest
-	TextOutput         chan spec.TextResponse
+	FactoryCollection spec.FactoryCollection
+	Log               spec.Log
+	StorageCollection spec.StorageCollection
+	TextInput         chan spec.TextRequest
+	TextOutput        chan spec.TextResponse
 
 	// Settings.
 
 	// Delay causes each CLG execution to be delayed. This value represents a
-	// default value. The actually used value is optimized based on experience
-	// and learning.
-	// TODO implement
+	// default value. A delay can be used harden the internal synchronization of
+	// the network. For instance some chaos monkey could be implemented to cause
+	// unusual delays in neural communications. Analysing situations in which such
+	// chaos monkey takes place might shed some light on faulty implementations
+	// within the neural network.
+	//
+	// TODO implement the actual usage of the delay and make it dynamically
+	// configurable on demand like we already do with the log control.
 	Delay time.Duration
 }
 
 // DefaultConfig provides a default configuration to create a new network
 // object by best effort.
 func DefaultConfig() Config {
-	newPermutationFactory, err := permutation.NewFactory(permutation.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := Config{
 		// Dependencies.
-		IDFactory:          id.MustNewFactory(),
-		Log:                log.New(log.DefaultConfig()),
-		PermutationFactory: newPermutationFactory,
-		StorageCollection:  storage.MustNewCollection(),
-		TextInput:          make(chan spec.TextRequest, 1000),
-		TextOutput:         make(chan spec.TextResponse, 1000),
+		FactoryCollection: factory.MustNewCollection(),
+		Log:               log.New(log.DefaultConfig()),
+		StorageCollection: storage.MustNewCollection(),
+		TextInput:         make(chan spec.TextRequest, 1000),
+		TextOutput:        make(chan spec.TextResponse, 1000),
 
 		// Settings.
 		Delay: 0,
@@ -84,14 +83,11 @@ func New(config Config) (spec.Network, error) {
 		Type:         ObjectType,
 	}
 
-	if newNetwork.IDFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
+	if newNetwork.FactoryCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if newNetwork.PermutationFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "permutation factory must not be empty")
 	}
 	if newNetwork.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
@@ -161,6 +157,10 @@ func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.Net
 	}
 
 	return calculatedPayload, nil
+}
+
+func (n *network) Factory() spec.FactoryCollection {
+	return n.FactoryCollection
 }
 
 func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
@@ -248,7 +248,7 @@ func (n *network) Listen() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue
 			}
-			behaviorID, err := n.IDFactory.New()
+			behaviorID, err := n.Factory().ID().New()
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 				continue

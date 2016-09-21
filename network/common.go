@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/xh3b4sd/anna/api"
+	// TODO complete the list
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
@@ -38,7 +39,7 @@ func (n *network) clgByName(name string) (spec.CLG, error) {
 
 func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.ObjectID]spec.CLG {
 	for ID := range CLGs {
-		CLGs[ID].SetIDFactory(n.IDFactory)
+		CLGs[ID].SetFactoryCollection(n.FactoryCollection)
 		CLGs[ID].SetLog(n.Log)
 		CLGs[ID].SetStorageCollection(n.StorageCollection)
 	}
@@ -141,7 +142,7 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.Obj
 //
 // TODO the success of the synchronization done here is qualified by the first
 // match found using a permutation factory. Instead of using the first match
-// found, we should store information about combinations being succesful in the
+// found, we should store information about combinations being successful in the
 // past and prefer these, instead of randomly chosen combinations. Imagine the
 // CLG tree below. There the upper CLGs are requesting the lower CLG. Imagine
 // only two out of the five requesting CLGs are supposed to feed the target CLG
@@ -175,7 +176,7 @@ func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queu
 	}
 
 	for {
-		err := n.PermutationFactory.MapTo(newPermutationList)
+		err := n.Factory().Permutation().MapTo(newPermutationList)
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
@@ -205,7 +206,7 @@ func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queu
 			return newPayload, newQueue, nil
 		}
 
-		err = n.PermutationFactory.PermuteBy(newPermutationList, 1)
+		err = n.Factory().Permutation().PermuteBy(newPermutationList, 1)
 		if err != nil {
 			// Note that also an error is thrown when the maximum growth of the
 			// permutation list was reached.

@@ -8,6 +8,7 @@ package splitfeatures
 import (
 	"reflect"
 
+	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
@@ -17,13 +18,14 @@ import (
 const (
 	// ObjectType represents the object type of the CLG object. This is used e.g.
 	// to register itself to the logger.
-	ObjectType spec.ObjectType = "divide-clg"
+	// TODO test
+	ObjectType spec.ObjectType = "split-features"
 )
 
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	IDFactory         spec.IDFactory
+	FactoryCollection spec.FactoryCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 
@@ -36,7 +38,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		IDFactory:         id.MustNewFactory(),
+		FactoryCollection: factory.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 
@@ -56,8 +58,8 @@ func New(config Config) (spec.CLG, error) {
 	}
 
 	// Dependencies.
-	if newCLG.IDFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "ID factory must not be empty")
+	if newCLG.FactoryCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
@@ -107,6 +109,10 @@ func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error
 	return modifiedPayload, nil
 }
 
+func (c *clg) Factory() spec.FactoryCollection {
+	return c.FactoryCollection
+}
+
 func (c *clg) GetName() string {
 	return "split-features"
 }
@@ -127,8 +133,8 @@ func (c *clg) GetInputTypes() []reflect.Type {
 	return inputType
 }
 
-func (c *clg) SetIDFactory(idFactory spec.IDFactory) {
-	c.IDFactory = idFactory
+func (c *clg) SetFactoryCollection(factoryCollection spec.FactoryCollection) {
+	c.FactoryCollection = factoryCollection
 }
 
 func (c *clg) SetLog(log spec.Log) {
