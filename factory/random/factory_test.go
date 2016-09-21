@@ -6,19 +6,7 @@ import (
 	"math/big"
 	"testing"
 	"time"
-
-	"github.com/xh3b4sd/anna/spec"
 )
-
-func testMaybeNewRandomFactory(t *testing.T) spec.RandomFactory {
-	newConfig := DefaultFactoryConfig()
-	newFactory, err := NewFactory(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newFactory
-}
 
 func Test_RandomFactory_NewFactory_Error_RandFactory(t *testing.T) {
 	newConfig := DefaultFactoryConfig()
@@ -96,11 +84,7 @@ func Test_RandomFactory_CreateNBetween_Error_Timeout(t *testing.T) {
 }
 
 func Test_RandomFactory_CreateNBetween_GenerateNNumbers(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newFactory, err := NewFactory(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newFactory := MustNewFactory()
 
 	n := 5
 	max := 10
@@ -115,11 +99,7 @@ func Test_RandomFactory_CreateNBetween_GenerateNNumbers(t *testing.T) {
 }
 
 func Test_RandomFactory_CreateNBetween_GenerateRandomNumbers(t *testing.T) {
-	newConfig := DefaultFactoryConfig()
-	newFactory, err := NewFactory(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newFactory := MustNewFactory()
 
 	n := 100
 	max := 10
