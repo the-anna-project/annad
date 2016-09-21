@@ -19,7 +19,7 @@ const (
 	// ObjectType represents the object type of the CLG object. This is used e.g.
 	// to register itself to the logger.
 	// TODO test
-	ObjectType spec.ObjectType = "is-greater"
+	ObjectType spec.ObjectType = "is-greater-clg"
 )
 
 // Config represents the configuration used to create a new CLG object.

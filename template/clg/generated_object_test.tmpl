@@ -6,23 +6,26 @@ package {{.PackageName}}
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	"testing"
+  "testing"
 )
 
 func Test_CLG_GetID(t *testing.T) {
-	firstCLG := MustNew()
-	secondCLG := MustNew()
+  firstCLG := MustNew()
+  secondCLG := MustNew()
 
-	if firstCLG.GetID() == secondCLG.GetID() {
-		t.Fatal("expected", false, "got", true)
-	}
+  if firstCLG.GetID() == secondCLG.GetID() {
+    t.Fatal("expected", false, "got", true)
+  }
 }
 
 func Test_CLG_GetType(t *testing.T) {
-	newCLG := MustNew()
-	objectType := newCLG.GetType()
+  newCLG := MustNew()
+  objectType := newCLG.GetType()
 
-	if objectType != ObjectType {
-		t.Fatal("expected", ObjectType, "got", objectType)
-	}
+  if objectType != ObjectType {
+    t.Fatal("expected", ObjectType, "got", objectType)
+  }
+  if objectType != "{{.CLGName}}-clg" {
+    t.Fatal("expected", ObjectType, "got", "{{.CLGName}}-clg")
+  }
 }

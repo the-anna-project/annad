@@ -25,4 +25,7 @@ func Test_CLG_GetType(t *testing.T) {
 	if objectType != ObjectType {
 		t.Fatal("expected", ObjectType, "got", objectType)
 	}
+	if objectType != "subtract-clg" {
+		t.Fatal("expected", ObjectType, "got", "subtract-clg")
+	}
 }

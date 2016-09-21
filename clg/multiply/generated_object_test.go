@@ -25,4 +25,7 @@ func Test_CLG_GetType(t *testing.T) {
 	if objectType != ObjectType {
 		t.Fatal("expected", ObjectType, "got", objectType)
 	}
+	if objectType != "multiply-clg" {
+		t.Fatal("expected", ObjectType, "got", "multiply-clg")
+	}
 }

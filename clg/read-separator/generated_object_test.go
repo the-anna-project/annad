@@ -25,4 +25,7 @@ func Test_CLG_GetType(t *testing.T) {
 	if objectType != ObjectType {
 		t.Fatal("expected", ObjectType, "got", objectType)
 	}
+	if objectType != "read-separator-clg" {
+		t.Fatal("expected", ObjectType, "got", "read-separator-clg")
+	}
 }
