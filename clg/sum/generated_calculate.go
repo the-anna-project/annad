@@ -18,7 +18,6 @@ import (
 const (
 	// ObjectType represents the object type of the CLG object. This is used e.g.
 	// to register itself to the logger.
-	// TODO test
 	ObjectType spec.ObjectType = "sum-clg"
 )
 
