@@ -26,6 +26,17 @@ func NewFactory(config FactoryConfig) (spec.PermutationFactory, error) {
 	return newFactory, nil
 }
 
+// MustNewFactory creates either a new default configured random factory object,
+// or panics.
+func MustNewFactory() spec.PermutationFactory {
+	newPermutationFactory, err := NewFactory(DefaultFactoryConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newPermutationFactory
+}
+
 type factory struct {
 	FactoryConfig
 }

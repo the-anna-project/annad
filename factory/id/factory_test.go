@@ -30,6 +30,40 @@ func Test_IDFactory_NewFactory_Error_RandFactory(t *testing.T) {
 	}
 }
 
+func Test_IDFactory_NewFactory_Error_Type(t *testing.T) {
+	newConfig := DefaultFactoryConfig()
+	newConfig.Type = spec.IDType(0)
+
+	_, err := NewFactory(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
+func Test_IDFactory_New_Error(t *testing.T) {
+	// Create custom random factory with timeout config.
+	newRandomFactoryConfig := random.DefaultFactoryConfig()
+	newRandomFactoryConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+		return nil, maskAny(invalidConfigError)
+	}
+	newRandomFactory, err := random.NewFactory(newRandomFactoryConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	newConfig := DefaultFactoryConfig()
+	newConfig.RandomFactory = newRandomFactory
+	newFactory, err := NewFactory(newConfig)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	_, err = newFactory.New()
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", nil, "got", err)
+	}
+}
+
 func Test_IDFactory_WithType_Error(t *testing.T) {
 	// Create custom random factory with timeout config.
 	newRandomFactoryConfig := random.DefaultFactoryConfig()

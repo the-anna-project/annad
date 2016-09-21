@@ -11,6 +11,8 @@ type CLG interface {
 	// Calculate provides the CLG's actual business logic.
 	Calculate(payload NetworkPayload) (NetworkPayload, error)
 
+	FactoryProvider
+
 	// GetName returns the CLG's human readable name.
 	GetName() string
 
@@ -24,18 +26,19 @@ type CLG interface {
 
 	Object
 
-	// SetStorageCollection configures the CLG's storage collection. This is done
-	// for all CLGs, regardless if a CLG is making use of the storage collection
+	// SetFactoryCollection configures the CLG's factory collection. This is done
+	// for all CLGs, regardless if a CLG is making use of the factory collection
 	// or not.
-	SetStorageCollection(storageCollection StorageCollection)
-
-	// SetIDFactory configures the CLG's ID factory. This is done for all CLGs,
-	// regardless if a CLG is making use of the ID factory or not.
-	SetIDFactory(idFactory IDFactory)
+	SetFactoryCollection(factoryCollection FactoryCollection)
 
 	// SetLog configures the CLG's logger. This is done for all CLGs, regardless
 	// if a CLG is making use of the logger or not.
 	SetLog(log Log)
+
+	// SetStorageCollection configures the CLG's storage collection. This is done
+	// for all CLGs, regardless if a CLG is making use of the storage collection
+	// or not.
+	SetStorageCollection(storageCollection StorageCollection)
 
 	StorageProvider
 }

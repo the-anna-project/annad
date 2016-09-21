@@ -1,5 +1,20 @@
 // Package splitfeatures implements spec.CLG and provides functionality to
 // split information sequences into features.
+//
+// One possible CLG tree might look like described below. Here the output of the
+// two upper CLGs are used to feed the lower CLG.
+//
+//    |---------------------|     |---------------------|
+//    | read-information-id |     |    read-separator   |
+//    |---------------------|     |---------------------|
+//               |                           |
+//               -----------------------------
+//                             |
+//                             V
+//                     |----------------|
+//                     | split-features |
+//                     |----------------|
+//
 package splitfeatures
 
 import (
@@ -19,10 +34,11 @@ const (
 	FeatureSize int = 4
 )
 
-func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
+func (c *clg) calculate(ctx spec.Context, informationSequence, separator string) error {
 	newConfig := featureset.DefaultConfig()
 	newConfig.MaxLength = FeatureSize
 	newConfig.MinLength = FeatureSize
+	newConfig.Separator = separator
 	newConfig.Sequences = []string{informationSequence}
 	newFeatureSet, err := featureset.New(newConfig)
 	if err != nil {
@@ -36,6 +52,14 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 
 	features := newFeatureSet.GetFeatures()
 	for _, f := range features {
+		// Store the detected feature within the feature storage. It is important to
+		// preserve the key structure used here to simply parse the stored features
+		// in other places, like in the pair-syntactic and read-separator CLG.
+		// Changes in the key structure there must be aligned with implementation
+		// details here. The current key structure looks as follows.
+		//
+		//     feature:%s:positions
+		//
 		positionKey := key.NewCLGKey("feature:%s:positions", f.GetSequence())
 		raw, err := json.Marshal(f.GetPositions())
 		if err != nil {

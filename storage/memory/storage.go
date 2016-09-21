@@ -45,16 +45,11 @@ type StorageConfig struct {
 // DefaultStorageConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultStorageConfig() StorageConfig {
-	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := StorageConfig{
 		KeyValue:      map[string]string{},
 		Log:           log.New(log.DefaultConfig()),
 		MathSet:       map[string]map[string]struct{}{},
-		RandomFactory: newRandomFactory,
+		RandomFactory: random.MustNewFactory(),
 		StringMap:     map[string]map[string]string{},
 		Weighted:      map[string]scoredElements{},
 	}

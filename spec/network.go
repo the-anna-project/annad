@@ -14,13 +14,18 @@ type NetworkPayload interface {
 	// argument. If no Context can be found, an error is returned.
 	GetContext() (Context, error)
 
-	// GetArgs returns the destination of the current network payload.
+	// GetArgs returns the destination of the current network payload, which must
+	// be the ID of a CLG registered within the neural network.
 	GetDestination() ObjectID
 
 	// GetID returns the object ID of the current network payload.
 	GetID() ObjectID
 
-	// GetArgs returns the sources of the current network payload.
+	// GetArgs returns the sources of the current network payload, which must be
+	// the ID of a CLG registered within the neural network. One allowed exception
+	// is the very first source of the very first network payload, which is
+	// created within the network when user input is received to forward it to the
+	// input CLG.
 	GetSources() []ObjectID
 
 	// SetArgs returns the arguments of the current network payload. In case the
@@ -74,6 +79,8 @@ type Network interface {
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
 	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
+
+	FactoryProvider
 
 	// Forward is triggered after the CLGs calculation. Here is decided what to
 	// do next. Like Activate, it is up to the CLG if it forwards signals to

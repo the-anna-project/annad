@@ -7,16 +7,6 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func testMaybeNewFactory(t *testing.T) spec.PermutationFactory {
-	newConfig := DefaultFactoryConfig()
-	newFactory, err := NewFactory(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newFactory
-}
-
 // Test_Permutation_Factory_PermuteBy_AbsoluteDelta tests permutations by
 // providing deltas always to a new factory. That we we need to provide
 // absolute deltas.
@@ -131,7 +121,7 @@ func Test_Permutation_Factory_PermuteBy_AbsoluteDelta(t *testing.T) {
 		},
 	}
 
-	newFactory := testMaybeNewFactory(t)
+	newFactory := MustNewFactory()
 
 	for i, testCase := range testCases {
 		// Note we use list factory for all test cases.
@@ -195,7 +185,7 @@ func Test_Permutation_Factory_PermuteBy_Increment(t *testing.T) {
 	}
 
 	// Note we use the same factory for all test cases.
-	newFactory := testMaybeNewFactory(t)
+	newFactory := MustNewFactory()
 	newList := testMaybeNewList(t)
 
 	for i, testCase := range testCases {
@@ -278,7 +268,7 @@ func Test_Permutation_Factory_PermuteBy_RelativeDelta(t *testing.T) {
 	}
 
 	// Note we use the same factory for all test cases.
-	newFactory := testMaybeNewFactory(t)
+	newFactory := MustNewFactory()
 	newList := testMaybeNewList(t)
 
 	for i, testCase := range testCases {

@@ -10,9 +10,51 @@ import (
 	"testing"
 
 	"golang.org/x/net/context"
-
-	"github.com/xh3b4sd/anna/spec"
 )
+
+func Test_CLG_Factory(t *testing.T) {
+	newCLG := MustNew()
+	if newCLG.Factory() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_GetName(t *testing.T) {
+	newCLG := MustNew()
+	clgName := newCLG.GetName()
+	if clgName != "is-greater" {
+		t.Fatal("expected", "is-greater", "got", clgName)
+	}
+}
+
+func Test_CLG_GetInputChannel(t *testing.T) {
+	newCLG := MustNew()
+	if newCLG.GetInputChannel() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_GetInputTypes(t *testing.T) {
+	newCLG := MustNew()
+	inputTypes := newCLG.GetInputTypes()
+	if len(inputTypes) < 1 {
+		t.Fatal("expected", 1, "got", 0)
+	}
+
+	var ctx context.Context
+	if !inputTypes[0].Implements(reflect.TypeOf(&ctx).Elem()) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_New_FactoryCollection_Error(t *testing.T) {
+	newConfig := DefaultConfig()
+	newConfig.FactoryCollection = nil
+	_, err := New(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
 
 func Test_CLG_New_LogError(t *testing.T) {
 	newConfig := DefaultConfig()
@@ -41,36 +83,7 @@ func Test_CLG_New_StorageCollection_Error(t *testing.T) {
 	}
 }
 
-func Test_CLG_GetName(t *testing.T) {
-	newCLG := MustNew()
-	clgName := newCLG.GetName()
-	if clgName != "is-greater" {
-		t.Fatal("expected", "is-greater", "got", clgName)
-	}
-}
-
-func Test_CLG_GetInputChannel(t *testing.T) {
-	newCLG := MustNew()
-	inputChannel := newCLG.GetInputChannel()
-	if inputChannel == nil {
-		t.Fatal("expected", make(chan spec.NetworkPayload, 1000), "got", nil)
-	}
-}
-
-func Test_CLG_GetInputTypes(t *testing.T) {
-	newCLG := MustNew()
-	inputTypes := newCLG.GetInputTypes()
-	if len(inputTypes) < 1 {
-		t.Fatal("expected", 1, "got", 0)
-	}
-
-	var ctx context.Context
-	if !inputTypes[0].Implements(reflect.TypeOf(&ctx).Elem()) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_CLG_SetIDFactory(t *testing.T) {
+func Test_CLG_SetFactoryCollection(t *testing.T) {
 	newCLG := MustNew()
 	var rawCLG *clg
 
@@ -82,14 +95,14 @@ func Test_CLG_SetIDFactory(t *testing.T) {
 		t.Fatal("expected", "*clg", "got", c)
 	}
 
-	if rawCLG.IDFactory == nil {
-		t.Fatal("expected", "spec.IDFactory", "got", nil)
+	if rawCLG.FactoryCollection == nil {
+		t.Fatal("expected", "spec.FactoryCollection", "got", nil)
 	}
 
-	newCLG.SetIDFactory(nil)
+	newCLG.SetFactoryCollection(nil)
 
-	if rawCLG.IDFactory != nil {
-		t.Fatal("expected", nil, "got", "spec.IDFactory")
+	if rawCLG.FactoryCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.FactoryCollection")
 	}
 }
 
@@ -136,5 +149,12 @@ func Test_CLG_SetStorageCollection(t *testing.T) {
 
 	if rawCLG.StorageCollection != nil {
 		t.Fatal("expected", nil, "got", "spec.StorageCollection")
+	}
+}
+
+func Test_CLG_Storage(t *testing.T) {
+	newCLG := MustNew()
+	if newCLG.Storage() == nil {
+		t.Fatal("expected", false, "got", true)
 	}
 }

@@ -25,4 +25,7 @@ func Test_CLG_GetType(t *testing.T) {
 	if objectType != ObjectType {
 		t.Fatal("expected", ObjectType, "got", objectType)
 	}
+	if objectType != "split-features-clg" {
+		t.Fatal("expected", ObjectType, "got", "split-features-clg")
+	}
 }
