@@ -39,15 +39,10 @@ type FactoryConfig struct {
 // DefaultFactoryConfig provides a default configuration to create a new ID factory
 // object by best effort.
 func DefaultFactoryConfig() FactoryConfig {
-	newRandomFactory, err := random.NewFactory(random.DefaultFactoryConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newConfig := FactoryConfig{
 		// Settings.
 		HashChars:     "abcdef0123456789", // hex character set
-		RandomFactory: newRandomFactory,
+		RandomFactory: random.MustNewFactory(),
 		Type:          Hex128,
 	}
 
