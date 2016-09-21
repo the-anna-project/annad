@@ -4,7 +4,6 @@ import (
 	"reflect"
 
 	"github.com/xh3b4sd/anna/api"
-	// TODO complete the list
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
@@ -14,6 +13,7 @@ import (
 	//"github.com/xh3b4sd/anna/clg/output"
 	"github.com/xh3b4sd/anna/clg/pair-syntactic"
 	"github.com/xh3b4sd/anna/clg/read-information-id"
+	"github.com/xh3b4sd/anna/clg/read-separator"
 	"github.com/xh3b4sd/anna/clg/split-features"
 	"github.com/xh3b4sd/anna/clg/subtract"
 	"github.com/xh3b4sd/anna/clg/sum"
@@ -329,6 +329,7 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 		//output.MustNew(),
 		pairsyntactic.MustNew(),
 		readinformationid.MustNew(),
+		readseparator.MustNew(),
 		splitfeatures.MustNew(),
 		subtract.MustNew(),
 		sum.MustNew(),
