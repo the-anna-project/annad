@@ -35,6 +35,8 @@ func (n *network) payloadFromConnections(CLG spec.CLG, queue []spec.NetworkPaylo
 	// during the activation of the requested CLG. The payloads sent by the CLGs
 	// being fetched here are useful because, in the past, they have already been
 	// helpful within the current CLG tree.
+	//
+	// TODO who writes this data?
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
 	list, err := n.Storage().General().Get(behaviorIDsKey)
 	if err != nil {
