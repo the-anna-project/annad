@@ -252,8 +252,9 @@ where to forward signals to. In case an exact expectation is known, the behavior
 should change slightly over time to find more optimized ways of solving
 problems. In case a problem was able to be solved using some modifications, the
 behavior can be updated completely. Note that the order of the stored behavior
-IDs is not important. The following key maps a single behavior ID to multiple
-behavior IDs.
+IDs is not important, because we only need to make sure that signals are
+dispatched to each connected CLG. The following key maps a single behavior ID to
+multiple behavior IDs.
 
 ```
 <prefix>:behavior-id:<behavior-id>:forward-behavior-ids    <behavior-id>,<behavior-id>,...
@@ -270,8 +271,9 @@ which payloads to accept when being activated. In case an exact expectation is
 known, the behavior should change slightly over time to find more optimized ways
 of solving problems. In case a problem was able to be solved using some
 modifications, the behavior can be updated completely. Note that the order of
-the stored behavior IDs is important. The following key maps a single
-behavior ID to multiple behavior IDs.
+the stored behavior IDs is important, because it reflects the input interface of
+the requested CLG. The following key maps a single behavior ID to multiple
+behavior IDs.
 
 ```
 <prefix>:behavior-id:<behavior-id>:activate-behavior-ids    <behavior-id>,<behavior-id>,...
