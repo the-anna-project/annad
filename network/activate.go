@@ -25,7 +25,9 @@ func (n *network) payloadFromConnections(behaviorID string, queue []spec.Network
 	behaviorIDs := strings.Split(list, ",")
 
 	// Check if there is a network payload for each behavior ID we found in the
-	// storage.
+	// storage. Here it is important to obtain the order of the behavior IDs
+	// stored as connections. They represent the input interface of the requested
+	// CLG.
 	var members []interface{}
 	for _, behaviorID := range behaviorIDs {
 		for _, networkPayload := range queue {
