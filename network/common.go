@@ -69,23 +69,22 @@ func (n *network) listenCLGs() {
 	for ID, CLG := range n.CLGs {
 		go func(ID spec.ObjectID, CLG spec.CLG) {
 			var queue []spec.NetworkPayload
-			clgChannel := CLG.GetInputChannel()
+			queueBuffer := len(CLG.GetInputTypes()) + 1
+			inputChannel := CLG.GetInputChannel()
 
 			for {
 				select {
 				case <-n.Closer:
 					break
-				case payload := <-clgChannel:
+				case payload := <-inputChannel:
 
 					// In case the current queue exeeds a certain amount of payloads, it
 					// is unlikely that the queue is going to be helpful when growing any
-					// further. Thus we cut the queue at some point.
-					//
-					// TODO the limit is hardcoded and should be configured by the neural
-					// network itself.
+					// further. Thus we cut the queue at some point beyond the interface
+					// capabilities of the requested CLG.
 					queue = append(queue, payload)
-					if len(queue) > 10 {
-						queue = queue[:10]
+					if len(queue) > queueBuffer {
+						queue = queue[1:]
 					}
 
 					go func(payload spec.NetworkPayload) {
