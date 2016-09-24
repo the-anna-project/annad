@@ -157,9 +157,6 @@ func (n *network) Activate(CLG spec.CLG, queue []spec.NetworkPayload) (spec.Netw
 		}
 	}
 
-	// TODO the requested CLG needs to be removed from forwarding connections of
-	// CLGs listed in queue ???
-
 	return payload, queue, nil
 }
 

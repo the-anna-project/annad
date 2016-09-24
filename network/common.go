@@ -77,7 +77,6 @@ func (n *network) listenCLGs() {
 				case <-n.Closer:
 					break
 				case payload := <-inputChannel:
-
 					// In case the current queue exeeds a certain amount of payloads, it
 					// is unlikely that the queue is going to be helpful when growing any
 					// further. Thus we cut the queue at some point beyond the interface
