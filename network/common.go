@@ -83,6 +83,7 @@ func (n *network) listenCLGs() {
 					//
 					// TODO the limit is hardcoded and should be configured by the neural
 					// network itself.
+					queue = append(queue, payload)
 					if len(queue) > 10 {
 						queue = queue[:10]
 					}
@@ -90,7 +91,7 @@ func (n *network) listenCLGs() {
 					go func(payload spec.NetworkPayload) {
 						// Activate if the CLG's interface is satisfied by the given
 						// network payload.
-						newPayload, newQueue, err := n.Activate(CLG, payload, queue)
+						newPayload, newQueue, err := n.Activate(CLG, queue)
 						if IsInvalidInterface(err) {
 							// The interface of the requested CLG was not fulfilled. We
 							// continue listening for the next network payload without doing

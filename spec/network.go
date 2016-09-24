@@ -68,7 +68,7 @@ type Network interface {
 	// so it can be used for the requested CLG execution. Network payloads being
 	// matched will be removed from the new queue which is returned as second
 	// value.
-	Activate(clg CLG, payload NetworkPayload, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
+	Activate(clg CLG, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you

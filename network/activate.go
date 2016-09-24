@@ -12,31 +12,11 @@ import (
 
 // receiver
 
-func (n *network) payloadFromConnections(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
-	// Check the queue is valid for our operations.
-	if len(queue) < 1 {
-		return nil, nil, maskAnyf(invalidNetworkPayloadError, "must not be empty")
-	}
-
-	// Lookup the behavior ID from the context of any payload of the queue. We can
-	// simply take the first payload because the behavior ID should always be the
-	// same. It is set within Forward, where signals are sent to further CLGs,
-	// until the payload is passed to here.
-	ctx, err := queue[0].GetContext()
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
-		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-
+func (n *network) payloadFromConnections(behaviorID string, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	// Fetch the available behavior IDs which are known to be useful connections
 	// during the activation of the requested CLG. The payloads sent by the CLGs
 	// being fetched here are useful because, in the past, they have already been
 	// helpful within the current CLG tree.
-	//
-	// TODO who writes this data?
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
 	list, err := n.Storage().General().Get(behaviorIDsKey)
 	if err != nil {
@@ -87,10 +67,12 @@ func (n *network) payloadFromConnections(CLG spec.CLG, queue []spec.NetworkPaylo
 // will be returned in one merged network payload. The returned list of network
 // payloads will not contain any of the network payloads merged.
 func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+	inputTypes := CLG.GetInputTypes()
+
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.
 	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(CLG.GetInputTypes())
+	newConfig.MaxGrowth = len(inputTypes)
 	newConfig.Values = queueToValues(queue)
 	newPermutationList, err := permutation.NewList(newConfig)
 	if err != nil {
@@ -109,7 +91,7 @@ func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayl
 		if err != nil {
 			return nil, nil, maskAny(err)
 		}
-		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
+		if reflect.DeepEqual(types, inputTypes) {
 			newPayload, err := membersToPayload(members)
 			if err != nil {
 				return nil, nil, maskAny(err)
@@ -132,6 +114,28 @@ func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayl
 }
 
 // helper
+
+func behaviorIDFromQueue(queue []spec.NetworkPayload) (string, error) {
+	// Check the queue is valid for our operations.
+	if len(queue) < 1 {
+		return "", maskAnyf(invalidNetworkPayloadError, "must not be empty")
+	}
+
+	// Lookup the behavior ID from the context of any payload of the queue. We can
+	// simply take the first payload because the behavior ID should always be the
+	// same. It is set within Forward, where signals are sent to further CLGs,
+	// until the payload is passed to here.
+	ctx, err := queue[0].GetContext()
+	if err != nil {
+		return "", maskAny(err)
+	}
+	behaviorID := ctx.GetBehaviorID()
+	if behaviorID == "" {
+		return "", maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
+
+	return behaviorID, nil
+}
 
 func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
 	for _, p := range list {
