@@ -54,20 +54,32 @@ type Network interface {
 	// decision the given network payload and formerly received network payloads
 	// are considered. CLGs within the neural network are able to join forces to
 	// trigger a CLG together, where their own output types do not satisfy the
-	// input interface of the requested CLG. For this case some synchronization
-	// is required. That means network payloads need to be queued until the
-	// requested CLG can be properly executed with the provided inputs. That is
-	// why Activate takes a single payload, which represents the currently
-	// received one, and a list of network payloads, which represent the formerly
-	// received network payloads. Activate tries to find a combination of all
-	// known payloads that satisfy the interface of the requested CLG. Note that
-	// queue has a maximum length of the number of input arguments of the
-	// requested CLG. In case no match can be found the given single payload is
-	// added to queue and the oldest payload is removed. In case some match was
-	// found the unified network payload matching the CLG's interface is returned
-	// so it can be used for the requested CLG execution. Network payloads being
-	// matched will be removed from the new queue which is returned as second
-	// value.
+	// input interface of the requested CLG. For this case some synchronization is
+	// required. That means network payloads need to be queued until the requested
+	// CLG can be properly executed with the provided inputs. Activate tries to
+	// find a combination using all queued network payloads to satisfy the
+	// interface of the requested CLG. Note that queue has a maximum length of the
+	// number of input arguments of the requested CLG. In case no match can be
+	// found the oldest network payload is removed from the queue, because a new
+	// network payload was added before. In case some match was found the merged
+	// network payload matching the CLG's interface is returned so it can be used
+	// to execute the requested CLG. Network payloads being matched will be
+	// removed from the queue which is returned as second value. This is how it
+	// might look like when multiple CLGs forward signals to one CLG, which needs
+	// to decide if it should be actiavted or not.
+	//
+	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//       |           |           |           |           |
+	//       V           V           V           V           V
+	//       -------------------------------------------------
+	//                               |
+	//                               V
+	//                            |-----|
+	//                            | CLG |
+	//                            |-----|
+	//
 	Activate(clg CLG, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
@@ -82,12 +94,26 @@ type Network interface {
 
 	FactoryProvider
 
-	// Forward is triggered after the CLGs calculation. Here is decided what to
-	// do next. Like Activate, it is up to the CLG if it forwards signals to
+	// Forward is triggered after the CLGs calculation. Here will be decided what
+	// to do next. Like Activate, it is up to the CLG if it forwards signals to
 	// further CLGs. E.g. a CLG may or may not forward its calculated results to
-	// one or more CLGs. All this depends on the information provided by the
-	// given network payload, the CLG's connections and its therefore resulting
-	// behaviour properties.
+	// one or more CLGs. All this depends on the information provided by the given
+	// network payload, the CLG's connections and its therefore resulting
+	// behaviour properties. This is how it might look like when one CLG forwards
+	// signals to multiple other CLGs.
+	//
+	//                            |-----|
+	//                            | CLG |
+	//                            |-----|
+	//                               |
+	//                               V
+	//       -------------------------------------------------
+	//       |           |           |           |           |
+	//       V           V           V           V           V
+	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//
 	Forward(clg CLG, payload NetworkPayload) error
 
 	// Listen makes the network listen on requests from the outside. Here each
