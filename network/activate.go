@@ -31,10 +31,14 @@ func (n *network) payloadFromConnections(behaviorID string, queue []spec.Network
 	var members []interface{}
 	for _, behaviorID := range behaviorIDs {
 		for _, networkPayload := range queue {
-			// At this point there is only one source given, the CLG that forwarded
-			// the current network payload to here.
-			sourceID := string(networkPayload.GetSources()[0])
-			if behaviorID == string(sourceID) {
+			// At this point there is only one source given. That is the CLG that
+			// forwarded the current network payload to here. If this is not the case,
+			// we return an error.
+			sources := networkPayload.GetSources()
+			if len(sources) != 1 {
+				return nil, nil, maskAnyf(invalidInterfaceError, "there must be one source")
+			}
+			if behaviorID == string(sources[0]) {
 				members = append(members, networkPayload)
 				continue
 			}
