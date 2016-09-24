@@ -1,8 +1,6 @@
 package network
 
 import (
-	"reflect"
-
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/greater"
@@ -17,7 +15,6 @@ import (
 	"github.com/xh3b4sd/anna/clg/split-features"
 	"github.com/xh3b4sd/anna/clg/subtract"
 	"github.com/xh3b4sd/anna/clg/sum"
-	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
@@ -72,18 +69,27 @@ func (n *network) listenCLGs() {
 	for ID, CLG := range n.CLGs {
 		go func(ID spec.ObjectID, CLG spec.CLG) {
 			var queue []spec.NetworkPayload
-			clgChannel := CLG.GetInputChannel()
+			queueBuffer := len(CLG.GetInputTypes()) + 1
+			inputChannel := CLG.GetInputChannel()
 
 			for {
 				select {
 				case <-n.Closer:
 					break
-				case payload := <-clgChannel:
+				case payload := <-inputChannel:
+					// In case the current queue exeeds a certain amount of payloads, it
+					// is unlikely that the queue is going to be helpful when growing any
+					// further. Thus we cut the queue at some point beyond the interface
+					// capabilities of the requested CLG.
+					queue = append(queue, payload)
+					if len(queue) > queueBuffer {
+						queue = queue[1:]
+					}
 
 					go func(payload spec.NetworkPayload) {
 						// Activate if the CLG's interface is satisfied by the given
 						// network payload.
-						newPayload, newQueue, err := n.Activate(CLG, payload, queue)
+						newPayload, newQueue, err := n.Activate(CLG, queue)
 						if IsInvalidInterface(err) {
 							// The interface of the requested CLG was not fulfilled. We
 							// continue listening for the next network payload without doing
@@ -134,187 +140,7 @@ func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.Obj
 	return clgIDs
 }
 
-// permutePayload tries to find a combination of payloads which together are
-// able to fulfill the interface of the requested CLG. This mechanism decides
-// how to synchronize the communication between the CLGs within the neural
-// network.
-//
-//
-// TODO the success of the synchronization done here is qualified by the first
-// match found using a permutation factory. Instead of using the first match
-// found, we should store information about combinations being successful in the
-// past and prefer these, instead of randomly chosen combinations. Imagine the
-// CLG tree below. There the upper CLGs are requesting the lower CLG. Imagine
-// only two out of the five requesting CLGs are supposed to feed the target CLG
-// to solve a specific problem. In fact multiple combinations of CLGs would
-// fulfil the interface of the requested CLG, but not all connections are
-// desired to solve a specific problem. So it would be good to prefer
-// connections we already know they are successful in a certain scope.
-//
-//    |-----|     |-----|     |-----|     |-----|     |-----|
-//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
-//    |-----|     |-----|     |-----|     |-----|     |-----|
-//       |           |           |           |           |
-//       -------------------------------------------------
-//                               |
-//                               V
-//                            |-----|
-//                            | CLG |
-//                            |-----|
-//
-func (n *network) permutePayload(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
-	queue = append(queue, payload)
-
-	// Prepare the permutation list to find out which combination of payloads
-	// satisfies the requested CLG's interface.
-	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(CLG.GetInputTypes())
-	newConfig.Values = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newConfig)
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-
-	for {
-		err := n.Factory().Permutation().MapTo(newPermutationList)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-
-		// Check if the given payload satisfies the requested CLG's interface.
-		members := newPermutationList.GetMembers()
-		types, err := membersToTypes(members)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		if reflect.DeepEqual(types, CLG.GetInputTypes()) {
-			newPayload, err := membersToPayload(members)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-			newQueue, err := filterMembersFromQueue(members, queue)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-
-			// In case the current queue exeeds the interface of the requested CLG, it is
-			// trimmed to cause a more strict behaviour of the neural network.
-			if len(newPermutationList.GetValues()) > len(CLG.GetInputTypes()) {
-				newQueue = newQueue[1:]
-			}
-
-			return newPayload, newQueue, nil
-		}
-
-		err = n.Factory().Permutation().PermuteBy(newPermutationList, 1)
-		if err != nil {
-			// Note that also an error is thrown when the maximum growth of the
-			// permutation list was reached.
-			return nil, nil, maskAny(err)
-		}
-	}
-}
-
 // helper
-
-func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
-	for _, p := range list {
-		if p.GetID() == item.GetID() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func filterMembersFromQueue(members []interface{}, queue []spec.NetworkPayload) ([]spec.NetworkPayload, error) {
-	var memberPayloads []spec.NetworkPayload
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
-		}
-		memberPayloads = append(memberPayloads, payload)
-	}
-
-	var newQueue []spec.NetworkPayload
-	for _, queuedPayload := range queue {
-		if containsNetworkPayload(memberPayloads, queuedPayload) {
-			continue
-		}
-
-		newQueue = append(newQueue, queuedPayload)
-	}
-
-	return newQueue, nil
-}
-
-func membersToPayload(members []interface{}) (spec.NetworkPayload, error) {
-	var ctxAdded bool
-	var args []reflect.Value
-	var destination spec.ObjectID
-	var sources []spec.ObjectID
-
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
-		}
-
-		if !ctxAdded {
-			ctx, err := payload.GetContext()
-			if !ok {
-				return nil, maskAny(err)
-			}
-			args = append(args, reflect.ValueOf(ctx))
-			destination = payload.GetDestination()
-			ctxAdded = true
-		}
-
-		for _, v := range payload.GetArgs()[1:] {
-			args = append(args, v)
-			sources = append(sources, payload.GetSources()...)
-		}
-	}
-
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = args
-	newNetworkPayloadConfig.Destination = destination
-	newNetworkPayloadConfig.Sources = sources
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newNetworkPayload, nil
-}
-
-func membersToTypes(members []interface{}) ([]reflect.Type, error) {
-	var types []reflect.Type
-	var ctxAdded bool
-
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
-		}
-
-		if !ctxAdded {
-			ctx, err := payload.GetContext()
-			if !ok {
-				return nil, maskAny(err)
-			}
-			types = append(types, reflect.TypeOf(ctx))
-			ctxAdded = true
-		}
-
-		for _, v := range payload.GetArgs()[1:] {
-			types = append(types, v.Type())
-		}
-	}
-
-	return types, nil
-}
 
 func newCLGs() map[spec.ObjectID]spec.CLG {
 	newList := []spec.CLG{
@@ -342,14 +168,4 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 	}
 
 	return newCLGs
-}
-
-func queueToValues(queue []spec.NetworkPayload) []interface{} {
-	var values []interface{}
-
-	for _, p := range queue {
-		values = append(values, p)
-	}
-
-	return values
 }

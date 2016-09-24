@@ -121,16 +121,40 @@ type network struct {
 	Type         spec.ObjectType
 }
 
-func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) Activate(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	payload, queue, err := n.permutePayload(CLG, payload, queue)
-	if permutation.IsMaxGrowthReached(err) {
-		// We could not find a sufficient payload for the requsted CLG by permuting
-		// the queue of network payloads.
-		return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
-	} else if err != nil {
+	behaviorID, err := behaviorIDFromQueue(queue)
+	if err != nil {
 		return nil, nil, maskAny(err)
+	}
+
+	// Check if we have neural connections that tell us which payloads to use.
+	payload, queue, err := n.payloadFromConnections(behaviorID, queue)
+	if IsInvalidInterface(err) {
+		// There are no sufficient connections. We need to come up with something
+		// random.
+		payload, queue, err = n.payloadFromPermutations(CLG, queue)
+		if permutation.IsMaxGrowthReached(err) {
+			// We could not find a sufficient payload for the requsted CLG by permuting
+			// the queue of network payloads.
+			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+		} else if err != nil {
+			return nil, nil, maskAny(err)
+		}
+
+		// Once we found a new combination, we need to make sure the neural network
+		// remembers it. Thus we store the connections between the current behavior
+		// and the behaviors matching the interface of the current behavior.
+		var behaviorIDs string
+		for _, s := range payload.GetSources() {
+			behaviorIDs += "," + string(s)
+		}
+		behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
+		err := n.Storage().General().Set(behaviorIDsKey, behaviorIDs)
+		if err != nil {
+			return nil, nil, maskAny(err)
+		}
 	}
 
 	return payload, queue, nil
