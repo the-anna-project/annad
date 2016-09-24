@@ -124,14 +124,21 @@ type network struct {
 func (n *network) Activate(CLG spec.CLG, payload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	payload, queue, err := n.permutePayload(CLG, payload, queue)
-	if permutation.IsMaxGrowthReached(err) {
-		// We could not find a sufficient payload for the requsted CLG by permuting
-		// the queue of network payloads.
-		return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
-	} else if err != nil {
-		return nil, nil, maskAny(err)
+	queue = append(queue, payload)
+
+	payload, queue, err := n.payloadFromConnections(CLG, queue)
+	if IsInvalidInterface(err) {
+		payload, queue, err = n.payloadFromPermutations(CLG, queue)
+		if permutation.IsMaxGrowthReached(err) {
+			// We could not find a sufficient payload for the requsted CLG by permuting
+			// the queue of network payloads.
+			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+		} else if err != nil {
+			return nil, nil, maskAny(err)
+		}
 	}
+
+	// TODO the requested CLG needs to be removed from forwarding connections of CLGs listed in queue
 
 	return payload, queue, nil
 }

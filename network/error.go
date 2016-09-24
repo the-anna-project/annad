@@ -49,3 +49,10 @@ var invalidBehaviorIDError = errgo.New("invalid behavior ID")
 func IsInvalidBehaviorID(err error) bool {
 	return errgo.Cause(err) == invalidBehaviorIDError
 }
+
+var invalidNetworkPayloadError = errgo.New("invalid network payload")
+
+// IsInvalidNetworkPayload asserts invalidNetworkPayloadError.
+func IsInvalidNetworkPayload(err error) bool {
+	return errgo.Cause(err) == invalidNetworkPayloadError
+}

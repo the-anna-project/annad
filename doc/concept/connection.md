@@ -243,18 +243,38 @@ a CLG tree ID to the very first behavior within this specific CLG tree.
 
 ---
 
-###### map behavior ID to behavior IDs
+###### map behavior ID to behavior IDs set
 When having a single behavior ID given it needs to be mapped to multiple
 behavior IDs. This mapping represents connections linking from one behavior to
 other behaviors within the connection space. That way dynamic CLG trees can be
-referenced. CLGs can lookup connections using their own behavior IDs. In case an
-exact expectation is known, the behavior should change slightly over time to
-find more optimized ways of solving problems. In case a problem was able to be
-solved using some modifications, the behavior can be updated completely. The
-following key maps a single behavior ID to multiple behavior IDs.
+referenced. CLGs can lookup connections using their own behavior IDs to know
+where to forward signals to. In case an exact expectation is known, the behavior
+should change slightly over time to find more optimized ways of solving
+problems. In case a problem was able to be solved using some modifications, the
+behavior can be updated completely. Note that the order of the stored behavior
+IDs is not important. The following key maps a single behavior ID to multiple
+behavior IDs.
 
 ```
-<prefix>:behavior-id:<behavior-id>:behavior-ids    <behavior-id>,<behavior-id>,...
+<prefix>:behavior-id:<behavior-id>:forward-behavior-ids    <behavior-id>,<behavior-id>,...
+```
+
+---
+
+###### map behavior ID to behavior IDs list
+When having a single behavior ID given it needs to be mapped to multiple
+behavior IDs. This mapping represents connections linking from one behavior to
+other behaviors within the connection space. That way dynamic CLG trees can be
+referenced. CLGs can lookup connections using their own behavior IDs to know
+which payloads to accept when being activated. In case an exact expectation is
+known, the behavior should change slightly over time to find more optimized ways
+of solving problems. In case a problem was able to be solved using some
+modifications, the behavior can be updated completely. Note that the order of
+the stored behavior IDs is important. The following key maps a single
+behavior ID to multiple behavior IDs.
+
+```
+<prefix>:behavior-id:<behavior-id>:activate-behavior-ids    <behavior-id>,<behavior-id>,...
 ```
 
 ---
