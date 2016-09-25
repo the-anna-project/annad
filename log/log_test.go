@@ -84,6 +84,10 @@ func (c *context) GetCLGTreeID() string {
 	return c.CLGTreeID
 }
 
+func (c *context) GetExpectation() spec.Expectation {
+	return nil
+}
+
 func (c *context) GetID() string {
 	return c.ID
 }
@@ -102,6 +106,10 @@ func (c *context) SetBehaviorID(behaviorID string) {
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.CLGTreeID = clgTreeID
+}
+
+func (c *context) SetExpectation(expectation spec.Expectation) {
+
 }
 
 func (c *context) SetInformationID(informationID string) {
