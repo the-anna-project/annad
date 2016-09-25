@@ -238,7 +238,7 @@ This mapping resolves all behaviors of a whole CLG tree. The following key maps
 a CLG tree ID to the very first behavior within this specific CLG tree.
 
 ```
-<prefix>:clg-tree-id:<clg-tree-id>:behavior-id    <behavior-id>
+<prefix>:clg-tree-id:<clg-tree-id>:first-behavior-id    <behavior-id>
 ```
 
 ---

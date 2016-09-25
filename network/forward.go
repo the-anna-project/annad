@@ -51,31 +51,42 @@ func (n *network) forwardCLGs(ctx spec.Context, behaviorIDs []string, payload sp
 	return nil
 }
 
-// TODO
 func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
 	ctx, err := payload.GetContext()
 	if err != nil {
 		return maskAny(err)
 	}
 
-	// TODO fetch CLG tree ID using information ID
-	// TODO fetch input CLG ID (behaviorID) using CLG tree ID
-	//clgTreeID, err := c.Storage.Get(key.NewCLGKey("information-id:%s:clg-tree-id", informationID))
-	//if storage.IsNotFound(err) {
-	//	// We do not know any useful CLG tree for the given input. Thus we cannot
-	//	// set any to the current context.
-	//	return nil
-	//} else if err != nil {
-	//	return maskAny(err)
+	// Find the original information sequence using the information ID from the
+	// context.
+	informationID := ctx.GetCLGTreeID()
+	if informationID != "" {
+		return maskAnyf(invalidInformationIDError, "must not be empty")
+	}
+	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
+	informationSequence, err := n.Storage().General().Get(informationSequenceKey)
+	if err != nil {
+		return maskAny(err)
+	}
 
-	var behaviorID string
+	// Find the first behavior ID (input CLG ID) using the CLG tree ID from the
+	// context.
+	clgTreeID := ctx.GetCLGTreeID()
+	if clgTreeID != "" {
+		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
+	}
+	firstBehaviorIDKey := key.NewCLGKey("clg-tree-id:%s:first-behavior-id", clgTreeID)
+	behaviorID, err := n.Storage().General().Get(firstBehaviorIDKey)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	newCtx := ctx.Clone()
 	newCtx.SetBehaviorID(behaviorID)
 
-	// Create a new network payload
+	// Create a new network payload.
 	newPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
+	newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(informationSequence)}
 	newPayloadConfig.Destination = spec.ObjectID(behaviorID)
 	newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
 	newPayload, err := api.NewNetworkPayload(newPayloadConfig)

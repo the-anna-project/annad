@@ -50,6 +50,20 @@ func IsInvalidBehaviorID(err error) bool {
 	return errgo.Cause(err) == invalidBehaviorIDError
 }
 
+var invalidCLGTreeIDError = errgo.New("invalid CLG tree ID")
+
+// IsInvalidCLGTreeID asserts invalidCLGTreeIDError.
+func IsInvalidCLGTreeID(err error) bool {
+	return errgo.Cause(err) == invalidCLGTreeIDError
+}
+
+var invalidInformationIDError = errgo.New("invalid information ID")
+
+// IsInvalidInformationID asserts invalidInformationIDError.
+func IsInvalidInformationID(err error) bool {
+	return errgo.Cause(err) == invalidInformationIDError
+}
+
 var invalidNetworkPayloadError = errgo.New("invalid network payload")
 
 // IsInvalidNetworkPayload asserts invalidNetworkPayloadError.

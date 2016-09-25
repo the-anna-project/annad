@@ -6,6 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/output"
 	"github.com/xh3b4sd/anna/context"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -91,63 +92,76 @@ func (n *network) listenInputCLG() {
 		case <-n.Closer:
 			break
 		case textRequest := <-n.TextInput:
+			go func(textRequest spec.TextRequest) {
+				// This should only be used for testing to bypass the neural network
+				// and directly respond with the received input.
+				if textRequest.GetEcho() {
+					newTextResponseConfig := api.DefaultTextResponseConfig()
+					newTextResponseConfig.Output = textRequest.GetInput()
+					newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+					if err != nil {
+						n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+					}
+					n.TextOutput <- newTextResponse
+					return
+				}
 
-			// This should only be used for testing to bypass the neural network
-			// and directly respond with the received input.
-			if textRequest.GetEcho() {
-				newTextResponseConfig := api.DefaultTextResponseConfig()
-				newTextResponseConfig.Output = textRequest.GetInput()
-				newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+				// Create new IDs for the new CLG tree and the input CLG.
+				clgTreeID, err := n.Factory().ID().New()
 				if err != nil {
 					n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+					return
 				}
-				n.TextOutput <- newTextResponse
-				continue
-			}
+				behaviorID, err := n.Factory().ID().New()
+				if err != nil {
+					n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+					return
+				}
 
-			// Prepare the context and a unique behaviour ID for the input CLG.
-			ctxConfig := context.DefaultConfig()
-			ctxConfig.Expectation = textRequest.GetExpectation()
-			ctxConfig.SessionID = textRequest.GetSessionID()
-			ctx, err := context.New(ctxConfig)
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-				continue
-			}
-			// TODO write a new CLG tree ID and add it to context
-			behaviorID, err := n.Factory().ID().New()
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-				continue
-			}
+				// Write the new CLG tree ID to reference the input CLG ID and add the CLG
+				// tree ID to the new context.
+				firstBehaviorIDKey := key.NewCLGKey("clg-tree-id:%s:first-behavior-id", clgTreeID)
+				err = n.Storage().General().Set(firstBehaviorIDKey, string(behaviorID))
+				if err != nil {
+					n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+					return
+				}
 
-			// We transform the received input to a network payload to have a
-			// conventional data structure within the neural network. Note the
-			// following details.
-			//
-			//     The list of arguments always contains a context as first argument.
-			//
-			//     Destination is always the behavior ID of the input CLG, since this
-			//     one is the connecting building block to other CLGs within the
-			//     neural network. This behavior ID is always a new one, because it
-			//     will eventually be part of a completely new CLG tree within the
-			//     connection space.
-			//
-			//     Sources is here only the individual network ID to have at least
-			//     any reference of origin.
-			//
-			payloadConfig := api.DefaultNetworkPayloadConfig()
-			payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
-			payloadConfig.Destination = behaviorID
-			payloadConfig.Sources = []spec.ObjectID{networkID}
-			newPayload, err := api.NewNetworkPayload(payloadConfig)
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-				continue
-			}
+				// Prepare the context and a unique behavior ID for the input CLG.
+				ctx := context.MustNew()
+				ctx.SetBehaviorID(string(behaviorID))
+				ctx.SetCLGTreeID(string(clgTreeID))
+				ctx.SetExpectation(textRequest.GetExpectation())
+				ctx.SetSessionID(textRequest.GetSessionID())
 
-			// Send the new network payload to the input CLG.
-			clgChannel <- newPayload
+				// We transform the received input to a network payload to have a
+				// conventional data structure within the neural network. Note the
+				// following details.
+				//
+				//     The list of arguments always contains a context as first argument.
+				//
+				//     Destination is always the behavior ID of the input CLG, because
+				//     this one is the connecting building block to other CLGs within the
+				//     neural network. This behavior ID is always a new one, because it
+				//     will eventually be part of a completely new CLG tree within the
+				//     connection space.
+				//
+				//     Sources is here only the individual network ID to have at least
+				//     any reference of origin.
+				//
+				payloadConfig := api.DefaultNetworkPayloadConfig()
+				payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
+				payloadConfig.Destination = behaviorID
+				payloadConfig.Sources = []spec.ObjectID{networkID}
+				newPayload, err := api.NewNetworkPayload(payloadConfig)
+				if err != nil {
+					n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+					return
+				}
+
+				// Send the new network payload to the input CLG.
+				clgChannel <- newPayload
+			}(textRequest)
 		}
 	}
 }
