@@ -6,11 +6,14 @@ import (
 	"github.com/xh3b4sd/anna/clg/input"
 	"github.com/xh3b4sd/anna/clg/is-between"
 	"github.com/xh3b4sd/anna/clg/is-greater"
+	"github.com/xh3b4sd/anna/clg/is-lesser"
+	"github.com/xh3b4sd/anna/clg/lesser"
 	"github.com/xh3b4sd/anna/clg/multiply"
 	//"github.com/xh3b4sd/anna/clg/output"
 	"github.com/xh3b4sd/anna/clg/pair-syntactic"
 	"github.com/xh3b4sd/anna/clg/read-information-id"
 	"github.com/xh3b4sd/anna/clg/read-separator"
+	"github.com/xh3b4sd/anna/clg/round"
 	"github.com/xh3b4sd/anna/clg/split-features"
 	"github.com/xh3b4sd/anna/clg/subtract"
 	"github.com/xh3b4sd/anna/clg/sum"
@@ -63,11 +66,14 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 		input.MustNew(),
 		isbetween.MustNew(),
 		isgreater.MustNew(),
+		islesser.MustNew(),
+		lesser.MustNew(),
 		multiply.MustNew(),
 		//output.MustNew(),
 		pairsyntactic.MustNew(),
 		readinformationid.MustNew(),
 		readseparator.MustNew(),
+		round.MustNew(),
 		splitfeatures.MustNew(),
 		subtract.MustNew(),
 		sum.MustNew(),
