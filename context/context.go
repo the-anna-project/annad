@@ -26,9 +26,7 @@ const (
 type Config struct {
 	// Settings.
 
-	Context     netcontext.Context
-	Expectation spec.Expectation
-	SessionID   string
+	Context netcontext.Context
 
 	// TODO we want to track the original input that was provided from the
 	// outside. Further it would probably be interesting to also track the last 3
@@ -40,9 +38,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context:     netcontext.Background(),
-		Expectation: nil,
-		SessionID:   "",
+		Context: netcontext.Background(),
 	}
 
 	return newConfig
@@ -54,13 +50,6 @@ func New(config Config) (spec.Context, error) {
 		Config: config,
 
 		ID: string(id.MustNew()),
-	}
-
-	// If there is a session ID configured, we set it to the underlying context.
-	// That way our standard configuration interface is obtained and the data
-	// structures of the underlying implementation consistent.
-	if config.SessionID != "" {
-		newContext.SetSessionID(config.SessionID)
 	}
 
 	if newContext.Context == nil {
@@ -94,14 +83,12 @@ func (c *context) Clone() spec.Context {
 	// We prepare a new underlying context to have a fresh storage.
 	newContext.(*context).Context = netcontext.Background()
 
-	// We set the session ID to our own context object and also make the
-	// underlying context aware of it.
-	newContext.(*context).SessionID = c.GetSessionID()
-	newContext.SetSessionID(c.GetSessionID())
-
-	// Add other information to the underlying context.
+	// Add the other information to the new underlying context.
+	newContext.SetBehaviorID(c.GetBehaviorID())
 	newContext.SetCLGTreeID(c.GetCLGTreeID())
 	newContext.SetExpectation(c.GetExpectation())
+	newContext.SetInformationID(c.GetInformationID())
+	newContext.SetSessionID(c.GetSessionID())
 
 	return newContext
 }
@@ -118,6 +105,7 @@ func (c *context) Err() error {
 	return c.Context.Err()
 }
 
+// TODO make interface GetBehaviorID() (string, bool)
 func (c *context) GetBehaviorID() string {
 	behaviorID, ok := c.Context.Value(behaviorIDKey).(string)
 	if ok {
