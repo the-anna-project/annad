@@ -9,7 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/clg/is-lesser"
 	"github.com/xh3b4sd/anna/clg/lesser"
 	"github.com/xh3b4sd/anna/clg/multiply"
-	//"github.com/xh3b4sd/anna/clg/output"
+	"github.com/xh3b4sd/anna/clg/output"
 	"github.com/xh3b4sd/anna/clg/pair-syntactic"
 	"github.com/xh3b4sd/anna/clg/read-information-id"
 	"github.com/xh3b4sd/anna/clg/read-separator"
@@ -69,7 +69,7 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 		islesser.MustNew(),
 		lesser.MustNew(),
 		multiply.MustNew(),
-		//output.MustNew(),
+		output.MustNew(),
 		pairsyntactic.MustNew(),
 		readinformationid.MustNew(),
 		readseparator.MustNew(),
