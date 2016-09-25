@@ -59,8 +59,8 @@ func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
 
 	// Find the original information sequence using the information ID from the
 	// context.
-	informationID := ctx.GetCLGTreeID()
-	if informationID != "" {
+	informationID, ok := ctx.GetCLGTreeID()
+	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
@@ -71,8 +71,8 @@ func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
 
 	// Find the first behavior ID (input CLG ID) using the CLG tree ID from the
 	// context.
-	clgTreeID := ctx.GetCLGTreeID()
-	if clgTreeID != "" {
+	clgTreeID, ok := ctx.GetCLGTreeID()
+	if !ok {
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
 	firstBehaviorIDKey := key.NewCLGKey("clg-tree-id:%s:first-behavior-id", clgTreeID)
@@ -123,8 +123,8 @@ func (n *network) forwardOutputCLG(ctx spec.Context, payload spec.NetworkPayload
 func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
 	var behaviorIDs []string
 
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
 		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
 	}
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)

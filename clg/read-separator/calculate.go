@@ -11,8 +11,8 @@ import (
 )
 
 func (c *clg) calculate(ctx spec.Context) (string, error) {
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
 		return "", maskAnyf(invalidBehaviorIDError, "must not be empty")
 	}
 

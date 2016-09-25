@@ -14,14 +14,17 @@ type Context interface {
 
 	// GetBehaviorID returns the behavior ID of the current Context. This behavior
 	// ID represents the behavior currently being executed. That way CLGs can
-	// identify themself.
-	GetBehaviorID() string
+	// identify themself. The second return value expresses the existence of the
+	// key requested.
+	GetBehaviorID() (string, bool)
 
-	// GetCLGTreeID returns the CLG tree ID of the current Context.
-	GetCLGTreeID() string
+	// GetCLGTreeID returns the CLG tree ID of the current Context. The second
+	// return value expresses the existence of the key requested.
+	GetCLGTreeID() (string, bool)
 
-	// GetExpectation returns the expectation of the current Context.
-	GetExpectation() Expectation
+	// GetExpectation returns the expectation of the current Context. The second
+	// return value expresses the existence of the key requested.
+	GetExpectation() (Expectation, bool)
 
 	// GetID returns the context's ID representing the very unique scope of its
 	// own lifetime. This can be useful for e.g. gathering logs bound to one
@@ -30,11 +33,13 @@ type Context interface {
 
 	// GetInformationID returns the information ID of the current Context. This
 	// information ID represents the information sequence of the original user
-	// input.
-	GetInformationID() string
+	// input. The second return value expresses the existence of the key
+	// requested.
+	GetInformationID() (string, bool)
 
-	// GetSessionID returns the session ID of the current Context.
-	GetSessionID() string
+	// GetSessionID returns the session ID of the current Context. The second
+	// return value expresses the existence of the key requested.
+	GetSessionID() (string, bool)
 
 	// SetBehaviorID sets the given behavior ID to the current Context.
 	SetBehaviorID(behaviorID string)

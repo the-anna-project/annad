@@ -10,8 +10,8 @@ import (
 // calculate fetches the information sequence stored under a specific
 // information ID. The information ID is provided by the given context.
 func (c *clg) calculate(ctx spec.Context) (string, error) {
-	informationID := ctx.GetInformationID()
-	if informationID == "" {
+	informationID, ok := ctx.GetInformationID()
+	if !ok {
 		return "", maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 

@@ -145,7 +145,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	}
 
 	// Check if the information ID was set to the context.
-	injectedInformationID := newCtx.GetInformationID()
+	injectedInformationID, _ := newCtx.GetInformationID()
 	if informationID != injectedInformationID {
 		t.Fatal("expected", informationID, "got", injectedInformationID)
 	}
@@ -154,6 +154,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
+	newFactoryCollection := testMustNewFactoryCollection(t)
 	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
@@ -161,6 +162,7 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
+	newCLG.(*clg).FactoryCollection = newFactoryCollection
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
@@ -180,9 +182,9 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	}
 
 	// Check if the information ID was set to the context.
-	injectedInformationID := newCtx.GetInformationID()
-	if injectedInformationID == "" {
-		t.Fatal("expected", false, "got", true)
+	injectedInformationID, _ := newCtx.GetInformationID()
+	if injectedInformationID != "new-ID" {
+		t.Fatal("expected", true, "got", false)
 	}
 }
 

@@ -84,11 +84,16 @@ func (c *context) Clone() spec.Context {
 	newContext.(*context).Context = netcontext.Background()
 
 	// Add the other information to the new underlying context.
-	newContext.SetBehaviorID(c.GetBehaviorID())
-	newContext.SetCLGTreeID(c.GetCLGTreeID())
-	newContext.SetExpectation(c.GetExpectation())
-	newContext.SetInformationID(c.GetInformationID())
-	newContext.SetSessionID(c.GetSessionID())
+	behaviorID, _ := c.GetBehaviorID()
+	newContext.SetBehaviorID(behaviorID)
+	clgTreeID, _ := c.GetCLGTreeID()
+	newContext.SetCLGTreeID(clgTreeID)
+	expectation, _ := c.GetExpectation()
+	newContext.SetExpectation(expectation)
+	informationID, _ := c.GetInformationID()
+	newContext.SetInformationID(informationID)
+	sessionID, _ := c.GetSessionID()
+	newContext.SetSessionID(sessionID)
 
 	return newContext
 }
@@ -105,54 +110,33 @@ func (c *context) Err() error {
 	return c.Context.Err()
 }
 
-// TODO make interface GetBehaviorID() (string, bool)
-func (c *context) GetBehaviorID() string {
-	behaviorID, ok := c.Context.Value(behaviorIDKey).(string)
-	if ok {
-		return behaviorID
-	}
-
-	return ""
+func (c *context) GetBehaviorID() (string, bool) {
+	v, ok := c.Context.Value(behaviorIDKey).(string)
+	return v, ok
 }
 
-func (c *context) GetCLGTreeID() string {
-	clgTreeID, ok := c.Context.Value(clgTreeIDKey).(string)
-	if ok {
-		return clgTreeID
-	}
-
-	return ""
+func (c *context) GetCLGTreeID() (string, bool) {
+	v, ok := c.Context.Value(clgTreeIDKey).(string)
+	return v, ok
 }
 
-func (c *context) GetExpectation() spec.Expectation {
-	expectation, ok := c.Context.Value(expectationIDKey).(spec.Expectation)
-	if ok {
-		return expectation
-	}
-
-	return nil
+func (c *context) GetExpectation() (spec.Expectation, bool) {
+	v, ok := c.Context.Value(expectationIDKey).(spec.Expectation)
+	return v, ok
 }
 
 func (c *context) GetID() string {
 	return c.ID
 }
 
-func (c *context) GetInformationID() string {
-	informationID, ok := c.Context.Value(informationIDKey).(string)
-	if ok {
-		return informationID
-	}
-
-	return ""
+func (c *context) GetInformationID() (string, bool) {
+	v, ok := c.Context.Value(informationIDKey).(string)
+	return v, ok
 }
 
-func (c *context) GetSessionID() string {
-	sessionID, ok := c.Context.Value(sessionIDKey).(string)
-	if ok {
-		return sessionID
-	}
-
-	return ""
+func (c *context) GetSessionID() (string, bool) {
+	v, ok := c.Context.Value(sessionIDKey).(string)
+	return v, ok
 }
 
 func (c *context) SetBehaviorID(behaviorID string) {

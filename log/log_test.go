@@ -76,28 +76,28 @@ func (c *context) Err() error {
 	return nil
 }
 
-func (c *context) GetBehaviorID() string {
-	return ""
+func (c *context) GetBehaviorID() (string, bool) {
+	return "", false
 }
 
-func (c *context) GetCLGTreeID() string {
-	return c.CLGTreeID
+func (c *context) GetCLGTreeID() (string, bool) {
+	return c.CLGTreeID, true
 }
 
-func (c *context) GetExpectation() spec.Expectation {
-	return nil
+func (c *context) GetExpectation() (spec.Expectation, bool) {
+	return nil, false
 }
 
 func (c *context) GetID() string {
 	return c.ID
 }
 
-func (c *context) GetInformationID() string {
-	return ""
+func (c *context) GetInformationID() (string, bool) {
+	return "", false
 }
 
-func (c *context) GetSessionID() string {
-	return c.SessionID
+func (c *context) GetSessionID() (string, bool) {
+	return c.SessionID, true
 }
 
 func (c *context) SetBehaviorID(behaviorID string) {

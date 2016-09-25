@@ -138,8 +138,8 @@ func behaviorIDFromQueue(queue []spec.NetworkPayload) (string, error) {
 	if err != nil {
 		return "", maskAny(err)
 	}
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
 		return "", maskAnyf(invalidBehaviorIDError, "must not be empty")
 	}
 

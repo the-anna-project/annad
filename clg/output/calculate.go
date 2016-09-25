@@ -14,12 +14,11 @@ import (
 // TODO there is no CLG to read from the certenty pyramid
 
 func (c *clg) calculate(ctx spec.Context, informationSequence string) (string, error) {
-	expectation := ctx.GetExpectation()
-
 	// Check the calculated output against the provided expectation, if any. In
 	// case there is no expectation provided, we simply go with what we
 	// calculated. This then means we are probably not in a training situation.
-	if expectation == nil {
+	expectation, ok := ctx.GetExpectation()
+	if !ok {
 		return informationSequence, nil
 	}
 
