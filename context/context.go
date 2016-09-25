@@ -17,6 +17,7 @@ type key string
 const (
 	behaviorIDKey    key = "behavior-id"
 	clgTreeIDKey     key = "clg-tree-id"
+	expectationIDKey key = "expectation"
 	informationIDKey key = "information-id"
 	sessionIDKey     key = "session-id"
 )
@@ -25,8 +26,9 @@ const (
 type Config struct {
 	// Settings.
 
-	Context   netcontext.Context
-	SessionID string
+	Context     netcontext.Context
+	Expectation spec.Expectation
+	SessionID   string
 
 	// TODO we want to track the original input that was provided from the
 	// outside. Further it would probably be interesting to also track the last 3
@@ -38,8 +40,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context:   netcontext.Background(),
-		SessionID: "",
+		Context:     netcontext.Background(),
+		Expectation: nil,
+		SessionID:   "",
 	}
 
 	return newConfig
@@ -86,20 +89,21 @@ type context struct {
 func (c *context) Clone() spec.Context {
 	// At first we create a new context with its own very unique ID, which will
 	// not be cloned. All properties but the context ID must be cloned below.
-	specContext := MustNew()
+	newContext := MustNew()
 
 	// We prepare a new underlying context to have a fresh storage.
-	specContext.(*context).Context = netcontext.Background()
+	newContext.(*context).Context = netcontext.Background()
 
 	// We set the session ID to our own context object and also make the
 	// underlying context aware of it.
-	specContext.(*context).SessionID = c.GetSessionID()
-	specContext.SetSessionID(c.GetSessionID())
+	newContext.(*context).SessionID = c.GetSessionID()
+	newContext.SetSessionID(c.GetSessionID())
 
 	// Add other information to the underlying context.
-	specContext.SetCLGTreeID(c.GetCLGTreeID())
+	newContext.SetCLGTreeID(c.GetCLGTreeID())
+	newContext.SetExpectation(c.GetExpectation())
 
-	return specContext
+	return newContext
 }
 
 func (c *context) Deadline() (time.Time, bool) {
@@ -132,6 +136,15 @@ func (c *context) GetCLGTreeID() string {
 	return ""
 }
 
+func (c *context) GetExpectation() spec.Expectation {
+	expectation, ok := c.Context.Value(expectationIDKey).(spec.Expectation)
+	if ok {
+		return expectation
+	}
+
+	return nil
+}
+
 func (c *context) GetID() string {
 	return c.ID
 }
@@ -160,6 +173,10 @@ func (c *context) SetBehaviorID(behaviorID string) {
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+}
+
+func (c *context) SetExpectation(expectation spec.Expectation) {
+	c.Context = netcontext.WithValue(c.Context, expectationIDKey, expectation)
 }
 
 func (c *context) SetInformationID(informationID string) {

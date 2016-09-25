@@ -11,42 +11,25 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// TODO
-type clg struct{}
+// TODO there is no CLG to read from the certenty pyramid
 
-func maskAny(error) error {
-	return nil
-}
+func (c *clg) calculate(ctx spec.Context, informationSequence string) (string, error) {
+	expectation := ctx.GetExpectation()
 
-// TODO
-//
-//    read from the top of the certenty pyramid
-//    use scope from context
-//
-func (c *clg) TODOcalculate(ctx spec.Context) error {
-	var e spec.Expectation
-
-	// Check the calculated output aganst the provided expectation, if any. In
+	// Check the calculated output against the provided expectation, if any. In
 	// case there is no expectation provided, we simply go with what we
 	// calculated. This then means we are probably not in a training situation.
-	if e.IsEmpty() {
-		return nil
+	if expectation == nil {
+		return informationSequence, nil
 	}
 
-	// There is an expectation provided. Thus we are going to check the
-	// calculated output against it. In case the provided expectation did match
-	// the calculated result, we simply return it and stop the iteration.
-	match, err := e.Match()
-	if err != nil {
-		return maskAny(err)
-	}
-	if match {
-		return nil
+	// There is an expectation provided. Thus we are going to check the calculated
+	// output against it. In case the provided expectation does match the
+	// calculated result, we simply return it.
+	calculatedOutput := expectation.GetOutput()
+	if informationSequence == calculatedOutput {
+		return informationSequence, nil
 	}
 
-	// TODO move reward/punish to output CLG?
-	// TODO expectation met == reward?
-	// TODO expectation NOT met == punishing?
-
-	return nil
+	return "", maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
 }

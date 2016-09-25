@@ -85,6 +85,12 @@ type Network interface {
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
 	// might want to call it in a separate goroutine.
+	//
+	// Boot makes the network listen on requests from the outside. Here each
+	// CLG input channel is managed. This way Listen acts as kind of cortex in
+	// which signals are dispatched into all possible direction and finally flow
+	// back again. Errors during processing of the neural network will be logged
+	// to the provided logger.
 	Boot()
 
 	// Calculate executes the activated CLG and invokes its actual implemented
@@ -115,13 +121,6 @@ type Network interface {
 	//    |-----|     |-----|     |-----|     |-----|     |-----|
 	//
 	Forward(clg CLG, payload NetworkPayload) error
-
-	// Listen makes the network listen on requests from the outside. Here each
-	// CLG input channel is managed. This way Listen acts as kind of cortex in
-	// which signals are dispatched into all possible direction and finally flow
-	// back again. Errors during processing of the neural network will be logged
-	// to the provided logger.
-	Listen()
 
 	Object
 

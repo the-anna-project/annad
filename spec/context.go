@@ -20,6 +20,9 @@ type Context interface {
 	// GetCLGTreeID returns the CLG tree ID of the current Context.
 	GetCLGTreeID() string
 
+	// GetExpectation returns the expectation of the current Context.
+	GetExpectation() Expectation
+
 	// GetID returns the context's ID representing the very unique scope of its
 	// own lifetime. This can be useful for e.g. gathering logs bound to one
 	// request going through multiple independent sub-systems.
@@ -38,6 +41,9 @@ type Context interface {
 
 	// SetCLGTreeID sets the given CLG tree ID to the current Context.
 	SetCLGTreeID(clgTreeID string)
+
+	// SetExpectation sets the given expectation to the current Context.
+	SetExpectation(expectation Expectation)
 
 	// SetInformationID sets the given information ID to the current Context.
 	SetInformationID(informationID string)

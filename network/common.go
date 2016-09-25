@@ -1,7 +1,6 @@
 package network
 
 import (
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
@@ -15,7 +14,6 @@ import (
 	"github.com/xh3b4sd/anna/clg/split-features"
 	"github.com/xh3b4sd/anna/clg/subtract"
 	"github.com/xh3b4sd/anna/clg/sum"
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -42,92 +40,6 @@ func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.Object
 	}
 
 	return CLGs
-}
-
-func (n *network) findConnections(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
-	var behaviorIDs []string
-
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
-
-	err := n.Storage().General().WalkSet(behaviorIDsKey, n.Closer, func(element string) error {
-		behaviorIDs = append(behaviorIDs, element)
-		return nil
-	})
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return behaviorIDs, nil
-}
-
-func (n *network) listenCLGs() {
-	// Make all CLGs listening in their specific input channel.
-	for ID, CLG := range n.CLGs {
-		go func(ID spec.ObjectID, CLG spec.CLG) {
-			var queue []spec.NetworkPayload
-			queueBuffer := len(CLG.GetInputTypes()) + 1
-			inputChannel := CLG.GetInputChannel()
-
-			for {
-				select {
-				case <-n.Closer:
-					break
-				case payload := <-inputChannel:
-					// In case the current queue exeeds a certain amount of payloads, it
-					// is unlikely that the queue is going to be helpful when growing any
-					// further. Thus we cut the queue at some point beyond the interface
-					// capabilities of the requested CLG.
-					queue = append(queue, payload)
-					if len(queue) > queueBuffer {
-						queue = queue[1:]
-					}
-
-					go func(payload spec.NetworkPayload) {
-						// Activate if the CLG's interface is satisfied by the given
-						// network payload.
-						newPayload, newQueue, err := n.Activate(CLG, queue)
-						if IsInvalidInterface(err) {
-							// The interface of the requested CLG was not fulfilled. We
-							// continue listening for the next network payload without doing
-							// any work.
-							return
-						} else if err != nil {
-							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-						}
-						queue = newQueue
-
-						// Calculate based on the CLG's implemented business logic.
-						calculatedPayload, err := n.Calculate(CLG, newPayload)
-						if err != nil {
-							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-						}
-
-						// Forward to other CLG's, if necessary.
-						err = n.Forward(CLG, calculatedPayload)
-						if err != nil {
-							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-						}
-
-						// Return the calculated output to the requesting client, if the
-						// current CLG is the output CLG.
-						if CLG.GetName() == "output" {
-							newTextResponseConfig := api.DefaultTextResponseConfig()
-							newTextResponseConfig.Output = calculatedPayload.String()
-							newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-							if err != nil {
-								n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-							}
-							n.TextOutput <- newTextResponse
-						}
-					}(payload)
-				}
-			}
-		}(ID, CLG)
-	}
 }
 
 func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.ObjectID {

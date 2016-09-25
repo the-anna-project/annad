@@ -28,6 +28,9 @@ func (n *network) payloadFromConnections(behaviorID string, queue []spec.Network
 	// storage. Here it is important to obtain the order of the behavior IDs
 	// stored as connections. They represent the input interface of the requested
 	// CLG.
+	//
+	// TODO there needs to be some sort of variation when executing existing CLG trees
+	//
 	var members []interface{}
 	for _, behaviorID := range behaviorIDs {
 		for _, networkPayload := range queue {

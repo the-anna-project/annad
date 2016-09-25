@@ -46,7 +46,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
-	textRequest := api.NewEmptyTextRequest()
+	textRequest := api.MustNewTextRequest()
 	err = json.Unmarshal(b, &textRequest)
 	if err != nil {
 		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
