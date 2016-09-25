@@ -174,14 +174,8 @@ type CLGFeature interface {
 
 // CLGFloat64 represents all float64 compatible CLGs that can be used.
 type CLGFloat64 interface {
-	// LesserThanFloat64 returns the int that is lesser than the other.
-	LesserThanFloat64(args ...interface{}) ([]interface{}, error)
-
 	// PowFloat64 provides functionality of math.Pow, but for float64s.
 	PowFloat64(args ...interface{}) ([]interface{}, error)
-
-	// RoundFloat64 returns a number rounded using the given precision.
-	RoundFloat64(args ...interface{}) ([]interface{}, error)
 
 	// SqrtFloat64 provides functionality of math.Sqrt, but for float64s.
 	SqrtFloat64(args ...interface{}) ([]interface{}, error)
@@ -280,9 +274,6 @@ type CLGFloat64Slice interface {
 
 // CLGInt represents all int compatible CLGs that can be used.
 type CLGInt interface {
-	// LesserThanInt returns the int that is lesser than the other.
-	LesserThanInt(args ...interface{}) ([]interface{}, error)
-
 	// PowInt provides functionality of math.Pow, but for ints.
 	PowInt(args ...interface{}) ([]interface{}, error)
 
