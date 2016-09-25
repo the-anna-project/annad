@@ -1,9 +1,7 @@
 package collection
 
 import (
-	"fmt"
 	"math"
-	"strconv"
 )
 
 func (c *collection) PowFloat64(args ...interface{}) ([]interface{}, error) {
