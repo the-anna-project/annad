@@ -100,7 +100,8 @@ func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.Stor
 
 func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spec.NetworkPayload {
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(input)}
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(input)}
+	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = "destination"
 	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)

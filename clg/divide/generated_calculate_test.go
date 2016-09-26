@@ -19,14 +19,6 @@ func Test_CLG_Factory(t *testing.T) {
 	}
 }
 
-func Test_CLG_GetName(t *testing.T) {
-	newCLG := MustNew()
-	clgName := newCLG.GetName()
-	if clgName != "divide" {
-		t.Fatal("expected", "divide", "got", clgName)
-	}
-}
-
 func Test_CLG_GetInputChannel(t *testing.T) {
 	newCLG := MustNew()
 	if newCLG.GetInputChannel() == nil {
@@ -44,6 +36,14 @@ func Test_CLG_GetInputTypes(t *testing.T) {
 	var ctx context.Context
 	if !inputTypes[0].Implements(reflect.TypeOf(&ctx).Elem()) {
 		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_GetName(t *testing.T) {
+	newCLG := MustNew()
+	clgName := newCLG.GetName()
+	if clgName != "divide" {
+		t.Fatal("expected", "divide", "got", clgName)
 	}
 }
 

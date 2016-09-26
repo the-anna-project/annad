@@ -80,6 +80,10 @@ func (c *context) GetBehaviorID() (string, bool) {
 	return "", false
 }
 
+func (c *context) GetCLGName() (string, bool) {
+	return "", true
+}
+
 func (c *context) GetCLGTreeID() (string, bool) {
 	return c.CLGTreeID, true
 }
@@ -101,6 +105,10 @@ func (c *context) GetSessionID() (string, bool) {
 }
 
 func (c *context) SetBehaviorID(behaviorID string) {
+
+}
+
+func (c *context) SetCLGName(clgname string) {
 
 }
 

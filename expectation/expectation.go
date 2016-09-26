@@ -37,5 +37,5 @@ type expectation struct {
 
 // IsEmpty checks whether the current expectation is empty.
 func (e *expectation) GetOutput() string {
-	return er.Output
+	return e.Output
 }
