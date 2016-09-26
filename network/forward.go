@@ -20,7 +20,8 @@ func (n *network) forwardCLGs(ctx spec.Context, behaviorIDs []string, payload sp
 		// network payload is removed to only append actual arguments to the new
 		// network payload.
 		newPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newPayloadConfig.Args = append([]reflect.Value{reflect.ValueOf(newCtx)}, payload.GetArgs()[1:]...)
+		newPayloadConfig.Args = payload.GetArgs()
+		newPayloadConfig.Context = newCtx
 		newPayloadConfig.Destination = spec.ObjectID(ID)
 		newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
 		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
@@ -51,12 +52,7 @@ func (n *network) forwardCLGs(ctx spec.Context, behaviorIDs []string, payload sp
 	return nil
 }
 
-func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
-	ctx, err := payload.GetContext()
-	if err != nil {
-		return maskAny(err)
-	}
-
+func (n *network) forwardInputCLG(ctx spec.Context, payload spec.NetworkPayload) error {
 	// Find the original information sequence using the information ID from the
 	// context.
 	informationID, ok := ctx.GetCLGTreeID()
@@ -86,7 +82,8 @@ func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
 
 	// Create a new network payload.
 	newPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(newCtx), reflect.ValueOf(informationSequence)}
+	newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
+	newPayloadConfig.Context = newCtx
 	newPayloadConfig.Destination = spec.ObjectID(behaviorID)
 	newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
 	newPayload, err := api.NewNetworkPayload(newPayloadConfig)
@@ -99,21 +96,6 @@ func (n *network) forwardInputCLG(payload spec.NetworkPayload) error {
 		return maskAny(err)
 	}
 	CLG.GetInputChannel() <- newPayload
-
-	return nil
-}
-
-func (n *network) forwardOutputCLG(ctx spec.Context, payload spec.NetworkPayload) error {
-	// Return the calculated output to the requesting client, if the
-	// current CLG is the output CLG.
-	newTextResponseConfig := api.DefaultTextResponseConfig()
-	newTextResponseConfig.Output = payload.String()
-	newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	n.TextOutput <- newTextResponse
 
 	return nil
 }

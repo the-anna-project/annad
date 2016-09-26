@@ -100,12 +100,9 @@ func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error
 		return nil, maskAny(err)
 	}
 
-	modifiedPayload, err := injectValues(payload, outputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	payload.SetArgs(outputs)
 
-	return modifiedPayload, nil
+	return payload, nil
 }
 
 func (c *clg) Factory() spec.FactoryCollection {

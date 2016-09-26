@@ -12,11 +12,15 @@ import (
 
 // receiver
 
-func (n *network) payloadFromConnections(behaviorID string, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) payloadFromConnections(ctx spec.Context, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	// Fetch the available behavior IDs which are known to be useful connections
 	// during the activation of the requested CLG. The payloads sent by the CLGs
 	// being fetched here are useful because, in the past, they have already been
 	// helpful within the current CLG tree.
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
+		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
 	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
 	list, err := n.Storage().General().Get(behaviorIDsKey)
 	if err != nil {
@@ -58,7 +62,7 @@ func (n *network) payloadFromConnections(behaviorID string, queue []spec.Network
 	// The received network payloads have been able to satisfy the interface
 	// of the connections we looked up. We merge the matching payloads together
 	// and filter them from the queue.
-	newPayload, err := membersToPayload(members)
+	newPayload, err := membersToPayload(ctx, members)
 	if err != nil {
 		return nil, nil, maskAny(err)
 	}
@@ -75,7 +79,15 @@ func (n *network) payloadFromConnections(behaviorID string, queue []spec.Network
 // combination of payloads found, which match the interface of the requested CLG
 // will be returned in one merged network payload. The returned list of network
 // payloads will not contain any of the network payloads merged.
-func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) payloadFromPermutations(ctx spec.Context, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+	clgName, ok := ctx.GetCLGName()
+	if !ok {
+		return nil, nil, maskAnyf(invalidCLGNameError, "must not be empty")
+	}
+	CLG, err := n.clgByName(clgName)
+	if err != nil {
+		return nil, nil, maskAny(err)
+	}
 	inputTypes := CLG.GetInputTypes()
 
 	// Prepare the permutation list to find out which combination of payloads
@@ -101,7 +113,7 @@ func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayl
 			return nil, nil, maskAny(err)
 		}
 		if reflect.DeepEqual(types, inputTypes) {
-			newPayload, err := membersToPayload(members)
+			newPayload, err := membersToPayload(ctx, members)
 			if err != nil {
 				return nil, nil, maskAny(err)
 			}
@@ -123,28 +135,6 @@ func (n *network) payloadFromPermutations(CLG spec.CLG, queue []spec.NetworkPayl
 }
 
 // helper
-
-func behaviorIDFromQueue(queue []spec.NetworkPayload) (string, error) {
-	// Check the queue is valid for our operations.
-	if len(queue) < 1 {
-		return "", maskAnyf(invalidNetworkPayloadError, "must not be empty")
-	}
-
-	// Lookup the behavior ID from the context of any payload of the queue. We can
-	// simply take the first payload because the behavior ID should always be the
-	// same. It is set within Forward, where signals are sent to further CLGs,
-	// until the payload is passed to here.
-	ctx, err := queue[0].GetContext()
-	if err != nil {
-		return "", maskAny(err)
-	}
-	behaviorID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return "", maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-
-	return behaviorID, nil
-}
 
 func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
 	for _, p := range list {
@@ -178,11 +168,14 @@ func filterMembersFromQueue(members []interface{}, queue []spec.NetworkPayload) 
 	return newQueue, nil
 }
 
-func membersToPayload(members []interface{}) (spec.NetworkPayload, error) {
-	var ctxAdded bool
+func membersToPayload(ctx spec.Context, members []interface{}) (spec.NetworkPayload, error) {
 	var args []reflect.Value
-	var destination spec.ObjectID
 	var sources []spec.ObjectID
+
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
+		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
 
 	for _, m := range members {
 		payload, ok := m.(spec.NetworkPayload)
@@ -190,37 +183,28 @@ func membersToPayload(members []interface{}) (spec.NetworkPayload, error) {
 			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
 		}
 
-		if !ctxAdded {
-			ctx, err := payload.GetContext()
-			if !ok {
-				return nil, maskAny(err)
-			}
-			args = append(args, reflect.ValueOf(ctx))
-			destination = payload.GetDestination()
-			ctxAdded = true
+		for _, v := range payload.GetArgs() {
+			args = append(args, v)
 		}
 
-		for _, v := range payload.GetArgs()[1:] {
-			args = append(args, v)
-			sources = append(sources, payload.GetSources()...)
-		}
+		sources = append(sources, payload.GetSources()...)
 	}
 
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = args
-	newNetworkPayloadConfig.Destination = destination
-	newNetworkPayloadConfig.Sources = sources
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newPayloadConfig.Args = args
+	newPayloadConfig.Context = ctx
+	newPayloadConfig.Destination = spec.ObjectID(behaviorID)
+	newPayloadConfig.Sources = sources
+	newPayload, err := api.NewNetworkPayload(newPayloadConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return newNetworkPayload, nil
+	return newPayload, nil
 }
 
 func membersToTypes(members []interface{}) ([]reflect.Type, error) {
 	var types []reflect.Type
-	var ctxAdded bool
 
 	for _, m := range members {
 		payload, ok := m.(spec.NetworkPayload)
@@ -228,16 +212,7 @@ func membersToTypes(members []interface{}) ([]reflect.Type, error) {
 			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
 		}
 
-		if !ctxAdded {
-			ctx, err := payload.GetContext()
-			if !ok {
-				return nil, maskAny(err)
-			}
-			types = append(types, reflect.TypeOf(ctx))
-			ctxAdded = true
-		}
-
-		for _, v := range payload.GetArgs()[1:] {
+		for _, v := range payload.GetArgs() {
 			types = append(types, v.Type())
 		}
 	}

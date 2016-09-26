@@ -23,7 +23,7 @@ func (n *network) listenCLGs() {
 			for {
 				select {
 				case <-n.Closer:
-					break
+					return
 				case payload := <-inputChannel:
 					// In case the current queue exeeds a certain amount of payloads, it
 					// is unlikely that the queue is going to be helpful when growing any
@@ -34,10 +34,21 @@ func (n *network) listenCLGs() {
 						queue = queue[1:]
 					}
 
-					go func(payload spec.NetworkPayload) {
+					// We pass the context of the received payload separately because we
+					// merged the payload to the queue and have no reliable and easy way
+					// to make the current context available otherwise.
+					ctx := payload.GetContext()
+
+					// Setting the CLG name to the current context helps us looking up the
+					// CLG later on when needed. That way we do not need to pass it
+					// through all the way even though it is not required to be available
+					// in that many places.
+					ctx.SetCLGName(CLG.GetName())
+
+					go func(ctx spec.Context, queue []spec.NetworkPayload) {
 						// Activate if the CLG's interface is satisfied by the given
 						// network payload.
-						newPayload, newQueue, err := n.Activate(CLG, queue)
+						newPayload, newQueue, err := n.Activate(ctx, queue)
 						if IsInvalidInterface(err) {
 							// The interface of the requested CLG was not fulfilled. We
 							// continue listening for the next network payload without doing
@@ -49,11 +60,11 @@ func (n *network) listenCLGs() {
 						queue = newQueue
 
 						// Calculate based on the CLG's implemented business logic.
-						calculatedPayload, err := n.Calculate(CLG, newPayload)
+						calculatedPayload, err := n.Calculate(ctx, newPayload)
 						if output.IsExpectationNotMet(err) {
 							n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
 
-							err = n.forwardInputCLG(calculatedPayload)
+							err = n.forwardInputCLG(ctx, calculatedPayload)
 							if err != nil {
 								n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 							}
@@ -64,11 +75,11 @@ func (n *network) listenCLGs() {
 						}
 
 						// Forward to other CLG's, if necessary.
-						err = n.Forward(CLG, calculatedPayload)
+						err = n.Forward(ctx, calculatedPayload)
 						if err != nil {
 							n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 						}
-					}(payload)
+					}(ctx, queue)
 				}
 			}
 		}(ID, CLG)
@@ -130,6 +141,7 @@ func (n *network) listenInputCLG() {
 				// Prepare the context and a unique behavior ID for the input CLG.
 				ctx := context.MustNew()
 				ctx.SetBehaviorID(string(behaviorID))
+				ctx.SetCLGName("input")
 				ctx.SetCLGTreeID(string(clgTreeID))
 				ctx.SetExpectation(textRequest.GetExpectation())
 				ctx.SetSessionID(textRequest.GetSessionID())
@@ -150,7 +162,8 @@ func (n *network) listenInputCLG() {
 				//     any reference of origin.
 				//
 				payloadConfig := api.DefaultNetworkPayloadConfig()
-				payloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(textRequest.GetInput())}
+				payloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
+				payloadConfig.Context = ctx
 				payloadConfig.Destination = behaviorID
 				payloadConfig.Sources = []spec.ObjectID{networkID}
 				newPayload, err := api.NewNetworkPayload(payloadConfig)

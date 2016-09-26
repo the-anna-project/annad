@@ -50,6 +50,13 @@ func IsInvalidBehaviorID(err error) bool {
 	return errgo.Cause(err) == invalidBehaviorIDError
 }
 
+var invalidCLGNameError = errgo.New("invalid CLG name")
+
+// IsInvalidCLGName asserts invalidCLGNameError.
+func IsInvalidCLGName(err error) bool {
+	return errgo.Cause(err) == invalidCLGNameError
+}
+
 var invalidCLGTreeIDError = errgo.New("invalid CLG tree ID")
 
 // IsInvalidCLGTreeID asserts invalidCLGTreeIDError.

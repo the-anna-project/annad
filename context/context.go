@@ -16,6 +16,7 @@ type key string
 
 const (
 	behaviorIDKey    key = "behavior-id"
+	clgNameKey       key = "clg-name"
 	clgTreeIDKey     key = "clg-tree-id"
 	expectationIDKey key = "expectation"
 	informationIDKey key = "information-id"
@@ -86,6 +87,8 @@ func (c *context) Clone() spec.Context {
 	// Add the other information to the new underlying context.
 	behaviorID, _ := c.GetBehaviorID()
 	newContext.SetBehaviorID(behaviorID)
+	clgName, _ := c.GetCLGName()
+	newContext.SetCLGName(clgName)
 	clgTreeID, _ := c.GetCLGTreeID()
 	newContext.SetCLGTreeID(clgTreeID)
 	expectation, _ := c.GetExpectation()
@@ -115,6 +118,11 @@ func (c *context) GetBehaviorID() (string, bool) {
 	return v, ok
 }
 
+func (c *context) GetCLGName() (string, bool) {
+	v, ok := c.Context.Value(clgNameKey).(string)
+	return v, ok
+}
+
 func (c *context) GetCLGTreeID() (string, bool) {
 	v, ok := c.Context.Value(clgTreeIDKey).(string)
 	return v, ok
@@ -141,6 +149,10 @@ func (c *context) GetSessionID() (string, bool) {
 
 func (c *context) SetBehaviorID(behaviorID string) {
 	c.Context = netcontext.WithValue(c.Context, behaviorIDKey, behaviorID)
+}
+
+func (c *context) SetCLGName(clgName string) {
+	c.Context = netcontext.WithValue(c.Context, clgNameKey, clgName)
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {

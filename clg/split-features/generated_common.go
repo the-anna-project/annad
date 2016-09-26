@@ -7,8 +7,6 @@ package splitfeatures
 
 import (
 	"reflect"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 // filterError removes the last element of the given list. Thus filterError
@@ -31,18 +29,4 @@ func filterError(values []reflect.Value) ([]reflect.Value, error) {
 	}
 
 	return values[:len(values)-1], nil
-}
-
-func injectValues(payload spec.NetworkPayload, values []reflect.Value) (spec.NetworkPayload, error) {
-	ctx, err := payload.GetContext()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	err = payload.SetArgs(append([]reflect.Value{reflect.ValueOf(ctx)}, values...))
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return payload, nil
 }

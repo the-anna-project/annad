@@ -6,14 +6,9 @@ package splitfeatures
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/xh3b4sd/anna/spec"
-)
-
-import (
-	"fmt"
 )
 
 func Test_CLG_filterError_noValues(t *testing.T) {
@@ -103,90 +98,5 @@ func Test_CLG_filterError_CLG(t *testing.T) {
 	_, err := filterError(in)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-type testErrorNetworkPayload struct {
-	GetContextError error
-	ID              spec.ObjectID
-	SetArgsError    error
-}
-
-func (p *testErrorNetworkPayload) GetArgs() []reflect.Value {
-	return nil
-}
-
-func (p *testErrorNetworkPayload) GetContext() (spec.Context, error) {
-	return nil, p.GetContextError
-}
-
-func (p *testErrorNetworkPayload) GetDestination() spec.ObjectID {
-	return ""
-}
-
-func (p *testErrorNetworkPayload) GetID() spec.ObjectID {
-	return p.ID
-}
-
-func (p *testErrorNetworkPayload) GetSources() []spec.ObjectID {
-	return nil
-}
-
-func (p *testErrorNetworkPayload) SetArgs(args []reflect.Value) error {
-	return p.SetArgsError
-}
-
-func (p *testErrorNetworkPayload) String() string {
-	return ""
-}
-
-func (p *testErrorNetworkPayload) Validate() error {
-	return nil
-}
-
-func Test_CLG_injectValues_Error_GetContext(t *testing.T) {
-	testNetworkPayload := &testErrorNetworkPayload{
-		GetContextError: invalidConfigError,
-		ID:              "foo",
-		SetArgsError:    nil,
-	}
-	var testValues []reflect.Value
-
-	_, err := injectValues(testNetworkPayload, testValues)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_CLG_injectValues_Error_SetArgs(t *testing.T) {
-	testNetworkPayload := &testErrorNetworkPayload{
-		GetContextError: nil,
-		ID:              "foo",
-		SetArgsError:    invalidConfigError,
-	}
-	var testValues []reflect.Value
-
-	_, err := injectValues(testNetworkPayload, testValues)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_CLG_injectValues_NetworkPayload(t *testing.T) {
-	testNetworkPayload := &testErrorNetworkPayload{
-		GetContextError: nil,
-		ID:              "foo",
-		SetArgsError:    nil,
-	}
-	var testValues []reflect.Value
-
-	newNetworkPayload, err := injectValues(testNetworkPayload, testValues)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	testID := newNetworkPayload.GetID()
-	if testID != spec.ObjectID("foo") {
-		t.Fatal("expected", "foo", "got", testID)
 	}
 }

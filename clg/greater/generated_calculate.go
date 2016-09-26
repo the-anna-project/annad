@@ -97,12 +97,9 @@ type clg struct {
 func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	outputs := reflect.ValueOf(c.calculate).Call(payload.GetArgs())
 
-	modifiedPayload, err := injectValues(payload, outputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	payload.SetArgs(outputs)
 
-	return modifiedPayload, nil
+	return payload, nil
 }
 
 func (c *clg) Factory() spec.FactoryCollection {

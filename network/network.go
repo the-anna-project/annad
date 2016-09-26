@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
@@ -118,20 +119,20 @@ type network struct {
 	Type         spec.ObjectType
 }
 
-func (n *network) Activate(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) Activate(ctx spec.Context, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	behaviorID, err := behaviorIDFromQueue(queue)
-	if err != nil {
-		return nil, nil, maskAny(err)
+	behaviorID, ok := ctx.GetBehaviorID()
+	if !ok {
+		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
 	}
 
 	// Check if we have neural connections that tell us which payloads to use.
-	payload, queue, err := n.payloadFromConnections(behaviorID, queue)
+	payload, queue, err := n.payloadFromConnections(ctx, queue)
 	if IsInvalidInterface(err) {
 		// There are no sufficient connections. We need to come up with something
 		// random.
-		payload, queue, err = n.payloadFromPermutations(CLG, queue)
+		payload, queue, err = n.payloadFromPermutations(ctx, queue)
 		if permutation.IsMaxGrowthReached(err) {
 			// We could not find a sufficient payload for the requsted CLG by permuting
 			// the queue of network payloads.
@@ -169,9 +170,17 @@ func (n *network) Boot() {
 	})
 }
 
-func (n *network) Calculate(CLG spec.CLG, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (n *network) Calculate(ctx spec.Context, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
+	clgName, ok := ctx.GetCLGName()
+	if !ok {
+		return nil, maskAnyf(invalidCLGNameError, "must not be empty")
+	}
+	CLG, err := n.clgByName(clgName)
+	if err != nil {
+		return nil, maskAny(err)
+	}
 	calculatedPayload, err := CLG.Calculate(payload)
 	if err != nil {
 		return nil, maskAny(err)
@@ -184,13 +193,8 @@ func (n *network) Factory() spec.FactoryCollection {
 	return n.FactoryCollection
 }
 
-func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
+func (n *network) Forward(ctx spec.Context, payload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
-
-	ctx, err := payload.GetContext()
-	if err != nil {
-		return maskAny(err)
-	}
 
 	behaviorIDs, err := n.findConnections(ctx, payload)
 	if err != nil {
@@ -202,11 +206,21 @@ func (n *network) Forward(CLG spec.CLG, payload spec.NetworkPayload) error {
 		return maskAny(err)
 	}
 
-	if CLG.GetName() == "output" {
-		err := n.forwardOutputCLG(ctx, payload)
+	clgName, ok := ctx.GetCLGName()
+	if !ok {
+		return maskAnyf(invalidCLGNameError, "must not be empty")
+	}
+	if clgName == "output" {
+		// Return the calculated output to the requesting client, if the
+		// current CLG is the output CLG.
+		newTextResponseConfig := api.DefaultTextResponseConfig()
+		newTextResponseConfig.Output = payload.String()
+		newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
 		if err != nil {
 			return maskAny(err)
 		}
+
+		n.TextOutput <- newTextResponse
 	}
 
 	return nil

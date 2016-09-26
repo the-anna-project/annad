@@ -10,9 +10,8 @@ type NetworkPayload interface {
 	// GetArgs returns the arguments of the current network payload.
 	GetArgs() []reflect.Value
 
-	// GetContext returns the Context the current network payload holds as first
-	// argument. If no Context can be found, an error is returned.
-	GetContext() (Context, error)
+	// GetContext returns the context of the current network payload.
+	GetContext() Context
 
 	// GetArgs returns the destination of the current network payload, which must
 	// be the ID of a CLG registered within the neural network.
@@ -28,19 +27,16 @@ type NetworkPayload interface {
 	// input CLG.
 	GetSources() []ObjectID
 
-	// SetArgs returns the arguments of the current network payload. In case the
-	// given arguments are not valid, SetArgs returns an error. See Validate for
-	// more information.
-	SetArgs(args []reflect.Value) error
+	// SetArgs sets the arguments of the current network payload.
+	SetArgs(args []reflect.Value)
 
 	// String returns the concatenated string representations of the currently
 	// configured arguments.
 	String() string
 
 	// Validate throws an error if the current network payload is not valid. An
-	// network payload is not valid if it is empty, or if it does not satisfy the
-	// convention of the CLG interface to have a proper Context as first input
-	// parameter.
+	// network payload is not valid if it does ot have any context, destination or
+	// sources defined.
 	Validate() error
 }
 
@@ -80,7 +76,7 @@ type Network interface {
 	//                            | CLG |
 	//                            |-----|
 	//
-	Activate(clg CLG, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
+	Activate(ctx Context, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -96,7 +92,7 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
+	Calculate(ctx Context, payload NetworkPayload) (NetworkPayload, error)
 
 	FactoryProvider
 
@@ -120,7 +116,7 @@ type Network interface {
 	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
 	//    |-----|     |-----|     |-----|     |-----|     |-----|
 	//
-	Forward(clg CLG, payload NetworkPayload) error
+	Forward(ctx Context, payload NetworkPayload) error
 
 	Object
 
