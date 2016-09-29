@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// TODO rename to NetworkKeyFormat, NewNetworkKey
+
 const (
 	// CLGKeyFormat represents the format used to create storage keys for the CLG
 	// scope. "s" stands for the scope, that is, the CLG scope. "o" stands for

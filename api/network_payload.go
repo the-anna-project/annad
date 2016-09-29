@@ -58,6 +58,17 @@ func NewNetworkPayload(config NetworkPayloadConfig) (spec.NetworkPayload, error)
 	return newNetworkPayload, nil
 }
 
+// MustNewNetworkPayload creates either a new default configured network payload
+// object, or panics.
+func MustNewNetworkPayload() spec.NetworkPayload {
+	newNetworkPayload, err := NewNetworkPayload(DefaultNetworkPayloadConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newNetworkPayload
+}
+
 type networkPayload struct {
 	NetworkPayloadConfig
 

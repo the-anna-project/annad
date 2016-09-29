@@ -15,6 +15,7 @@ import (
 type key string
 
 const (
+	// TODO make the context marshalable
 	behaviorIDKey    key = "behavior-id"
 	clgNameKey       key = "clg-name"
 	clgTreeIDKey     key = "clg-tree-id"

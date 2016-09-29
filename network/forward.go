@@ -52,10 +52,10 @@ func (n *network) forwardCLGs(ctx spec.Context, behaviorIDs []string, payload sp
 	return nil
 }
 
-func (n *network) forwardInputCLG(ctx spec.Context, payload spec.NetworkPayload) error {
+func (n *network) forwardInputCLG(networkPayload spec.NetworkPayload) error {
 	// Find the original information sequence using the information ID from the
 	// context.
-	informationID, ok := ctx.GetCLGTreeID()
+	informationID, ok := networkPayload.GetContext().GetCLGTreeID()
 	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
@@ -65,9 +65,9 @@ func (n *network) forwardInputCLG(ctx spec.Context, payload spec.NetworkPayload)
 		return maskAny(err)
 	}
 
-	// Find the first behavior ID (input CLG ID) using the CLG tree ID from the
-	// context.
-	clgTreeID, ok := ctx.GetCLGTreeID()
+	// Find the first behavior ID using the CLG tree ID from the context. The
+	// behavior ID we are looking up here is the ID of the initial input CLG.
+	clgTreeID, ok := networkPayload.GetContext().GetCLGTreeID()
 	if !ok {
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
@@ -77,25 +77,34 @@ func (n *network) forwardInputCLG(ctx spec.Context, payload spec.NetworkPayload)
 		return maskAny(err)
 	}
 
-	newCtx := ctx.Clone()
-	newCtx.SetBehaviorID(behaviorID)
+	// Adapt the given context with the information of the current scope.
+	networkPayload.GetContext().SetBehaviorID(behaviorID)
+	networkPayload.GetContext().SetCLGName("input")
+	networkPayload.GetContext().SetCLGTreeID(clgTreeID)
+	// We do not need to set the expectation because it never changes.
+	// We do not need to set the session ID because it never changes.
 
 	// Create a new network payload.
-	newPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
-	newPayloadConfig.Context = newCtx
-	newPayloadConfig.Destination = spec.ObjectID(behaviorID)
-	newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
-	newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+	networkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	networkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
+	networkPayloadConfig.Context = networkPayload.GetContext()
+	networkPayloadConfig.Destination = spec.ObjectID(behaviorID)
+	networkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+	newNetworkPayload, err := api.NewNetworkPayload(networkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
-	CLG, err := n.clgByName("input")
+	// Write the transformed network payload to the queue.
+	listKey := key.NewCLGKey("events:network-payload")
+	element, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
-	CLG.GetInputChannel() <- newPayload
+	element, err := n.Storage().General().PopFromList(listKey, element)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }

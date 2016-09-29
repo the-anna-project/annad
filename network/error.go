@@ -77,3 +77,10 @@ var invalidNetworkPayloadError = errgo.New("invalid network payload")
 func IsInvalidNetworkPayload(err error) bool {
 	return errgo.Cause(err) == invalidNetworkPayloadError
 }
+
+var workerCanceledError = errgo.New("worker canceled")
+
+// IsWorkerCanceled asserts workerCanceledError.
+func IsWorkerCanceled(err error) bool {
+	return errgo.Cause(err) == workerCanceledError
+}

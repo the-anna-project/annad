@@ -6,6 +6,7 @@
 package network
 
 import (
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/worker-pool"
 )
 
 const (
@@ -107,11 +109,9 @@ type network struct {
 
 	BootOnce sync.Once
 
-	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG
-	// ID.
-	CLGIDs map[string]spec.ObjectID
+	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
+	CLGs map[string]spec.CLG
 
-	CLGs         map[spec.ObjectID]spec.CLG // TODO there is probably no reason to index the CLGs like this
 	Closer       chan struct{}
 	ID           spec.ObjectID
 	Mutex        sync.Mutex
@@ -162,14 +162,45 @@ func (n *network) Boot() {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Boot")
 
 	n.BootOnce.Do(func() {
-		n.CLGs = n.configureCLGs(n.CLGs)
-		n.CLGIDs = n.mapCLGIDs(n.CLGs)
+		n.CLGs = n.newCLGs()
 
-		go n.listenInputCLG()
-		go n.listenCLGs()
+		go func() {
+			// Create a new worker pool for the input listener.
+			inputPoolConfig := workerpool.DefaultConfig()
+			inputPoolConfig.Canceler = n.Closer
+			inputPoolConfig.NumWorkers = 1
+			inputPoolConfig.WorkerFunc = n.InputListener
+			inputPool, err := workerpool.New(inputPoolConfig)
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+			// Execute the worker pool and block until all work is done.
+			err = n.maybeReturnAndLogErrors(inputPool.Execute())
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+		}()
+
+		go func() {
+			// Create a new worker pool for the event listener.
+			eventPoolConfig := workerpool.DefaultConfig()
+			eventPoolConfig.Canceler = n.Closer
+			eventPoolConfig.NumWorkers = 10
+			eventPoolConfig.WorkerFunc = n.EventListener
+			eventPool, err := workerpool.New(eventPoolConfig)
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+			// Execute the worker pool and block until all work is done.
+			err = n.maybeReturnAndLogErrors(eventPool.Execute())
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+		}()
 	})
 }
 
+// TODO calculate here instead of within the CLG
 func (n *network) Calculate(ctx spec.Context, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
@@ -177,16 +208,107 @@ func (n *network) Calculate(ctx spec.Context, payload spec.NetworkPayload) (spec
 	if !ok {
 		return nil, maskAnyf(invalidCLGNameError, "must not be empty")
 	}
-	CLG, err := n.clgByName(clgName)
-	if err != nil {
-		return nil, maskAny(err)
+	CLG, ok := n.CLGs[clgName]
+	if !ok {
+		return nil, maskAnyf(clgNotFoundError, "name: %s", clgName)
 	}
-	calculatedPayload, err := CLG.Calculate(payload)
+	newNetworkPayload, err := CLG.Calculate(payload)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return calculatedPayload, nil
+	return newNetworkPayload, nil
+}
+
+func (n *network) EventListener(canceler <-chan struct{}) error {
+	invokeEventHandler := func() error {
+		// Fetch the next network payload from the queue. This call blocks until one
+		// network payload was fetched from the queue. As soon as we receive the
+		// network payload, it is removed from the queue automatically, so it is not
+		// handled twice.
+		listKey := key.NewCLGKey("events:network-payload")
+		element, err := Storage.PopFromList(listKey)
+		if err != nil {
+			return maskAny(err)
+		}
+		networkPayload := api.MustNewNetworkPayload()
+		err = json.Unmarshal([]byte(element), &networkPayload)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		// Lookup the CLG that is supposed to be executed. The CLG object is
+		// referenced by name. When being executed it is referenced by its behavior
+		// ID. The behavior ID represents a specific peer within a connection path.
+		clgName, ok := networkPayload.GetContext().GetCLGName()
+		if !ok {
+			return maskAnyf(invalidCLGNameError, "must not be empty")
+		}
+		CLG, ok := n.CLGs[clgName]
+		if !ok {
+			return maskAnyf(clgNotFoundError, "name: %s", clgName)
+		}
+
+		// Invoke the event handler to execute the given CLG using the given network
+		// payload. Here we execute one distinct behavior within its own scope. The
+		// CLG decides if and how it is activated, how it calculates its output, if
+		// any, and where to forward signals to, if any.
+		err := n.EventHandler(CLG, networkPayload)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	for {
+		select {
+		case <-canceler:
+			return maskAny(workerCanceledError)
+		default:
+			err := invokeEventHandler()
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+		}
+	}
+}
+
+func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// Activate if the CLG's interface is satisfied by the given
+	// network payload.
+	networkPayload, err := n.Activate(ctx, networkPayload)
+	if IsInvalidInterface(err) {
+		// The interface of the requested CLG was not fulfilled. We
+		// continue listening for the next network payload without doing
+		// any work.
+		return nil
+	} else if err != nil {
+		return maskAny(err)
+	}
+
+	// Calculate based on the CLG's implemented business logic.
+	newNetworkPayload, err := n.Calculate(ctx, networkPayload)
+	if output.IsExpectationNotMet(err) {
+		n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
+
+		err = n.forwardInputCLG(networkPayload)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	} else if err != nil {
+		return maskAny(err)
+	}
+
+	// Forward to other CLG's, if necessary.
+	err = n.Forward(ctx, newNetworkPayload)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (n *network) Factory() spec.FactoryCollection {
@@ -209,6 +331,91 @@ func (n *network) Forward(ctx spec.Context, payload spec.NetworkPayload) error {
 	clgName, ok := ctx.GetCLGName()
 	if !ok {
 		return maskAnyf(invalidCLGNameError, "must not be empty")
+	}
+
+	return nil
+}
+
+func (n *network) InputListener(canceler <-chan struct{}) error {
+	CLG, ok := n.CLGs["input"]
+	if !ok {
+		return maskAnyf(clgNotFoundError, "name: %s", "input")
+	}
+
+	for {
+		select {
+		case <-canceler:
+			return maskAny(workerCanceledError)
+		case textRequest := <-n.TextInput:
+			ctx := context.MustNew()
+			err := n.InputHandler(ctx, CLG, textRequest)
+			if err != nil {
+				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+			}
+		}
+	}
+}
+
+func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error {
+	// In case the text request defines the echo flag, we overwrite the given CLG
+	// directly to the output CLG. This will cause the created network payload to
+	// be forwarded to the output CLG without indirection. Note that this should
+	// only be used for testing purposes to bypass more complex neural network
+	// activities to directly respond with the received input.
+	if textRequest.GetEcho() {
+		var ok bool
+		CLG, ok = n.CLGs["output"]
+		if !ok {
+			return maskAnyf(clgNotFoundError, "name: %s", "output")
+		}
+	}
+
+	// Create new IDs for the new CLG tree and the input CLG.
+	clgTreeID, err := n.Factory().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	behaviorID, err := n.Factory().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+
+	// Adapt the given context with the information of the current scope.
+	ctx.SetBehaviorID(string(behaviorID))
+	ctx.SetCLGName(CLG.GetName())
+	ctx.SetCLGTreeID(string(clgTreeID))
+	ctx.SetExpectation(textRequest.GetExpectation())
+	ctx.SetSessionID(textRequest.GetSessionID())
+
+	// We transform the received text request to a network payload to have a
+	// conventional data structure within the neural network.
+	payloadConfig := api.DefaultNetworkPayloadConfig()
+	payloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
+	payloadConfig.Context = ctx
+	payloadConfig.Destination = behaviorID
+	payloadConfig.Sources = []spec.ObjectID{n.GetID()}
+	newPayload, err := api.NewNetworkPayload(payloadConfig)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	// Write the new CLG tree ID to reference the input CLG ID and add the CLG
+	// tree ID to the new context.
+	firstBehaviorIDKey := key.NewCLGKey("clg-tree-id:%s:first-behavior-id", clgTreeID)
+	err = n.Storage().General().Set(firstBehaviorIDKey, string(behaviorID))
+	if err != nil {
+		return maskAny(err)
+	}
+
+	// Write the transformed network payload to the queue.
+	listKey := key.NewCLGKey("events:network-payload")
+	element, err := json.Marshal(networkPayload)
+	if err != nil {
+		return maskAny(err)
+	}
+	element, err := n.Storage().General().PopFromList(listKey, element)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil

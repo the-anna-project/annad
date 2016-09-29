@@ -22,43 +22,35 @@ import (
 
 // receiver
 
-func (n *network) clgByName(name string) (spec.CLG, error) {
-	ID, ok := n.CLGIDs[name]
-	if !ok {
-		return nil, maskAnyf(clgNotFoundError, "name: %s", name)
-	}
-	CLG, ok := n.CLGs[ID]
-	if !ok {
-		return nil, maskAnyf(clgNotFoundError, "ID: %s", ID)
+// maybeReturnAndLogErrors returns the very first error that may be given by
+// errors. All upcoming errors may be given by the provided error channel will
+// be logged using the configured logger with log level E and verbosity 4.
+func (n *network) maybeReturnAndLogErrors(errors chan error) error {
+	var executeErr error
+
+	for err := range errors {
+		if IsWorkerCanceled(err) {
+			continue
+		}
+
+		if executeErr == nil {
+			// Only return the first error.
+			executeErr = err
+		} else {
+			// Log all errors but the first one
+			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+		}
 	}
 
-	return CLG, nil
+	if executeErr != nil {
+		return maskAny(executeErr)
+	}
+
+	return nil
 }
 
-func (n *network) configureCLGs(CLGs map[spec.ObjectID]spec.CLG) map[spec.ObjectID]spec.CLG {
-	for ID := range CLGs {
-		CLGs[ID].SetFactoryCollection(n.FactoryCollection)
-		CLGs[ID].SetLog(n.Log)
-		CLGs[ID].SetStorageCollection(n.StorageCollection)
-	}
-
-	return CLGs
-}
-
-func (n *network) mapCLGIDs(CLGs map[spec.ObjectID]spec.CLG) map[string]spec.ObjectID {
-	clgIDs := map[string]spec.ObjectID{}
-
-	for ID, CLG := range CLGs {
-		clgIDs[CLG.GetName()] = ID
-	}
-
-	return clgIDs
-}
-
-// helper
-
-func newCLGs() map[spec.ObjectID]spec.CLG {
-	newList := []spec.CLG{
+func (n *network) newCLGs() map[string]spec.CLG {
+	list := []spec.CLG{
 		divide.MustNew(),
 		input.MustNew(),
 		divide.MustNew(),
@@ -79,10 +71,16 @@ func newCLGs() map[spec.ObjectID]spec.CLG {
 		sum.MustNew(),
 	}
 
-	newCLGs := map[spec.ObjectID]spec.CLG{}
+	newCLGs := map[string]spec.CLG{}
 
-	for _, CLG := range newList {
-		newCLGs[CLG.GetID()] = CLG
+	for _, CLG := range list {
+		newCLGs[CLG.GetName()] = CLG
+	}
+
+	for name := range newCLGs {
+		newCLGs[name].SetFactoryCollection(n.FactoryCollection)
+		newCLGs[name].SetLog(n.Log)
+		newCLGs[name].SetStorageCollection(n.StorageCollection)
 	}
 
 	return newCLGs
