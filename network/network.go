@@ -210,18 +210,6 @@ func (n *network) Forward(ctx spec.Context, payload spec.NetworkPayload) error {
 	if !ok {
 		return maskAnyf(invalidCLGNameError, "must not be empty")
 	}
-	if clgName == "output" {
-		// Return the calculated output to the requesting client, if the
-		// current CLG is the output CLG.
-		newTextResponseConfig := api.DefaultTextResponseConfig()
-		newTextResponseConfig.Output = payload.String()
-		newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
-		if err != nil {
-			return maskAny(err)
-		}
-
-		n.TextOutput <- newTextResponse
-	}
 
 	return nil
 }

@@ -43,8 +43,22 @@ type Storage interface {
 
 	Object
 
-	// PushToSet pushes the given element to the set identified by the given key.
-	// Note that a set is an unordered list containing distinct objects.
+	// PopFromList returns the next element from the list identified by the given
+	// key. Note that a list is an ordered sequence of arbitrary elements.
+	// PushToList and PopFromList are operating according to a "first in, first
+	// out" primitive. If the requested list is empty, PopFromList blocks
+	// infinitely until an element is added to the list. Returned elements will
+	// also be removed from the specified list.
+	PopFromList(key string) (string, error)
+
+	// PushToList adds the given element to the list identified by the given key.
+	// Note that a list is an ordered sequence of arbitrary elements. PushToList
+	// and PopFromList are operating according to a "first in, first out"
+	// primitive.
+	PushToList(key string, element string) error
+
+	// PushToSet adds the given element to the set identified by the given key.
+	// Note that a set is an unordered collection of distinct elements.
 	PushToSet(key string, element string) error
 
 	// RemoveFromSet removes the given element from the set identified by the

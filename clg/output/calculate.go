@@ -13,13 +13,18 @@ import (
 
 // TODO there is no CLG to read from the certenty pyramid
 
-func (c *clg) calculate(ctx spec.Context, informationSequence string) (string, error) {
+func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// Check the calculated output against the provided expectation, if any. In
 	// case there is no expectation provided, we simply go with what we
 	// calculated. This then means we are probably not in a training situation.
 	expectation, ok := ctx.GetExpectation()
 	if !ok {
-		return informationSequence, nil
+		err := sendTextResponse(informationSequence)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
 	}
 
 	// There is an expectation provided. Thus we are going to check the calculated
@@ -27,8 +32,26 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) (string, e
 	// calculated result, we simply return it.
 	calculatedOutput := expectation.GetOutput()
 	if informationSequence == calculatedOutput {
-		return informationSequence, nil
+		err := sendTextResponse(informationSequence)
+		if err != nil {
+			return maskAny(err)
+		}
 	}
 
-	return "", maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
+	return maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
+}
+
+func sendTextResponse(informationSequence string) error {
+	// Return the calculated output to the requesting client, if the
+	// current CLG is the output CLG.
+	newTextResponseConfig := api.DefaultTextResponseConfig()
+	newTextResponseConfig.Output = informationSequence
+	newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	n.TextOutput <- newTextResponse
+
+	return nil
 }
