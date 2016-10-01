@@ -22,10 +22,10 @@ import (
 
 // receiver
 
-// maybeReturnAndLogErrors returns the very first error that may be given by
-// errors. All upcoming errors may be given by the provided error channel will
-// be logged using the configured logger with log level E and verbosity 4.
-func (n *network) maybeReturnAndLogErrors(errors chan error) error {
+// returnAndLogErrors returns the very first error that may be given by errors.
+// All upcoming errors may be given by the provided error channel will be logged
+// using the configured logger with log level E and verbosity 4.
+func (n *network) returnAndLogErrors(errors chan error) error {
 	var executeErr error
 
 	for err := range errors {

@@ -46,6 +46,7 @@ type NetworkPayload interface {
 // activity calculates outputs which are streamed through the output channel
 // back to the requestor.
 type Network interface {
+	// TODO
 	// Activate decides if the requested CLG should be activated. To make this
 	// decision the given network payload and formerly received network payloads
 	// are considered. CLGs within the neural network are able to join forces to
@@ -76,7 +77,7 @@ type Network interface {
 	//                            | CLG |
 	//                            |-----|
 	//
-	Activate(ctx Context, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
+	Activate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -92,7 +93,13 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(ctx Context, payload NetworkPayload) (NetworkPayload, error)
+	Calculate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+
+	// TODO
+	EventListener(canceler <-chan struct{}) error
+
+	// TODO
+	EventHandler(CLG CLG, networkPayload NetworkPayload) error
 
 	FactoryProvider
 
@@ -116,7 +123,13 @@ type Network interface {
 	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
 	//    |-----|     |-----|     |-----|     |-----|     |-----|
 	//
-	Forward(ctx Context, payload NetworkPayload) error
+	Forward(CLG CLG, networkPayload NetworkPayload) error
+
+	// TODO
+	InputListener(canceler <-chan struct{}) error
+
+	// TODO
+	InputHandler(CLG CLG, textRequest TextRequest) error
 
 	Object
 

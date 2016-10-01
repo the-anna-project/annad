@@ -94,16 +94,12 @@ type clg struct {
 	Type spec.ObjectType
 }
 
-func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	outputs := reflect.ValueOf(c.calculate).Call(payload.GetArgs())
-
-	payload.SetArgs(outputs)
-
-	return payload, nil
-}
-
 func (c *clg) Factory() spec.FactoryCollection {
 	return c.FactoryCollection
+}
+
+func (c *clg) GetCalculate() interface{} {
+	return c.calculate
 }
 
 func (c *clg) GetName() string {
@@ -112,18 +108,6 @@ func (c *clg) GetName() string {
 
 func (c *clg) GetInputChannel() chan spec.NetworkPayload {
 	return c.InputChannel
-}
-
-func (c *clg) GetInputTypes() []reflect.Type {
-	t := reflect.TypeOf(c.calculate)
-
-	var inputType []reflect.Type
-
-	for i := 0; i < t.NumIn(); i++ {
-		inputType = append(inputType, t.In(i))
-	}
-
-	return inputType
 }
 
 func (c *clg) SetFactoryCollection(factoryCollection spec.FactoryCollection) {

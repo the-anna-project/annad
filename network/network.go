@@ -7,6 +7,7 @@ package network
 
 import (
 	"encoding/json"
+	"reflect"
 	"sync"
 	"time"
 
@@ -16,8 +17,11 @@ import (
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/network/activator"
+	"github.com/xh3b4sd/anna/network/forwarder"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+
 	"github.com/xh3b4sd/worker-pool"
 )
 
@@ -30,7 +34,9 @@ const (
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
+	Activator         spec.Activator
 	FactoryCollection spec.FactoryCollection
+	Forwarder         spec.Forwarder
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 	TextInput         chan spec.TextRequest
@@ -55,7 +61,9 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
+		Activator:         activator.MustNew(),
 		FactoryCollection: factory.MustNewCollection(),
+		Forwarder:         forwarder.MustNew(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 		TextInput:         make(chan spec.TextRequest, 1000),
@@ -78,13 +86,18 @@ func New(config Config) (spec.Network, error) {
 		CLGs:         newCLGs(),
 		Closer:       make(chan struct{}, 1),
 		ID:           id.MustNew(),
-		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,
 	}
 
+	if newNetwork.Activator == nil {
+		return nil, maskAnyf(invalidConfigError, "activator must not be empty")
+	}
 	if newNetwork.FactoryCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
+	}
+	if newNetwork.Forwarder == nil {
+		return nil, maskAnyf(invalidConfigError, "forwarder must not be empty")
 	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
@@ -114,48 +127,19 @@ type network struct {
 
 	Closer       chan struct{}
 	ID           spec.ObjectID
-	Mutex        sync.Mutex
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
 }
 
-func (n *network) Activate(ctx spec.Context, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (n *network) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
-	behaviorID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	networkPayload, err := n.Activator.Activate(CLG, networkPayload)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	// Check if we have neural connections that tell us which payloads to use.
-	payload, queue, err := n.payloadFromConnections(ctx, queue)
-	if IsInvalidInterface(err) {
-		// There are no sufficient connections. We need to come up with something
-		// random.
-		payload, queue, err = n.payloadFromPermutations(ctx, queue)
-		if permutation.IsMaxGrowthReached(err) {
-			// We could not find a sufficient payload for the requsted CLG by permuting
-			// the queue of network payloads.
-			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
-		} else if err != nil {
-			return nil, nil, maskAny(err)
-		}
-
-		// Once we found a new combination, we need to make sure the neural network
-		// remembers it. Thus we store the connections between the current behavior
-		// and the behaviors matching the interface of the current behavior.
-		var behaviorIDs string
-		for _, s := range payload.GetSources() {
-			behaviorIDs += "," + string(s)
-		}
-		behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
-		err := n.Storage().General().Set(behaviorIDsKey, behaviorIDs)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-	}
-
-	return payload, queue, nil
+	return networkPayload, nil
 }
 
 func (n *network) Boot() {
@@ -175,7 +159,7 @@ func (n *network) Boot() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
-			err = n.maybeReturnAndLogErrors(inputPool.Execute())
+			err = n.returnAndLogErrors(inputPool.Execute())
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
@@ -192,7 +176,7 @@ func (n *network) Boot() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
-			err = n.maybeReturnAndLogErrors(eventPool.Execute())
+			err = n.returnAndLogErrors(eventPool.Execute())
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
@@ -200,8 +184,7 @@ func (n *network) Boot() {
 	})
 }
 
-// TODO calculate here instead of within the CLG
-func (n *network) Calculate(ctx spec.Context, payload spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (n *network) Calculate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
 	clgName, ok := ctx.GetCLGName()
@@ -212,12 +195,15 @@ func (n *network) Calculate(ctx spec.Context, payload spec.NetworkPayload) (spec
 	if !ok {
 		return nil, maskAnyf(clgNotFoundError, "name: %s", clgName)
 	}
-	newNetworkPayload, err := CLG.Calculate(payload)
+
+	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetArgs()))
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return newNetworkPayload, nil
+	networkPayload.SetArgs(outputs)
+
+	return networkPayload, nil
 }
 
 func (n *network) EventListener(canceler <-chan struct{}) error {
@@ -277,7 +263,7 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	// Activate if the CLG's interface is satisfied by the given
 	// network payload.
-	networkPayload, err := n.Activate(ctx, networkPayload)
+	networkPayload, err := n.Activate(CLG, networkPayload)
 	if IsInvalidInterface(err) {
 		// The interface of the requested CLG was not fulfilled. We
 		// continue listening for the next network payload without doing
@@ -288,7 +274,7 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	}
 
 	// Calculate based on the CLG's implemented business logic.
-	newNetworkPayload, err := n.Calculate(ctx, networkPayload)
+	newNetworkPayload, err := n.Calculate(CLG, networkPayload)
 	if output.IsExpectationNotMet(err) {
 		n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
 
@@ -303,7 +289,7 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	}
 
 	// Forward to other CLG's, if necessary.
-	err = n.Forward(ctx, newNetworkPayload)
+	err = n.Forward(CLG, newNetworkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -311,26 +297,12 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	return nil
 }
 
-func (n *network) Factory() spec.FactoryCollection {
-	return n.FactoryCollection
-}
-
-func (n *network) Forward(ctx spec.Context, payload spec.NetworkPayload) error {
+func (n *network) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
-	behaviorIDs, err := n.findConnections(ctx, payload)
+	err := n.Forwarder.Forward(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
-	}
-
-	err = n.forwardCLGs(ctx, behaviorIDs, payload)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	clgName, ok := ctx.GetCLGName()
-	if !ok {
-		return maskAnyf(invalidCLGNameError, "must not be empty")
 	}
 
 	return nil
@@ -427,8 +399,4 @@ func (n *network) Shutdown() {
 	n.ShutdownOnce.Do(func() {
 		close(n.Closer)
 	})
-}
-
-func (n *network) Storage() spec.StorageCollection {
-	return n.StorageCollection
 }

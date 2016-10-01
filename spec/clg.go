@@ -8,10 +8,11 @@ import (
 // network. Each CLG is registered in the Network. From there signal are
 // dispatched in a dynamic fashion until some useful calculation took place.
 type CLG interface {
-	// Calculate provides the CLG's actual business logic.
-	Calculate(payload NetworkPayload) (NetworkPayload, error)
-
 	FactoryProvider
+
+	// GetCalculate returns the CLG's calculate function which implements its
+	// actual business logic.
+	GetCalculate() interface{}
 
 	// GetName returns the CLG's human readable name.
 	GetName() string

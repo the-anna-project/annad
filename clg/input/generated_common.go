@@ -19,14 +19,20 @@ func filterError(values []reflect.Value) ([]reflect.Value, error) {
 	}
 
 	lastArg := values[len(values)-1]
-	switch lastArg.Kind() {
-	case reflect.Interface:
-		fallthrough
-	case reflect.Ptr:
-		if err, ok := lastArg.Interface().(error); ok {
-			return nil, maskAny(err)
+	if lastArg.Type().String() == "error" {
+		if lastArg.IsValid() && !lastArg.IsNil() {
+			switch lastArg.Kind() {
+			case reflect.Interface:
+				fallthrough
+			case reflect.Ptr:
+				if err, ok := lastArg.Interface().(error); ok {
+					return nil, err
+				}
+			}
+		} else {
+			return values[:len(values)-1], nil
 		}
 	}
 
-	return values[:len(values)-1], nil
+	return values, nil
 }
