@@ -212,8 +212,8 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 		// network payload was fetched from the queue. As soon as we receive the
 		// network payload, it is removed from the queue automatically, so it is not
 		// handled twice.
-		listKey := key.NewCLGKey("events:network-payload")
-		element, err := Storage.PopFromList(listKey)
+		eventKey := key.NewCLGKey("event:network-payload")
+		element, err := Storage.PopFromList(eventKey)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -380,12 +380,12 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 	}
 
 	// Write the transformed network payload to the queue.
-	listKey := key.NewCLGKey("events:network-payload")
+	eventKey := key.NewCLGKey("event:network-payload")
 	element, err := json.Marshal(networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
-	element, err := n.Storage().General().PopFromList(listKey, element)
+	element, err := n.Storage().General().PopFromList(eventKey, element)
 	if err != nil {
 		return maskAny(err)
 	}
