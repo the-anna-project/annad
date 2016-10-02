@@ -9,15 +9,15 @@ import (
 type ListConfig struct {
 	// Settings.
 
-	// Indizes represents an ordered list where each index represents a members
+	// Indizes represents an ordered list where each index represents a raw value
 	// position.
 	Indizes []int
 
-	// MaxGrowth represents the maximum length Members is allowed to grow.
+	// MaxGrowth represents the maximum length PermutedValues is allowed to grow.
 	MaxGrowth int
 
-	// Values represents the values being used to permute Members.
-	Values []interface{}
+	// RawValues represents the values being used to permute PermutedValues.
+	RawValues []interface{}
 }
 
 // DefaultListConfig provides a default configuration to create a new
@@ -27,7 +27,7 @@ func DefaultListConfig() ListConfig {
 		// Settings.
 		Indizes:   []int{},
 		MaxGrowth: 5,
-		Values:    []interface{}{},
+		RawValues: []interface{}{},
 	}
 
 	return newConfig
@@ -39,15 +39,15 @@ func NewList(config ListConfig) (spec.PermutationList, error) {
 	newList := &list{
 		ListConfig: config,
 
-		Members: []interface{}{},
+		PermutedValues: []interface{}{},
 	}
 
 	// Validate new object.
 	if newList.MaxGrowth < 1 {
 		return nil, maskAnyf(invalidConfigError, "max growth must be 1 or greater")
 	}
-	if len(newList.Values) < 2 {
-		return nil, maskAnyf(invalidConfigError, "values must be 2 or greater")
+	if len(newList.RawValues) < 2 {
+		return nil, maskAnyf(invalidConfigError, "raw values must be 2 or greater")
 	}
 
 	return newList, nil
@@ -56,9 +56,9 @@ func NewList(config ListConfig) (spec.PermutationList, error) {
 type list struct {
 	ListConfig
 
-	// Members represents the list being permuted. Initially this is the zero
-	// value of []interface{}: []interface{}{}.
-	Members []interface{}
+	// PermutedValues represents the permuted list of RawValues. Initially this is
+	// the zero value []interface{}{}.
+	PermutedValues []interface{}
 }
 
 func (l *list) GetIndizes() []int {
@@ -69,18 +69,15 @@ func (l *list) GetMaxGrowth() int {
 	return l.MaxGrowth
 }
 
-func (l *list) GetMembers() []interface{} {
-	return l.Members
+func (l *list) GetPermutedValues() []interface{} {
+	return l.PermutedValues
 }
 
-func (l *list) GetValues() []interface{} {
-	return l.Values
+func (l *list) GetRawValues() []interface{} {
+	return l.RawValues
 }
 
 func (l *list) SetIndizes(indizes []int) {
 	l.Indizes = indizes
-}
-
-func (l *list) SetMembers(members []interface{}) {
-	l.Members = members
+	l.PermutedValues = permuteValues(l)
 }

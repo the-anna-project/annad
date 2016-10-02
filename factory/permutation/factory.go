@@ -41,12 +41,6 @@ type factory struct {
 	FactoryConfig
 }
 
-func (f *factory) MapTo(list spec.PermutationList) error {
-	list.SetMembers(createMembers(list))
-
-	return nil
-}
-
 func (f *factory) PermuteBy(list spec.PermutationList, delta int) error {
 	if delta < 1 {
 		return nil

@@ -46,36 +46,24 @@ type NetworkPayload interface {
 // activity calculates outputs which are streamed through the output channel
 // back to the requestor.
 type Network interface {
-	// TODO
-	// Activate decides if the requested CLG should be activated. To make this
-	// decision the given network payload and formerly received network payloads
-	// are considered. CLGs within the neural network are able to join forces to
-	// trigger a CLG together, where their own output types do not satisfy the
-	// input interface of the requested CLG. For this case some synchronization is
-	// required. That means network payloads need to be queued until the requested
-	// CLG can be properly executed with the provided inputs. Activate tries to
-	// find a combination using all queued network payloads to satisfy the
-	// interface of the requested CLG. Note that queue has a maximum length of the
-	// number of input arguments of the requested CLG. In case no match can be
-	// found the oldest network payload is removed from the queue, because a new
-	// network payload was added before. In case some match was found the merged
-	// network payload matching the CLG's interface is returned so it can be used
-	// to execute the requested CLG. Network payloads being matched will be
-	// removed from the queue which is returned as second value. This is how it
-	// might look like when multiple CLGs forward signals to one CLG, which needs
-	// to decide if it should be actiavted or not.
+	// Activate decides if a requested CLG shall be activated. It needs to be
+	// decided if the requested CLG shall be activated. In case the requested CLG
+	// shall be activated it needs to be decided how this activation shall happen.
+	// For more information on the activation process see Activator.Activate.
+	// This is how it might look like when a CLG is requested and multiple CLGs
+	// forward signals to it.
 	//
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//       |           |           |           |           |
-	//       V           V           V           V           V
-	//       -------------------------------------------------
-	//                               |
-	//                               V
-	//                            |-----|
-	//                            | CLG |
-	//                            |-----|
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//        |           |           |           |           |
+	//        V           V           V           V           V
+	//        -------------------------------------------------
+	//                                |
+	//                                V
+	//                             |-----|
+	//                             | CLG |
+	//                             |-----|
 	//
 	Activate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
 
@@ -111,17 +99,17 @@ type Network interface {
 	// behaviour properties. This is how it might look like when one CLG forwards
 	// signals to multiple other CLGs.
 	//
-	//                            |-----|
-	//                            | CLG |
-	//                            |-----|
-	//                               |
-	//                               V
-	//       -------------------------------------------------
-	//       |           |           |           |           |
-	//       V           V           V           V           V
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//                             |-----|
+	//                             | CLG |
+	//                             |-----|
+	//                                |
+	//                                V
+	//        -------------------------------------------------
+	//        |           |           |           |           |
+	//        V           V           V           V           V
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
 	//
 	Forward(CLG CLG, networkPayload NetworkPayload) error
 

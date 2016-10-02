@@ -2,7 +2,6 @@ package activator
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 
 	"github.com/xh3b4sd/anna/api"
@@ -21,6 +20,7 @@ const (
 type Config struct {
 	// Dependencies.
 	Log               spec.Log
+	FactoryCollection spec.FactoryCollection
 	StorageCollection spec.StorageCollection
 }
 
@@ -30,6 +30,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Log:               log.New(log.DefaultConfig()),
+		FactoryCollection: factory.MustNewCollection(),
 		StorageCollection: storage.MustNewCollection(),
 	}
 
@@ -47,6 +48,9 @@ func New(config Config) (spec.Activator, error) {
 
 	if newActivator.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newActivator.FactoryCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newActivator.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
@@ -98,14 +102,22 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 		queue = append(queue, np)
 	}
 
-	// Merge the given payload with the fetched queue. Note that it is possible to
-	// have multiple network payloads sent by the same CLG. That might happen in
-	// case a specific CLG wants to fulfil the interface of the requested CLG on
-	// its own, even it is not able to do so with the output of a single
-	// calculation. We store the extended queue directly after merging to
-	// definitely have tracked the received network payload, even if something
-	// goes wrong and we need to return an error on the code below.
+	// Merge the given network payload with the queue that we just fetched from
+	// storage. We store the extended queue directly after merging it with the
+	// given network payload to definitely track the received network payload,
+	// even if something goes wrong and we need to return an error on the code
+	// below. In case the current queue exeeds a certain amount of payloads, it is
+	// unlikely that the queue is going to be helpful when growing any further.
+	// Thus we cut the queue at some point beyond the interface capabilities of
+	// the requested CLG. Note that it is possible to have multiple network
+	// payloads sent by the same CLG. That might happen in case a specific CLG
+	// wants to fulfil the interface of the requested CLG on its own, even it is
+	// not able to do so with the output of a single calculation.
 	queue = append(queue, networkPayload)
+	queueBuffer := len(getInputTypes(CLG.GetCalculate())) + 1
+	if len(queue) > queueBuffer {
+		queue = queue[1:]
+	}
 	raw, err = json.marshal(queue)
 	if err != nil {
 		return nil, maskAny(err)
@@ -116,15 +128,16 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	}
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(networkPayload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error){
+	lookups := []func(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error){
 		a.GetNetworkPayload,
 		a.NewNetworkPayload,
 	}
 
 	// Execute one lookup after another. As soon as we find a network payload, we
 	// return it.
+	var newNetworkPayload spec.NewNetworkPayload
 	for _, lookup := range lookups {
-		newNetworkPayload, newQueue, err = lookup(networkPayload, queue)
+		newNetworkPayload, err = lookup(CLG, queue)
 		if IsNetworkPayloadNotFound(err) {
 			// There could no network payload be found by this lookup. Go on and try
 			// the next one.
@@ -133,50 +146,72 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 			return nil, maskAny(err)
 		}
 
-		// Update the modified queue.
-		raw, err = json.marshal(newQueue)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		err := a.Storage().General().Set(queueKey, string(raw))
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		// The current lookup was able to find a network payload. Thus we simply
-		// return it.
-		return newNetworkPayload, nil
+		// The current lookup was successful. We do not need to execute any further
+		// lookup, but can go on with the new network payload created.
+		break
 	}
 
-	return maskAny(networkPayloadNotFoundError), nil
+	// Filter all network payloads from the queue that are merged into the new
+	// network payload.
+	var newQueue spec.NetworkPayload
+	for _, s := range newNetworkPayload.GetSources() {
+		for _, np := range queue {
+			// At this point there is only one source given. That is the CLG that
+			// forwarded the current network payload to here. If this is not the case,
+			// we return an error.
+			sources := np.GetSources()
+			if len(sources) != 1 {
+				return nil, maskAnyf(invalidSourcesError, "there must be one source")
+			}
+			if s == string(sources[0]) {
+				// The current network payload is part of the merged network payload.
+				// Thus we do not add it to the new queue.
+				continue
+			}
+			newQueue = append(newQueue, np)
+		}
+	}
+
+	// Update the modified queue in the underlying storage.
+	raw, err = json.marshal(newQueue)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	err := a.Storage().General().Set(queueKey, string(raw))
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	// The current lookup was able to find a network payload. Thus we simply
+	// return it.
+	return newNetworkPayload, nil
 }
 
-func (a *activator) GetNetworkPayload(networkPayload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
+func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
 	// Fetch the combination of successful behaviour IDs which are known to be
 	// useful for the activation of the requested CLG. The network payloads sent
 	// by the CLGs being fetched here are known to be useful because they have
 	// already been helpful for the execution of the current CLG tree.
-	behaviourID, ok := networkPayload.GetContext().GetBehaviorID()
+	behaviourID, ok := queue[0].GetContext().GetBehaviorID()
 	if !ok {
-		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
 	}
-	// TODO this data needs to be written when creating new combinations
-	behaviourIDsKey := key.NewCLGKey("activate:success:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	s, err := a.Storage().General().Get(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
 		// error. Eventually some other lookup is able to find a sufficient network
 		// payload.
-		return nil, nil, maskAny(networkPayloadNotFoundError)
+		return nil, maskAny(networkPayloadNotFoundError)
 	} else if err != nil {
-		return nil, nil, maskAny(err)
+		return nil, maskAny(err)
 	}
 	behaviourIDs := strings.Split(s, ",")
 	if len(behaviourIDs) == 0 {
-		// No successful combination of behaviour IDs is stored. Thus we return an
-		// error. Eventually some other lookup is able to find a sufficient network
-		// payload.
-		return nil, nil, maskAny(networkPayloadNotFoundError)
+		// No activation configuration of the requested CLG is stored. Thus we
+		// return an error. Eventually some other lookup is able to find a
+		// sufficient network payload.
+		return nil, maskAny(networkPayloadNotFoundError)
 	}
 
 	// Check if there is a queued network payload for each behaviour ID we found in the
@@ -192,14 +227,13 @@ func (a *activator) GetNetworkPayload(networkPayload spec.NetworkPayload, queue 
 			// we return an error.
 			sources := np.GetSources()
 			if len(sources) != 1 {
-				return nil, nil, maskAnyf(invalidSourcesError, "there must be one source")
+				return nil, maskAnyf(invalidSourcesError, "there must be one source")
 			}
 			if behaviourID == string(sources[0]) {
 				// The current behaviour ID belongs to the current network payload. We
-				// remove the network payload from the queue and try to find the network
-				// payload belonging to the next behabiour ID.
+				// add the matching network payload to our list and go on to find the
+				// network payload belonging to the next behabiour ID.
 				matches = append(matches, np)
-				queue = filterNetworkPayload(queue, np)
 				break
 			}
 		}
@@ -208,243 +242,87 @@ func (a *activator) GetNetworkPayload(networkPayload spec.NetworkPayload, queue 
 		// No match using the stored configuration associated with the requested CLG
 		// can be found. Thus we return an error. Eventually some other lookup is
 		// able to find a sufficient network payload.
-		return nil, nil, maskAny(networkPayloadNotFoundError)
-	}
-
-	// The received network payloads have been able to satisfy the interface of
-	// the requested CLG. We merge the matching network payloads together and
-	// return the result.
-	newNetworkPayload, err := mergeNetworkPayloads(matches)
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-
-	return newNetworkPayload, queue, nil
-}
-
-// TODO
-func (a *activator) NewNetworkPayload(networkPayload spec.NetworkPayload, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
-	// fetch queue
-	// merge given payload with queue
-}
-
-// TODO
-
-// payloadFromPermutations tries to find a combination of payloads which
-// together are able to fulfill the interface of the requested CLG. The first
-// combination of payloads found, which match the interface of the requested CLG
-// will be returned in one merged network payload. The returned list of network
-// payloads will not contain any of the network payloads merged.
-func (a *activator) payloadFromPermutations(ctx spec.Context, queue []spec.NetworkPayload) (spec.NetworkPayload, []spec.NetworkPayload, error) {
-	clgName, ok := ctx.GetCLGName()
-	if !ok {
-		return nil, nil, maskAnyf(invalidCLGNameError, "must not be empty")
-	}
-	CLG, err := a.clgByName(clgName)
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-	inputTypes := CLG.GetInputTypes()
-
-	// Prepare the permutation list to find out which combination of payloads
-	// satisfies the requested CLG's interface.
-	newConfig := permutation.DefaultListConfig()
-	newConfig.MaxGrowth = len(inputTypes)
-	newConfig.Values = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newConfig)
-	if err != nil {
-		return nil, nil, maskAny(err)
-	}
-
-	for {
-		err := a.Factory().Permutation().MapTo(newPermutationList)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-
-		// Check if the given payload satisfies the requested CLG's interface.
-		members := newPermutationList.GetMembers()
-		types, err := membersToTypes(members)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
-		if reflect.DeepEqual(types, inputTypes) {
-			newPayload, err := membersToPayload(ctx, members)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-			newQueue, err := filterMembersFromQueue(members, queue)
-			if err != nil {
-				return nil, nil, maskAny(err)
-			}
-
-			return newPayload, newQueue, nil
-		}
-
-		err = a.Factory().Permutation().PermuteBy(newPermutationList, 1)
-		if err != nil {
-			// Note that also an error is thrown when the maximum growth of the
-			// permutation list was reached.
-			return nil, nil, maskAny(err)
-		}
-	}
-}
-
-// helper
-
-func filterNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) []spec.NetworkPayload {
-	var newList spec.NetworkPayload
-
-	for _, np := range list {
-		if np.GetID() == item.GetID() {
-			// This is the network payload we want to filter. Thus we go on with the
-			// loop to not add it to the new list.
-			continue
-		}
-
-		newList = append(newList, np)
-	}
-
-	return newList
-}
-
-func containsNetworkPayload(list []spec.NetworkPayload, item spec.NetworkPayload) bool {
-	for _, p := range list {
-		if p.GetID() == item.GetID() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func filterMembersFromQueue(members []interface{}, queue []spec.NetworkPayload) ([]spec.NetworkPayload, error) {
-	var memberPayloads []spec.NetworkPayload
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
-		}
-		memberPayloads = append(memberPayloads, payload)
-	}
-
-	var newQueue []spec.NetworkPayload
-	for _, queuedPayload := range queue {
-		if containsNetworkPayload(memberPayloads, queuedPayload) {
-			continue
-		}
-
-		newQueue = append(newQueue, queuedPayload)
-	}
-
-	return newQueue, nil
-}
-
-func getInputTypes(f interface{}) []reflect.Type {
-	t := reflect.TypeOf(f)
-
-	var inputType []reflect.Type
-
-	for i := 0; i < t.NumIn(); i++ {
-		inputType = append(inputType, t.In(i))
-	}
-
-	return inputType
-}
-
-func mergeNetworkPayloads(networkPayloads []spec.NetworkPayload) (spec.NetworkPayload, error) {
-	if len(networkPayloads) == 0 {
 		return nil, maskAny(networkPayloadNotFoundError)
 	}
 
-	var args []reflect.Value
-	var sources []spec.ObjectID
-	var ctx = networkPayloads[0].GetContext()
-
-	behaviourID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-
-	for _, m := range members {
-		for _, v := range payload.GetArgs() {
-			args = append(args, v)
-		}
-
-		sources = append(sources, payload.GetSources()...)
-	}
-
-	networkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	networkPayloadConfig.Args = args
-	networkPayloadConfig.Context = ctx
-	networkPayloadConfig.Destination = spec.ObjectID(behaviourID)
-	networkPayloadConfig.Sources = sources
-	networkPayload, err := api.NewNetworkPayload(networkPayloadConfig)
+	// The received network payloads are able to satisfy the interface of the
+	// requested CLG. We merge the matching network payloads together and return
+	// the result.
+	newNetworkPayload, err := mergeNetworkPayloads(matches)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return networkPayload, nil
+	return newNetworkPayload, nil
 }
 
-func membersToPayload(ctx spec.Context, members []interface{}) (spec.NetworkPayload, error) {
-	var args []reflect.Value
-	var sources []spec.ObjectID
+func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
+	// Track the input types of the requested CLG as string slice to have
+	// something that is easily comparable and efficient.
+	clgTypes := typesToStrings(getInputTypes(CLG.GetCalculate()))
 
-	behaviourID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
-		}
-
-		for _, v := range payload.GetArgs() {
-			args = append(args, v)
-		}
-
-		sources = append(sources, payload.GetSources()...)
-	}
-
-	newPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newPayloadConfig.Args = args
-	newPayloadConfig.Context = ctx
-	newPayloadConfig.Destination = spec.ObjectID(behaviourID)
-	newPayloadConfig.Sources = sources
-	newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+	// Prepare the permutation list to find out which combination of payloads
+	// satisfies the requested CLG's interface.
+	newPermutationListConfig := permutation.DefaultListConfig()
+	newPermutationListConfig.MaxGrowth = len(clgTypes)
+	newPermutationListConfig.Values = queueToValues(queue)
+	newPermutationList, err := permutation.NewList(newPermutationListConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return newPayload, nil
-}
+	// Permute the permutation list of the queued network payloads until we find
+	// the matching combination of network payloads.
+	var matches []spec.NetworkPayload
+	for {
+		// Check if the current combination of network payloads already satisfies
+		// the interface of the requested CLG. This is done in the first place to
+		// also handle the very first combination of the permutation list.
+		permutedValues := newPermutationList.GetPermutedValues()
 
-func membersToTypes(members []interface{}) ([]reflect.Type, error) {
-	var types []reflect.Type
-
-	for _, m := range members {
-		payload, ok := m.(spec.NetworkPayload)
-		if !ok {
-			return nil, maskAnyf(invalidInterfaceError, "member must be spec.NetworkPayload")
+		// In case there does a combination of network payloads match the interface
+		// of the requested CLG, we capture the combination and stop the permutation
+		// loop.
+		valueTypes := typesToStrings(valuesToTypes(permutedValues))
+		if equalStrings(clgTypes, valueTypes) {
+			matches = valuesToQueue(permutedValues)
+			break
 		}
 
-		for _, v := range payload.GetArgs() {
-			types = append(types, v.Type())
+		// Permute the list of the queued network payloads by one further
+		// permutation step.
+		err = a.Factory().Permutation().PermuteBy(newPermutationList, 1)
+		if IsMaxGrowthReached(err) {
+		} else if err != nil {
+			return nil, maskAny(err)
 		}
 	}
 
-	return types, nil
-}
-
-func queueToValues(queue []spec.NetworkPayload) []interface{} {
-	var values []interface{}
-
-	for _, p := range queue {
-		values = append(values, p)
+	// The received network payloads are able to satisfy the interface of the
+	// requested CLG. We merge the matching network payloads together and return
+	// the result.
+	newNetworkPayload, err := mergeNetworkPayloads(matches)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	return values
+	// Persists the combination of permuted network payloads as configuration for
+	// the requested CLG. This configuration is stored using references of the
+	// behaviour IDs associated with CLGs that forwarded signals to this requested
+	// CLG.
+	behaviourID, ok := newNetworkPayload.GetContext().GetBehaviorID()
+	if !ok {
+		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	}
+	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	var behaviourIDs []string
+	for _, behaviourID := range newNetworkPayload.GetSources() {
+		behaviourIDs = append(behaviourIDs, string(behaviourID))
+	}
+	err := a.Storage().General().Set(behaviourIDsKey, strings.Join(behaviourIDs, ","))
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return newNetworkPayload, nil
 }
