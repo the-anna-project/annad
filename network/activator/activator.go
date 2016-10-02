@@ -256,6 +256,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	return newNetworkPayload, nil
 }
 
+// TODO
 func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
 	// something that is easily comparable and efficient.
@@ -288,6 +289,10 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 			matches = valuesToQueue(permutedValues)
 			break
 		}
+
+		// TODO we need to fetch all combinations and select one random across all
+		// to cover all possible combinations across all possible CLG trees over
+		// time
 
 		// Permute the list of the queued network payloads by one further
 		// permutation step.
