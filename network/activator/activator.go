@@ -1,7 +1,6 @@
 package activator
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/xh3b4sd/anna/api"
@@ -83,23 +82,18 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 
 	// Fetch the queued network payloads. queue is a string of comma separated
 	// JSON objects representing a specific network payload.
-	behaviourID, ok := networkPayload.GetContext().GetBehaviorID()
+	behaviourID, ok := networkPayload.GetContext().GetBehaviourID()
 	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	queueKey := key.NewCLGKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
 	s, err := a.Storage().General().Get(queueKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	var queue []spec.NetworkPayload
-	for _, s := range strings.Split(s, ",") {
-		np := api.MustNewNetworkPayload()
-		err = json.Unmarshal([]byte(s), &np)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		queue = append(queue, np)
+	queue, err := stringToQueue(s)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
 	// Merge the given network payload with the queue that we just fetched from
@@ -118,11 +112,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	if len(queue) > queueBuffer {
 		queue = queue[1:]
 	}
-	raw, err = json.marshal(queue)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err := a.Storage().General().Set(queueKey, string(raw))
+	err = n.persistQueue(queueKey, queue)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -173,11 +163,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	}
 
 	// Update the modified queue in the underlying storage.
-	raw, err = json.marshal(newQueue)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	err := a.Storage().General().Set(queueKey, string(raw))
+	err = n.persistQueue(queueKey, newQueue)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -192,9 +178,9 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// useful for the activation of the requested CLG. The network payloads sent
 	// by the CLGs being fetched here are known to be useful because they have
 	// already been helpful for the execution of the current CLG tree.
-	behaviourID, ok := queue[0].GetContext().GetBehaviorID()
+	behaviourID, ok := queue[0].GetContext().GetBehaviourID()
 	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	s, err := a.Storage().General().Get(behaviourIDsKey)
@@ -315,9 +301,9 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// the requested CLG. This configuration is stored using references of the
 	// behaviour IDs associated with CLGs that forwarded signals to this requested
 	// CLG.
-	behaviourID, ok := newNetworkPayload.GetContext().GetBehaviorID()
+	behaviourID, ok := newNetworkPayload.GetContext().GetBehaviourID()
 	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	var behaviourIDs []string

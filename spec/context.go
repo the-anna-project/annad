@@ -12,11 +12,11 @@ type Context interface {
 
 	context.Context
 
-	// GetBehaviorID returns the behavior ID of the current context. This behavior
-	// ID represents the behavior currently being executed. That way CLGs can
-	// identify themself. The second return value expresses the existence of the
-	// key requested.
-	GetBehaviorID() (string, bool)
+	// GetBehaviourID returns the behavior ID of the current context. This
+	// behavior ID represents the behavior currently being executed. That way CLGs
+	// can identify themself. The second return value expresses the existence of
+	// the key requested.
+	GetBehaviourID() (string, bool)
 
 	// GetCLGName returns the CLG name of the current context.
 	GetCLGName() (string, bool)
@@ -44,8 +44,8 @@ type Context interface {
 	// return value expresses the existence of the key requested.
 	GetSessionID() (string, bool)
 
-	// SetBehaviorID sets the given behavior ID to the current context.
-	SetBehaviorID(behaviorID string)
+	// SetBehaviourID sets the given behavior ID to the current context.
+	SetBehaviourID(behaviorID string)
 
 	// SetCLGName sets the CLG name of the current context.
 	SetCLGName(clgName string)

@@ -16,7 +16,7 @@ type key string
 
 const (
 	// TODO make the context marshalable
-	behaviorIDKey    key = "behavior-id"
+	behaviourIDKey   key = "behaviour-id"
 	clgNameKey       key = "clg-name"
 	clgTreeIDKey     key = "clg-tree-id"
 	expectationIDKey key = "expectation"
@@ -86,8 +86,8 @@ func (c *context) Clone() spec.Context {
 	newContext.(*context).Context = netcontext.Background()
 
 	// Add the other information to the new underlying context.
-	behaviorID, _ := c.GetBehaviorID()
-	newContext.SetBehaviorID(behaviorID)
+	behaviourID, _ := c.GetBehaviourID()
+	newContext.SetBehaviourID(behaviourID)
 	clgName, _ := c.GetCLGName()
 	newContext.SetCLGName(clgName)
 	clgTreeID, _ := c.GetCLGTreeID()
@@ -114,8 +114,8 @@ func (c *context) Err() error {
 	return c.Context.Err()
 }
 
-func (c *context) GetBehaviorID() (string, bool) {
-	v, ok := c.Context.Value(behaviorIDKey).(string)
+func (c *context) GetBehaviourID() (string, bool) {
+	v, ok := c.Context.Value(behaviourIDKey).(string)
 	return v, ok
 }
 
@@ -148,8 +148,8 @@ func (c *context) GetSessionID() (string, bool) {
 	return v, ok
 }
 
-func (c *context) SetBehaviorID(behaviorID string) {
-	c.Context = netcontext.WithValue(c.Context, behaviorIDKey, behaviorID)
+func (c *context) SetBehaviourID(behaviourID string) {
+	c.Context = netcontext.WithValue(c.Context, behaviourIDKey, behaviourID)
 }
 
 func (c *context) SetCLGName(clgName string) {

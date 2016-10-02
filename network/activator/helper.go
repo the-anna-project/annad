@@ -1,6 +1,7 @@
 package activator
 
 import (
+	"encoding/json"
 	"reflect"
 
 	"github.com/xh3b4sd/anna/api"
@@ -79,6 +80,21 @@ func queueToValues(queue []spec.NetworkPayload) []interface{} {
 	}
 
 	return values
+}
+
+func stringToQueue(s string) ([]spec.NetworkPayload, error) {
+	var queue []spec.NetworkPayload
+
+	for _, s := range strings.Split(s, ",") {
+		np := api.MustNewNetworkPayload()
+		err = json.Unmarshal([]byte(s), &np)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		queue = append(queue, np)
+	}
+
+	return queue, nil
 }
 
 func typesToStrings(types []reflect.Type) []string {
