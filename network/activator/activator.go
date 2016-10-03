@@ -137,7 +137,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 		}
 
 		// The current lookup was successful. We do not need to execute any further
-		// lookup, but can go on with the new network payload created.
+		// lookup, but can go on with the network payload found.
 		break
 	}
 

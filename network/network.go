@@ -278,7 +278,7 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	if output.IsExpectationNotMet(err) {
 		n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
 
-		err = n.forwardInputCLG(networkPayload)
+		err := n.Forwarder.ToInputCLG(CLG, networkPayload)
 		if err != nil {
 			return maskAny(err)
 		}

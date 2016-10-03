@@ -71,68 +71,79 @@ type forwarder struct {
 	Type spec.ObjectType
 }
 
-// TODO
-func (f *forwarder) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	f.Log.WithTags(spec.Tags{C: nil, L: "D", O: f, V: 13}, "call Activate")
+func (f *forwarder) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	f.Log.WithTags(spec.Tags{C: nil, L: "D", O: f, V: 13}, "call Forward")
 
-	// TODO
-
-	// get stored network payloads
-	// create list of network payloads
-	// get CLG combinations known to be useful from storage (payloadFromConnections)
-	// if no sufficient network payload, create permutation (payloadFromPermutations)
-	// if no sufficient network payload, return error
-	//
-
-	behaviorID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return nil, nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+	// This is the list of lookup functions which is executed seuqentially.
+	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]string, error){
+		a.GetBehaviourIDs,
+		a.NewBehaviourIDs,
 	}
 
-	// Check if we have neural connections that tell us which payloads to use.
-	payload, queue, err := f.payloadFromConnections(ctx, queue)
-	if IsInvalidInterface(err) {
-		// There are no sufficient connections. We need to come up with something
-		// random.
-		payload, queue, err = f.payloadFromPermutations(ctx, queue)
-		if permutation.IsMaxGrowthReached(err) {
-			// We could not find a sufficient payload for the requsted CLG by permuting
-			// the queue of network payloads.
-			return nil, nil, maskAnyf(invalidInterfaceError, "types must match")
+	// Execute one lookup after another. As soon as we find some behaviour IDs, we
+	// use them to forward the given network payload.
+	var behaviourIDs []string
+	for _, lookup := range lookups {
+		behaviourIDs, err = lookup(CLG, networkPayload)
+		if IsBehaviourIDsNotFound(err) {
+			// There could no behaviour IDs be found by this lookup. Go on and try the
+			// next one.
+			continue
 		} else if err != nil {
-			return nil, nil, maskAny(err)
+			return maskAny(err)
 		}
 
-		// Once we found a new combination, we need to make sure the neural network
-		// remembers it. Thus we store the connections between the current behavior
-		// and the behaviors matching the interface of the current behavior.
-		var behaviorIDs string
-		for _, s := range payload.GetSources() {
-			behaviorIDs += "," + string(s)
-		}
-		behaviorIDsKey := key.NewCLGKey("behavior-id:%s:activate-behavior-ids", behaviorID)
-		err := f.Storage().General().Set(behaviorIDsKey, behaviorIDs)
-		if err != nil {
-			return nil, nil, maskAny(err)
-		}
+		// The current lookup was successful. We do not need to execute any further
+		// lookup, but can go on with the behaviour IDs found.
+		break
 	}
 
-	return payload, queue, nil
+	// Forward the given network payload asynchronously to all CLGs references by
+	// the found behaviour IDs.
+	for _, ID := range behaviourIDs {
+		go func(ID string) {
+			// Prepare a new context for the new connection path.
+			ctx := networkPayload.GetContext().Clone()
+			ctx.SetBehaviourID(ID)
+
+			// Create a new network payload.
+			newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+			newNetworkPayloadConfig.Args = networkPayload.GetArgs()
+			newNetworkPayloadConfig.Context = ctx
+			newNetworkPayloadConfig.Destination = spec.ObjectID(ID)
+			newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+			newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			// Write the transformed network payload to the queue.
+			listKey := key.NewCLGKey("events:network-payload")
+			element, err := json.Marshal(newNetworkPayload)
+			if err != nil {
+				return maskAny(err)
+			}
+			err = f.Storage().General().PushToList(listKey, element)
+			if err != nil {
+				return maskAny(err)
+			}
+		}(ID)
+	}
+
+	return nil
 }
 
-// receiver
+// TODO
+func (f *forwarder) GetBehaviourIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]string, error) {
+	var behaviourIDs []string
 
-func (f *forwarder) findForwardingRules(ctx spec.Context, payload spec.NetworkPayload) ([]string, error) {
-	var behaviorIDs []string
-
-	behaviorID, ok := ctx.GetBehaviorID()
+	behaviourID, ok := ctx.GetBehaviourID()
 	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
+		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviorIDsKey := key.NewCLGKey("behavior-id:%s:behavior-ids", behaviorID)
-
-	err := f.Storage().General().WalkSet(behaviorIDsKey, f.Closer, func(element string) error {
-		behaviorIDs = append(behaviorIDs, element)
+	behaviourIDsKey := key.NewCLGKey("behaviour-id:%s:behaviour-ids", behaviourID)
+	err := f.Storage().General().WalkSet(behaviourIDsKey, f.Closer, func(element string) error {
+		behaviourIDs = append(behaviourIDs, element)
 		return nil
 	})
 	if err != nil {
@@ -144,19 +155,19 @@ func (f *forwarder) findForwardingRules(ctx spec.Context, payload spec.NetworkPa
 	// Create a new network payload. Note that the old context of the old
 	// network payload is removed to only append actual arguments to the new
 	// network payload.
-	newPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newPayloadConfig.Args = payload.GetArgs()
-	newPayloadConfig.Context = rule.Ctx
-	newPayloadConfig.Destination = spec.ObjectID(ID)
-	newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
-	newPayload, err := api.NewNetworkPayload(newPayloadConfig)
+	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig.Args = networkPayload.GetArgs()
+	newNetworkPayloadConfig.Context = rule.Ctx
+	newNetworkPayloadConfig.Destination = spec.ObjectID(ID)
+	newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
 	for _, rule := range forwardingRules {
-		// Find the actual CLG based on its behavior ID. Therefore we lookup the
-		// behavior name by the given behavior ID. Data we read here is written
+		// Find the actual CLG based on its behaviour ID. Therefore we lookup the
+		// behaviour name by the given behaviour ID. Data we read here is written
 		// within several CLGs. That way the network creates its own connections
 		// based on learned experiences.
 		//
@@ -166,55 +177,19 @@ func (f *forwarder) findForwardingRules(ctx spec.Context, payload spec.NetworkPa
 		// TODO store network payload in queue
 	}
 
-	return behaviorIDs, nil
+	return behaviourIDs, nil
 }
 
-func (f *forwarder) forwardCLGs(ctx spec.Context, behaviorIDs []string, payload spec.NetworkPayload) error {
-	for _, ID := range behaviorIDs {
-		// Prepare a new context for the new connection path.
-		newCtx := ctx.Clone()
-		newCtx.SetBehaviorID(ID)
-
-		// Create a new network payload. Note that the old context of the old
-		// network payload is removed to only append actual arguments to the new
-		// network payload.
-		newPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newPayloadConfig.Args = payload.GetArgs()
-		newPayloadConfig.Context = newCtx
-		newPayloadConfig.Destination = spec.ObjectID(ID)
-		newPayloadConfig.Sources = []spec.ObjectID{payload.GetDestination()}
-		newPayload, err := api.NewNetworkPayload(newPayloadConfig)
-		if err != nil {
-			return maskAny(err)
-		}
-
-		// Find the actual CLG based on its behavior ID. Therefore we lookup the
-		// behavior name by the given behavior ID. Data we read here is written
-		// within several CLGs. That way the network creates its own connections
-		// based on learned experiences.
-		//
-		// TODO where are these connections coming from?
-		// TODO if there are none, we need to find some randomly
-		// TODO there needs to be some sort of variation when executing existing CLG trees
-		//
-		clgName, err := f.Storage().General().Get(key.NewCLGKey("behavior-id:%s:behavior-name", ID))
-		if err != nil {
-			return maskAny(err)
-		}
-		CLG, err := f.clgByName(clgName)
-		if err != nil {
-			return maskAny(err)
-		}
-		CLG.GetInputChannel() <- newPayload
-	}
-
-	return nil
+func (f *forwarder) NewBehaviourIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]string, error) {
+	return nil, nil
 }
 
-func (f *forwarder) forwardInputCLG(networkPayload spec.NetworkPayload) error {
+func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	ctx := networkPayload.GetContext()
+
 	// Find the original information sequence using the information ID from the
 	// context.
-	informationID, ok := networkPayload.GetContext().GetCLGTreeID()
+	informationID, ok := ctx.GetCLGTreeID()
 	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
@@ -224,32 +199,32 @@ func (f *forwarder) forwardInputCLG(networkPayload spec.NetworkPayload) error {
 		return maskAny(err)
 	}
 
-	// Find the first behavior ID using the CLG tree ID from the context. The
-	// behavior ID we are looking up here is the ID of the initial input CLG.
-	clgTreeID, ok := networkPayload.GetContext().GetCLGTreeID()
+	// Find the first behaviour ID using the CLG tree ID from the context. The
+	// behaviour ID we are looking up here is the ID of the initial input CLG.
+	clgTreeID, ok := ctx.GetCLGTreeID()
 	if !ok {
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
-	firstBehaviorIDKey := key.NewCLGKey("clg-tree-id:%s:first-behavior-id", clgTreeID)
-	behaviorID, err := f.Storage().General().Get(firstBehaviorIDKey)
+	firstBehaviourIDKey := key.NewCLGKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	behaviourID, err := f.Storage().General().Get(firstBehaviourIDKey)
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Adapt the given context with the information of the current scope.
-	networkPayload.GetContext().SetBehaviorID(behaviorID)
-	networkPayload.GetContext().SetCLGName("input")
-	networkPayload.GetContext().SetCLGTreeID(clgTreeID)
+	ctx.SetBehaviourID(behaviourID)
+	ctx.SetCLGName("input")
+	ctx.SetCLGTreeID(clgTreeID)
 	// We do not need to set the expectation because it never changes.
 	// We do not need to set the session ID because it never changes.
 
 	// Create a new network payload.
-	networkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	networkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
-	networkPayloadConfig.Context = networkPayload.GetContext()
-	networkPayloadConfig.Destination = spec.ObjectID(behaviorID)
-	networkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
-	newNetworkPayload, err := api.NewNetworkPayload(networkPayloadConfig)
+	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
+	newNetworkPayloadConfig.Context = ctx
+	newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
+	newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -260,7 +235,7 @@ func (f *forwarder) forwardInputCLG(networkPayload spec.NetworkPayload) error {
 	if err != nil {
 		return maskAny(err)
 	}
-	element, err := f.Storage().General().PopFromList(listKey, element)
+	err = f.Storage().General().PushToList(listKey, element)
 	if err != nil {
 		return maskAny(err)
 	}
