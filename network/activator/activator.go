@@ -242,7 +242,6 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	return newNetworkPayload, nil
 }
 
-// TODO
 func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
 	// something that is easily comparable and efficient.
@@ -258,40 +257,49 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 		return nil, maskAny(err)
 	}
 
-	// Permute the permutation list of the queued network payloads until we find
-	// the matching combination of network payloads.
-	var matches []spec.NetworkPayload
+	// Permute the permutation list of the queued network payloads until we found
+	// all the matching combinations.
+	var possibleMatches []spec.NetworkPayload
 	for {
 		// Check if the current combination of network payloads already satisfies
 		// the interface of the requested CLG. This is done in the first place to
-		// also handle the very first combination of the permutation list.
+		// also handle the very first combination of the permutation list.  In case
+		// there does a combination of network payloads match the interface of the
+		// requested CLG, we capture the found combination and try to find more
+		// combinations in the upcoming loops.
 		permutedValues := newPermutationList.GetPermutedValues()
-
-		// In case there does a combination of network payloads match the interface
-		// of the requested CLG, we capture the combination and stop the permutation
-		// loop.
 		valueTypes := typesToStrings(valuesToTypes(permutedValues))
 		if equalStrings(clgTypes, valueTypes) {
-			matches = valuesToQueue(permutedValues)
-			break
+			possibleMatches = valuesToQueue(permutedValues)
 		}
 
-		// TODO we need to fetch all combinations and select one random across all
-		// to cover all possible combinations across all possible CLG trees over
-		// time
-
 		// Permute the list of the queued network payloads by one further
-		// permutation step.
+		// permutation step within the current iteration. As soon as the permutation
+		// list cannot be permuted anymore, we stop the permutation loop to choose
+		// one random combination of the tracked list in the next step below.
 		err = a.Factory().Permutation().PermuteBy(newPermutationList, 1)
 		if IsMaxGrowthReached(err) {
+			break
 		} else if err != nil {
 			return nil, maskAny(err)
 		}
 	}
 
-	// The received network payloads are able to satisfy the interface of the
+	// We fetched all possible combinations if network payloads that match the
+	// interface of the requested CLG. Now we need to select one random
+	// combination to cover all possible combinations across all possible CLG
+	// trees being created over time. This prevents us from choosing always only
+	// the first matching combination, which would lack discoveries of all
+	// potential combinations being created.
+	numbers, err := a.Factory().Random().CreateNMax(1, len(possibleMatches))
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	matches := possibleMatches[numbers[0]]
+
+	// The queued network payloads are able to satisfy the interface of the
 	// requested CLG. We merge the matching network payloads together and return
-	// the result.
+	// the result after storing the created configuration of the requested CLG.
 	newNetworkPayload, err := mergeNetworkPayloads(matches)
 	if err != nil {
 		return nil, maskAny(err)
@@ -300,7 +308,8 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// Persists the combination of permuted network payloads as configuration for
 	// the requested CLG. This configuration is stored using references of the
 	// behaviour IDs associated with CLGs that forwarded signals to this requested
-	// CLG.
+	// CLG. Note that the order of behaviour IDs must be preserved, because it
+	// represents the input interface of the requested CLG.
 	behaviourID, ok := newNetworkPayload.GetContext().GetBehaviourID()
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")

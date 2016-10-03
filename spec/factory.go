@@ -89,6 +89,7 @@ type PermutationList interface {
 
 // RandomFactory creates pseudo random numbers. The factory might implement
 // retries using backoff strategies and timeouts.
+// TODO provide CreateMax to only return one random number
 type RandomFactory interface {
 	// CreateNMax tries to create a list of new pseudo random numbers. n
 	// represents the number of pseudo random numbers in the returned list. The
