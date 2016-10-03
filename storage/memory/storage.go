@@ -162,15 +162,14 @@ func (s *storage) GetRandomKey() (string, error) {
 	defer s.Mutex.Unlock()
 
 	// Here we create a random number to chose a random map, of which we have 4.
-	// The random numbers starts at 0. So the maximum random number we want to
-	// have is 3. Because the max parameter of CreateNMax is exclusive, we set max
-	// to 4.
-	mapIDs, err := s.RandomFactory.CreateNMax(1, 4)
+	// The random numbers start at 0. So the maximum random number we want to have
+	// is 3. Because the max parameter of CreateMax is exclusive, we set max to 4.
+	mapID, err := s.RandomFactory.CreateNMax(4)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	switch mapIDs[0] {
+	switch mapID {
 	case 0:
 		for k := range s.KeyValue {
 			return k, nil

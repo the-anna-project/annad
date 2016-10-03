@@ -291,11 +291,11 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// trees being created over time. This prevents us from choosing always only
 	// the first matching combination, which would lack discoveries of all
 	// potential combinations being created.
-	numbers, err := a.Factory().Random().CreateNMax(1, len(possibleMatches))
+	matchIndex, err := a.Factory().Random().CreateMax(len(possibleMatches))
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	matches := possibleMatches[numbers[0]]
+	matches := possibleMatches[matchIndex]
 
 	// The queued network payloads are able to satisfy the interface of the
 	// requested CLG. We merge the matching network payloads together and return
