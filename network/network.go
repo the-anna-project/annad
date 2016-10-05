@@ -117,6 +117,16 @@ func New(config Config) (spec.Network, error) {
 	return newNetwork, nil
 }
 
+// MustNew creates either a new default configured network object, or panics.
+func MustNew() spec.Network {
+	newNetwork, err := New(DefaultConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newNetwork
+}
+
 type network struct {
 	Config
 
@@ -187,6 +197,8 @@ func (n *network) Boot() {
 func (n *network) Calculate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
+	ctx := networkPayload.GetContext()
+
 	clgName, ok := ctx.GetCLGName()
 	if !ok {
 		return nil, maskAnyf(invalidCLGNameError, "must not be empty")
@@ -196,14 +208,22 @@ func (n *network) Calculate(CLG spec.CLG, networkPayload spec.NetworkPayload) (s
 		return nil, maskAnyf(clgNotFoundError, "name: %s", clgName)
 	}
 
-	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetArgs()))
+	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetCLGInput()))
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	networkPayload.SetArgs(outputs)
+	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig.Args = outputs
+	newNetworkPayloadConfig.Context = ctx
+	newNetworkPayloadConfig.Destination = networkPayload.GetDestination()
+	newNetworkPayloadConfig.Sources = networkPayload.GetSources()
+	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
 
-	return networkPayload, nil
+	return newNetworkPayload, nil
 }
 
 func (n *network) EventListener(canceler <-chan struct{}) error {

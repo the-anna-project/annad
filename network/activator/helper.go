@@ -121,8 +121,10 @@ func valuesToQueue(values []interface{}) []spec.NetworkPayload {
 }
 
 // valuesToTypes parses permutation values to reflect types. The underlying type
-// of each permutation value must be spec.NetworkPayload. Otherwhise
-// valuesToTypes panics.
+// of each permutation value must be spec.NetworkPayload. The list of returned
+// types will represent the reflect types of the given network payload's
+// arguments. Thus, if the underlying type of the given values is not
+// spec.NetworkPayload, valuesToTypes panics.
 func valuesToTypes(values []interface{}) []reflect.Type {
 	var types []reflect.Type
 

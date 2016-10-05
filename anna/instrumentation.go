@@ -5,7 +5,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func createPrometheusInstrumentation(prefixes []string) (spec.Instrumentation, error) {
+func newPrometheusInstrumentation(prefixes []string) (spec.Instrumentation, error) {
 	newInstrumentationConfig := prometheus.DefaultInstrumentationConfig()
 	newInstrumentationConfig.Prefixes = append(newInstrumentationConfig.Prefixes, prefixes...)
 	newInstrumentation, err := prometheus.NewInstrumentation(newInstrumentationConfig)

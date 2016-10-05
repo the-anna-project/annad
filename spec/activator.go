@@ -8,7 +8,7 @@ type Activator interface {
 	// functions.
 	//
 	//     GetNetworkPayload
-	//     NewNetworkPayload.
+	//     NewNetworkPayload
 	//
 	// Activate fetches the list of all queued network payloads of the requested
 	// CLG from the underlying storage. The stored list is merged with the given

@@ -9,12 +9,12 @@ import (
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-func createStorageCollection(newLog spec.Log, flags Flags) (spec.StorageCollection, error) {
-	newFeatureStorage, err := createFeatureStorage(newLog, flags)
+func newStorageCollection(newLog spec.Log, flags Flags) (spec.StorageCollection, error) {
+	newFeatureStorage, err := newFeatureStorage(newLog, flags)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	newGeneralStorage, err := createGeneralStorage(newLog, flags)
+	newGeneralStorage, err := newGeneralStorage(newLog, flags)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -30,7 +30,7 @@ func createStorageCollection(newLog spec.Log, flags Flags) (spec.StorageCollecti
 	return newCollection, nil
 }
 
-func createFeatureStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
+func newFeatureStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
 	var newStorage spec.Storage
 	var err error
 
@@ -48,7 +48,7 @@ func createFeatureStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
 			return backoff.NewExponentialBackOff()
 		}
 		newStorageConfig.Log = newLog
-		newStorageConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Feature", "Storage", "Redis"})
+		newStorageConfig.Instrumentation, err = newPrometheusInstrumentation([]string{"Feature", "Storage", "Redis"})
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -70,7 +70,7 @@ func createFeatureStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
 	return newStorage, nil
 }
 
-func createGeneralStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
+func newGeneralStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
 	var newStorage spec.Storage
 	var err error
 
@@ -88,7 +88,7 @@ func createGeneralStorage(newLog spec.Log, flags Flags) (spec.Storage, error) {
 			return backoff.NewExponentialBackOff()
 		}
 		newStorageConfig.Log = newLog
-		newStorageConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"General", "Storage", "Redis"})
+		newStorageConfig.Instrumentation, err = newPrometheusInstrumentation([]string{"General", "Storage", "Redis"})
 		if err != nil {
 			return nil, maskAny(err)
 		}

@@ -42,11 +42,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new anna object
 // by best effort.
 func DefaultConfig() Config {
-	newNetwork, err := network.New(network.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newServer, err := server.New(server.DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -55,7 +50,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Log:               log.New(log.DefaultConfig()),
-		Network:           newNetwork,
+		Network:           network.MustNew(),
 		Server:            newServer,
 		StorageCollection: storage.MustNewCollection(),
 

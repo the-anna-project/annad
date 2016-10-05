@@ -29,11 +29,11 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidBehaviorIDError = errgo.New("invalid behavior ID")
+var invalidBehaviourIDError = errgo.New("invalid behaviour ID")
 
-// IsInvalidBehaviorID asserts invalidBehaviorIDError.
-func IsInvalidBehaviorID(err error) bool {
-	return errgo.Cause(err) == invalidBehaviorIDError
+// IsInvalidBehaviourID asserts invalidBehaviourIDError.
+func IsInvalidBehaviourID(err error) bool {
+	return errgo.Cause(err) == invalidBehaviourIDError
 }
 
 var invalidSourcesError = errgo.New("invalid sources")

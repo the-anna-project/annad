@@ -29,16 +29,16 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var behaviourIDsNotFoundError = errgo.New("behaviour IDs not found")
+var networkPayloadsNotFoundError = errgo.New("network payloads not found")
 
-// IsBehaviourIDsNotFound asserts behaviourIDsNotFoundError.
-func IsBehaviourIDsNotFound(err error) bool {
-	return errgo.Cause(err) == behaviourIDsNotFoundError
+// IsNetworkPayloadsNotFound asserts networkPayloadsNotFoundError.
+func IsNetworkPayloadsNotFound(err error) bool {
+	return errgo.Cause(err) == networkPayloadsNotFoundError
 }
 
-var invalidBehaviorIDError = errgo.New("invalid behavior ID")
+var invalidBehaviourIDError = errgo.New("invalid behaviour ID")
 
-// IsInvalidBehaviorID asserts invalidBehaviorIDError.
-func IsInvalidBehaviorID(err error) bool {
-	return errgo.Cause(err) == invalidBehaviorIDError
+// IsInvalidBehaviourID asserts invalidBehaviourIDError.
+func IsInvalidBehaviourID(err error) bool {
+	return errgo.Cause(err) == invalidBehaviourIDError
 }

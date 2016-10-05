@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"encoding/json"
 	"reflect"
 )
 
@@ -9,6 +10,12 @@ import (
 type NetworkPayload interface {
 	// GetArgs returns the arguments of the current network payload.
 	GetArgs() []reflect.Value
+
+	// GetCLGInput returns a list of arguments intended to be provided as input
+	// for a CLG's execution. The list of arguments exists of the arguments
+	// configured to the network payload and the context configured to the network
+	// payload. Note that the context is always the first argument in the list.
+	GetCLGInput() []reflect.Value
 
 	// GetContext returns the context of the current network payload.
 	GetContext() Context
@@ -26,6 +33,9 @@ type NetworkPayload interface {
 	// created within the network when user input is received to forward it to the
 	// input CLG.
 	GetSources() []ObjectID
+
+	json.Marshaler
+	json.Unmarshaler
 
 	// SetArgs sets the arguments of the current network payload.
 	SetArgs(args []reflect.Value)

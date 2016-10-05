@@ -4,9 +4,12 @@ import (
 	"strings"
 
 	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
+	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
@@ -18,8 +21,8 @@ const (
 // Config represents the configuration used to create a new activator object.
 type Config struct {
 	// Dependencies.
-	Log               spec.Log
 	FactoryCollection spec.FactoryCollection
+	Log               spec.Log
 	StorageCollection spec.StorageCollection
 }
 
@@ -28,8 +31,8 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log:               log.New(log.DefaultConfig()),
 		FactoryCollection: factory.MustNewCollection(),
+		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 	}
 
@@ -244,8 +247,13 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 
 func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
-	// something that is easily comparable and efficient.
-	clgTypes := typesToStrings(getInputTypes(CLG.GetCalculate()))
+	// something that is easily comparable and efficient. By convention the first
+	// input argument of each CLG is a context. We remove the first argument here,
+	// because we want to match output interfaces against input interfaces. By
+	// convention output interfaces of CLGs must not have a context as first
+	// return value. Therefore we align the input and output values to make them
+	// comparable.
+	clgTypes := typesToStrings(getInputTypes(CLG.GetCalculate()))[1:]
 
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.

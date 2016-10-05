@@ -76,11 +76,15 @@ type networkPayload struct {
 }
 
 func (np *networkPayload) GetArgs() []reflect.Value {
-	return append([]reflect.Value{reflect.ValueOf(np.GetContext())}, np.Args...)
+	return np.Args
 }
 
 func (np *networkPayload) GetContext() spec.Context {
 	return np.Context
+}
+
+func (np *networkPayload) GetCLGInput() []reflect.Value {
+	return append([]reflect.Value{reflect.ValueOf(np.GetContext())}, np.GetArgs()...)
 }
 
 func (np *networkPayload) GetDestination() spec.ObjectID {

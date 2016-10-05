@@ -22,7 +22,8 @@ type CLG interface {
 	GetInputChannel() chan NetworkPayload
 
 	// GetInputTypes returns the CLG's underlying input types. These reflect the
-	// real interface hidden behind the Calculate API.
+	// real interface hidden behind the Calculate API. By convention the first
+	// argument of each CLG is a context.
 	GetInputTypes() []reflect.Type
 
 	Object
