@@ -42,3 +42,17 @@ var invalidBehaviourIDError = errgo.New("invalid behaviour ID")
 func IsInvalidBehaviourID(err error) bool {
 	return errgo.Cause(err) == invalidBehaviourIDError
 }
+
+var invalidInformationIDError = errgo.New("invalid information ID")
+
+// IsInvalidInformationID asserts invalidInformationIDError.
+func IsInvalidInformationID(err error) bool {
+	return errgo.Cause(err) == invalidInformationIDError
+}
+
+var invalidCLGTreeIDError = errgo.New("invalid CLG tree ID")
+
+// IsInvalidCLGTreeID asserts invalidCLGTreeIDError.
+func IsInvalidCLGTreeID(err error) bool {
+	return errgo.Cause(err) == invalidCLGTreeIDError
+}

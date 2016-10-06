@@ -76,7 +76,7 @@ func (c *context) Err() error {
 	return nil
 }
 
-func (c *context) GetBehaviorID() (string, bool) {
+func (c *context) GetBehaviourID() (string, bool) {
 	return "", false
 }
 
@@ -104,7 +104,7 @@ func (c *context) GetSessionID() (string, bool) {
 	return c.SessionID, true
 }
 
-func (c *context) SetBehaviorID(behaviorID string) {
+func (c *context) SetBehaviourID(behaviourID string) {
 
 }
 

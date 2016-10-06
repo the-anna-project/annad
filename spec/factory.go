@@ -4,14 +4,14 @@ package spec
 // factory implementations in a simple container, which can easily be passed
 // around.
 type FactoryCollection interface {
-	// ID represents an ID factory. It is used to create IDs of a certain type.
+	// ID returns an ID factory. It is used to create IDs of a certain type.
 	ID() IDFactory
 
-	// Permutation represents a permutation factory. It is used to permute
-	// instances of type PermutationList.
+	// Permutation returns a permutation factory. It is used to permute instances
+	// of type PermutationList.
 	Permutation() PermutationFactory
 
-	// Random represents a random factory. It is used to create random numbers.
+	// Random returns a random factory. It is used to create random numbers.
 	Random() RandomFactory
 }
 

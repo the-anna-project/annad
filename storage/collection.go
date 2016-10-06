@@ -25,7 +25,7 @@ func DefaultCollectionConfig() CollectionConfig {
 	return newConfig
 }
 
-// NewCollection creates a new configured network object.
+// NewCollection creates a new configured storage collection object.
 func NewCollection(config CollectionConfig) (spec.StorageCollection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,

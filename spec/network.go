@@ -123,6 +123,8 @@ type Network interface {
 	//
 	Forward(CLG CLG, networkPayload NetworkPayload) error
 
+	GatewayProvider
+
 	// TODO
 	InputListener(canceler <-chan struct{}) error
 

@@ -21,7 +21,7 @@ type Activator interface {
 	FactoryProvider
 
 	// GetNetworkPayload compares the given queue against the stored configuration
-	// of the requested CLG. This configuration is a combination of behavior IDs
+	// of the requested CLG. This configuration is a combination of behaviour IDs
 	// that are known to be successful. We know that this configuration was
 	// already successful in the past when it was created by newNetworkPayload
 	// beforehand. Such a creation then happened in some CLG tree execution before

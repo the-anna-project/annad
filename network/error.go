@@ -43,11 +43,11 @@ func IsInvalidInterface(err error) bool {
 	return errgo.Cause(err) == invalidInterfaceError
 }
 
-var invalidBehaviorIDError = errgo.New("invalid behavior ID")
+var invalidBehaviourIDError = errgo.New("invalid behaviour ID")
 
-// IsInvalidBehaviorID asserts invalidBehaviorIDError.
-func IsInvalidBehaviorID(err error) bool {
-	return errgo.Cause(err) == invalidBehaviorIDError
+// IsInvalidBehaviourID asserts invalidBehaviourIDError.
+func IsInvalidBehaviourID(err error) bool {
+	return errgo.Cause(err) == invalidBehaviourIDError
 }
 
 var invalidCLGNameError = errgo.New("invalid CLG name")

@@ -19,11 +19,11 @@ type Forwarder interface {
 	// CLG.
 	GetMaxSignals() int
 
-	GetNetworkPayloads(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]NetworkPayload, error)
+	GetNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
-	NewNetworkPayloads(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]NetworkPayload, error)
+	NewNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
-	ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload) error
+	ToInputCLG(CLG CLG, networkPayload NetworkPayload) error
 
 	StorageProvider
 }

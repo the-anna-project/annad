@@ -38,7 +38,7 @@ func (n *network) returnAndLogErrors(errors chan error) error {
 			executeErr = err
 		} else {
 			// Log all errors but the first one
-			n.Log.WithTags(spec.Tags{L: "E", O: n, T: nil, V: 4}, "%#v", maskAny(err))
+			n.Log.WithTags(spec.Tags{L: "E", O: n, C: nil, V: 4}, "%#v", maskAny(err))
 		}
 	}
 
@@ -79,6 +79,7 @@ func (n *network) newCLGs() map[string]spec.CLG {
 
 	for name := range newCLGs {
 		newCLGs[name].SetFactoryCollection(n.FactoryCollection)
+		newCLGs[name].SetGatewayCollection(n.GatewayCollection)
 		newCLGs[name].SetLog(n.Log)
 		newCLGs[name].SetStorageCollection(n.StorageCollection)
 	}

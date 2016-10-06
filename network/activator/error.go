@@ -1,4 +1,4 @@
-package network
+package activator
 
 import (
 	"fmt"
@@ -41,4 +41,11 @@ var invalidSourcesError = errgo.New("invalid sources")
 // IsInvalidSources asserts invalidSourcesError.
 func IsInvalidSources(err error) bool {
 	return errgo.Cause(err) == invalidSourcesError
+}
+
+var networkPayloadNotFoundError = errgo.New("network payload not found")
+
+// IsNetworkPayloadNotFound asserts networkPayloadNotFoundError.
+func IsNetworkPayloadNotFound(err error) bool {
+	return errgo.Cause(err) == networkPayloadNotFoundError
 }

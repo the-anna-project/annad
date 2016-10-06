@@ -244,6 +244,54 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	return result, nil
 }
 
+// TODO
+func (s *storage) PopFromList(key string) (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		_, err := redis.Int(conn.Do("SADD", s.withPrefix(key)))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return "", nil
+}
+
+// TODO
+func (s *storage) PushToList(key string, element string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		_, err := redis.Int(conn.Do("SADD", s.withPrefix(key), element))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
 func (s *storage) PushToSet(key string, element string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
 

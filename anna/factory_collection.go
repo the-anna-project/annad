@@ -15,7 +15,7 @@ func newFactoryCollection() (spec.FactoryCollection, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	idFactory, err := newIDFactory(newRandomFactory)
+	idFactory, err := newIDFactory(randomFactory)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -39,7 +39,7 @@ func newFactoryCollection() (spec.FactoryCollection, error) {
 func newIDFactory(randomFactory spec.RandomFactory) (spec.IDFactory, error) {
 	newFactoryConfig := id.DefaultFactoryConfig()
 	newFactoryConfig.RandomFactory = randomFactory
-	newFactory, err := id.New(newFactoryConfig)
+	newFactory, err := id.NewFactory(newFactoryConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -49,7 +49,7 @@ func newIDFactory(randomFactory spec.RandomFactory) (spec.IDFactory, error) {
 
 func newPermutationFactory() (spec.PermutationFactory, error) {
 	newFactoryConfig := permutation.DefaultFactoryConfig()
-	newFactory, err := permutation.New(newFactoryConfig)
+	newFactory, err := permutation.NewFactory(newFactoryConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -62,7 +62,7 @@ func newRandomFactory() (spec.RandomFactory, error) {
 	newFactoryConfig.BackOffFactory = func() spec.BackOff {
 		return backoff.NewExponentialBackOff()
 	}
-	newFactory, err := random.New(newFactoryConfig)
+	newFactory, err := random.NewFactory(newFactoryConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

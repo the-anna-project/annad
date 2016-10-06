@@ -8,6 +8,7 @@
 package output
 
 import (
+	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -19,7 +20,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// calculated. This then means we are probably not in a training situation.
 	expectation, ok := ctx.GetExpectation()
 	if !ok {
-		err := sendTextResponse(informationSequence)
+		err := c.sendTextResponse(informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -32,7 +33,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// calculated result, we simply return it.
 	calculatedOutput := expectation.GetOutput()
 	if informationSequence == calculatedOutput {
-		err := sendTextResponse(informationSequence)
+		err := c.sendTextResponse(informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -41,7 +42,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	return maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
 }
 
-func sendTextResponse(informationSequence string) error {
+func (c *clg) sendTextResponse(informationSequence string) error {
 	// Return the calculated output to the requesting client, if the
 	// current CLG is the output CLG.
 	newTextResponseConfig := api.DefaultTextResponseConfig()
@@ -51,7 +52,7 @@ func sendTextResponse(informationSequence string) error {
 		return maskAny(err)
 	}
 
-	n.TextOutput <- newTextResponse
+	c.Gateway().TextOutput().GetChannel() <- newTextResponse
 
 	return nil
 }

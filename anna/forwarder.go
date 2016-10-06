@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/xh3b4sd/anna/network/forwarder"
+	"github.com/xh3b4sd/anna/spec"
 )
 
 func newForwarder(newLog spec.Log, newFactoryCollection spec.FactoryCollection, newStorageCollection spec.StorageCollection) (spec.Forwarder, error) {

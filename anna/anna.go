@@ -44,14 +44,15 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			panicOnError(err)
 
 			// activator.
-			activator, err = newActivator(a.Log, factoryCollection, a.StorageCollection)
+			activator, err := newActivator(a.Log, factoryCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// forwarder.
-			forwarder, err = newForwarder(a.Log, factoryCollection, a.StorageCollection)
+			forwarder, err := newForwarder(a.Log, factoryCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// network.
+			// TODO add interface collection
 			networkConfig := network.DefaultConfig()
 			networkConfig.Activator = activator
 			networkConfig.FactoryCollection = factoryCollection

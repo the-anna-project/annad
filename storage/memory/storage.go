@@ -164,7 +164,7 @@ func (s *storage) GetRandomKey() (string, error) {
 	// Here we create a random number to chose a random map, of which we have 4.
 	// The random numbers start at 0. So the maximum random number we want to have
 	// is 3. Because the max parameter of CreateMax is exclusive, we set max to 4.
-	mapID, err := s.RandomFactory.CreateNMax(4)
+	mapID, err := s.RandomFactory.CreateMax(4)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -200,6 +200,26 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	}
 
 	return nil, notFoundError
+}
+
+// TODO
+func (s *storage) PopFromList(key string) (string, error) {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	// TODO
+
+	return "", nil
+}
+
+// TODO
+func (s *storage) PushToList(key string, element string) error {
+	s.Mutex.Lock()
+	defer s.Mutex.Unlock()
+
+	// TODO
+
+	return nil
 }
 
 func (s *storage) PushToSet(key string, element string) error {

@@ -3,6 +3,7 @@ package activator
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
@@ -44,19 +45,18 @@ func mergeNetworkPayloads(networkPayloads []spec.NetworkPayload) (spec.NetworkPa
 
 	var args []reflect.Value
 	var sources []spec.ObjectID
-	var ctx = networkPayloads[0].GetContext()
-
-	behaviourID, ok := ctx.GetBehaviorID()
-	if !ok {
-		return nil, maskAnyf(invalidBehaviorIDError, "must not be empty")
-	}
-
-	for _, m := range members {
-		for _, v := range payload.GetArgs() {
+	for _, np := range networkPayloads {
+		for _, v := range np.GetArgs() {
 			args = append(args, v)
 		}
 
-		sources = append(sources, payload.GetSources()...)
+		sources = append(sources, np.GetSources()...)
+	}
+
+	ctx := networkPayloads[0].GetContext()
+	behaviourID, ok := ctx.GetBehaviourID()
+	if !ok {
+		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
 	networkPayloadConfig := api.DefaultNetworkPayloadConfig()
@@ -87,7 +87,7 @@ func stringToQueue(s string) ([]spec.NetworkPayload, error) {
 
 	for _, s := range strings.Split(s, ",") {
 		np := api.MustNewNetworkPayload()
-		err = json.Unmarshal([]byte(s), &np)
+		err := json.Unmarshal([]byte(s), &np)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -117,7 +117,7 @@ func valuesToQueue(values []interface{}) []spec.NetworkPayload {
 		queue = append(queue, v.(spec.NetworkPayload))
 	}
 
-	return queue, nil
+	return queue
 }
 
 // valuesToTypes parses permutation values to reflect types. The underlying type

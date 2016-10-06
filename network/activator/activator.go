@@ -3,8 +3,8 @@ package activator
 import (
 	"strings"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory"
+	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
@@ -115,7 +115,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	if len(queue) > queueBuffer {
 		queue = queue[1:]
 	}
-	err = n.persistQueue(queueKey, queue)
+	err = a.persistQueue(queueKey, queue)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -128,7 +128,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 
 	// Execute one lookup after another. As soon as we find a network payload, we
 	// return it.
-	var newNetworkPayload spec.NewNetworkPayload
+	var newNetworkPayload spec.NetworkPayload
 	for _, lookup := range lookups {
 		newNetworkPayload, err = lookup(CLG, queue)
 		if IsNetworkPayloadNotFound(err) {
@@ -146,7 +146,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 
 	// Filter all network payloads from the queue that are merged into the new
 	// network payload.
-	var newQueue spec.NetworkPayload
+	var newQueue []spec.NetworkPayload
 	for _, s := range newNetworkPayload.GetSources() {
 		for _, np := range queue {
 			// At this point there is only one source given. That is the CLG that
@@ -156,7 +156,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 			if len(sources) != 1 {
 				return nil, maskAnyf(invalidSourcesError, "there must be one source")
 			}
-			if s == string(sources[0]) {
+			if s == sources[0] {
 				// The current network payload is part of the merged network payload.
 				// Thus we do not add it to the new queue.
 				continue
@@ -166,7 +166,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	}
 
 	// Update the modified queue in the underlying storage.
-	err = n.persistQueue(queueKey, newQueue)
+	err = a.persistQueue(queueKey, newQueue)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -259,7 +259,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// satisfies the requested CLG's interface.
 	newPermutationListConfig := permutation.DefaultListConfig()
 	newPermutationListConfig.MaxGrowth = len(clgTypes)
-	newPermutationListConfig.Values = queueToValues(queue)
+	newPermutationListConfig.RawValues = queueToValues(queue)
 	newPermutationList, err := permutation.NewList(newPermutationListConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -267,7 +267,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 
 	// Permute the permutation list of the queued network payloads until we found
 	// all the matching combinations.
-	var possibleMatches []spec.NetworkPayload
+	var possibleMatches [][]spec.NetworkPayload
 	for {
 		// Check if the current combination of network payloads already satisfies
 		// the interface of the requested CLG. This is done in the first place to
@@ -278,7 +278,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 		permutedValues := newPermutationList.GetPermutedValues()
 		valueTypes := typesToStrings(valuesToTypes(permutedValues))
 		if equalStrings(clgTypes, valueTypes) {
-			possibleMatches = valuesToQueue(permutedValues)
+			possibleMatches = append(possibleMatches, valuesToQueue(permutedValues))
 		}
 
 		// Permute the list of the queued network payloads by one further
@@ -286,7 +286,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 		// list cannot be permuted anymore, we stop the permutation loop to choose
 		// one random combination of the tracked list in the next step below.
 		err = a.Factory().Permutation().PermuteBy(newPermutationList, 1)
-		if IsMaxGrowthReached(err) {
+		if permutation.IsMaxGrowthReached(err) {
 			break
 		} else if err != nil {
 			return nil, maskAny(err)
@@ -327,7 +327,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	for _, behaviourID := range newNetworkPayload.GetSources() {
 		behaviourIDs = append(behaviourIDs, string(behaviourID))
 	}
-	err := a.Storage().General().Set(behaviourIDsKey, strings.Join(behaviourIDs, ","))
+	err = a.Storage().General().Set(behaviourIDsKey, strings.Join(behaviourIDs, ","))
 	if err != nil {
 		return nil, maskAny(err)
 	}
