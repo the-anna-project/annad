@@ -21,7 +21,7 @@ make annactl
 
 ### log control
 
-The [log control](control.md#log) is used to configure Anna's logging behavior
+The [log control](control.md#log) is used to configure Anna's logging behaviour
 at runtime.
 
 ```yaml

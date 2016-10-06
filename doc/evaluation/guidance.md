@@ -13,7 +13,7 @@ static. So it always must be very consciously thought about when, why and how
 Anna should be taught actively.
 
 Finally the strategic results of guidance should be recognized by Anna and lead
-to a dynamically learned behavior and cause consciously connected neurons within
+to a dynamically learned behaviour and cause consciously connected neurons within
 Anna's neural networks.
 
 ### provide BI, Basic Information
@@ -27,7 +27,7 @@ sufficient. E.g. this BIs probably need to be provided from the very beginning
 Anna needs to connect neurons to gather knowledge. It may happen that there
 cannot be made all important connections by herself. Then there could be the
 option to tell her what neurons to connect and why. Here it is important that
-this behavior is implemented in a generic way so we don't create exceptions
+this behaviour is implemented in a generic way so we don't create exceptions
 only to support this special case. This approach must be part of Anna's
-[BBs](/doc/concept/clg.md#bb-basic-behavior). The interface of such generic
-behavior model could be seen as `when x then y` action.
+[BBs](/doc/concept/clg.md#bb-basic-behaviour). The interface of such generic
+behaviour model could be seen as `when x then y` action.

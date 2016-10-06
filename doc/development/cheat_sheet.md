@@ -65,8 +65,8 @@ ack-grep "key\.NewCLGKey\(" --nobreak --noheading --no-filename | sed -u 's/^.*k
 
 The generated output will somehow look like this.
 ```
-behavior-id:%s:behavior-ids
-behavior-id:%s:behavior-name
+behaviour-id:%s:behaviour-ids
+behaviour-id:%s:behaviour-name
 feature:%s:positions
 information-id:%s:clg-tree-id
 information-id:%s:information-sequence

@@ -53,7 +53,7 @@ When we have filled the context with all necessary information Anna can create
 a response.
 
 Creativity, inspriration, spontaneity and other human like fresh skills need to
-influence behavior as well. To fill a conversation with life is basically the
+influence behaviour as well. To fill a conversation with life is basically the
 simple result of using already known information and choosing this one that
 fits the current situation the most. What that actually means depends on the
 experiences an individual made so far. After clustering context related
