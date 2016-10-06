@@ -262,7 +262,7 @@ func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload)
 
 	// Find the original information sequence using the information ID from the
 	// context.
-	informationID, ok := ctx.GetCLGTreeID()
+	informationID, ok := ctx.GetInformationID()
 	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}

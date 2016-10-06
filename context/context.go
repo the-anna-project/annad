@@ -27,12 +27,7 @@ const (
 // Config represents the configuration used to create a new context object.
 type Config struct {
 	// Settings.
-
 	Context netcontext.Context
-
-	// TODO we want to track the original input that was provided from the
-	// outside. Further it would probably be interesting to also track the last 3
-	// arguments of the current connection path.
 }
 
 // DefaultConfig provides a default configuration to create a new context
