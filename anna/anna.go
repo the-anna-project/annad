@@ -39,6 +39,10 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			factoryCollection, err := newFactoryCollection()
 			panicOnError(err)
 
+			// gateway collection.
+			gatewayCollection, err := newGatewayCollection(newTextOutput)
+			panicOnError(err)
+
 			// storage collection.
 			a.StorageCollection, err = newStorageCollection(a.Log, a.Flags)
 			panicOnError(err)
@@ -52,11 +56,11 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			panicOnError(err)
 
 			// network.
-			// TODO add interface collection
 			networkConfig := network.DefaultConfig()
 			networkConfig.Activator = activator
 			networkConfig.FactoryCollection = factoryCollection
 			networkConfig.Forwarder = forwarder
+			networkConfig.GatewayCollection = gatewayCollection
 			networkConfig.Log = a.Log
 			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.TextInput = newTextInput
