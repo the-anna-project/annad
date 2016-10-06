@@ -27,9 +27,6 @@ type Config struct {
 	FactoryCollection spec.FactoryCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
-
-	// Settings.
-	InputChannel chan spec.NetworkPayload
 }
 
 // DefaultConfig provides a default configuration to create a new CLG object by
@@ -40,9 +37,6 @@ func DefaultConfig() Config {
 		FactoryCollection: factory.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
-
-		// Settings.
-		InputChannel: make(chan spec.NetworkPayload, 1000),
 	}
 
 	return newConfig
@@ -53,6 +47,7 @@ func New(config Config) (spec.CLG, error) {
 	newCLG := &clg{
 		Config: config,
 		ID:     id.MustNew(),
+		Name:   "divide",
 		Type:   ObjectType,
 	}
 
@@ -65,11 +60,6 @@ func New(config Config) (spec.CLG, error) {
 	}
 	if newCLG.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-
-	// Settings.
-	if newCLG.InputChannel == nil {
-		return nil, maskAnyf(invalidConfigError, "input channel must not be empty")
 	}
 
 	newCLG.Log.Register(newCLG.GetType())
@@ -91,6 +81,7 @@ type clg struct {
 	Config
 
 	ID   spec.ObjectID
+	Name string
 	Type spec.ObjectType
 }
 
@@ -103,11 +94,7 @@ func (c *clg) GetCalculate() interface{} {
 }
 
 func (c *clg) GetName() string {
-	return "divide"
-}
-
-func (c *clg) GetInputChannel() chan spec.NetworkPayload {
-	return c.InputChannel
+	return c.Name
 }
 
 func (c *clg) SetFactoryCollection(factoryCollection spec.FactoryCollection) {
