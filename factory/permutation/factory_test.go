@@ -14,7 +14,7 @@ func Test_Permutation_Factory_PermuteBy_AbsoluteDelta(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {
@@ -148,7 +148,7 @@ func Test_Permutation_Factory_PermuteBy_Increment(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {
@@ -207,7 +207,7 @@ func Test_Permutation_Factory_PermuteBy_RelativeDelta(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {

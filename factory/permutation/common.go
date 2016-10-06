@@ -6,7 +6,7 @@ import (
 
 func createIndizesWithDelta(list spec.PermutationList, delta int) ([]int, error) {
 	// Initialize scope variables.
-	base := len(list.GetValues())
+	base := len(list.GetRawValues())
 	newIndizes := list.GetIndizes()
 	operation := 0
 
@@ -57,7 +57,7 @@ func permuteValues(list spec.PermutationList) []interface{} {
 	permutedValues := make([]interface{}, len(list.GetIndizes()))
 
 	for i, index := range list.GetIndizes() {
-		permutedValues[i] = list.GetValues()[index]
+		permutedValues[i] = list.GetRawValues()[index]
 	}
 
 	return permutedValues
