@@ -1,6 +1,8 @@
 package spec
 
 import (
+	"encoding/json"
+
 	"golang.org/x/net/context"
 )
 
@@ -43,6 +45,9 @@ type Context interface {
 	// GetSessionID returns the session ID of the current context. The second
 	// return value expresses the existence of the key requested.
 	GetSessionID() (string, bool)
+
+	json.Marshaler
+	json.Unmarshaler
 
 	// SetBehaviourID sets the given behaviour ID to the current context.
 	SetBehaviourID(behaviourID string)

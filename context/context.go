@@ -12,22 +12,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-type key string
-
-const (
-	// TODO make the context marshalable
-	behaviourIDKey   key = "behaviour-id"
-	clgNameKey       key = "clg-name"
-	clgTreeIDKey     key = "clg-tree-id"
-	expectationIDKey key = "expectation"
-	informationIDKey key = "information-id"
-	sessionIDKey     key = "session-id"
-)
-
 // Config represents the configuration used to create a new context object.
 type Config struct {
 	// Settings.
-	Context netcontext.Context
+
+	BehaviourID   string
+	Context       netcontext.Context
+	CLGName       string
+	CLGTreeID     string
+	Expectation   spec.Expectation
+	InformationID string
+	SessionID     string
 }
 
 // DefaultConfig provides a default configuration to create a new context
@@ -35,7 +30,13 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context: netcontext.Background(),
+		BehaviourID:   "",
+		Context:       netcontext.Background(),
+		CLGName:       "",
+		CLGTreeID:     "",
+		Expectation:   nil,
+		InformationID: "",
+		SessionID:     "",
 	}
 
 	return newConfig
@@ -110,23 +111,35 @@ func (c *context) Err() error {
 }
 
 func (c *context) GetBehaviourID() (string, bool) {
-	v, ok := c.Context.Value(behaviourIDKey).(string)
-	return v, ok
+	if c.BehaviourID == "" {
+		return "", false
+	}
+
+	return c.BehaviourID, true
 }
 
 func (c *context) GetCLGName() (string, bool) {
-	v, ok := c.Context.Value(clgNameKey).(string)
-	return v, ok
+	if c.CLGName == "" {
+		return "", false
+	}
+
+	return c.CLGName, true
 }
 
 func (c *context) GetCLGTreeID() (string, bool) {
-	v, ok := c.Context.Value(clgTreeIDKey).(string)
-	return v, ok
+	if c.CLGTreeID == "" {
+		return "", false
+	}
+
+	return c.CLGTreeID, true
 }
 
 func (c *context) GetExpectation() (spec.Expectation, bool) {
-	v, ok := c.Context.Value(expectationIDKey).(spec.Expectation)
-	return v, ok
+	if c.Expectation == nil {
+		return nil, false
+	}
+
+	return c.Expectation, true
 }
 
 func (c *context) GetID() string {
@@ -134,37 +147,43 @@ func (c *context) GetID() string {
 }
 
 func (c *context) GetInformationID() (string, bool) {
-	v, ok := c.Context.Value(informationIDKey).(string)
-	return v, ok
+	if c.InformationID == "" {
+		return "", false
+	}
+
+	return c.InformationID, true
 }
 
 func (c *context) GetSessionID() (string, bool) {
-	v, ok := c.Context.Value(sessionIDKey).(string)
-	return v, ok
+	if c.SessionID == "" {
+		return "", false
+	}
+
+	return c.SessionID, true
 }
 
 func (c *context) SetBehaviourID(behaviourID string) {
-	c.Context = netcontext.WithValue(c.Context, behaviourIDKey, behaviourID)
+	c.BehaviourID = behaviourID
 }
 
 func (c *context) SetCLGName(clgName string) {
-	c.Context = netcontext.WithValue(c.Context, clgNameKey, clgName)
+	c.CLGName = clgName
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
-	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+	c.CLGTreeID = clgTreeID
 }
 
 func (c *context) SetExpectation(expectation spec.Expectation) {
-	c.Context = netcontext.WithValue(c.Context, expectationIDKey, expectation)
+	c.Expectation = expectation
 }
 
 func (c *context) SetInformationID(informationID string) {
-	c.Context = netcontext.WithValue(c.Context, informationIDKey, informationID)
+	c.InformationID = informationID
 }
 
 func (c *context) SetSessionID(sessionID string) {
-	c.Context = netcontext.WithValue(c.Context, sessionIDKey, sessionID)
+	c.SessionID = sessionID
 }
 
 func (c *context) Value(key interface{}) interface{} {
