@@ -20,35 +20,30 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// receiver
+// logNetworkError logs the given error in a specific way dependening on the
+// given error. If the given error is nil, nothing will be logged.
+func (n *network) logNetworkError(err error) {
+	if output.IsExpectationNotMet(err) {
+		n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
+	} else if err != nil {
+		n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+	}
+}
 
-// returnAndLogErrors returns the very first error that may be given by errors.
-// All upcoming errors may be given by the provided error channel will be logged
-// using the configured logger with log level E and verbosity 4.
-func (n *network) returnAndLogErrors(errors chan error) error {
-	var executeErr error
-
+// logWorkerErrors logs all errors that are may be queued by the provided error
+// channel using the configured logger with log level E and verbosity 4.
+func (n *network) logWorkerErrors(errors chan error) {
 	for err := range errors {
 		if IsWorkerCanceled(err) {
 			continue
 		}
 
-		if executeErr == nil {
-			// Only return the first error.
-			executeErr = err
-		} else {
-			// Log all errors but the first one
-			n.Log.WithTags(spec.Tags{L: "E", O: n, C: nil, V: 4}, "%#v", maskAny(err))
-		}
+		n.Log.WithTags(spec.Tags{L: "E", O: n, C: nil, V: 4}, "%#v", maskAny(err))
 	}
-
-	if executeErr != nil {
-		return maskAny(executeErr)
-	}
-
-	return nil
 }
 
+// newCLGs returns a list of all CLGs which are configured and ready to be used
+// within the neural network.
 func (n *network) newCLGs() map[string]spec.CLG {
 	list := []spec.CLG{
 		divide.MustNew(),

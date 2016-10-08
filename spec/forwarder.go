@@ -31,8 +31,5 @@ type Forwarder interface {
 	// list is returned.
 	NewNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
-	// TODO move to output CLG
-	ToInputCLG(CLG CLG, networkPayload NetworkPayload) error
-
 	StorageProvider
 }

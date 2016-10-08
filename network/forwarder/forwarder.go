@@ -2,7 +2,6 @@ package forwarder
 
 import (
 	"encoding/json"
-	"reflect"
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/factory"
@@ -253,64 +252,4 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	}
 
 	return newNetworkPayloads, nil
-}
-
-// TODO this should probably be moved to the output CLG
-func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	ctx := networkPayload.GetContext()
-
-	// Find the original information sequence using the information ID from the
-	// context.
-	informationID, ok := ctx.GetInformationID()
-	if !ok {
-		return maskAnyf(invalidInformationIDError, "must not be empty")
-	}
-	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := f.Storage().General().Get(informationSequenceKey)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	// Find the first behaviour ID using the CLG tree ID from the context. The
-	// behaviour ID we are looking up here is the ID of the initial input CLG.
-	clgTreeID, ok := ctx.GetCLGTreeID()
-	if !ok {
-		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
-	}
-	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
-	behaviourID, err := f.Storage().General().Get(firstBehaviourIDKey)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	// Adapt the given context with the information of the current scope.
-	ctx.SetBehaviourID(behaviourID)
-	ctx.SetCLGName("input")
-	ctx.SetCLGTreeID(clgTreeID)
-	// We do not need to set the expectation because it never changes.
-	// We do not need to set the session ID because it never changes.
-
-	// Create a new network payload.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
-	newNetworkPayloadConfig.Context = ctx
-	newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	// Write the transformed network payload to the queue.
-	networkPayloadKey := key.NewNetworkKey("events:network-payload")
-	b, err := json.Marshal(newNetworkPayload)
-	if err != nil {
-		return maskAny(err)
-	}
-	err = f.Storage().General().PushToList(networkPayloadKey, string(b))
-	if err != nil {
-		return maskAny(err)
-	}
-
-	return nil
 }

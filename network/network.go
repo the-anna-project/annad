@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/clg/output"
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
@@ -175,10 +174,7 @@ func (n *network) Boot() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
-			err = n.returnAndLogErrors(inputPool.Execute())
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-			}
+			n.logWorkerErrors(inputPool.Execute())
 		}()
 
 		go func() {
@@ -192,10 +188,7 @@ func (n *network) Boot() {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
-			err = n.returnAndLogErrors(eventPool.Execute())
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-			}
+			n.logWorkerErrors(eventPool.Execute())
 		}()
 	})
 }
@@ -267,15 +260,14 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 		case <-canceler:
 			return maskAny(workerCanceledError)
 		default:
-			err := invokeEventHandler()
-			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
-			}
+			n.logNetworkError(invokeEventHandler())
 		}
 	}
 }
 
 func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// TODO add event tracker
+
 	// Activate if the CLG's interface is satisfied by the given
 	// network payload.
 	networkPayload, err := n.Activate(CLG, networkPayload)
@@ -285,17 +277,7 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 
 	// Calculate based on the CLG's implemented business logic.
 	newNetworkPayload, err := n.Calculate(CLG, networkPayload)
-	if output.IsExpectationNotMet(err) {
-		n.Log.WithTags(spec.Tags{C: nil, L: "W", O: n, V: 7}, "%#v", maskAny(err))
-
-		// TODO this should probably be moved to the output CLG
-		err := n.Forwarder.ToInputCLG(CLG, networkPayload)
-		if err != nil {
-			return maskAny(err)
-		}
-
-		return nil
-	} else if err != nil {
+	if err != nil {
 		return maskAny(err)
 	}
 
