@@ -16,6 +16,8 @@ type GatewayProvider interface {
 	Gateway() GatewayCollection
 }
 
+// TextOutputGateway provides a communication channel to send information
+// sequences back to the client.
 type TextOutputGateway interface {
 	// GetChannel returns a channel which is used to send text responses back to
 	// the client.

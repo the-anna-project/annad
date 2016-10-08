@@ -207,7 +207,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// storage. Here it is important to obtain the order of the behaviour IDs
 	// stored as connections. They represent the input interface of the requested
 	// CLG. Thus there must not be any variation applied to the lookup here,
-	// because we need the lookup to be reproducable.
+	// because we need the lookup to be reproducible.
 	var matches []spec.NetworkPayload
 	for _, behaviourID := range behaviourIDs {
 		for _, np := range queue {
