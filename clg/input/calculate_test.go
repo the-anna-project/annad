@@ -130,19 +130,9 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	// Check if the information ID was set to the context.
@@ -167,19 +157,9 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	// Check if the information ID was set to the context.
@@ -210,19 +190,9 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
 	}
 
 	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
@@ -259,7 +229,7 @@ func Test_CLG_Input_IDFactoryError(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -290,7 +260,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	newCLG.(*clg).FactoryCollection = newFactoryCollection
 
 	// Execute CLG.
-	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -323,7 +293,7 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 	newCLG.(*clg).FactoryCollection = newFactoryCollection
 
 	// Execute CLG.
-	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -345,7 +315,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCLG.SetStorageCollection(newStorageCollection)
 
 	// Execute CLG.
-	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}

@@ -6,10 +6,7 @@ package round
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	"reflect"
 	"testing"
-
-	"golang.org/x/net/context"
 )
 
 func Test_CLG_Factory(t *testing.T) {

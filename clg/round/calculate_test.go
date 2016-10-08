@@ -1,11 +1,9 @@
 package round
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/context"
 )
 
 func Test_CLG_Round(t *testing.T) {
@@ -59,27 +57,12 @@ func Test_CLG_Round(t *testing.T) {
 	newCLG := MustNew()
 
 	for i, testCase := range testCases {
-		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(testCase.Float), reflect.ValueOf(testCase.Precision)}
-		newNetworkPayloadConfig.Destination = "destination"
-		newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-		newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+		f, err := newCLG.(*clg).calculate(context.MustNew(), testCase.Float, testCase.Precision)
 		if err != nil {
 			t.Fatal("case", i+1, "expected", nil, "got", err)
 		}
-
-		calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 2 {
-			t.Fatal("case", i+1, "expected", 2, "got", len(args))
-		}
-		result := args[1].Float()
-
-		if result != testCase.Expected {
-			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)
+		if f != testCase.Expected {
+			t.Fatal("case", i+1, "expected", testCase.Expected, "got", f)
 		}
 	}
 }

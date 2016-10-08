@@ -1,11 +1,9 @@
 package islesser
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/context"
 )
 
 func Test_CLG_IsLesser(t *testing.T) {
@@ -54,27 +52,9 @@ func Test_CLG_IsLesser(t *testing.T) {
 	newCLG := MustNew()
 
 	for i, testCase := range testCases {
-		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(testCase.A), reflect.ValueOf(testCase.B)}
-		newNetworkPayloadConfig.Destination = "destination"
-		newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-		newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-
-		calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 2 {
-			t.Fatal("case", i+1, "expected", 2, "got", len(args))
-		}
-		result := args[1].Bool()
-
-		if result != testCase.Expected {
-			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)
+		f := newCLG.(*clg).calculate(context.MustNew(), testCase.A, testCase.B)
+		if f != testCase.Expected {
+			t.Fatal("case", i+1, "expected", testCase.Expected, "got", f)
 		}
 	}
 }
