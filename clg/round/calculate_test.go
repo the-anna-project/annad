@@ -66,3 +66,11 @@ func Test_CLG_Round(t *testing.T) {
 		}
 	}
 }
+
+func Test_CLG_Round_Error_NegativePrecision(t *testing.T) {
+	newCLG := MustNew()
+	_, err := newCLG.(*clg).calculate(context.MustNew(), 3.4465, -3)
+	if !IsParseFloatSyntax(err) {
+		t.Fatal("case", "expected", true, "got", false)
+	}
+}
