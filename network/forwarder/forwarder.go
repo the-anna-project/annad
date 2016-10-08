@@ -213,6 +213,9 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 		newBehaviourIDs = append(newBehaviourIDs, string(newBehaviourID))
 	}
 
+	// TODO find a CLG name that can be connected to the current CLG for each new
+	// behaviour ID and pair these combinations (network event tracker)
+
 	// Store each new behaviour ID in the underlying storage.
 	behaviourID, ok := ctx.GetBehaviourID()
 	if !ok {
@@ -233,6 +236,7 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 		// Prepare a new context for the new network payload.
 		newCtx := ctx.Clone()
 		newCtx.SetBehaviourID(behaviourID)
+		// TODO set the paired CLG name to the new context
 
 		// Create a new network payload.
 		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()

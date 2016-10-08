@@ -19,10 +19,19 @@ type Forwarder interface {
 	// CLG.
 	GetMaxSignals() int
 
+	// GetNetworkPayloads tries to lookup behaviour IDs that can be used to
+	// forward a certain network payload from the requested CLG to other CLGs. If
+	// there are behaviour IDs found, a network payload for each behaviour ID is
+	// created and the list of new network payloads is returned. If there could
+	// not any behaviour ID be found, an error is returned.
 	GetNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
+	// NewNetworkPayloads creates new connections to other CLGs in a pseudo random
+	// manner. For each connection one network payload is created. The resulting
+	// list is returned.
 	NewNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
+	// TODO move to output CLG
 	ToInputCLG(CLG CLG, networkPayload NetworkPayload) error
 
 	StorageProvider

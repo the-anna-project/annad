@@ -93,10 +93,18 @@ type Network interface {
 	// does with the provided NetworkPayload.
 	Calculate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
 
-	// TODO
+	// EventListener is a worker pool function which is executed multiple times
+	// concurrently to listen for network events. A network event is qualified by
+	// a network payload being queued and waiting to be processed. A network event
+	// and its processing represents an event associated with a very specific CLG.
+	// Thus EventListener represents the entrypoint for every single CLG execution
+	// step. canceler is provided by the worker pool that executes EventListener.
+	// Therefore EventListener should respect canceler by implementing a clean
+	// shutdown behaviour. EventListener calls EventHandler.
 	EventListener(canceler <-chan struct{}) error
 
-	// TODO
+	// EventHandler effectively executes a network event associated to a CLG and
+	// the corresponding network payload. EventHandler is called by EventListener.
 	EventHandler(CLG CLG, networkPayload NetworkPayload) error
 
 	FactoryProvider
@@ -125,10 +133,15 @@ type Network interface {
 
 	GatewayProvider
 
-	// TODO
+	// InputListener is a worker pool function which is executed multiple times
+	// concurrently to listen for network inputs. A network input is qualified by
+	// information sequences sent by clients who request some calculation from the
+	// network. InputListener also calls InputHandler.
 	InputListener(canceler <-chan struct{}) error
 
-	// TODO
+	// InputHandler effectively executes the network input by invoking the input
+	// CLG using the incoming text request. InputHandler is called by
+	// InputListener.
 	InputHandler(CLG CLG, textRequest TextRequest) error
 
 	Object

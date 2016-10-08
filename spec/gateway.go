@@ -7,6 +7,8 @@ type GatewayCollection interface {
 	// TextOutput returns an text output gateway. It is used to send text
 	// responses back to the client.
 	TextOutput() TextOutputGateway
+
+	// TODO add TextInput
 }
 
 // GatewayProvider should be implemented by every object which wants to use
