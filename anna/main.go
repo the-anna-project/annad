@@ -3,8 +3,10 @@
 package main
 
 import (
+	"math/rand"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
@@ -68,6 +70,7 @@ func New(config Config) (spec.Anna, error) {
 		Config: config,
 
 		BootOnce:     sync.Once{},
+		Closer:       make(chan struct{}, 1),
 		ID:           id.MustNew(),
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,
@@ -93,6 +96,7 @@ type anna struct {
 	Config
 
 	BootOnce     sync.Once
+	Closer       chan struct{}
 	ID           spec.ObjectID
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
@@ -122,6 +126,15 @@ func (a *anna) Shutdown() {
 	a.ShutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
+		close(a.Closer)
+
+		wg.Add(1)
+		go func() {
+			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down storage")
+			a.Storage().Shutdown()
+			wg.Done()
+		}()
+
 		wg.Add(1)
 		go func() {
 			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down network")
@@ -145,6 +158,10 @@ func (a *anna) Shutdown() {
 
 func (a *anna) Storage() spec.StorageCollection {
 	return a.StorageCollection
+}
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
 }
 
 func main() {

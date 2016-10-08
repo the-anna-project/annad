@@ -134,7 +134,7 @@ func (f *forwarder) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) er
 			return maskAny(err)
 		}
 		// TODO store asynchronuously
-		err = f.Storage().General().PushToList(networkPayloadKey, string(b))
+		err = f.Storage().General().PushToSet(networkPayloadKey, string(b))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -152,17 +152,12 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 
 	// Check if there are behaviour IDs known that we can use to forward the
 	// current network payload to.
-	var newBehaviourIDs []string
 	behaviourID, ok := ctx.GetBehaviourID()
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewCLGKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
-	// TODO add closer instead of nil
-	err := f.Storage().General().WalkSet(behaviourIDsKey, nil, func(element string) error {
-		newBehaviourIDs = append(newBehaviourIDs, element)
-		return nil
-	})
+	newBehaviourIDs, err := f.Storage().General().GetAllFromSet(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No configuration of behaviour IDs is stored. Thus we return an error.
 		// Eventually some other lookup is able to find sufficient network payloads.

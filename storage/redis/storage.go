@@ -39,14 +39,32 @@ type StorageConfig struct {
 // DefaultStorageConfigWithConn provides a configuration that can be mocked
 // using a redis connection. This is used for testing.
 func DefaultStorageConfigWithConn(redisConn redis.Conn) StorageConfig {
+	// pool
 	newPoolConfig := DefaultPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
 	newMockDialConfig.RedisConn = redisConn
 	newPoolConfig.Dial = newMockDial(newMockDialConfig)
 	newPool := NewPool(newPoolConfig)
 
+	// storage
 	newStorageConfig := DefaultStorageConfig()
 	newStorageConfig.Pool = newPool
+
+	return newStorageConfig
+}
+
+// DefaultStorageConfigWithAddr provides a configuration to make a redis client
+// connect to the provided address. This is used for production.
+func DefaultStorageConfigWithAddr(addr string) StorageConfig {
+	// dial
+	newDialConfig := DefaultDialConfig()
+	newDialConfig.Addr = addr
+	// pool
+	newPoolConfig := DefaultPoolConfig()
+	newPoolConfig.Dial = NewDial(newDialConfig)
+	// storage
+	newStorageConfig := DefaultStorageConfig()
+	newStorageConfig.Pool = NewPool(newPoolConfig)
 
 	return newStorageConfig
 }
@@ -59,7 +77,7 @@ func DefaultStorageConfig() StorageConfig {
 		panic(err)
 	}
 
-	newConfig := StorageConfig{
+	newStorageConfig := StorageConfig{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
 		Log:             log.New(log.DefaultConfig()),
@@ -72,7 +90,7 @@ func DefaultStorageConfig() StorageConfig {
 		Prefix: "prefix",
 	}
 
-	return newConfig
+	return newStorageConfig
 }
 
 // NewStorage creates a new configured redis storage object.
@@ -133,6 +151,35 @@ func (s *storage) Get(key string) (string, error) {
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
+	}
+
+	return result, nil
+}
+
+// TODO test
+func (s *storage) GetAllFromSet(key string) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
+
+	var result []string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		values, err := redis.Values(conn.Do("SMEMBERS", s.withPrefix(key)))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		for _, v := range values {
+			result = append(result, v.(string))
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetAllFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
 	return result, nil
@@ -244,15 +291,17 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	return result, nil
 }
 
-// TODO
+// TODO test
 func (s *storage) PopFromList(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
 
+	var result string
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("SADD", s.withPrefix(key)))
+		var err error
+		result, err = redis.String(conn.Do("BRPOP", s.withPrefix(key)))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -260,23 +309,23 @@ func (s *storage) PopFromList(key string) (string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PopFromList", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	return "", nil
+	return result, nil
 }
 
-// TODO
+// TODO test
 func (s *storage) PushToList(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
 
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		_, err := redis.Int(conn.Do("SADD", s.withPrefix(key), element))
+		_, err := redis.Int(conn.Do("LPUSH", s.withPrefix(key), element))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -284,7 +333,7 @@ func (s *storage) PushToList(key string, element string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToList", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -436,6 +485,12 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 	}
 
 	return nil
+}
+
+func (s *storage) Shutdown() {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+
+	s.Pool.Close()
 }
 
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
