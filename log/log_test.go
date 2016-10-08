@@ -104,6 +104,10 @@ func (c *context) GetSessionID() (string, bool) {
 	return c.SessionID, true
 }
 
+func (c *context) MarshalJSON() ([]byte, error) {
+	return nil, nil
+}
+
 func (c *context) SetBehaviourID(behaviourID string) {
 
 }
@@ -126,6 +130,10 @@ func (c *context) SetInformationID(informationID string) {
 
 func (c *context) SetSessionID(sessionID string) {
 	c.SessionID = sessionID
+}
+
+func (c *context) UnmarshalJSON(b []byte) error {
+	return nil
 }
 
 func (c *context) Value(key interface{}) interface{} {

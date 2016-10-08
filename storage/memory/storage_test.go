@@ -5,5 +5,6 @@ import (
 )
 
 func Test_Memory_MustNew(t *testing.T) {
-	MustNew()
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
 }

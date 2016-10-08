@@ -98,9 +98,9 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:    id.MustNew(),
-		Mutex: sync.Mutex{},
-		Type:  ObjectType,
+		ID:           id.MustNew(),
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectType,
 	}
 
 	// Dependencies.
@@ -126,9 +126,9 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 type storage struct {
 	StorageConfig
 
-	ID    spec.ObjectID
-	Mutex sync.Mutex
-	Type  spec.ObjectType
+	ID           spec.ObjectID
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (s *storage) Get(key string) (string, error) {
@@ -490,7 +490,9 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 func (s *storage) Shutdown() {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
 
-	s.Pool.Close()
+	s.ShutdownOnce.Do(func() {
+		s.Pool.Close()
+	})
 }
 
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {

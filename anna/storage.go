@@ -9,12 +9,12 @@ import (
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-func newStorageCollection(newLog spec.Log, closer chan struct{}, flags Flags) (spec.StorageCollection, error) {
-	newFeatureStorage, err := newConfiguredStorage(newLog, closer, flags.Storage, flags.RedisStoragePrefix, flags.RedisFeatureStorageAddr)
+func newStorageCollection(newLog spec.Log, flags Flags) (spec.StorageCollection, error) {
+	newFeatureStorage, err := newConfiguredStorage(newLog, flags.Storage, flags.RedisStoragePrefix, flags.RedisFeatureStorageAddr)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	newGeneralStorage, err := newConfiguredStorage(newLog, closer, flags.Storage, flags.RedisStoragePrefix, flags.RedisGeneralStorageAddr)
+	newGeneralStorage, err := newConfiguredStorage(newLog, flags.Storage, flags.RedisStoragePrefix, flags.RedisGeneralStorageAddr)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -30,13 +30,13 @@ func newStorageCollection(newLog spec.Log, closer chan struct{}, flags Flags) (s
 	return newCollection, nil
 }
 
-func newConfiguredStorage(newLog spec.Log, closer chan struct{}, storageType, storagePrefix, storageAddr string) (spec.Storage, error) {
-	var newStorageConfig redis.StorageConfig
+func newConfiguredStorage(newLog spec.Log, storageType, storagePrefix, storageAddr string) (spec.Storage, error) {
+	var newStorage spec.Storage
 	var err error
 
 	switch storageType {
 	case "redis":
-		newStorageConfig = redis.DefaultStorageConfigWithAddr(storageAddr)
+		newStorageConfig := redis.DefaultStorageConfigWithAddr(storageAddr)
 		newStorageConfig.BackOffFactory = func() spec.BackOff {
 			return backoff.NewExponentialBackOff()
 		}
@@ -46,16 +46,17 @@ func newConfiguredStorage(newLog spec.Log, closer chan struct{}, storageType, st
 		}
 		newStorageConfig.Log = newLog
 		newStorageConfig.Prefix = storagePrefix
+		newStorage, err = redis.NewStorage(newStorageConfig)
+		if err != nil {
+			return nil, maskAny(err)
+		}
 	case "memory":
-		// storage
-		newStorageConfig = memory.DefaultStorageConfigWithCloser(closer)
+		newStorage, err = memory.NewStorage(memory.DefaultStorageConfig())
+		if err != nil {
+			return nil, maskAny(err)
+		}
 	default:
 		return nil, maskAnyf(invalidStorageFlagError, "%s", storageType)
-	}
-
-	newStorage, err := redis.NewStorage(newStorageConfig)
-	if err != nil {
-		return nil, maskAny(err)
 	}
 
 	return newStorage, nil

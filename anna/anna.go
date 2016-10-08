@@ -44,7 +44,7 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			panicOnError(err)
 
 			// storage collection.
-			a.StorageCollection, err = newStorageCollection(a.Log, a.Closer, a.Flags)
+			a.StorageCollection, err = newStorageCollection(a.Log, a.Flags)
 			panicOnError(err)
 
 			// activator.
