@@ -12,7 +12,8 @@ type Forwarder interface {
 	//     GetNetworkPayloads
 	//     NewNetworkPayloads
 	//
-	// TODO
+	// The network payloads being found by any of the lookup functions listed
+	// above are queued by Forward.
 	Forward(CLG CLG, networkPayload NetworkPayload) error
 
 	// GetMaxSignals returns the maximum number of signals being forwarded by one
