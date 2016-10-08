@@ -6,12 +6,27 @@ package output
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
+	"reflect"
 	"testing"
 )
 
 func Test_CLG_Factory(t *testing.T) {
 	newCLG := MustNew()
 	if newCLG.Factory() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_Gateway(t *testing.T) {
+	newCLG := MustNew()
+	if newCLG.Gateway() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_GetCalculate(t *testing.T) {
+	newCLG := MustNew()
+	if reflect.TypeOf(newCLG.GetCalculate()).Kind() != reflect.Func {
 		t.Fatal("expected", false, "got", true)
 	}
 }
@@ -27,6 +42,15 @@ func Test_CLG_GetName(t *testing.T) {
 func Test_CLG_New_FactoryCollection_Error(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.FactoryCollection = nil
+	_, err := New(newConfig)
+	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_CLG_New_GatewayCollection_Error(t *testing.T) {
+	newConfig := DefaultConfig()
+	newConfig.GatewayCollection = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -71,6 +95,29 @@ func Test_CLG_SetFactoryCollection(t *testing.T) {
 
 	if rawCLG.FactoryCollection != nil {
 		t.Fatal("expected", nil, "got", "spec.FactoryCollection")
+	}
+}
+
+func Test_CLG_SetGatewayCollection(t *testing.T) {
+	newCLG := MustNew()
+	var rawCLG *clg
+
+	switch c := newCLG.(type) {
+	case *clg:
+		// all good
+		rawCLG = newCLG.(*clg)
+	default:
+		t.Fatal("expected", "*clg", "got", c)
+	}
+
+	if rawCLG.GatewayCollection == nil {
+		t.Fatal("expected", "spec.GatewayCollection", "got", nil)
+	}
+
+	newCLG.SetGatewayCollection(nil)
+
+	if rawCLG.GatewayCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.GatewayCollection")
 	}
 }
 
