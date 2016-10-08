@@ -6,7 +6,7 @@ import (
 	"github.com/juju/errgo"
 )
 
-// IsInvalidConfig asserts invalidConfigError.
+// IsParseFloatSyntax asserts strconv.ErrSyntax.
 func IsParseFloatSyntax(err error) bool {
 	cause := errgo.Cause(err)
 
