@@ -227,7 +227,7 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 		// network payload was fetched from the queue. As soon as we receive the
 		// network payload, it is removed from the queue automatically, so it is not
 		// handled twice.
-		eventKey := key.NewCLGKey("event:network-payload")
+		eventKey := key.NewNetworkKey("event:network-payload")
 		element, err := n.Storage().General().PopFromList(eventKey)
 		if err != nil {
 			return maskAny(err)
@@ -384,14 +384,14 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 
 	// Write the new CLG tree ID to reference the input CLG ID and add the CLG
 	// tree ID to the new context.
-	firstBehaviourIDKey := key.NewCLGKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
 	err = n.Storage().General().Set(firstBehaviourIDKey, string(behaviourID))
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Write the transformed network payload to the queue.
-	eventKey := key.NewCLGKey("event:network-payload")
+	eventKey := key.NewNetworkKey("event:network-payload")
 	b, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)

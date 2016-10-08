@@ -60,7 +60,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence, separator string)
 		//
 		//     feature:%s:positions
 		//
-		positionKey := key.NewCLGKey("feature:%s:positions", f.GetSequence())
+		positionKey := key.NewNetworkKey("feature:%s:positions", f.GetSequence())
 		raw, err := json.Marshal(f.GetPositions())
 		if err != nil {
 			return maskAny(err)

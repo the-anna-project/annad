@@ -89,7 +89,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	queueKey := key.NewCLGKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
+	queueKey := key.NewNetworkKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
 	s, err := a.Storage().General().Get(queueKey)
 	if err != nil {
 		return nil, maskAny(err)
@@ -185,7 +185,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	s, err := a.Storage().General().Get(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
@@ -322,7 +322,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewCLGKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	var behaviourIDs []string
 	for _, behaviourID := range newNetworkPayload.GetSources() {
 		behaviourIDs = append(behaviourIDs, string(behaviourID))

@@ -128,7 +128,7 @@ func (f *forwarder) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) er
 	// Forward the found network payloads to other CLGs by adding them to the
 	// queue so other processes can fetch them.
 	for _, np := range newNetworkPayloads {
-		networkPayloadKey := key.NewCLGKey("events:network-payload")
+		networkPayloadKey := key.NewNetworkKey("events:network-payload")
 		b, err := json.Marshal(np)
 		if err != nil {
 			return maskAny(err)
@@ -156,7 +156,7 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewCLGKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	newBehaviourIDs, err := f.Storage().General().GetAllFromSet(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No configuration of behaviour IDs is stored. Thus we return an error.
@@ -218,7 +218,7 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewCLGKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	for _, behaviourID := range newBehaviourIDs {
 		// TODO store asynchronuously
 		err = f.Storage().General().PushToSet(behaviourIDsKey, behaviourID)
@@ -261,7 +261,7 @@ func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
-	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
+	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
 	informationSequence, err := f.Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return maskAny(err)
@@ -273,7 +273,7 @@ func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	if !ok {
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
-	firstBehaviourIDKey := key.NewCLGKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
 	behaviourID, err := f.Storage().General().Get(firstBehaviourIDKey)
 	if err != nil {
 		return maskAny(err)
@@ -298,7 +298,7 @@ func (f *forwarder) ToInputCLG(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	}
 
 	// Write the transformed network payload to the queue.
-	networkPayloadKey := key.NewCLGKey("events:network-payload")
+	networkPayloadKey := key.NewNetworkKey("events:network-payload")
 	b, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)

@@ -16,7 +16,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 		return "", maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
-	behaviourIDKey := key.NewCLGKey("behaviour-id:%s:separator", behaviourID)
+	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
 	separator, err := c.Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
 		randomKey, err := c.Storage().Feature().GetRandomKey()

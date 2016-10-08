@@ -15,7 +15,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 		return "", maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 
-	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
+	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
 	informationSequence, err := c.Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return "", maskAny(err)

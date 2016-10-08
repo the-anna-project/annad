@@ -14,7 +14,7 @@ import (
 // information sequence. In any case the information ID is added to the given
 // context.
 func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", informationSequence)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", informationSequence)
 	informationID, err := c.Storage().General().Get(informationIDKey)
 	if storage.IsNotFound(err) {
 		// The given information sequence was never seen before. Thus we register it
@@ -30,7 +30,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 			return maskAny(err)
 		}
 
-		informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", informationID)
+		informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
 		err = c.Storage().General().Set(informationSequenceKey, informationSequence)
 		if err != nil {
 			return maskAny(err)
