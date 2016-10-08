@@ -110,7 +110,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	}
 
 	// The calculated output did not match the given expectation. That means we
-	// need to caluclate some new output to match the given expectation. To do so
+	// need to calculate some new output to match the given expectation. To do so
 	// we create a new network payload and assign the input CLG of the current CLG
 	// tree to it by queueing the new network payload in the underlying storage.
 	err := c.forwardNetworkPayload(ctx, informationSequence)
