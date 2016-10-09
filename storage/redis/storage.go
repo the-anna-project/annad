@@ -267,44 +267,23 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
 
-	errors := make(chan error, 1)
-
 	var result []string
+	var err error
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		result, err = redis.Strings(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
+		if err != nil {
 			return maskAny(err)
-		}
-
-		for _, v := range values {
-			result = append(result, v.(string))
 		}
 
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return nil, maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
@@ -338,8 +317,6 @@ func (s *storage) GetRandomKey() (string, error) {
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
 
-	errors := make(chan error, 1)
-
 	var result map[string]string
 	var err error
 	action := func() error {
@@ -347,14 +324,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 		defer conn.Close()
 
 		result, err = redis.StringMap(conn.Do("HGETALL", s.withPrefix(key)))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -364,15 +334,6 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return nil, maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
@@ -603,8 +564,6 @@ func (s *storage) Shutdown() {
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
 
-	errors := make(chan error, 1)
-
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
@@ -623,19 +582,14 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 			}
 
 			reply, err := redis.Values(conn.Do("ZSCAN", s.withPrefix(key), cursor, "COUNT", 100))
-			if IsNotFound(err) {
-				// To return the not found error we need to break through the retrier.
-				// Therefore we do not return the not found error here, but dispatch it to
-				// the calling goroutine. Further we simply fall through and return nil to
-				// finally stop the retrier.
-				errors <- maskAny(err)
-				return nil
-			} else if err != nil {
+			if err != nil {
 				return maskAny(err)
 			}
 
-			cursor := reply[0].(int64)
-			values := reply[1].([]string)
+			cursor, values, err := parseMultiBulkReply(reply)
+			if err != nil {
+				return maskAny(err)
+			}
 
 			for i := range values {
 				select {
@@ -671,22 +625,11 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 		return maskAny(err)
 	}
 
-	select {
-	case err := <-errors:
-		if err != nil {
-			return maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
-	}
-
 	return nil
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkSet")
-
-	errors := make(chan error, 1)
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -706,19 +649,14 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 			}
 
 			reply, err := redis.Values(conn.Do("SSCAN", s.withPrefix(key), cursor, "COUNT", 100))
-			if IsNotFound(err) {
-				// To return the not found error we need to break through the retrier.
-				// Therefore we do not return the not found error here, but dispatch it to
-				// the calling goroutine. Further we simply fall through and return nil to
-				// finally stop the retrier.
-				errors <- maskAny(err)
-				return nil
-			} else if err != nil {
+			if err != nil {
 				return maskAny(err)
 			}
 
-			cursor := reply[0].(int64)
-			values := reply[1].([]string)
+			cursor, values, err := parseMultiBulkReply(reply)
+			if err != nil {
+				return maskAny(err)
+			}
 
 			for _, v := range values {
 				select {
@@ -744,15 +682,6 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkSet", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return nil
