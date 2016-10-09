@@ -626,7 +626,14 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 			}
 
 			reply, err := redis.Values(conn.Do("ZSCAN", s.withPrefix(key), cursor, "COUNT", 100))
-			if err != nil {
+			if IsNotFound(err) {
+				// To return the not found error we need to break through the retrier.
+				// Therefore we do not return the not found error here, but dispatch it to
+				// the calling goroutine. Further we simply fall through and return nil to
+				// finally stop the retrier.
+				errors <- maskAny(err)
+				return nil
+			} else if err != nil {
 				return maskAny(err)
 			}
 
@@ -702,7 +709,14 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 			}
 
 			reply, err := redis.Values(conn.Do("SSCAN", s.withPrefix(key), cursor, "COUNT", 100))
-			if err != nil {
+			if IsNotFound(err) {
+				// To return the not found error we need to break through the retrier.
+				// Therefore we do not return the not found error here, but dispatch it to
+				// the calling goroutine. Further we simply fall through and return nil to
+				// finally stop the retrier.
+				errors <- maskAny(err)
+				return nil
+			} else if err != nil {
 				return maskAny(err)
 			}
 
