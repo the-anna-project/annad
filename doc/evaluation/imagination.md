@@ -18,7 +18,7 @@ Depending on how much of certain brain movies would be recognized, Anna's
 behaviour could be influenced. That way a simulation of currently experienced
 situatiuons would go a step further. The surrounding environment influences
 created thoughts. Created thoughts are recognized. Recognized thoughts
-influence behavior. Behavior influences the surrounding environment.
+influence behaviour. Behaviour influences the surrounding environment.
 
 ```
 A concept is a common feature or characteristic. Kant investigated the way that

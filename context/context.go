@@ -12,25 +12,17 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-type key string
-
-const (
-	behaviorIDKey    key = "behavior-id"
-	clgTreeIDKey     key = "clg-tree-id"
-	informationIDKey key = "information-id"
-	sessionIDKey     key = "session-id"
-)
-
 // Config represents the configuration used to create a new context object.
 type Config struct {
 	// Settings.
 
-	Context   netcontext.Context
-	SessionID string
-
-	// TODO we want to track the original input that was provided from the
-	// outside. Further it would probably be interesting to also track the last 3
-	// arguments of the current connection path.
+	BehaviourID   string
+	Context       netcontext.Context
+	CLGName       string
+	CLGTreeID     string
+	Expectation   spec.Expectation
+	InformationID string
+	SessionID     string
 }
 
 // DefaultConfig provides a default configuration to create a new context
@@ -38,8 +30,13 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Context:   netcontext.Background(),
-		SessionID: "",
+		BehaviourID:   "",
+		Context:       netcontext.Background(),
+		CLGName:       "",
+		CLGTreeID:     "",
+		Expectation:   nil,
+		InformationID: "",
+		SessionID:     "",
 	}
 
 	return newConfig
@@ -51,13 +48,6 @@ func New(config Config) (spec.Context, error) {
 		Config: config,
 
 		ID: string(id.MustNew()),
-	}
-
-	// If there is a session ID configured, we set it to the underlying context.
-	// That way our standard configuration interface is obtained and the data
-	// structures of the underlying implementation consistent.
-	if config.SessionID != "" {
-		newContext.SetSessionID(config.SessionID)
 	}
 
 	if newContext.Context == nil {
@@ -86,20 +76,26 @@ type context struct {
 func (c *context) Clone() spec.Context {
 	// At first we create a new context with its own very unique ID, which will
 	// not be cloned. All properties but the context ID must be cloned below.
-	specContext := MustNew()
+	newContext := MustNew()
 
 	// We prepare a new underlying context to have a fresh storage.
-	specContext.(*context).Context = netcontext.Background()
+	newContext.(*context).Context = netcontext.Background()
 
-	// We set the session ID to our own context object and also make the
-	// underlying context aware of it.
-	specContext.(*context).SessionID = c.GetSessionID()
-	specContext.SetSessionID(c.GetSessionID())
+	// Add the other information to the new underlying context.
+	behaviourID, _ := c.GetBehaviourID()
+	newContext.SetBehaviourID(behaviourID)
+	clgName, _ := c.GetCLGName()
+	newContext.SetCLGName(clgName)
+	clgTreeID, _ := c.GetCLGTreeID()
+	newContext.SetCLGTreeID(clgTreeID)
+	expectation, _ := c.GetExpectation()
+	newContext.SetExpectation(expectation)
+	informationID, _ := c.GetInformationID()
+	newContext.SetInformationID(informationID)
+	sessionID, _ := c.GetSessionID()
+	newContext.SetSessionID(sessionID)
 
-	// Add other information to the underlying context.
-	specContext.SetCLGTreeID(c.GetCLGTreeID())
-
-	return specContext
+	return newContext
 }
 
 func (c *context) Deadline() (time.Time, bool) {
@@ -114,60 +110,80 @@ func (c *context) Err() error {
 	return c.Context.Err()
 }
 
-func (c *context) GetBehaviorID() string {
-	behaviorID, ok := c.Context.Value(behaviorIDKey).(string)
-	if ok {
-		return behaviorID
+func (c *context) GetBehaviourID() (string, bool) {
+	if c.BehaviourID == "" {
+		return "", false
 	}
 
-	return ""
+	return c.BehaviourID, true
 }
 
-func (c *context) GetCLGTreeID() string {
-	clgTreeID, ok := c.Context.Value(clgTreeIDKey).(string)
-	if ok {
-		return clgTreeID
+func (c *context) GetCLGName() (string, bool) {
+	if c.CLGName == "" {
+		return "", false
 	}
 
-	return ""
+	return c.CLGName, true
+}
+
+func (c *context) GetCLGTreeID() (string, bool) {
+	if c.CLGTreeID == "" {
+		return "", false
+	}
+
+	return c.CLGTreeID, true
+}
+
+func (c *context) GetExpectation() (spec.Expectation, bool) {
+	if c.Expectation == nil {
+		return nil, false
+	}
+
+	return c.Expectation, true
 }
 
 func (c *context) GetID() string {
 	return c.ID
 }
 
-func (c *context) GetInformationID() string {
-	informationID, ok := c.Context.Value(informationIDKey).(string)
-	if ok {
-		return informationID
+func (c *context) GetInformationID() (string, bool) {
+	if c.InformationID == "" {
+		return "", false
 	}
 
-	return ""
+	return c.InformationID, true
 }
 
-func (c *context) GetSessionID() string {
-	sessionID, ok := c.Context.Value(sessionIDKey).(string)
-	if ok {
-		return sessionID
+func (c *context) GetSessionID() (string, bool) {
+	if c.SessionID == "" {
+		return "", false
 	}
 
-	return ""
+	return c.SessionID, true
 }
 
-func (c *context) SetBehaviorID(behaviorID string) {
-	c.Context = netcontext.WithValue(c.Context, behaviorIDKey, behaviorID)
+func (c *context) SetBehaviourID(behaviourID string) {
+	c.BehaviourID = behaviourID
+}
+
+func (c *context) SetCLGName(clgName string) {
+	c.CLGName = clgName
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
-	c.Context = netcontext.WithValue(c.Context, clgTreeIDKey, clgTreeID)
+	c.CLGTreeID = clgTreeID
+}
+
+func (c *context) SetExpectation(expectation spec.Expectation) {
+	c.Expectation = expectation
 }
 
 func (c *context) SetInformationID(informationID string) {
-	c.Context = netcontext.WithValue(c.Context, informationIDKey, informationID)
+	c.InformationID = informationID
 }
 
 func (c *context) SetSessionID(sessionID string) {
-	c.Context = netcontext.WithValue(c.Context, sessionIDKey, sessionID)
+	c.SessionID = sessionID
 }
 
 func (c *context) Value(key interface{}) interface{} {

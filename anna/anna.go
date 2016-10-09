@@ -35,12 +35,32 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			newTextInput := make(chan spec.TextRequest, 1000)
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
+			// factory collection.
+			factoryCollection, err := newFactoryCollection()
+			panicOnError(err)
+
+			// gateway collection.
+			gatewayCollection, err := newGatewayCollection(newTextOutput)
+			panicOnError(err)
+
 			// storage collection.
-			a.StorageCollection, err = createStorageCollection(a.Log, a.Flags)
+			a.StorageCollection, err = newStorageCollection(a.Log, a.Flags)
+			panicOnError(err)
+
+			// activator.
+			activator, err := newActivator(a.Log, factoryCollection, a.StorageCollection)
+			panicOnError(err)
+
+			// forwarder.
+			forwarder, err := newForwarder(a.Log, factoryCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// network.
 			networkConfig := network.DefaultConfig()
+			networkConfig.Activator = activator
+			networkConfig.FactoryCollection = factoryCollection
+			networkConfig.Forwarder = forwarder
+			networkConfig.GatewayCollection = gatewayCollection
 			networkConfig.Log = a.Log
 			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.TextInput = newTextInput
@@ -49,18 +69,18 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			panicOnError(err)
 
 			// log control.
-			logControl, err := createLogControl(a.Log)
+			logControl, err := newLogControl(a.Log)
 			panicOnError(err)
 
 			// text interface.
-			textInterface, err := createTextInterface(a.Log, newTextInput, newTextOutput)
+			textInterface, err := newTextInterface(a.Log, newTextInput, newTextOutput)
 			panicOnError(err)
 
 			// server.
 			serverConfig := server.DefaultConfig()
 			serverConfig.GRPCAddr = a.Flags.GRPCAddr
 			serverConfig.HTTPAddr = a.Flags.HTTPAddr
-			serverConfig.Instrumentation, err = createPrometheusInstrumentation([]string{"Server"})
+			serverConfig.Instrumentation, err = newPrometheusInstrumentation([]string{"Server"})
 			panicOnError(err)
 			serverConfig.Log = a.Log
 			serverConfig.LogControl = logControl

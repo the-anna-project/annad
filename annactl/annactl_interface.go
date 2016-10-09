@@ -12,8 +12,8 @@ func (a *annactl) InitAnnactlInterfaceCmd() *cobra.Command {
 	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "interface",
-		Short: "Interface for Anna's behaviors.",
-		Long:  "Interface for Anna's behaviors.",
+		Short: "Interface for Anna's behaviours.",
+		Long:  "Interface for Anna's behaviours.",
 		Run:   a.ExecAnnactlInterfaceCmd,
 	}
 

@@ -100,7 +100,8 @@ func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.Stor
 
 func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spec.NetworkPayload {
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(input)}
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(input)}
+	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = "destination"
 	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
@@ -119,7 +120,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	// Create record for the test input.
 	informationID := "123"
 	newInput := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	err := newStorageCollection.General().Set(informationIDKey, informationID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -129,23 +130,13 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
-	}
-
 	// Check if the information ID was set to the context.
-	injectedInformationID := newCtx.GetInformationID()
+	injectedInformationID, _ := newCtx.GetInformationID()
 	if informationID != injectedInformationID {
 		t.Fatal("expected", informationID, "got", injectedInformationID)
 	}
@@ -154,6 +145,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
+	newFactoryCollection := testMustNewFactoryCollection(t)
 	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
@@ -161,28 +153,19 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
+	newCLG.(*clg).FactoryCollection = newFactoryCollection
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
-	}
-
 	// Check if the information ID was set to the context.
-	injectedInformationID := newCtx.GetInformationID()
-	if injectedInformationID == "" {
-		t.Fatal("expected", false, "got", true)
+	injectedInformationID, _ := newCtx.GetInformationID()
+	if injectedInformationID != "new-ID" {
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
@@ -207,22 +190,12 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	calculatedNetworkPayload, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	// Check the calculated payload. The interface of the input CLG only returns
-	// an error. This error is filtered to be handled during the call to
-	// Calculate. Thus it is removed from the calculated payload. Anyway there is
-	// the original context be obtained as first argument within the network
-	// payload.
-	args := calculatedNetworkPayload.GetArgs()
-	if len(args) != 1 {
-		t.Fatal("expected", 1, "got", len(args))
-	}
-
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	storedID, err := newStorageCollection.General().Get(informationIDKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -231,7 +204,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 		t.Fatal("expected", newID, "got", storedID)
 	}
 
-	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", newID)
+	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", newID)
 	storedInput, err := newStorageCollection.General().Get(informationSequenceKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -256,7 +229,7 @@ func Test_CLG_Input_IDFactoryError(t *testing.T) {
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
-	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -269,7 +242,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
 	newID, err := newFactoryCollection.ID().New()
@@ -287,7 +260,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	newCLG.(*clg).FactoryCollection = newFactoryCollection
 
 	// Execute CLG.
-	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -300,14 +273,14 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
 	newID, err := newFactoryCollection.ID().New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	informationSequenceKey := key.NewCLGKey("information-id:%s:information-sequence", newID)
+	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", newID)
 
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
@@ -320,7 +293,7 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 	newCLG.(*clg).FactoryCollection = newFactoryCollection
 
 	// Execute CLG.
-	_, err = newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err = newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
@@ -331,7 +304,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCtx := context.MustNew()
 
 	newInput := "test input"
-	informationIDKey := key.NewCLGKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()
@@ -342,7 +315,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCLG.SetStorageCollection(newStorageCollection)
 
 	// Execute CLG.
-	_, err := newCLG.Calculate(testMustNewNetworkPayload(t, newCtx, newInput))
+	err := newCLG.(*clg).calculate(newCtx, newInput)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}

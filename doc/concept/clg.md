@@ -1,18 +1,18 @@
 # CLG, complex logic gate
-CLG, Complex logic gate, implements BB, Basic Behavior, when receiving input in
-form of BI, Basic Inormation. Basic behavior is created when some sort of
+CLG, Complex logic gate, implements BB, Basic Behaviour, when receiving input in
+form of BI, Basic Inormation. Basic behaviour is created when some sort of
 complex logic operation is processed with respect to some fundamental input. In
 computer science there are logic gates implementing logic operations causing
 some action. The concept of CLGs presumes the need of more sophisticated logic
-gates to mimic human behavior. The theory is that as soon as there are enough
+gates to mimic human behaviour. The theory is that as soon as there are enough
 sufficient CLGs, intellectual explosion will happen. CLGs are supposed to be
 the minimal and fundamental inborn logic units that can be used out of the box.
 This builtin functionality should be the only hard coded logic. All other
-behavior must result out of the combination of learned data, CLGs and
+behaviour must result out of the combination of learned data, CLGs and
 [connections](connection.md) between these two.
 
-A CLG creates behavior when having information provided during execution. This
-is how information is translated into behavior. Using some function
+A CLG creates behaviour when having information provided during execution. This
+is how information is translated into behaviour. Using some function
 implementing some functionality.
 
 Random fact: currently Anna is capable of more than 130 CLG implementations.
@@ -32,8 +32,8 @@ our own. Having that said there is a need for some guidance for a machine to
 learn. Goal should be to make a machine able to gather information by itself
 using available sensors, interfaces and resources it is able to access.
 
-### BB, basic behavior
-BB, Basic Behavior, can probably be seen as instinct, intuition or talent.
+### BB, basic behaviour
+BB, Basic Behaviour, can probably be seen as instinct, intuition or talent.
 There are presets within humans. These enable us to do things without actively
 thinking about them. These things are might be in our DNA, subconscious mind or
 as football trainers would point at it, in our blood. BB lets us breathe from
@@ -43,13 +43,13 @@ have to learn in a guided fashion and later autonomously.
 
 ### the intelligence gap
 We can write the following formular to express how intelligence is created: `I
-= ibⁿ`. Intelligence equals information times exponential behavior. Simply put,
+= ibⁿ`. Intelligence equals information times exponential behaviour. Simply put,
 one piece of information, combined with multiple pieces of behaviour, creates
 some sort of intelligence.
 
 Anyway, there is a technical issue that needs to be solved to fix the
 intelligence gap, to make artificial intelligence work. The intelligence gap
-describes the gap between information and behavior. This gap needs to be filled
+describes the gap between information and behaviour. This gap needs to be filled
 to make the intelligence equation work. This technical issue is solved by the
 concept of CLGs.
 
@@ -99,9 +99,9 @@ approach. There are maybe others which have not ben found yet.
 - remove pair from current key
 - store pair with key having certenty applied
 
-###### derive behavior (8)
+###### derive behaviour (8)
 - read information from certenty level
-- lookup relations of information and behavior
+- lookup relations of information and behaviour
 - write spontaneous connection into storage
 
 ###### maximum certenty

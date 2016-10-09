@@ -3,7 +3,7 @@
 there to help to form more concrete ideas around solutions.**
 
 Each implementation of pattern recognition is a
-[BB](/doc/concept/clg.md#bb-basic-behavior). The goal is to make Anna find
+[BB](/doc/concept/clg.md#bb-basic-behaviour). The goal is to make Anna find
 patterns herself and even make her find patterns for pattern finding. Thus she
 needs to be able to discover new patterns herself.
 

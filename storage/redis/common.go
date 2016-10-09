@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/xh3b4sd/anna/spec"
@@ -18,4 +19,17 @@ func (s *storage) withPrefix(keys ...string) string {
 	}
 
 	return newKey
+}
+
+func parseMultiBulkReply(reply []interface{}) (int64, []string, error) {
+	cursor, err := strconv.ParseInt(string(reply[0].([]uint8)), 10, 64)
+	if err != nil {
+		return 0, nil, maskAny(err)
+	}
+	var values []string
+	for _, v := range reply[1].([]interface{}) {
+		values = append(values, string(v.([]uint8)))
+	}
+
+	return cursor, values, nil
 }

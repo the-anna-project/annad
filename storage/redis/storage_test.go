@@ -86,7 +86,7 @@ func Test_RedisStorage_Get_Error(t *testing.T) {
 
 func Test_RedisStorage_GetElementsByScore_Success(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("ZREVRANGEBYSCORE", "prefix:foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{"bar"})
+	c.Command("ZREVRANGEBYSCORE", "prefix:foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{[]uint8("bar")})
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
@@ -118,7 +118,9 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 
 func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("ZREVRANGE", "prefix:foo", 0, 2, "WITHSCORES").Expect([]interface{}{"one", "0.8", "two", "0.5"})
+	c.Command("ZREVRANGE", "prefix:foo", 0, 2, "WITHSCORES").Expect([]interface{}{
+		[]uint8("one"), []uint8("0.8"), []uint8("two"), []uint8("0.5"),
+	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
@@ -398,8 +400,8 @@ func Test_RedisStorage_SetStringMap_Error(t *testing.T) {
 func Test_RedisStorage_WalkScoredElements(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("0.8"), []uint8("test-value-2"), []uint8("0.8")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -420,8 +422,8 @@ func Test_RedisStorage_WalkScoredElements(t *testing.T) {
 func Test_RedisStorage_WalkScoredElements_CloseDirectly(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("0.8"), []uint8("test-value-2"), []uint8("0.8")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -446,8 +448,8 @@ func Test_RedisStorage_WalkScoredElements_CloseDirectly(t *testing.T) {
 func Test_RedisStorage_WalkScoredElements_CloseAfterCallback(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("0.8"), []uint8("test-value-2"), []uint8("0.8")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -486,8 +488,8 @@ func Test_RedisStorage_WalkScoredElements_QueryError(t *testing.T) {
 func Test_RedisStorage_WalkScoredElements_CallbackError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "0.8", "test-value-2", "0.8"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("0.8"), []uint8("test-value-2"), []uint8("0.8")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -505,8 +507,8 @@ func Test_RedisStorage_WalkScoredElements_CallbackError(t *testing.T) {
 func Test_RedisStorage_WalkSet(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -527,8 +529,8 @@ func Test_RedisStorage_WalkSet(t *testing.T) {
 func Test_RedisStorage_WalkSet_CloseDirectly(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "test-value-2"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("test-value-2")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -553,8 +555,8 @@ func Test_RedisStorage_WalkSet_CloseDirectly(t *testing.T) {
 func Test_RedisStorage_WalkSet_CloseAfterCallback(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "test-value-2"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("test-value-2")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
@@ -593,8 +595,8 @@ func Test_RedisStorage_WalkSet_QueryError(t *testing.T) {
 func Test_RedisStorage_WalkSet_CallbackError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("SSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
-		int64(0),
-		[]string{"test-value-1", "test-value-2"},
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-value-1"), []uint8("test-value-2")},
 	})
 
 	newStorage := testMustNewStorageWithConn(t, c)

@@ -19,7 +19,7 @@ type TextRequestConfig struct {
 	// match against the calculated output. In case there is an expectation
 	// given, the neural network tries to calculate an output until it generated
 	// one that matches the given expectation.
-	ExpectationRequest ExpectationRequest
+	ExpectationRequest spec.ExpectationRequest
 
 	// Input represents the input being fed into the neural network. There must
 	// be a none empty input given when requesting calculations from the neural
@@ -36,7 +36,7 @@ type TextRequestConfig struct {
 func DefaultTextRequestConfig() TextRequestConfig {
 	newConfig := TextRequestConfig{
 		Echo:               false,
-		ExpectationRequest: ExpectationRequest{},
+		ExpectationRequest: nil,
 		Input:              "",
 		SessionID:          "",
 	}
@@ -50,13 +50,25 @@ func NewTextRequest(config TextRequestConfig) (spec.TextRequest, error) {
 		TextRequestConfig: config,
 	}
 
+	if newTextRequest.Input == "" {
+		return nil, maskAnyf(invalidConfigError, "input must not be empty")
+	}
+	if newTextRequest.SessionID == "" {
+		return nil, maskAnyf(invalidConfigError, "session ID must not be empty")
+	}
+
 	return newTextRequest, nil
 }
 
-// NewEmptyTextRequest simply returns an empty, maybe invalid, text request
-// object. This should only be used for things like unmarshaling.
-func NewEmptyTextRequest() spec.TextRequest {
-	return &textRequest{}
+// MustNewTextRequest creates either a new default configured text request
+// object, or panics.
+func MustNewTextRequest() spec.TextRequest {
+	newTextRequest, err := NewTextRequest(DefaultTextRequestConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newTextRequest
 }
 
 type textRequest struct {
@@ -67,14 +79,14 @@ func (tr *textRequest) GetEcho() bool {
 	return tr.Echo
 }
 
+func (tr *textRequest) GetExpectation() spec.Expectation {
+	return tr.ExpectationRequest.GetExpectation()
+}
+
 func (tr *textRequest) GetInput() string {
 	return tr.Input
 }
 
 func (tr *textRequest) GetSessionID() string {
 	return tr.SessionID
-}
-
-func (tr *textRequest) IsEmpty() bool {
-	return tr.Input == "" || tr.SessionID == ""
 }

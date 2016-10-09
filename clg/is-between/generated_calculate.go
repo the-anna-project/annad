@@ -6,10 +6,9 @@ package isbetween
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	"reflect"
-
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
@@ -25,11 +24,9 @@ const (
 type Config struct {
 	// Dependencies.
 	FactoryCollection spec.FactoryCollection
+	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
-
-	// Settings.
-	InputChannel chan spec.NetworkPayload
 }
 
 // DefaultConfig provides a default configuration to create a new CLG object by
@@ -38,11 +35,9 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		FactoryCollection: factory.MustNewCollection(),
+		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
-
-		// Settings.
-		InputChannel: make(chan spec.NetworkPayload, 1000),
 	}
 
 	return newConfig
@@ -53,6 +48,7 @@ func New(config Config) (spec.CLG, error) {
 	newCLG := &clg{
 		Config: config,
 		ID:     id.MustNew(),
+		Name:   "is-between",
 		Type:   ObjectType,
 	}
 
@@ -60,16 +56,14 @@ func New(config Config) (spec.CLG, error) {
 	if newCLG.FactoryCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
+	if newCLG.GatewayCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "gateway collection must not be empty")
+	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 	if newCLG.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-
-	// Settings.
-	if newCLG.InputChannel == nil {
-		return nil, maskAnyf(invalidConfigError, "input channel must not be empty")
 	}
 
 	newCLG.Log.Register(newCLG.GetType())
@@ -91,46 +85,32 @@ type clg struct {
 	Config
 
 	ID   spec.ObjectID
+	Name string
 	Type spec.ObjectType
-}
-
-func (c *clg) Calculate(payload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	outputs := reflect.ValueOf(c.calculate).Call(payload.GetArgs())
-
-	modifiedPayload, err := injectValues(payload, outputs)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return modifiedPayload, nil
 }
 
 func (c *clg) Factory() spec.FactoryCollection {
 	return c.FactoryCollection
 }
 
+func (c *clg) GetCalculate() interface{} {
+	return c.calculate
+}
+
 func (c *clg) GetName() string {
-	return "is-between"
+	return c.Name
 }
 
-func (c *clg) GetInputChannel() chan spec.NetworkPayload {
-	return c.InputChannel
-}
-
-func (c *clg) GetInputTypes() []reflect.Type {
-	t := reflect.TypeOf(c.calculate)
-
-	var inputType []reflect.Type
-
-	for i := 0; i < t.NumIn(); i++ {
-		inputType = append(inputType, t.In(i))
-	}
-
-	return inputType
+func (c *clg) Gateway() spec.GatewayCollection {
+	return c.GatewayCollection
 }
 
 func (c *clg) SetFactoryCollection(factoryCollection spec.FactoryCollection) {
 	c.FactoryCollection = factoryCollection
+}
+
+func (c *clg) SetGatewayCollection(gatewayCollection spec.GatewayCollection) {
+	c.GatewayCollection = gatewayCollection
 }
 
 func (c *clg) SetLog(log spec.Log) {

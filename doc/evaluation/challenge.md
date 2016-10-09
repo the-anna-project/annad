@@ -26,7 +26,7 @@ This is the essence of the learning circle.
 1. Interacting with the environment.
 2. Recognizing changes due to actions.
 3. Remembering these information.
-4. Let memories influence upcoming behavior.
+4. Let memories influence upcoming behaviour.
 1. ...
 
 ### exploring the file system
@@ -34,10 +34,10 @@ This is the essence of the learning circle.
 2. see nothing is in there
 3. create a file in it
 4. see a file is in it
-5. connect metrics transition with own behavior (number of files changed due to action)
+5. connect metrics transition with own behaviour (number of files changed due to action)
 6. create file in another directory
 7. see no file is created in first directory
-8. connect metrics transition with own behavior (number of files changed NOT due to action)
+8. connect metrics transition with own behaviour (number of files changed NOT due to action)
 
 ### exploring the network (idea)
 Scanning ports until she calls her own API and recognizes the request

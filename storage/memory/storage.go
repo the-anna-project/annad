@@ -1,14 +1,16 @@
 package memory
 
 import (
-	"sort"
-	"strconv"
 	"sync"
+	"time"
+
+	"github.com/alicebob/miniredis"
+	"github.com/cenk/backoff"
 
 	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/factory/random"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage/redis"
 )
 
 const (
@@ -17,57 +19,69 @@ const (
 	ObjectType spec.ObjectType = "memory-storage"
 )
 
-type scoredElements struct {
-	// ElementScores represents the mapping between elements and their scores.
-	// This is a 1:1 relation. Key is element. Value is score.
-	ElementScores map[string]float64
-
-	// ScoreElements represents the mapping between scores and associated
-	// elements. This is a 1:n relation. Key is Score. Value is a list of
-	// elements.
-	ScoreElements map[float64][]string
-
-	// Scores holds ordered scores. Lowest score first. Highest score last.
-	Scores []float64
-}
-
-// StorageConfig represents the configuration used to create a new memory storage
-// object.
+// StorageConfig represents the configuration used to create a new memory
+// storage object.
 type StorageConfig struct {
-	KeyValue      map[string]string
-	Log           spec.Log
-	MathSet       map[string]map[string]struct{}
-	RandomFactory spec.RandomFactory
-	StringMap     map[string]map[string]string
-	Weighted      map[string]scoredElements
+	// Dependencies.
+
+	Log spec.Log
 }
 
 // DefaultStorageConfig provides a default configuration to create a new memory
 // storage object by best effort.
 func DefaultStorageConfig() StorageConfig {
 	newConfig := StorageConfig{
-		KeyValue:      map[string]string{},
-		Log:           log.New(log.DefaultConfig()),
-		MathSet:       map[string]map[string]struct{}{},
-		RandomFactory: random.MustNewFactory(),
-		StringMap:     map[string]map[string]string{},
-		Weighted:      map[string]scoredElements{},
+		// Dependencies.
+		Log: log.New(log.DefaultConfig()),
 	}
 
 	return newConfig
 }
 
-// NewStorage creates a new configured memory storage object.
+// NewStorage creates a new configured memory storage object. Therefore it
+// manages an in-memory redis instance which can be shut down using the
+// configured closer. This is used for local development.
 func NewStorage(config StorageConfig) (spec.Storage, error) {
+	addrChan := make(chan string, 1)
+	closer := make(chan struct{}, 1)
+	redisAddr := ""
+
+	go func() {
+		s, err := miniredis.Run()
+		if err != nil {
+			panic(err)
+		}
+		addrChan <- s.Addr()
+
+		<-closer
+		s.Close()
+	}()
+
+	select {
+	case <-time.After(1 * time.Second):
+		panic("starting miniredis timed out")
+	case addr := <-addrChan:
+		redisAddr = addr
+	}
+
+	newRedisStorageConfig := redis.DefaultStorageConfigWithAddr(redisAddr)
+	newRedisStorageConfig.BackOffFactory = func() spec.BackOff {
+		return backoff.NewExponentialBackOff()
+	}
+	newRedisStorage, err := redis.NewStorage(newRedisStorageConfig)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:    id.MustNew(),
-		Mutex: sync.Mutex{},
-		Type:  ObjectType,
+		Closer:       closer,
+		ID:           id.MustNew(),
+		RedisStorage: newRedisStorage,
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectType,
 	}
-
-	newStorage.Log.Register(newStorage.GetType())
 
 	return newStorage, nil
 }
@@ -85,310 +99,192 @@ func MustNew() spec.Storage {
 type storage struct {
 	StorageConfig
 
-	ID    spec.ObjectID
-	Mutex sync.Mutex
-	Type  spec.ObjectType
+	Closer       chan struct{}
+	ID           spec.ObjectID
+	RedisStorage spec.Storage
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (s *storage) Get(key string) (string, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
 
-	if value, ok := s.KeyValue[key]; ok {
-		return value, nil
-	}
-
-	return "", notFoundError
-}
-
-func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	s.Mutex.Lock()
-	weighted, ok := s.Weighted[key]
-	s.Mutex.Unlock()
-	if !ok {
-		return nil, notFoundError
-	}
-
-	if elements, ok := weighted.ScoreElements[score]; ok {
-		n := maxElements
-		if n > len(elements) || n < 0 {
-			n = len(elements)
-		}
-
-		return elements[:n], nil
-	}
-
-	return nil, notFoundError
-}
-
-func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	s.Mutex.Lock()
-	weighted, ok := s.Weighted[key]
-	s.Mutex.Unlock()
-	if !ok {
-		return nil, notFoundError
-	}
-
-	var t int
-	var scoredElements []string
-	orig := weighted.Scores
-	l := len(orig)
-
-	for i := 1; i <= l; i++ {
-		score := orig[l-i]
-
-		elements, err := s.GetElementsByScore(key, score, maxElements)
-		if err != nil {
-			return nil, maskAny(err)
-		}
-
-		formatted := strconv.FormatFloat(score, 'f', -1, 64)
-		for _, e := range elements {
-			scoredElements = append(scoredElements, e)
-			scoredElements = append(scoredElements, formatted)
-
-			t++
-			if t == maxElements {
-				return scoredElements, nil
-			}
-		}
-	}
-
-	return scoredElements, nil
-}
-
-func (s *storage) GetRandomKey() (string, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
-
-	// Here we create a random number to chose a random map, of which we have 4.
-	// The random numbers starts at 0. So the maximum random number we want to
-	// have is 3. Because the max parameter of CreateNMax is exclusive, we set max
-	// to 4.
-	mapIDs, err := s.RandomFactory.CreateNMax(1, 4)
+	result, err := s.RedisStorage.Get(key)
 	if err != nil {
 		return "", maskAny(err)
 	}
 
-	switch mapIDs[0] {
-	case 0:
-		for k := range s.KeyValue {
-			return k, nil
-		}
-	case 1:
-		for k := range s.MathSet {
-			return k, nil
-		}
-	case 2:
-		for k := range s.StringMap {
-			return k, nil
-		}
-	case 3:
-		for k := range s.Weighted {
-			return k, nil
-		}
+	return result, nil
+}
+
+func (s *storage) GetAllFromSet(key string) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
+
+	result, err := s.RedisStorage.GetAllFromSet(key)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	return "", notFoundError
+	return result, nil
+}
+
+func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
+
+	result, err := s.RedisStorage.GetElementsByScore(key, score, maxElements)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
+
+	result, err := s.RedisStorage.GetHighestScoredElements(key, maxElements)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (s *storage) GetRandomKey() (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandomKey")
+
+	result, err := s.RedisStorage.GetRandomKey()
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return result, nil
 }
 
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
 
-	if value, ok := s.StringMap[key]; ok {
-		return value, nil
+	result, err := s.RedisStorage.GetStringMap(key)
+	if err != nil {
+		return nil, maskAny(err)
 	}
 
-	return nil, notFoundError
+	return result, nil
+}
+
+func (s *storage) PopFromList(key string) (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
+
+	result, err := s.RedisStorage.PopFromList(key)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (s *storage) PushToList(key string, element string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
+
+	err := s.RedisStorage.PushToList(key, element)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (s *storage) PushToSet(key string, element string) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
 
-	set, ok := s.MathSet[key]
-	if !ok {
-		set = map[string]struct{}{
-			element: {},
-		}
+	err := s.RedisStorage.PushToSet(key, element)
+	if err != nil {
+		return maskAny(err)
 	}
-
-	set[element] = struct{}{}
-	s.MathSet[key] = set
 
 	return nil
 }
 
 func (s *storage) RemoveFromSet(key string, element string) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveFromSet")
 
-	set, ok := s.MathSet[key]
-	if !ok {
-		return notFoundError
+	err := s.RedisStorage.RemoveFromSet(key, element)
+	if err != nil {
+		return maskAny(err)
 	}
-	delete(set, element)
 
 	return nil
 }
 
 func (s *storage) RemoveScoredElement(key string, element string) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveScoredElement")
 
-	weighted, ok := s.Weighted[key]
-	if !ok {
-		return notFoundError
+	err := s.RedisStorage.RemoveScoredElement(key, element)
+	if err != nil {
+		return maskAny(err)
 	}
-
-	score, ok := weighted.ElementScores[element]
-	if !ok {
-		return notFoundError
-	}
-	delete(weighted.ElementScores, element)
-
-	elements := weighted.ScoreElements[score]
-	if len(elements) == 1 {
-		delete(weighted.ScoreElements, score)
-	} else {
-		var newElements []string
-		for _, e := range elements {
-			if e != element {
-				newElements = append(newElements, e)
-			}
-		}
-		weighted.ScoreElements[score] = newElements
-	}
-
-	if len(elements) == 1 {
-		// In case there was only one element, and we removed it, we also need to
-		// remove the score from the "global" list.
-		var newScores []float64
-		for _, es := range weighted.Scores {
-			if es != score {
-				newScores = append(newScores, es)
-			}
-		}
-		weighted.Scores = newScores
-	}
-
-	s.Weighted[key] = weighted
 
 	return nil
 }
 
 func (s *storage) Set(key, value string) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
 
-	s.KeyValue[key] = value
+	err := s.RedisStorage.Set(key, value)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }
 
 func (s *storage) SetElementByScore(key, element string, score float64) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetElementByScore")
 
-	// Initialize the weighted list.
-	if _, ok := s.Weighted[key]; !ok {
-		// The weighted list for key does not yet exist.
-		s.Weighted[key] = scoredElements{
-			ElementScores: map[string]float64{},
-			ScoreElements: map[float64][]string{},
-			Scores:        []float64{},
-		}
+	err := s.RedisStorage.SetElementByScore(key, element, score)
+	if err != nil {
+		return maskAny(err)
 	}
-
-	// Add and sort
-	wl := s.Weighted[key]
-
-	wl.ElementScores[element] = score
-
-	var foundScoreElements bool
-	for _, item := range wl.ScoreElements[score] {
-		if item == element {
-			foundScoreElements = true
-			break
-		}
-	}
-	if !foundScoreElements {
-		wl.ScoreElements[score] = append(wl.ScoreElements[score], element)
-		sort.Strings(wl.ScoreElements[score])
-	}
-
-	var foundScores bool
-	for _, item := range wl.Scores {
-		if item == score {
-			foundScores = true
-			break
-		}
-	}
-	if !foundScores {
-		wl.Scores = append(wl.Scores, score)
-		sort.Float64s(wl.Scores)
-	}
-
-	s.Weighted[key] = wl
 
 	return nil
 }
 
 func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
-	s.Mutex.Lock()
-	defer s.Mutex.Unlock()
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetStringMap")
 
-	s.StringMap[key] = stringMap
+	err := s.RedisStorage.SetStringMap(key, stringMap)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }
 
+func (s *storage) Shutdown() {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+
+	s.ShutdownOnce.Do(func() {
+		close(s.Closer)
+	})
+}
+
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Mutex.Lock()
-	weighted, ok := s.Weighted[key]
-	s.Mutex.Unlock()
-	if !ok {
-		return notFoundError
-	}
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
 
-	for _, score := range weighted.Scores {
-		for _, element := range weighted.ScoreElements[score] {
-			select {
-			case <-closer:
-				return nil
-			default:
-			}
-
-			err := cb(element, score)
-			if err != nil {
-				return maskAny(err)
-			}
-		}
+	err := s.RedisStorage.WalkScoredElements(key, closer, cb)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
-	s.Mutex.Lock()
-	set, ok := s.MathSet[key]
-	s.Mutex.Unlock()
-	if !ok {
-		return notFoundError
-	}
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkSet")
 
-	for element := range set {
-		select {
-		case <-closer:
-			return nil
-		default:
-		}
-
-		err := cb(element)
-		if err != nil {
-			return maskAny(err)
-		}
+	err := s.RedisStorage.WalkSet(key, closer, cb)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil

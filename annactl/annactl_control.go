@@ -12,8 +12,8 @@ func (a *annactl) InitAnnactlControlCmd() *cobra.Command {
 	// Create new command.
 	newCmd := &cobra.Command{
 		Use:   "control",
-		Short: "Control for Anna's behaviors.",
-		Long:  "Control for Anna's behaviors.",
+		Short: "Control for Anna's behaviours.",
+		Long:  "Control for Anna's behaviours.",
 		Run:   a.ExecAnnactlControlCmd,
 	}
 

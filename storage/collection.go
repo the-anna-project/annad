@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"sync"
+
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
 )
@@ -25,10 +27,12 @@ func DefaultCollectionConfig() CollectionConfig {
 	return newConfig
 }
 
-// NewCollection creates a new configured network object.
+// NewCollection creates a new configured storage collection object.
 func NewCollection(config CollectionConfig) (spec.StorageCollection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,
+
+		ShutdownOnce: sync.Once{},
 	}
 
 	if newCollection.FeatureStorage == nil {
@@ -54,6 +58,8 @@ func MustNewCollection() spec.StorageCollection {
 
 type collection struct {
 	CollectionConfig
+
+	ShutdownOnce sync.Once
 }
 
 func (c *collection) Feature() spec.Storage {
@@ -62,4 +68,24 @@ func (c *collection) Feature() spec.Storage {
 
 func (c *collection) General() spec.Storage {
 	return c.GeneralStorage
+}
+
+func (c *collection) Shutdown() {
+	c.ShutdownOnce.Do(func() {
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			c.Feature().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
+			c.General().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Wait()
+	})
 }

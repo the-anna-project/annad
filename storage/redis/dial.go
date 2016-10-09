@@ -32,7 +32,7 @@ func NewDial(config DialConfig) func() (redis.Conn, error) {
 			return nil, err
 		}
 
-		return c, err
+		return c, nil
 	}
 
 	return newDial

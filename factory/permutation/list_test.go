@@ -10,7 +10,7 @@ import (
 func testMaybeNewList(t *testing.T, values []interface{}) spec.PermutationList {
 	newConfig := DefaultListConfig()
 	newConfig.MaxGrowth = 3
-	newConfig.Values = values
+	newConfig.RawValues = values
 
 	newList, err := NewList(newConfig)
 	if err != nil {
@@ -23,7 +23,7 @@ func testMaybeNewList(t *testing.T, values []interface{}) spec.PermutationList {
 func Test_Permutation_NewList_Error_MaxGrowth(t *testing.T) {
 	newConfig := DefaultListConfig()
 	newConfig.MaxGrowth = 0
-	newConfig.Values = []interface{}{"a", "b"}
+	newConfig.RawValues = []interface{}{"a", "b"}
 
 	_, err := NewList(newConfig)
 	if !IsInvalidConfig(err) {
@@ -34,7 +34,7 @@ func Test_Permutation_NewList_Error_MaxGrowth(t *testing.T) {
 func Test_Permutation_NewList_Error_Values(t *testing.T) {
 	newConfig := DefaultListConfig()
 	newConfig.MaxGrowth = 3
-	newConfig.Values = []interface{}{"a"}
+	newConfig.RawValues = []interface{}{"a"}
 
 	_, err := NewList(newConfig)
 	if !IsInvalidConfig(err) {
@@ -79,14 +79,14 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 	}
 }
 
-func Test_Permutation_List_GetValues(t *testing.T) {
+func Test_Permutation_List_GetRawValues(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
 	newFactory := MustNewFactory()
 	newList := testMaybeNewList(t, testValues)
 
 	// Make sure the initial values are still obtained on the fresh factory.
-	newValues := newList.GetValues()
+	newValues := newList.GetRawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}
@@ -97,7 +97,7 @@ func Test_Permutation_List_GetValues(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newValues = newList.GetValues()
+	newValues = newList.GetRawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}
@@ -106,7 +106,7 @@ func Test_Permutation_List_GetValues(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newValues = newList.GetValues()
+	newValues = newList.GetRawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}

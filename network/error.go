@@ -43,11 +43,32 @@ func IsInvalidInterface(err error) bool {
 	return errgo.Cause(err) == invalidInterfaceError
 }
 
-var invalidBehaviorIDError = errgo.New("invalid behavior ID")
+var invalidBehaviourIDError = errgo.New("invalid behaviour ID")
 
-// IsInvalidBehaviorID asserts invalidBehaviorIDError.
-func IsInvalidBehaviorID(err error) bool {
-	return errgo.Cause(err) == invalidBehaviorIDError
+// IsInvalidBehaviourID asserts invalidBehaviourIDError.
+func IsInvalidBehaviourID(err error) bool {
+	return errgo.Cause(err) == invalidBehaviourIDError
+}
+
+var invalidCLGNameError = errgo.New("invalid CLG name")
+
+// IsInvalidCLGName asserts invalidCLGNameError.
+func IsInvalidCLGName(err error) bool {
+	return errgo.Cause(err) == invalidCLGNameError
+}
+
+var invalidCLGTreeIDError = errgo.New("invalid CLG tree ID")
+
+// IsInvalidCLGTreeID asserts invalidCLGTreeIDError.
+func IsInvalidCLGTreeID(err error) bool {
+	return errgo.Cause(err) == invalidCLGTreeIDError
+}
+
+var invalidInformationIDError = errgo.New("invalid information ID")
+
+// IsInvalidInformationID asserts invalidInformationIDError.
+func IsInvalidInformationID(err error) bool {
+	return errgo.Cause(err) == invalidInformationIDError
 }
 
 var invalidNetworkPayloadError = errgo.New("invalid network payload")
@@ -55,4 +76,11 @@ var invalidNetworkPayloadError = errgo.New("invalid network payload")
 // IsInvalidNetworkPayload asserts invalidNetworkPayloadError.
 func IsInvalidNetworkPayload(err error) bool {
 	return errgo.Cause(err) == invalidNetworkPayloadError
+}
+
+var workerCanceledError = errgo.New("worker canceled")
+
+// IsWorkerCanceled asserts workerCanceledError.
+func IsWorkerCanceled(err error) bool {
+	return errgo.Cause(err) == workerCanceledError
 }

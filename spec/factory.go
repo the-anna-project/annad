@@ -4,14 +4,14 @@ package spec
 // factory implementations in a simple container, which can easily be passed
 // around.
 type FactoryCollection interface {
-	// ID represents an ID factory. It is used to create IDs of a certain type.
+	// ID returns an ID factory. It is used to create IDs of a certain type.
 	ID() IDFactory
 
-	// Permutation represents a permutation factory. It is used to permute
-	// instances of type PermutationList.
+	// Permutation returns a permutation factory. It is used to permute instances
+	// of type PermutationList.
 	Permutation() PermutationFactory
 
-	// Random represents a random factory. It is used to create random numbers.
+	// Random returns a random factory. It is used to create random numbers.
 	Random() RandomFactory
 }
 
@@ -38,11 +38,6 @@ type IDFactory interface {
 
 // PermutationFactory creates permutations of arbitrary lists as configured.
 type PermutationFactory interface {
-	// MapTo maps the given list's values to its indizes. After a successful call
-	// to MapTo, a call to GetMembers returns the permuted values based on the
-	// current indizes.
-	MapTo(list PermutationList) error
-
 	// PermuteBy permutes the configured values by applying the given delta to
 	// the currently configured indizes. Error might indicate that the configured
 	// max growth is reached. It processes the essentiaal operation of permuting
@@ -55,17 +50,17 @@ type PermutationFactory interface {
 	//         []interface{"a", "b"}
 	//
 	//     Here the index 0 translates to indizes []int{0} and causes the
-	//     following permutation on the members.
+	//     following permutation on the raw values.
 	//
 	//         []interface{"a"}
 	//
 	//     Here the index 1 translates to indizes []int{1} and causes the
-	//     following permutation on the members..
+	//     following permutation on the raw values.
 	//
 	//         []interface{"b"}
 	//
 	//     Here the index 00 translates to indizes []int{0, 0} and causes the
-	//     following permutation on the members..
+	//     following permutation on the raw values.
 	//
 	//         []interface{"a", "a"}
 	//
@@ -79,27 +74,29 @@ type PermutationList interface {
 
 	// GetMaxGrowth returns the list's configured growth limit. The growth limit
 	// is used to prevent infinite permutations. E.g. MaxGrowth set to 4 will not
-	// permute up to a list of 5 members.
+	// permute up to a list of 5 raw values.
 	GetMaxGrowth() int
 
-	// GetMembers returns the list's permuted members.
-	GetMembers() []interface{}
+	// GetPermutedValues returns the list's permuted values.
+	GetPermutedValues() []interface{}
 
-	// GetValues returns the list's current values.
-	GetValues() []interface{}
+	// GetRawValues returns the list's unpermuted raw values.
+	GetRawValues() []interface{}
 
 	// SetIndizes sets the given indizes of the current permutation list.
 	SetIndizes(indizes []int)
-
-	// SetMembers sets the given members of the current permutation list.
-	SetMembers(members []interface{})
 }
 
 // RandomFactory creates pseudo random numbers. The factory might implement
 // retries using backoff strategies and timeouts.
 type RandomFactory interface {
+	// CreateMax tries to create one new pseudo random number. The generated
+	// number is within the range [0 max), which means that max is exclusive.
+	CreateMax(max int) (int, error)
+
 	// CreateNMax tries to create a list of new pseudo random numbers. n
 	// represents the number of pseudo random numbers in the returned list. The
-	// generated numbers are within the range [0 max).
+	// generated numbers are within the range [0 max), which means that max is
+	// exclusive.
 	CreateNMax(n, max int) ([]int, error)
 }

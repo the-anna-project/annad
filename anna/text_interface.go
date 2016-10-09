@@ -6,7 +6,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func createTextInterface(newLog spec.Log, newTextInput chan spec.TextRequest, newTextOutput chan spec.TextResponse) (api.TextInterfaceServer, error) {
+func newTextInterface(newLog spec.Log, newTextInput chan spec.TextRequest, newTextOutput chan spec.TextResponse) (api.TextInterfaceServer, error) {
 	newTextInterfaceConfig := text.DefaultServerConfig()
 	newTextInterfaceConfig.Log = newLog
 	newTextInterfaceConfig.TextInput = newTextInput

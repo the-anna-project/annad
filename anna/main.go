@@ -3,8 +3,10 @@
 package main
 
 import (
+	"math/rand"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
@@ -42,11 +44,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new anna object
 // by best effort.
 func DefaultConfig() Config {
-	newNetwork, err := network.New(network.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newServer, err := server.New(server.DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -55,7 +52,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Log:               log.New(log.DefaultConfig()),
-		Network:           newNetwork,
+		Network:           network.MustNew(),
 		Server:            newServer,
 		StorageCollection: storage.MustNewCollection(),
 
@@ -129,6 +126,13 @@ func (a *anna) Shutdown() {
 
 		wg.Add(1)
 		go func() {
+			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down storage")
+			a.Storage().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
 			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down network")
 			a.Network.Shutdown()
 			wg.Done()
@@ -150,6 +154,10 @@ func (a *anna) Shutdown() {
 
 func (a *anna) Storage() spec.StorageCollection {
 	return a.StorageCollection
+}
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
 }
 
 func main() {

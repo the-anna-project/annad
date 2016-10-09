@@ -53,7 +53,7 @@ func (c *clg) calculate(ctx spec.Context) error {
 		pair := key1[8:12] + key2[8:12]
 
 		// Write the new pair into the general storage.
-		pairIDKey := key.NewCLGKey("pair:%s:pair-id", pair)
+		pairIDKey := key.NewNetworkKey("pair:syntactic:feature:%s:pair-id", pair)
 		_, err = c.Storage().General().Get(pairIDKey)
 		if storage.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means

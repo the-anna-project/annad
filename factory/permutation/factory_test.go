@@ -14,7 +14,7 @@ func Test_Permutation_Factory_PermuteBy_AbsoluteDelta(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {
@@ -131,12 +131,8 @@ func Test_Permutation_Factory_PermuteBy_AbsoluteDelta(t *testing.T) {
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
-		err = newFactory.MapTo(newList)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
 
-		output := newList.GetMembers()
+		output := newList.GetPermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {
@@ -152,7 +148,7 @@ func Test_Permutation_Factory_PermuteBy_Increment(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {
@@ -193,12 +189,8 @@ func Test_Permutation_Factory_PermuteBy_Increment(t *testing.T) {
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
-		err = newFactory.MapTo(newList)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
 
-		output := newList.GetMembers()
+		output := newList.GetPermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {
@@ -215,7 +207,7 @@ func Test_Permutation_Factory_PermuteBy_RelativeDelta(t *testing.T) {
 	testMaybeNewList := func(t *testing.T) spec.PermutationList {
 		newConfig := DefaultListConfig()
 		newConfig.MaxGrowth = 3
-		newConfig.Values = []interface{}{"a", "b"}
+		newConfig.RawValues = []interface{}{"a", "b"}
 
 		newList, err := NewList(newConfig)
 		if err != nil {
@@ -276,12 +268,8 @@ func Test_Permutation_Factory_PermuteBy_RelativeDelta(t *testing.T) {
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
-		err = newFactory.MapTo(newList)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
 
-		output := newList.GetMembers()
+		output := newList.GetPermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {

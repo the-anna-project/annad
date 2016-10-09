@@ -7,7 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// CollectionConfig represents the configuration used to create a new storage
+// CollectionConfig represents the configuration used to create a new factory
 // collection object.
 type CollectionConfig struct {
 	// Dependencies.
@@ -17,7 +17,7 @@ type CollectionConfig struct {
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new
-// storage collection object by best effort.
+// factory collection object by best effort.
 func DefaultCollectionConfig() CollectionConfig {
 	newConfig := CollectionConfig{
 		// Dependencies.
@@ -29,7 +29,7 @@ func DefaultCollectionConfig() CollectionConfig {
 	return newConfig
 }
 
-// NewCollection creates a new configured network object.
+// NewCollection creates a new configured factory collection object.
 func NewCollection(config CollectionConfig) (spec.FactoryCollection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,
@@ -48,7 +48,7 @@ func NewCollection(config CollectionConfig) (spec.FactoryCollection, error) {
 	return newCollection, nil
 }
 
-// MustNewCollection creates either a new default configured storage collection
+// MustNewCollection creates either a new default configured factory collection
 // object, or panics.
 func MustNewCollection() spec.FactoryCollection {
 	newCollection, err := NewCollection(DefaultCollectionConfig())

@@ -1,6 +1,7 @@
 package spec
 
 import (
+	"encoding/json"
 	"reflect"
 )
 
@@ -10,9 +11,14 @@ type NetworkPayload interface {
 	// GetArgs returns the arguments of the current network payload.
 	GetArgs() []reflect.Value
 
-	// GetContext returns the Context the current network payload holds as first
-	// argument. If no Context can be found, an error is returned.
-	GetContext() (Context, error)
+	// GetCLGInput returns a list of arguments intended to be provided as input
+	// for a CLG's execution. The list of arguments exists of the arguments
+	// configured to the network payload and the context configured to the network
+	// payload. Note that the context is always the first argument in the list.
+	GetCLGInput() []reflect.Value
+
+	// GetContext returns the context of the current network payload.
+	GetContext() Context
 
 	// GetArgs returns the destination of the current network payload, which must
 	// be the ID of a CLG registered within the neural network.
@@ -28,19 +34,19 @@ type NetworkPayload interface {
 	// input CLG.
 	GetSources() []ObjectID
 
-	// SetArgs returns the arguments of the current network payload. In case the
-	// given arguments are not valid, SetArgs returns an error. See Validate for
-	// more information.
-	SetArgs(args []reflect.Value) error
+	json.Marshaler
+	json.Unmarshaler
+
+	// SetArgs sets the arguments of the current network payload.
+	SetArgs(args []reflect.Value)
 
 	// String returns the concatenated string representations of the currently
 	// configured arguments.
 	String() string
 
 	// Validate throws an error if the current network payload is not valid. An
-	// network payload is not valid if it is empty, or if it does not satisfy the
-	// convention of the CLG interface to have a proper Context as first input
-	// parameter.
+	// network payload is not valid if it does ot have any context, destination or
+	// sources defined.
 	Validate() error
 }
 
@@ -50,47 +56,56 @@ type NetworkPayload interface {
 // activity calculates outputs which are streamed through the output channel
 // back to the requestor.
 type Network interface {
-	// Activate decides if the requested CLG should be activated. To make this
-	// decision the given network payload and formerly received network payloads
-	// are considered. CLGs within the neural network are able to join forces to
-	// trigger a CLG together, where their own output types do not satisfy the
-	// input interface of the requested CLG. For this case some synchronization is
-	// required. That means network payloads need to be queued until the requested
-	// CLG can be properly executed with the provided inputs. Activate tries to
-	// find a combination using all queued network payloads to satisfy the
-	// interface of the requested CLG. Note that queue has a maximum length of the
-	// number of input arguments of the requested CLG. In case no match can be
-	// found the oldest network payload is removed from the queue, because a new
-	// network payload was added before. In case some match was found the merged
-	// network payload matching the CLG's interface is returned so it can be used
-	// to execute the requested CLG. Network payloads being matched will be
-	// removed from the queue which is returned as second value. This is how it
-	// might look like when multiple CLGs forward signals to one CLG, which needs
-	// to decide if it should be actiavted or not.
+	// Activate decides if a requested CLG shall be activated. It needs to be
+	// decided if the requested CLG shall be activated. In case the requested CLG
+	// shall be activated it needs to be decided how this activation shall happen.
+	// For more information on the activation process see Activator.Activate.
+	// This is how it might look like when a CLG is requested and multiple CLGs
+	// forward signals to it.
 	//
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//       |           |           |           |           |
-	//       V           V           V           V           V
-	//       -------------------------------------------------
-	//                               |
-	//                               V
-	//                            |-----|
-	//                            | CLG |
-	//                            |-----|
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//        |           |           |           |           |
+	//        V           V           V           V           V
+	//        -------------------------------------------------
+	//                                |
+	//                                V
+	//                             |-----|
+	//                             | CLG |
+	//                             |-----|
 	//
-	Activate(clg CLG, queue []NetworkPayload) (NetworkPayload, []NetworkPayload, error)
+	Activate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
 	// might want to call it in a separate goroutine.
+	//
+	// Boot makes the network listen on requests from the outside. Here each
+	// CLG input channel is managed. This way Listen acts as kind of cortex in
+	// which signals are dispatched into all possible direction and finally flow
+	// back again. Errors during processing of the neural network will be logged
+	// to the provided logger.
 	Boot()
 
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(clg CLG, payload NetworkPayload) (NetworkPayload, error)
+	Calculate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+
+	// EventListener is a worker pool function which is executed multiple times
+	// concurrently to listen for network events. A network event is qualified by
+	// a network payload being queued and waiting to be processed. A network event
+	// and its processing represents an event associated with a very specific CLG.
+	// Thus EventListener represents the entrypoint for every single CLG execution
+	// step. canceler is provided by the worker pool that executes EventListener.
+	// Therefore EventListener should respect canceler by implementing a clean
+	// shutdown behaviour. EventListener calls EventHandler.
+	EventListener(canceler <-chan struct{}) error
+
+	// EventHandler effectively executes a network event associated to a CLG and
+	// the corresponding network payload. EventHandler is called by EventListener.
+	EventHandler(CLG CLG, networkPayload NetworkPayload) error
 
 	FactoryProvider
 
@@ -102,26 +117,32 @@ type Network interface {
 	// behaviour properties. This is how it might look like when one CLG forwards
 	// signals to multiple other CLGs.
 	//
-	//                            |-----|
-	//                            | CLG |
-	//                            |-----|
-	//                               |
-	//                               V
-	//       -------------------------------------------------
-	//       |           |           |           |           |
-	//       V           V           V           V           V
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
-	//    | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
-	//    |-----|     |-----|     |-----|     |-----|     |-----|
+	//                             |-----|
+	//                             | CLG |
+	//                             |-----|
+	//                                |
+	//                                V
+	//        -------------------------------------------------
+	//        |           |           |           |           |
+	//        V           V           V           V           V
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
+	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
+	//     |-----|     |-----|     |-----|     |-----|     |-----|
 	//
-	Forward(clg CLG, payload NetworkPayload) error
+	Forward(CLG CLG, networkPayload NetworkPayload) error
 
-	// Listen makes the network listen on requests from the outside. Here each
-	// CLG input channel is managed. This way Listen acts as kind of cortex in
-	// which signals are dispatched into all possible direction and finally flow
-	// back again. Errors during processing of the neural network will be logged
-	// to the provided logger.
-	Listen()
+	GatewayProvider
+
+	// InputListener is a worker pool function which is executed multiple times
+	// concurrently to listen for network inputs. A network input is qualified by
+	// information sequences sent by clients who request some calculation from the
+	// network. InputListener also calls InputHandler.
+	InputListener(canceler <-chan struct{}) error
+
+	// InputHandler effectively executes the network input by invoking the input
+	// CLG using the incoming text request. InputHandler is called by
+	// InputListener.
+	InputHandler(CLG CLG, textRequest TextRequest) error
 
 	Object
 

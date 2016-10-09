@@ -4,7 +4,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-// LogControl provides a way to control Anna's log behavior. E.g. filters can
+// LogControl provides a way to control Anna's log behaviour. E.g. filters can
 // be set and reset using it.
 type LogControl interface {
 	// ResetLevels sets the log levels allowed to be logged back to the default

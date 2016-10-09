@@ -1,7 +1,7 @@
 # connection
 The connection model is the most important concept of the Anna project. A
 connection can be seen as a neural connection. Such connections represent
-relationships between certain information and behaviors, represented in a multi
+relationships between certain information and behaviours, represented in a multi
 dimensional space. [Inputs](input.md), [outputs](output.md) and [CLGs](clg.md)
 are wired together that way. Many of these connections interacting together
 dynamically, represent Anna's neural [network](network.md).
@@ -9,7 +9,7 @@ dynamically, represent Anna's neural [network](network.md).
 ### space
 The connection space can be seen as a multi dimensional vector space. In theory
 it's dimensions can represent everything: space, time or even conceptual weights
-representing something like emotions. Information and behaviors are mapped onto
+representing something like emotions. Information and behaviours are mapped onto
 the connection space by having coordinates applied. A coordinate represents a
 location within the connection space, which is calculated by interacting with
 [the balance system](distribution.md#balance-system). The balance system is used
@@ -25,15 +25,15 @@ mechanisms of leveraging event interactions and calculating connection locations
 within the connection space.
 
 Spontaneous modificatins of connections lead to variances within applied
-behaviors. Leads some behavior to successful results, slight adjustments of a
+behaviours. Leads some behaviour to successful results, slight adjustments of a
 CLG tree's coordinates can be stored, which causes the CLG tree to be updated.
-This will improve CLG trees over time, because behavior was adjusted to the
+This will improve CLG trees over time, because behaviour was adjusted to the
 given environmental feedback that Anna has received. That means the balance
-system influences connections within the connection space, and thus behavior of
+system influences connections within the connection space, and thus behaviour of
 the whole neural network. Thus coordinates are used to calculate dynamic and
 individual connection locations within the connection space. They are also used
 to calculate certain similarities between information, and certain similarities
-between behaviors.
+between behaviours.
 
 The following picture illustrates the connection space. For simplicity it only
 shows two dimensions, `x` and `y`. We see two different CLG trees within the
@@ -51,10 +51,10 @@ the past. The process of creating connections is a continuous task, that is
 fully dynamic and learned by experience.
 
 When information is provided, it is stored within the underlying storage. The
-creation of behavior connections takes place on the CLG level. A connection is
+creation of behaviour connections takes place on the CLG level. A connection is
 represented as single key-value pair. The key of such a key-value pair simply
-consists of a behavior ID. The value of such a key-value pair is a list of
-behavior IDs. All newly created connections are persisted within a trial scope
+consists of a behaviour ID. The value of such a key-value pair is a list of
+behaviour IDs. All newly created connections are persisted within a trial scope
 in the first place. The purpose of such a trial scope is to label all stored
 data within the current creation process as volatile. If the neural network
 succeeds to solve a problem with some newly created connections, the connections
@@ -116,17 +116,17 @@ notation of the described data structures reads as follows.
   which is simply used to prefix data structures to a certain scope. This
   prefix might also indicate a relation to some `<trial-scope>`.
 - When talking about a `<clg-tree-id>`, we talk about an identifier for
-  combined, executable behavior.
-- When talking about a `<behavior-coordinate>`, we talk about a single point
+  combined, executable behaviour.
+- When talking about a `<behaviour-coordinate>`, we talk about a single point
   within the connection space, which represents one single CLG associated with a
   very specific CLG tree. A CLG's coordinate represents its location within the
   connection space. This representation of a CLG's location is calculated
   continuously by interacting with the balance system. Thus coordinates might be
   recalculated to align them to successful CLG trees.
-- When talking about a `<behavior-ID>`, we talk about a very unique identifier
+- When talking about a `<behaviour-ID>`, we talk about a very unique identifier
   of a CLG, which is generated for each CLG execution that is not related to an
   already known CLG tree ID. That way a single CLG can be represented as unique
-  CLG with its own very unique connections and behaviors.
+  CLG with its own very unique connections and behaviours.
 - When talking about an `<information-coordinate>`, we talk about a single point
   within the connection space, which represents one single information sequence.
   An information sequence's coordinate represents its location within the
@@ -202,106 +202,106 @@ information coordinate to its information ID.
 
 ---
 
-###### map behavior coordinate to behavior ID
-When having a behavior coordinate given it needs to be mapped to its behavior
-ID. This mapping resolves a single behavior ID from its own coordinate within
-the connection space. Having the behavior coordinate indexed as key enables
+###### map behaviour coordinate to behaviour ID
+When having a behaviour coordinate given it needs to be mapped to its behaviour
+ID. This mapping resolves a single behaviour ID from its own coordinate within
+the connection space. Having the behaviour coordinate indexed as key enables
 lookups based on similarities when scanning the key space within the underlying
 storage. A coordinate is used to calculate its location within the connection
 space. The keyscan is very slow and only supposed to be done in the background
-as persistent neural activity. The following key maps a behavior coordinate to
-its behavior ID.
+as persistent neural activity. The following key maps a behaviour coordinate to
+its behaviour ID.
 
 ```
-<prefix>:behavior-coordinate:<behavior-coordinate>:behavior-id    <behavior-id>
+<prefix>:behaviour-coordinate:<behaviour-coordinate>:behaviour-id    <behaviour-id>
 ```
 
 ---
 
-###### map behavior ID to behavior coordinate
-When having a behavior ID given it needs to be mapped to its behavior
-coordinate. This mapping resolves a single behavior coordinate from its own ID
+###### map behaviour ID to behaviour coordinate
+When having a behaviour ID given it needs to be mapped to its behaviour
+coordinate. This mapping resolves a single behaviour coordinate from its own ID
 within the connection space. A coordinate is used to calculate its location
-within the connection space. The following key maps a behavior ID to its
-behavior coordinate.
+within the connection space. The following key maps a behaviour ID to its
+behaviour coordinate.
 
 ```
-<prefix>:behavior-id:<behavior-id>:behavior-coordinate    <behavior-coordinate>
+<prefix>:behaviour-id:<behaviour-id>:behaviour-coordinate    <behaviour-coordinate>
 ```
 
 ---
 
-###### map CLG tree ID to behavior ID
+###### map CLG tree ID to behaviour ID
 When having a CLG tree ID given it needs to be mapped to the very first CLG
-within a specific CLG tree. This very first CLG is represented by a behavior ID.
-This mapping resolves all behaviors of a whole CLG tree. The following key maps
-a CLG tree ID to the very first behavior within this specific CLG tree.
+within a specific CLG tree. This very first CLG is represented by a behaviour ID.
+This mapping resolves all behaviours of a whole CLG tree. The following key maps
+a CLG tree ID to the very first behaviour within this specific CLG tree.
 
 ```
-<prefix>:clg-tree-id:<clg-tree-id>:behavior-id    <behavior-id>
+<prefix>:clg-tree-id:<clg-tree-id>:first-behaviour-id    <behaviour-id>
 ```
 
 ---
 
-###### map behavior ID to behavior IDs set
-When having a single behavior ID given it needs to be mapped to multiple
-behavior IDs. This mapping represents connections linking from one behavior to
-other behaviors within the connection space. That way dynamic CLG trees can be
-referenced. CLGs can lookup connections using their own behavior IDs to know
-where to forward signals to. In case an exact expectation is known, the behavior
+###### map behaviour ID to behaviour IDs set
+When having a single behaviour ID given it needs to be mapped to multiple
+behaviour IDs. This mapping represents connections linking from one behaviour to
+other behaviours within the connection space. That way dynamic CLG trees can be
+referenced. CLGs can lookup connections using their own behaviour IDs to know
+where to forward signals to. In case an exact expectation is known, the behaviour
 should change slightly over time to find more optimized ways of solving
 problems. In case a problem was able to be solved using some modifications, the
-behavior can be updated completely. Note that the order of the stored behavior
+behaviour can be updated completely. Note that the order of the stored behaviour
 IDs is not important, because we only need to make sure that signals are
-dispatched to each connected CLG. The following key maps a single behavior ID to
-multiple behavior IDs.
+dispatched to each connected CLG. The following key maps a single behaviour ID to
+multiple behaviour IDs.
 
 ```
-<prefix>:behavior-id:<behavior-id>:forward-behavior-ids    <behavior-id>,<behavior-id>,...
+<prefix>:behaviour-id:<behaviour-id>:forward-behaviour-ids    <behaviour-id>,<behaviour-id>,...
 ```
 
 ---
 
-###### map behavior ID to behavior IDs list
-When having a single behavior ID given it needs to be mapped to multiple
-behavior IDs. This mapping represents connections linking from one behavior to
-other behaviors within the connection space. That way dynamic CLG trees can be
-referenced. CLGs can lookup connections using their own behavior IDs to know
+###### map behaviour ID to behaviour IDs list
+When having a single behaviour ID given it needs to be mapped to multiple
+behaviour IDs. This mapping represents connections linking from one behaviour to
+other behaviours within the connection space. That way dynamic CLG trees can be
+referenced. CLGs can lookup connections using their own behaviour IDs to know
 which payloads to accept when being activated. In case an exact expectation is
-known, the behavior should change slightly over time to find more optimized ways
+known, the behaviour should change slightly over time to find more optimized ways
 of solving problems. In case a problem was able to be solved using some
-modifications, the behavior can be updated completely. Note that the order of
-the stored behavior IDs is important, because it reflects the input interface of
-the requested CLG. The following key maps a single behavior ID to multiple
-behavior IDs.
+modifications, the behaviour can be updated completely. Note that the order of
+the stored behaviour IDs is important, because it reflects the input interface of
+the requested CLG. The following key maps a single behaviour ID to multiple
+behaviour IDs.
 
 ```
-<prefix>:behavior-id:<behavior-id>:activate-behavior-ids    <behavior-id>,<behavior-id>,...
+<prefix>:behaviour-id:<behaviour-id>:activate-behaviour-ids    <behaviour-id>,<behaviour-id>,...
 ```
 
 ---
 
-###### map behavior ID to CLG name
-When having a single behavior ID given it needs to be mapped to its unique CLG
-name. That way behavior can be resolved from its very unique ID to some actual
+###### map behaviour ID to CLG name
+When having a single behaviour ID given it needs to be mapped to its unique CLG
+name. That way behaviour can be resolved from its very unique ID to some actual
 functionality. This works even across reboots, because CLG IDs change where
-their names don't. The following key maps a single behavior ID to its unique CLG
+their names don't. The following key maps a single behaviour ID to its unique CLG
 name.
 
 ```
-<prefix>:behavior-id:<behavior-id>:behavior-name    <CLG-name>
+<prefix>:behaviour-id:<behaviour-id>:behaviour-name    <CLG-name>
 ```
 
 ---
 
-###### map behavior name to weighted behavior names
-When having a single behavior name given it needs to be mapped to multiple
-weighted bahavior names. That way patterns of behavior connections can be
-tracked. The following key maps a single behavior name to multiple behavior
+###### map behaviour name to weighted behaviour names
+When having a single behaviour name given it needs to be mapped to multiple
+weighted bahavior names. That way patterns of behaviour connections can be
+tracked. The following key maps a single behaviour name to multiple behaviour
 weighted names.
 
 ```
-<prefix>:behavior-name:<behavior-name>:weighted-behavior-names    <behavior-name>:<weight>,<behavior-name>:<weight>,...
+<prefix>:behaviour-name:<behaviour-name>:weighted-behaviour-names    <behaviour-name>:<weight>,<behaviour-name>:<weight>,...
 ```
 
 ### abstraction
@@ -310,7 +310,7 @@ as well. E.g. a mapping of conceptional ideas can be achieved by implementing
 certain CLGs. For instance one CLG which adds a mapping between two given
 strings, where these strings represent some concepts like `tree` or `house`.
 Another CLG reads such mappings and acts according to some pattern it decided
-for. Having enough entropy and time given this behavior will lead to
+for. Having enough entropy and time given this behaviour will lead to
 surprisingly results. The important thing for on this level of abstraction is
 simplicity. We only use very simple key-pairs to represent connections, which
 gives the neural network enough room to figure itself out how to act best.

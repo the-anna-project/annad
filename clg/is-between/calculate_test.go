@@ -1,12 +1,9 @@
 package isbetween
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func Test_CLG_IsBetween(t *testing.T) {
@@ -97,30 +94,11 @@ func Test_CLG_IsBetween(t *testing.T) {
 	}
 
 	newCLG := MustNew()
-	ctx := context.MustNew()
 
 	for i, testCase := range testCases {
-		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
-		newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(testCase.N), reflect.ValueOf(testCase.Min), reflect.ValueOf(testCase.Max)}
-		newNetworkPayloadConfig.Destination = "destination"
-		newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
-		newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-
-		calculatedNetworkPayload, err := newCLG.Calculate(newNetworkPayload)
-		if err != nil {
-			t.Fatal("case", i+1, "expected", nil, "got", err)
-		}
-		args := calculatedNetworkPayload.GetArgs()
-		if len(args) != 2 {
-			t.Fatal("case", i+1, "expected", 2, "got", len(args))
-		}
-		result := args[1].Bool()
-
-		if result != testCase.Expected {
-			t.Fatal("case", i+1, "expected", testCase.Expected, "got", result)
+		b := newCLG.(*clg).calculate(context.MustNew(), testCase.N, testCase.Min, testCase.Max)
+		if b != testCase.Expected {
+			t.Fatal("case", i+1, "expected", testCase.Expected, "got", b)
 		}
 	}
 }

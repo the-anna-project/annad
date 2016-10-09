@@ -8,13 +8,25 @@ package splitfeatures
 import (
 	"reflect"
 	"testing"
-
-	"golang.org/x/net/context"
 )
 
 func Test_CLG_Factory(t *testing.T) {
 	newCLG := MustNew()
 	if newCLG.Factory() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_Gateway(t *testing.T) {
+	newCLG := MustNew()
+	if newCLG.Gateway() == nil {
+		t.Fatal("expected", false, "got", true)
+	}
+}
+
+func Test_CLG_GetCalculate(t *testing.T) {
+	newCLG := MustNew()
+	if reflect.TypeOf(newCLG.GetCalculate()).Kind() != reflect.Func {
 		t.Fatal("expected", false, "got", true)
 	}
 }
@@ -27,26 +39,6 @@ func Test_CLG_GetName(t *testing.T) {
 	}
 }
 
-func Test_CLG_GetInputChannel(t *testing.T) {
-	newCLG := MustNew()
-	if newCLG.GetInputChannel() == nil {
-		t.Fatal("expected", false, "got", true)
-	}
-}
-
-func Test_CLG_GetInputTypes(t *testing.T) {
-	newCLG := MustNew()
-	inputTypes := newCLG.GetInputTypes()
-	if len(inputTypes) < 1 {
-		t.Fatal("expected", 1, "got", 0)
-	}
-
-	var ctx context.Context
-	if !inputTypes[0].Implements(reflect.TypeOf(&ctx).Elem()) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
 func Test_CLG_New_FactoryCollection_Error(t *testing.T) {
 	newConfig := DefaultConfig()
 	newConfig.FactoryCollection = nil
@@ -56,18 +48,18 @@ func Test_CLG_New_FactoryCollection_Error(t *testing.T) {
 	}
 }
 
-func Test_CLG_New_LogError(t *testing.T) {
+func Test_CLG_New_GatewayCollection_Error(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Log = nil
+	newConfig.GatewayCollection = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_CLG_New_InputChannelError(t *testing.T) {
+func Test_CLG_New_LogError(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.InputChannel = nil
+	newConfig.Log = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -103,6 +95,29 @@ func Test_CLG_SetFactoryCollection(t *testing.T) {
 
 	if rawCLG.FactoryCollection != nil {
 		t.Fatal("expected", nil, "got", "spec.FactoryCollection")
+	}
+}
+
+func Test_CLG_SetGatewayCollection(t *testing.T) {
+	newCLG := MustNew()
+	var rawCLG *clg
+
+	switch c := newCLG.(type) {
+	case *clg:
+		// all good
+		rawCLG = newCLG.(*clg)
+	default:
+		t.Fatal("expected", "*clg", "got", c)
+	}
+
+	if rawCLG.GatewayCollection == nil {
+		t.Fatal("expected", "spec.GatewayCollection", "got", nil)
+	}
+
+	newCLG.SetGatewayCollection(nil)
+
+	if rawCLG.GatewayCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.GatewayCollection")
 	}
 }
 

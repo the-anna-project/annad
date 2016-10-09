@@ -1,5 +1,5 @@
 // Package readseparator implements spec.CLG and provides functionality to
-// read a separator stored in association to a specific behavior ID.
+// read a separator stored in association to a specific behaviour ID.
 package readseparator
 
 import (
@@ -11,13 +11,13 @@ import (
 )
 
 func (c *clg) calculate(ctx spec.Context) (string, error) {
-	behaviorID := ctx.GetBehaviorID()
-	if behaviorID == "" {
-		return "", maskAnyf(invalidBehaviorIDError, "must not be empty")
+	behaviourID, ok := ctx.GetBehaviourID()
+	if !ok {
+		return "", maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
-	behaviorIDKey := key.NewCLGKey("behavior-id:%s:separator", behaviorID)
-	separator, err := c.Storage().General().Get(behaviorIDKey)
+	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
+	separator, err := c.Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
 		randomKey, err := c.Storage().Feature().GetRandomKey()
 		if err != nil {
@@ -45,18 +45,18 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 
 		// Create a new separator from the fetched random feature. Note that a
 		// feature is considered 4 characters long and the random factory takes a
-		// max parameter as second argument, which is exlusive.
+		// max parameter, which is exlusive.
 		feature := randomKey[8:12]
-		numbers, err := c.Factory().Random().CreateNMax(1, 5)
+		featureIndex, err := c.Factory().Random().CreateMax(5)
 		if err != nil {
 			return "", maskAny(err)
 		}
-		separator = string(feature[numbers[0]])
+		separator = string(feature[featureIndex])
 
-		// Store the newly created separator using the CLGs own behavior ID. In case
+		// Store the newly created separator using the CLGs own behaviour ID. In case
 		// this CLG is asked again to return its separator, it will lookup its
 		// separator in the general storage.
-		err = c.Storage().General().Set(behaviorIDKey, separator)
+		err = c.Storage().General().Set(behaviourIDKey, separator)
 		if err != nil {
 			return "", maskAny(err)
 		}

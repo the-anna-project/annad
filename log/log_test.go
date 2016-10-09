@@ -76,32 +76,52 @@ func (c *context) Err() error {
 	return nil
 }
 
-func (c *context) GetBehaviorID() string {
-	return ""
+func (c *context) GetBehaviourID() (string, bool) {
+	return "", false
 }
 
-func (c *context) GetCLGTreeID() string {
-	return c.CLGTreeID
+func (c *context) GetCLGName() (string, bool) {
+	return "", true
+}
+
+func (c *context) GetCLGTreeID() (string, bool) {
+	return c.CLGTreeID, true
+}
+
+func (c *context) GetExpectation() (spec.Expectation, bool) {
+	return nil, false
 }
 
 func (c *context) GetID() string {
 	return c.ID
 }
 
-func (c *context) GetInformationID() string {
-	return ""
+func (c *context) GetInformationID() (string, bool) {
+	return "", false
 }
 
-func (c *context) GetSessionID() string {
-	return c.SessionID
+func (c *context) GetSessionID() (string, bool) {
+	return c.SessionID, true
 }
 
-func (c *context) SetBehaviorID(behaviorID string) {
+func (c *context) MarshalJSON() ([]byte, error) {
+	return nil, nil
+}
+
+func (c *context) SetBehaviourID(behaviourID string) {
+
+}
+
+func (c *context) SetCLGName(clgname string) {
 
 }
 
 func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.CLGTreeID = clgTreeID
+}
+
+func (c *context) SetExpectation(expectation spec.Expectation) {
+
 }
 
 func (c *context) SetInformationID(informationID string) {
@@ -110,6 +130,10 @@ func (c *context) SetInformationID(informationID string) {
 
 func (c *context) SetSessionID(sessionID string) {
 	c.SessionID = sessionID
+}
+
+func (c *context) UnmarshalJSON(b []byte) error {
+	return nil
 }
 
 func (c *context) Value(key interface{}) interface{} {

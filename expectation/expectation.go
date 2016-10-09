@@ -3,20 +3,20 @@
 package expectation
 
 import (
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// Config represents the configuration used to create a new expectation object.
+// Config represents the configuration used to create a new expectation response
+// object.
 type Config struct {
-	ExpectationRequest api.ExpectationRequest
+	Output string
 }
 
 // DefaultConfig provides a default configuration to create a new expectation
 // object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
-		ExpectationRequest: api.ExpectationRequest{},
+		Output: "",
 	}
 
 	return newConfig
@@ -35,11 +35,7 @@ type expectation struct {
 	Config
 }
 
-func (e *expectation) IsEmpty() bool {
-	return e.ExpectationRequest.IsEmpty()
-}
-
-// TODO
-func (e *expectation) Match() (bool, error) {
-	return false, nil
+// IsEmpty checks whether the current expectation is empty.
+func (e *expectation) GetOutput() string {
+	return e.Output
 }

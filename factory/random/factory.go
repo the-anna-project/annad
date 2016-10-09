@@ -83,24 +83,22 @@ type factory struct {
 	FactoryConfig
 }
 
-func (f *factory) CreateNMax(n, max int) ([]int, error) {
+func (f *factory) CreateMax(max int) (int, error) {
 	// Define the action.
-	var result []int
+	var result int
 	action := func() error {
 		done := make(chan struct{}, 1)
 		fail := make(chan error, 1)
 
 		go func() {
-			for i := 0; i < n; i++ {
-				m := big.NewInt(int64(max))
-				j, err := f.RandFactory(f.RandReader, m)
-				if err != nil {
-					fail <- maskAny(err)
-					return
-				}
-
-				result = append(result, int(j.Int64()))
+			m := big.NewInt(int64(max))
+			j, err := f.RandFactory(f.RandReader, m)
+			if err != nil {
+				fail <- maskAny(err)
+				return
 			}
+
+			result = int(j.Int64())
 
 			done <- struct{}{}
 		}()
@@ -118,7 +116,22 @@ func (f *factory) CreateNMax(n, max int) ([]int, error) {
 	// Execute the action wrapped with a retrier.
 	err := backoff.Retry(action, f.BackOffFactory())
 	if err != nil {
-		return nil, maskAny(err)
+		return 0, maskAny(err)
+	}
+
+	return result, nil
+}
+
+func (f *factory) CreateNMax(n, max int) ([]int, error) {
+	var result []int
+
+	for i := 0; i < n; i++ {
+		j, err := f.CreateMax(max)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+
+		result = append(result, j)
 	}
 
 	return result, nil

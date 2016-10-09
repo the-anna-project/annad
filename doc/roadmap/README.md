@@ -81,7 +81,7 @@ can make. Understanding humans, its terminology and meanings of language will
 make interactions with Anna more easy. Learning and practicing human language
 is an essential step towards intelligence. The key here is to make Anna able to
 understand fundamental concepts of logic. Making her able to understand proves
-dynamic behavior, what is essential for AI. This is a complete logic problem.
+dynamic behaviour, what is essential for AI. This is a complete logic problem.
 Once solved Anna can work together with us to go further steps to improve her.
 
 ---

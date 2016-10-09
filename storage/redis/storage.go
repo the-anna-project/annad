@@ -39,14 +39,32 @@ type StorageConfig struct {
 // DefaultStorageConfigWithConn provides a configuration that can be mocked
 // using a redis connection. This is used for testing.
 func DefaultStorageConfigWithConn(redisConn redis.Conn) StorageConfig {
+	// pool
 	newPoolConfig := DefaultPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
 	newMockDialConfig.RedisConn = redisConn
 	newPoolConfig.Dial = newMockDial(newMockDialConfig)
 	newPool := NewPool(newPoolConfig)
 
+	// storage
 	newStorageConfig := DefaultStorageConfig()
 	newStorageConfig.Pool = newPool
+
+	return newStorageConfig
+}
+
+// DefaultStorageConfigWithAddr provides a configuration to make a redis client
+// connect to the provided address. This is used for production.
+func DefaultStorageConfigWithAddr(addr string) StorageConfig {
+	// dial
+	newDialConfig := DefaultDialConfig()
+	newDialConfig.Addr = addr
+	// pool
+	newPoolConfig := DefaultPoolConfig()
+	newPoolConfig.Dial = NewDial(newDialConfig)
+	// storage
+	newStorageConfig := DefaultStorageConfig()
+	newStorageConfig.Pool = NewPool(newPoolConfig)
 
 	return newStorageConfig
 }
@@ -59,7 +77,7 @@ func DefaultStorageConfig() StorageConfig {
 		panic(err)
 	}
 
-	newConfig := StorageConfig{
+	newStorageConfig := StorageConfig{
 		// Dependencies.
 		Instrumentation: newInstrumentation,
 		Log:             log.New(log.DefaultConfig()),
@@ -72,7 +90,7 @@ func DefaultStorageConfig() StorageConfig {
 		Prefix: "prefix",
 	}
 
-	return newConfig
+	return newStorageConfig
 }
 
 // NewStorage creates a new configured redis storage object.
@@ -80,9 +98,9 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:    id.MustNew(),
-		Mutex: sync.Mutex{},
-		Type:  ObjectType,
+		ID:           id.MustNew(),
+		ShutdownOnce: sync.Once{},
+		Type:         ObjectType,
 	}
 
 	// Dependencies.
@@ -108,13 +126,15 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 type storage struct {
 	StorageConfig
 
-	ID    spec.ObjectID
-	Mutex sync.Mutex
-	Type  spec.ObjectType
+	ID           spec.ObjectID
+	ShutdownOnce sync.Once
+	Type         spec.ObjectType
 }
 
 func (s *storage) Get(key string) (string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
+
+	errors := make(chan error, 1)
 
 	var result string
 	action := func() error {
@@ -123,7 +143,14 @@ func (s *storage) Get(key string) (string, error) {
 
 		var err error
 		result, err = redis.String(conn.Do("GET", s.withPrefix(key)))
-		if err != nil {
+		if IsNotFound(err) {
+			// To return the not found error we need to break through the retrier.
+			// Therefore we do not return the not found error here, but dispatch it to
+			// the calling goroutine. Further we simply fall through and return nil to
+			// finally stop the retrier.
+			errors <- maskAny(err)
+			return nil
+		} else if err != nil {
 			return maskAny(err)
 		}
 
@@ -135,19 +162,38 @@ func (s *storage) Get(key string) (string, error) {
 		return "", maskAny(err)
 	}
 
+	select {
+	case err := <-errors:
+		if err != nil {
+			return "", maskAny(err)
+		}
+	default:
+		// If there is no error, we simply fall through to return the result.
+	}
+
 	return result, nil
 }
 
-func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
+// TODO test
+func (s *storage) GetAllFromSet(key string) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
+
+	errors := make(chan error, 1)
 
 	var result []string
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
-		if err != nil {
+		values, err := redis.Values(conn.Do("SMEMBERS", s.withPrefix(key)))
+		if IsNotFound(err) {
+			// To return the not found error we need to break through the retrier.
+			// Therefore we do not return the not found error here, but dispatch it to
+			// the calling goroutine. Further we simply fall through and return nil to
+			// finally stop the retrier.
+			errors <- maskAny(err)
+			return nil
+		} else if err != nil {
 			return maskAny(err)
 		}
 
@@ -158,9 +204,61 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetAllFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
+	}
+
+	select {
+	case err := <-errors:
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	default:
+		// If there is no error, we simply fall through to return the result.
+	}
+
+	return result, nil
+}
+
+func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
+
+	errors := make(chan error, 1)
+
+	var result []string
+	var err error
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		result, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
+		if IsNotFound(err) {
+			// To return the not found error we need to break through the retrier.
+			// Therefore we do not return the not found error here, but dispatch it to
+			// the calling goroutine. Further we simply fall through and return nil to
+			// finally stop the retrier.
+			errors <- maskAny(err)
+			return nil
+		} else if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	select {
+	case err := <-errors:
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	default:
+		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
@@ -170,23 +268,20 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
 
 	var result []string
+	var err error
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
+		result, err = redis.Strings(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
 		if err != nil {
 			return maskAny(err)
-		}
-
-		for _, v := range values {
-			result = append(result, v.(string))
 		}
 
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -242,6 +337,74 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	}
 
 	return result, nil
+}
+
+// TODO test
+func (s *storage) PopFromList(key string) (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
+
+	errors := make(chan error, 1)
+
+	var result string
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		var err error
+		result, err = redis.String(conn.Do("BRPOP", s.withPrefix(key)))
+		if IsNotFound(err) {
+			// To return the not found error we need to break through the retrier.
+			// Therefore we do not return the not found error here, but dispatch it to
+			// the calling goroutine. Further we simply fall through and return nil to
+			// finally stop the retrier.
+			errors <- maskAny(err)
+			return nil
+		} else if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PopFromList", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	select {
+	case err := <-errors:
+		if err != nil {
+			return "", maskAny(err)
+		}
+	default:
+		// If there is no error, we simply fall through to return the result.
+	}
+
+	return result, nil
+}
+
+// TODO test
+func (s *storage) PushToList(key string, element string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		_, err := redis.Int(conn.Do("LPUSH", s.withPrefix(key), element))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToList", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (s *storage) PushToSet(key string, element string) error {
@@ -390,6 +553,14 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 	return nil
 }
 
+func (s *storage) Shutdown() {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+
+	s.ShutdownOnce.Do(func() {
+		s.Pool.Close()
+	})
+}
+
 func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
 
@@ -415,8 +586,10 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 				return maskAny(err)
 			}
 
-			cursor := reply[0].(int64)
-			values := reply[1].([]string)
+			cursor, values, err := parseMultiBulkReply(reply)
+			if err != nil {
+				return maskAny(err)
+			}
 
 			for i := range values {
 				select {
@@ -480,8 +653,10 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 				return maskAny(err)
 			}
 
-			cursor := reply[0].(int64)
-			values := reply[1].([]string)
+			cursor, values, err := parseMultiBulkReply(reply)
+			if err != nil {
+				return maskAny(err)
+			}
 
 			for _, v := range values {
 				select {

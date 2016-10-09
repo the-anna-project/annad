@@ -32,12 +32,6 @@ func NewTextResponse(config TextResponseConfig) (spec.TextResponse, error) {
 	return newTextResponse, nil
 }
 
-// NewEmptyTextResponse simply returns an empty, maybe invalid, text response
-// object. This should only be used for things like unmarshaling.
-func NewEmptyTextResponse() spec.TextResponse {
-	return &textResponse{}
-}
-
 type textResponse struct {
 	TextResponseConfig
 }
