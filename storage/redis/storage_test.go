@@ -84,23 +84,23 @@ func Test_RedisStorage_Get_Error(t *testing.T) {
 
 // GetElementsByScore
 
-//func Test_RedisStorage_GetElementsByScore_Success(t *testing.T) {
-//	c := redigomock.NewConn()
-//	c.Command("ZREVRANGEBYSCORE", "prefix:foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{"bar"})
-//
-//	newStorage := testMustNewStorageWithConn(t, c)
-//
-//	values, err := newStorage.GetElementsByScore("foo", 0.8, 3)
-//	if err != nil {
-//		t.Fatal("expected", nil, "got", err)
-//	}
-//	if len(values) != 1 {
-//		t.Fatal("expected", 1, "got", len(values))
-//	}
-//	if values[0] != "bar" {
-//		t.Fatal("expected", "bar", "got", values[0])
-//	}
-//}
+func Test_RedisStorage_GetElementsByScore_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZREVRANGEBYSCORE", "prefix:foo", 0.8, 0.8, "LIMIT", 0, 3).Expect([]interface{}{[]uint8("bar")})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	values, err := newStorage.GetElementsByScore("foo", 0.8, 3)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if len(values) != 1 {
+		t.Fatal("expected", 1, "got", len(values))
+	}
+	if values[0] != "bar" {
+		t.Fatal("expected", "bar", "got", values[0])
+	}
+}
 
 func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 	c := redigomock.NewConn()
@@ -116,32 +116,34 @@ func Test_RedisStorage_GetElementsByScore_Error(t *testing.T) {
 
 // GetHighestScoredElements
 
-//func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
-//	c := redigomock.NewConn()
-//	c.Command("ZREVRANGE", "prefix:foo", 0, 2, "WITHSCORES").Expect([]interface{}{"one", "0.8", "two", "0.5"})
-//
-//	newStorage := testMustNewStorageWithConn(t, c)
-//
-//	values, err := newStorage.GetHighestScoredElements("foo", 3)
-//	if err != nil {
-//		t.Fatal("expected", nil, "got", err)
-//	}
-//	if len(values) != 4 {
-//		t.Fatal("expected", 1, "got", len(values))
-//	}
-//	if values[0] != "one" {
-//		t.Fatal("expected", "one", "got", values[0])
-//	}
-//	if values[1] != "0.8" {
-//		t.Fatal("expected", "0.8", "got", values[1])
-//	}
-//	if values[2] != "two" {
-//		t.Fatal("expected", "two", "got", values[2])
-//	}
-//	if values[3] != "0.5" {
-//		t.Fatal("expected", "0.5", "got", values[3])
-//	}
-//}
+func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("ZREVRANGE", "prefix:foo", 0, 2, "WITHSCORES").Expect([]interface{}{
+		[]uint8("one"), []uint8("0.8"), []uint8("two"), []uint8("0.5"),
+	})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	values, err := newStorage.GetHighestScoredElements("foo", 3)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if len(values) != 4 {
+		t.Fatal("expected", 1, "got", len(values))
+	}
+	if values[0] != "one" {
+		t.Fatal("expected", "one", "got", values[0])
+	}
+	if values[1] != "0.8" {
+		t.Fatal("expected", "0.8", "got", values[1])
+	}
+	if values[2] != "two" {
+		t.Fatal("expected", "two", "got", values[2])
+	}
+	if values[3] != "0.5" {
+		t.Fatal("expected", "0.5", "got", values[3])
+	}
+}
 
 func Test_RedisStorage_GetHighestScoredElements_Error(t *testing.T) {
 	c := redigomock.NewConn()
