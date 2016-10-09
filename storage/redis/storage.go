@@ -227,11 +227,12 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	errors := make(chan error, 1)
 
 	var result []string
+	var err error
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		values, err := redis.Values(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
+		result, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
 		if IsNotFound(err) {
 			// To return the not found error we need to break through the retrier.
 			// Therefore we do not return the not found error here, but dispatch it to
@@ -243,14 +244,10 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 			return maskAny(err)
 		}
 
-		for _, v := range values {
-			result = append(result, v.(string))
-		}
-
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
