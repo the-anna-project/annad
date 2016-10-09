@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis"
+	"github.com/cenk/backoff"
 
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
@@ -64,6 +65,9 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	}
 
 	newRedisStorageConfig := redis.DefaultStorageConfigWithAddr(redisAddr)
+	newRedisStorageConfig.BackOffFactory = func() spec.BackOff {
+		return backoff.NewExponentialBackOff()
+	}
 	newRedisStorage, err := redis.NewStorage(newRedisStorageConfig)
 	if err != nil {
 		return nil, maskAny(err)
