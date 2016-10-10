@@ -124,7 +124,7 @@ func Test_RedisStorage_GetHighestScoredElements_Success(t *testing.T) {
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	values, err := newStorage.GetHighestScoredElements("foo", 3)
+	values, err := newStorage.GetHighestScoredElements("foo", 2)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -151,7 +151,7 @@ func Test_RedisStorage_GetHighestScoredElements_Error(t *testing.T) {
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	_, err := newStorage.GetHighestScoredElements("foo", 3)
+	_, err := newStorage.GetHighestScoredElements("foo", 2)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}

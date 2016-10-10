@@ -6,329 +6,328 @@ import (
 	"testing"
 )
 
-//func Test_Memory_GetElementsByScore_Success(t *testing.T) {
-//	testCases := []struct {
-//		Key          string
-//		Score        float64
-//		MaxElements  int
-//		Elements     map[string]float64
-//		Expected     []string
-//		ErrorMatcher func(err error) bool
-//	}{
-//		{
-//			Key:         "mykey",
-//			Score:       0.5,
-//			MaxElements: -1,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       0.5,
-//			MaxElements: 5,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       0.5,
-//			MaxElements: 1,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       3.4,
-//			MaxElements: 1,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected:     []string{},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       0.8,
-//			MaxElements: 5,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			// Note the order because of the lexicographical order.
-//			Expected: []string{
-//				"zero.eight.one",
-//				"zero.eight.three",
-//				"zero.eight.two",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       3.4,
-//			MaxElements: 5,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			Expected:     []string{},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       0.8,
-//			MaxElements: 2,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			// Note the order because of the lexicographical order.
-//			Expected: []string{
-//				"zero.eight.one",
-//				"zero.eight.three",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:   "mykey",
-//			Score: 0.8,
-//			// Note we set MaxElements to zero, so nothing should be returned.
-//			MaxElements: 0,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			Expected:     []string{},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			Key:         "mykey",
-//			Score:       0.5,
-//			MaxElements: 1,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//	}
-//
-//	for i, testCase := range testCases {
-//		// Setup
-//		newStorage := MustNew()
-//		defer newStorage.Shutdown()
-//
-//		for e, s := range testCase.Elements {
-//			err := newStorage.SetElementByScore(testCase.Key, e, s)
-//			if err != nil {
-//				t.Fatal("case", i+1, "expected", nil, "got", err)
-//			}
-//		}
-//
-//		// Test
-//		output, err := newStorage.GetElementsByScore(testCase.Key, testCase.Score, testCase.MaxElements)
-//		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
-//			t.Fatal("case", i+1, "expected", true, "got", false)
-//		}
-//
-//		// Assert
-//		if testCase.ErrorMatcher == nil {
-//			if len(output) != len(testCase.Expected) {
-//				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
-//			}
-//
-//			for i, e := range testCase.Expected {
-//				if output[i] != e {
-//					t.Fatal("case", i+1, "expected", e, "got", output[i])
-//				}
-//			}
-//		}
-//	}
-//}
+func Test_Memory_GetElementsByScore_Success(t *testing.T) {
+	testCases := []struct {
+		Key          string
+		Score        float64
+		MaxElements  int
+		Elements     map[string]float64
+		Expected     []string
+		ErrorMatcher func(err error) bool
+	}{
+		{
+			Key:         "mykey",
+			Score:       0.5,
+			MaxElements: -1,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       0.5,
+			MaxElements: 5,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       0.5,
+			MaxElements: 1,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       3.4,
+			MaxElements: 1,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected:     []string{},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       0.8,
+			MaxElements: 5,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			// Note the order because of the descending lexicographical order.
+			Expected: []string{
+				"zero.eight.two",
+				"zero.eight.three",
+				"zero.eight.one",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       3.4,
+			MaxElements: 5,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			Expected:     []string{},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       0.8,
+			MaxElements: 2,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			// Note the order because of the descending lexicographical order.
+			Expected: []string{
+				"zero.eight.two",
+				"zero.eight.three",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:   "mykey",
+			Score: 0.8,
+			// Note we set MaxElements to zero, so nothing should be returned.
+			MaxElements: 0,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			Expected:     []string{},
+			ErrorMatcher: nil,
+		},
+		{
+			Key:         "mykey",
+			Score:       0.5,
+			MaxElements: 1,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			Expected: []string{
+				"zero.five",
+			},
+			ErrorMatcher: nil,
+		},
+	}
 
-//func Test_Memory_GetElementsByScore_NotFound(t *testing.T) {
-//	newStorage := MustNew()
-//	defer newStorage.Shutdown()
-//
-//	_, err := newStorage.GetElementsByScore("not-found", 0.8, 3)
-//	if !IsNotFound(err) {
-//		t.Fatal("expected", nil, "got", err)
-//	}
-//}
+	for i, testCase := range testCases {
+		// Setup
+		newStorage := MustNew()
 
-//func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
-//	testCases := []struct {
-//		Key         string
-//		MaxElements int
-//		Elements    map[string]float64
-//		Expected    []string
-//	}{
-//		{
-//			Key:         "mykey",
-//			MaxElements: -1,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//				"0.5",
-//			},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 5,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//				"0.5",
-//			},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 1,
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//				"0.5",
-//			},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 5,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			// Note the order because of the lexicographical order.
-//			Expected: []string{
-//				"zero.eight.one",
-//				"0.8",
-//				"zero.eight.three",
-//				"0.8",
-//				"zero.eight.two",
-//				"0.8",
-//				"zero.five",
-//				"0.5",
-//				"zero.one",
-//				"0.1",
-//			},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 0,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			Expected: []string{},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 2,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			// Note the order because of the lexicographical order.
-//			Expected: []string{
-//				"zero.eight.one",
-//				"0.8",
-//				"zero.eight.three",
-//				"0.8",
-//			},
-//		},
-//		{
-//			Key:         "mykey",
-//			MaxElements: 1,
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			Expected: []string{
-//				"zero.eight.one",
-//				"0.8",
-//			},
-//		},
-//	}
-//
-//	for i, testCase := range testCases {
-//		// Setup
-//		newStorage := MustNew()
-//		defer newStorage.Shutdown()
-//
-//		for e, s := range testCase.Elements {
-//			err := newStorage.SetElementByScore(testCase.Key, e, s)
-//			if err != nil {
-//				t.Fatal("case", i+1, "expected", nil, "got", err)
-//			}
-//		}
-//
-//		// Test
-//		output, err := newStorage.GetHighestScoredElements(testCase.Key, testCase.MaxElements)
-//		if err != nil {
-//			t.Fatal("case", i+1, "expected", nil, "got", err)
-//		}
-//
-//		// Assert
-//		if len(output) != len(testCase.Expected) {
-//			t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
-//		}
-//
-//		for i, e := range testCase.Expected {
-//			if output[i] != e {
-//				t.Fatal("case", i+1, "expected", e, "got", output[i])
-//			}
-//		}
-//	}
-//}
+		for e, s := range testCase.Elements {
+			err := newStorage.SetElementByScore(testCase.Key, e, s)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+		}
+
+		// Test
+		output, err := newStorage.GetElementsByScore(testCase.Key, testCase.Score, testCase.MaxElements)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+
+		// Assert
+		if testCase.ErrorMatcher == nil {
+			if len(output) != len(testCase.Expected) {
+				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
+			}
+
+			for j, e := range testCase.Expected {
+				if output[j] != e {
+					t.Fatal("case", i+1, "expected", e, "got", output[j])
+				}
+			}
+		}
+
+		newStorage.Shutdown()
+	}
+}
+
+func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
+	testCases := []struct {
+		Key         string
+		MaxElements int
+		Elements    map[string]float64
+		Expected    []string
+	}{
+		{
+			Key:         "mykey",
+			MaxElements: -1,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+				"0.5",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 5,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+				"0.5",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 1,
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+				"0.5",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 5,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			// Note the order because of the descending lexicographical order.
+			Expected: []string{
+				"zero.eight.two",
+				"0.8",
+				"zero.eight.three",
+				"0.8",
+				"zero.eight.one",
+				"0.8",
+				"zero.five",
+				"0.5",
+				"zero.one",
+				"0.1",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 0,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			Expected: []string{
+				"zero.eight.two",
+				"0.8",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 2,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			// Note the order because of the descending lexicographical order.
+			Expected: []string{
+				"zero.eight.two",
+				"0.8",
+				"zero.eight.three",
+				"0.8",
+				"zero.eight.one",
+				"0.8",
+			},
+		},
+		{
+			Key:         "mykey",
+			MaxElements: 1,
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			Expected: []string{
+				"zero.eight.two",
+				"0.8",
+				"zero.eight.three",
+				"0.8",
+			},
+		},
+	}
+
+	for i, testCase := range testCases {
+		// Setup
+		newStorage := MustNew()
+
+		for e, s := range testCase.Elements {
+			err := newStorage.SetElementByScore(testCase.Key, e, s)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+		}
+
+		// Test
+		output, err := newStorage.GetHighestScoredElements(testCase.Key, testCase.MaxElements)
+		if err != nil {
+			t.Fatal("case", i+1, "expected", nil, "got", err)
+		}
+
+		// Assert
+		if len(output) != len(testCase.Expected) {
+			t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(output))
+		}
+
+		for j, e := range testCase.Expected {
+			if output[j] != e {
+				t.Fatal("case", i+1, "expected", e, "got", output[j])
+			}
+		}
+
+		newStorage.Shutdown()
+	}
+}
 
 func Test_Memory_GetRandomKey(t *testing.T) {
 	newStorage := MustNew()
@@ -499,111 +498,112 @@ func Test_Memory_Push_WalkSet_Remove(t *testing.T) {
 	}
 }
 
-//func Test_Memory_RemoveScoredElement(t *testing.T) {
-//	testCases := []struct {
-//		Elements      map[string]float64
-//		RemoveElement string
-//		Expected      []string
-//		ErrorMatcher  func(err error) bool
-//	}{
-//		{
-//			RemoveElement: "zero.five",
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected:     []string{},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			RemoveElement: "zero.five",
-//			Elements: map[string]float64{
-//				"zero.five":  0.5,
-//				"three.four": 3.4,
-//			},
-//			Expected: []string{
-//				"three.four",
-//				"3.4",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			RemoveElement: "zero.five",
-//			Elements:      map[string]float64{},
-//			Expected:      []string{},
-//			ErrorMatcher:  nil,
-//		},
-//		{
-//			RemoveElement: "invalid",
-//			Elements: map[string]float64{
-//				"zero.five": 0.5,
-//			},
-//			Expected: []string{
-//				"zero.five",
-//				"0.5",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//		{
-//			RemoveElement: "zero.eight.one",
-//			Elements: map[string]float64{
-//				"zero.five":        0.5,
-//				"zero.eight.one":   0.8,
-//				"zero.eight.two":   0.8,
-//				"zero.eight.three": 0.8,
-//				"zero.one":         0.1,
-//			},
-//			// Note the order because of the lexicographical order.
-//			Expected: []string{
-//				"zero.eight.three",
-//				"0.8",
-//				"zero.eight.two",
-//				"0.8",
-//				"zero.five",
-//				"0.5",
-//				"zero.one",
-//				"0.1",
-//			},
-//			ErrorMatcher: nil,
-//		},
-//	}
-//
-//	for i, testCase := range testCases {
-//		// Setup
-//		newStorage := MustNew()
-//		defer newStorage.Shutdown()
-//
-//		for e, s := range testCase.Elements {
-//			err := newStorage.SetElementByScore("test-key", e, s)
-//			if err != nil {
-//				t.Fatal("case", i+1, "expected", nil, "got", err)
-//			}
-//		}
-//
-//		// Test
-//		err := newStorage.RemoveScoredElement("test-key", testCase.RemoveElement)
-//		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
-//			t.Fatal("case", i+1, "expected", true, "got", false)
-//		}
-//
-//		// Assert
-//		if testCase.ErrorMatcher == nil {
-//			values, err := newStorage.GetHighestScoredElements("test-key", -1)
-//			if err != nil {
-//				t.Fatal("case", i+1, "expected", nil, "got", err)
-//			}
-//
-//			if len(values) != len(testCase.Expected) {
-//				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(values))
-//			}
-//
-//			for i, e := range testCase.Expected {
-//				if values[i] != e {
-//					t.Fatal("case", i+1, "expected", e, "got", values[i])
-//				}
-//			}
-//		}
-//	}
-//}
+func Test_Memory_RemoveScoredElement(t *testing.T) {
+	testCases := []struct {
+		Elements      map[string]float64
+		RemoveElement string
+		Expected      []string
+		ErrorMatcher  func(err error) bool
+	}{
+		{
+			RemoveElement: "zero.five",
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected:     []string{},
+			ErrorMatcher: nil,
+		},
+		{
+			RemoveElement: "zero.five",
+			Elements: map[string]float64{
+				"zero.five":  0.5,
+				"three.four": 3.4,
+			},
+			Expected: []string{
+				"three.four",
+				"3.4",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			RemoveElement: "zero.five",
+			Elements:      map[string]float64{},
+			Expected:      []string{},
+			ErrorMatcher:  nil,
+		},
+		{
+			RemoveElement: "invalid",
+			Elements: map[string]float64{
+				"zero.five": 0.5,
+			},
+			Expected: []string{
+				"zero.five",
+				"0.5",
+			},
+			ErrorMatcher: nil,
+		},
+		{
+			RemoveElement: "zero.eight.one",
+			Elements: map[string]float64{
+				"zero.five":        0.5,
+				"zero.eight.one":   0.8,
+				"zero.eight.two":   0.8,
+				"zero.eight.three": 0.8,
+				"zero.one":         0.1,
+			},
+			// Note the order because of the descending lexicographical order.
+			Expected: []string{
+				"zero.eight.two",
+				"0.8",
+				"zero.eight.three",
+				"0.8",
+				"zero.five",
+				"0.5",
+				"zero.one",
+				"0.1",
+			},
+			ErrorMatcher: nil,
+		},
+	}
+
+	for i, testCase := range testCases {
+		// Setup
+		newStorage := MustNew()
+
+		for e, s := range testCase.Elements {
+			err := newStorage.SetElementByScore("test-key", e, s)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+		}
+
+		// Test
+		err := newStorage.RemoveScoredElement("test-key", testCase.RemoveElement)
+		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
+			t.Fatal("case", i+1, "expected", true, "got", false)
+		}
+
+		// Assert
+		if testCase.ErrorMatcher == nil {
+			values, err := newStorage.GetHighestScoredElements("test-key", -1)
+			if err != nil {
+				t.Fatal("case", i+1, "expected", nil, "got", err)
+			}
+
+			if len(values) != len(testCase.Expected) {
+				t.Fatal("case", i+1, "expected", len(testCase.Expected), "got", len(values))
+			}
+
+			for j, e := range testCase.Expected {
+				if values[j] != e {
+					t.Fatal("case", i+1, "expected", e, "got", values[j])
+				}
+			}
+		}
+
+		newStorage.Shutdown()
+	}
+}
 
 func Test_Memory_String_GetSetGet(t *testing.T) {
 	newStorage := MustNew()

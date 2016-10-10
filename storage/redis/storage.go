@@ -273,7 +273,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 		conn := s.Pool.Get()
 		defer conn.Close()
 
-		result, err = redis.Strings(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements-1, "WITHSCORES"))
+		result, err = redis.Strings(conn.Do("ZREVRANGE", s.withPrefix(key), 0, maxElements, "WITHSCORES"))
 		if err != nil {
 			return maskAny(err)
 		}
