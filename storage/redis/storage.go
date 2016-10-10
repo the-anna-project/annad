@@ -174,7 +174,6 @@ func (s *storage) Get(key string) (string, error) {
 	return result, nil
 }
 
-// TODO test
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
 
