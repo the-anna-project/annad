@@ -48,11 +48,11 @@ func New(config Config) (spec.Activator, error) {
 		Type: ObjectType,
 	}
 
-	if newActivator.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
 	if newActivator.FactoryCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
+	}
+	if newActivator.Log == nil {
+		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
 	if newActivator.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")

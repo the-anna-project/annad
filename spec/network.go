@@ -151,5 +151,10 @@ type Network interface {
 	// you might want to call it in a separate goroutine.
 	Shutdown()
 
+	// Track tracks connections being created to learn from connection path
+	// patterns. Various data structures are stored to observe the behaviour of
+	// the neural network to act accordingly.
+	Track(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+
 	StorageProvider
 }

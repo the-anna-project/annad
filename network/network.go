@@ -20,6 +20,7 @@ import (
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
 	"github.com/xh3b4sd/anna/network/forwarder"
+	"github.com/xh3b4sd/anna/network/tracker"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 
@@ -41,8 +42,10 @@ type Config struct {
 	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
-	TextInput         chan spec.TextRequest
-	TextOutput        chan spec.TextResponse
+	Tracker           spec.Tracker
+	// TODO move into GatewayCollection
+	TextInput  chan spec.TextRequest
+	TextOutput chan spec.TextResponse
 
 	// Settings.
 
@@ -69,6 +72,7 @@ func DefaultConfig() Config {
 		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
+		Tracker:           tracker.MustNew(),
 		TextInput:         make(chan spec.TextRequest, 1000),
 		TextOutput:        make(chan spec.TextResponse, 1000),
 
@@ -108,6 +112,9 @@ func New(config Config) (spec.Network, error) {
 	}
 	if newNetwork.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
+	}
+	if newNetwork.Tracker == nil {
+		return nil, maskAnyf(invalidConfigError, "tracker must not be empty")
 	}
 	if newNetwork.TextInput == nil {
 		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
@@ -266,23 +273,28 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 }
 
 func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	// TODO add event tracker
+	// Track the the given CLG and network payload to learn more about the
+	// connection paths created.
+	networkPayload, err := n.Track(CLG, networkPayload)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	// Activate if the CLG's interface is satisfied by the given
 	// network payload.
-	networkPayload, err := n.Activate(CLG, networkPayload)
+	networkPayload, err = n.Activate(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Calculate based on the CLG's implemented business logic.
-	newNetworkPayload, err := n.Calculate(CLG, networkPayload)
+	networkPayload, err = n.Calculate(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Forward to other CLG's, if necessary.
-	err = n.Forward(CLG, newNetworkPayload)
+	err = n.Forward(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -392,4 +404,15 @@ func (n *network) Shutdown() {
 	n.ShutdownOnce.Do(func() {
 		close(n.Closer)
 	})
+}
+
+func (n *network) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
+	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Track")
+
+	networkPayload, err := n.Tracker.Track(CLG, networkPayload)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	return networkPayload, nil
 }
