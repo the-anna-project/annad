@@ -178,27 +178,18 @@ func (s *storage) Get(key string) (string, error) {
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
 
-	errors := make(chan error, 1)
-
 	var result []string
 	action := func() error {
 		conn := s.Pool.Get()
 		defer conn.Close()
 
 		values, err := redis.Values(conn.Do("SMEMBERS", s.withPrefix(key)))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		if err != nil {
 			return maskAny(err)
 		}
 
 		for _, v := range values {
-			result = append(result, v.(string))
+			result = append(result, string(v.([]uint8)))
 		}
 
 		return nil
@@ -207,15 +198,6 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetAllFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return nil, maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
