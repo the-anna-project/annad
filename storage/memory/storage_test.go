@@ -374,6 +374,59 @@ func Test_Memory_GetRandomKey(t *testing.T) {
 	}
 }
 
+// TODO commands like brpop are not implemented in miniredis right now.
+//func Test_Memory_List_PopFromList(t *testing.T) {
+//	newStorage := MustNew()
+//	defer newStorage.Shutdown()
+//
+//	var err error
+//	err = newStorage.PushToList("key", "element1")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	err = newStorage.PushToList("key", "element2")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	err = newStorage.PushToList("key", "element3")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//
+//	var element string
+//	element, err = newStorage.PopFromList("key")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	if element != "element1" {
+//		t.Fatal("expected", "element1", "got", element)
+//	}
+//	element, err = newStorage.PopFromList("key")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	if element != "element2" {
+//		t.Fatal("expected", "element2", "got", element)
+//	}
+//	element, err = newStorage.PopFromList("key")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	if element != "element3" {
+//		t.Fatal("expected", "element3", "got", element)
+//	}
+//
+//	// Fetching elements from a list removes the fetched elements from the list.
+//	// After all elements are fetched from the list, the list must be empty.
+//	element, err = newStorage.PopFromList("key")
+//	if err != nil {
+//		t.Fatal("expected", nil, "got", err)
+//	}
+//	if element != "" {
+//		t.Fatal("expected", "", "got", element)
+//	}
+//}
+
 func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
@@ -658,6 +711,54 @@ func Test_Memory_StringMap_GetSetGet(t *testing.T) {
 	}
 	if v != "baz" {
 		t.Fatal("expected", "baz", "got", v)
+	}
+}
+
+func Test_Memory_Set_GetAllFromSet(t *testing.T) {
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
+
+	var err error
+	err = newStorage.PushToSet("key", "element1")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	err = newStorage.PushToSet("key", "element2")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	err = newStorage.PushToSet("key", "element3")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	elements, err := newStorage.GetAllFromSet("key")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	if len(elements) != 3 {
+		t.Fatal("expected", 3, "got", len(elements))
+	}
+	if elements[0] != "element1" {
+		t.Fatal("expected", "element1", "got", elements[0])
+	}
+	if elements[1] != "element2" {
+		t.Fatal("expected", "element2", "got", elements[1])
+	}
+	if elements[2] != "element3" {
+		t.Fatal("expected", "element3", "got", elements[2])
+	}
+
+	// Fetching all elements from a set does not remove the fetched elements from
+	// the set. Multiple calls to GetAllFromSet always must return the same
+	// elements.
+	elements, err = newStorage.GetAllFromSet("key")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if len(elements) != 3 {
+		t.Fatal("expected", 3, "got", len(elements))
 	}
 }
 
