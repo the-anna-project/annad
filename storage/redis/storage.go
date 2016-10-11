@@ -174,11 +174,8 @@ func (s *storage) Get(key string) (string, error) {
 	return result, nil
 }
 
-// TODO test
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
-
-	errors := make(chan error, 1)
 
 	var result []string
 	action := func() error {
@@ -186,19 +183,12 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 		defer conn.Close()
 
 		values, err := redis.Values(conn.Do("SMEMBERS", s.withPrefix(key)))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		if err != nil {
 			return maskAny(err)
 		}
 
 		for _, v := range values {
-			result = append(result, v.(string))
+			result = append(result, string(v.([]uint8)))
 		}
 
 		return nil
@@ -209,22 +199,11 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 		return nil, maskAny(err)
 	}
 
-	select {
-	case err := <-errors:
-		if err != nil {
-			return nil, maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
-	}
-
 	return result, nil
 }
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
-
-	errors := make(chan error, 1)
 
 	var result []string
 	var err error
@@ -233,14 +212,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		defer conn.Close()
 
 		result, err = redis.Strings(conn.Do("ZREVRANGEBYSCORE", s.withPrefix(key), score, score, "LIMIT", 0, maxElements))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -250,15 +222,6 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return nil, maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
@@ -343,8 +306,6 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 func (s *storage) PopFromList(key string) (string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
 
-	errors := make(chan error, 1)
-
 	var result string
 	action := func() error {
 		conn := s.Pool.Get()
@@ -352,14 +313,7 @@ func (s *storage) PopFromList(key string) (string, error) {
 
 		var err error
 		result, err = redis.String(conn.Do("BRPOP", s.withPrefix(key)))
-		if IsNotFound(err) {
-			// To return the not found error we need to break through the retrier.
-			// Therefore we do not return the not found error here, but dispatch it to
-			// the calling goroutine. Further we simply fall through and return nil to
-			// finally stop the retrier.
-			errors <- maskAny(err)
-			return nil
-		} else if err != nil {
+		if err != nil {
 			return maskAny(err)
 		}
 
@@ -369,15 +323,6 @@ func (s *storage) PopFromList(key string) (string, error) {
 	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PopFromList", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
-	}
-
-	select {
-	case err := <-errors:
-		if err != nil {
-			return "", maskAny(err)
-		}
-	default:
-		// If there is no error, we simply fall through to return the result.
 	}
 
 	return result, nil
