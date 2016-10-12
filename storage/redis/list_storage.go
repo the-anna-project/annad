@@ -7,7 +7,6 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// TODO test
 func (s *storage) PopFromList(key string) (string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
 
@@ -17,10 +16,14 @@ func (s *storage) PopFromList(key string) (string, error) {
 		defer conn.Close()
 
 		var err error
-		result, err = redis.String(conn.Do("BRPOP", s.withPrefix(key)))
+		strings, err := redis.Strings(conn.Do("BRPOP", s.withPrefix(key), 0))
 		if err != nil {
 			return maskAny(err)
 		}
+		if len(strings) != 2 {
+			return maskAnyf(queryExecutionFailedError, "two elements must be returned")
+		}
+		result = strings[1]
 
 		return nil
 	}
@@ -33,7 +36,6 @@ func (s *storage) PopFromList(key string) (string, error) {
 	return result, nil
 }
 
-// TODO test
 func (s *storage) PushToList(key string, element string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
 

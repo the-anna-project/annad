@@ -8,7 +8,10 @@ import (
 
 func Test_ListStorage_PopFromList(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("BRPOP", "prefix:test-key").Expect("test-element")
+	c.Command("BRPOP", "prefix:test-key", 0).Expect([]interface{}{
+		[]uint8("test-key"),
+		[]uint8("test-element"),
+	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
@@ -23,7 +26,21 @@ func Test_ListStorage_PopFromList(t *testing.T) {
 
 func Test_ListStorage_PopFromList_Error(t *testing.T) {
 	c := redigomock.NewConn()
-	c.Command("BRPOP", "prefix:test-key").ExpectError(queryExecutionFailedError)
+	c.Command("BRPOP", "prefix:test-key", 0).ExpectError(queryExecutionFailedError)
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	_, err := newStorage.PopFromList("test-key")
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_ListStorage_PopFromList_Error_OneReturnValue(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("BRPOP", "prefix:test-key", 0).Expect([]interface{}{
+		[]uint8("test-key"),
+	})
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
