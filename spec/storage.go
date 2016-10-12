@@ -10,9 +10,6 @@ package spec
 //     }
 //
 type Storage interface {
-	// Get returns data associated with key. This is a simple key-value
-	// relationship.
-	Get(key string) (string, error)
 
 	// GetAllFromSet returns all elements from the stored stored under key.
 	GetAllFromSet(key string) ([]string, error)
@@ -36,10 +33,6 @@ type Storage interface {
 	// because the list contains the elements and their scores.
 	//
 	GetHighestScoredElements(key string, maxElements int) ([]string, error)
-
-	// GetRandomKey returns a random key which was formerly stored within the
-	// underlying storage.
-	GetRandomKey() (string, error)
 
 	// GetStringMap returns the hash map stored under the given key.
 	GetStringMap(key string) (map[string]string, error)
@@ -72,10 +65,6 @@ type Storage interface {
 	// key.
 	RemoveScoredElement(key string, element string) error
 
-	// Set stores the given key value pair. Once persisted, value can be
-	// retrieved using Get.
-	Set(key string, value string) error
-
 	// SetElementByScore persists the given element in the weighted list
 	// identified by key with respect to the given score.
 	SetElementByScore(key, element string, score float64) error
@@ -87,6 +76,8 @@ type Storage interface {
 	// The call to Shutdown blocks until the storage is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
+
+	StringStorage
 
 	// WalkScoredElements scans the scored set given by key and executes the
 	// callback for each found element. Note that the walk might ignores the score
@@ -108,6 +99,21 @@ type Storage interface {
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
+}
+
+type StringStorage interface {
+	// Get returns data associated with key. This is a simple key-value
+	// relationship.
+	Get(key string) (string, error)
+
+	// TODO GetRandom
+	// GetRandomKey returns a random key which was formerly stored within the
+	// underlying storage.
+	GetRandomKey() (string, error)
+
+	// Set stores the given key value pair. Once persisted, value can be
+	// retrieved using Get.
+	Set(key string, value string) error
 }
 
 // StorageCollection represents a collection of Storage instances. This scopes
