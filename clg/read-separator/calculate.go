@@ -19,7 +19,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
 	separator, err := c.Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
-		randomKey, err := c.Storage().Feature().GetRandomKey()
+		randomKey, err := c.Storage().Feature().GetRandom()
 		if err != nil {
 			return "", maskAny(err)
 		}

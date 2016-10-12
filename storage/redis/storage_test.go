@@ -589,13 +589,13 @@ func Test_Storage_String_Get_Error_NotFound(t *testing.T) {
 	}
 }
 
-func Test_Storage_String_GetRandomKey_Success(t *testing.T) {
+func Test_Storage_String_GetRandom_Success(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("RANDOMKEY").Expect("key1")
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	randomKey, err := newStorage.GetRandomKey()
+	randomKey, err := newStorage.GetRandom()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -604,13 +604,13 @@ func Test_Storage_String_GetRandomKey_Success(t *testing.T) {
 	}
 }
 
-func Test_Storage_String_GetRandomKey_Error(t *testing.T) {
+func Test_Storage_String_GetRandom_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("RANDOMKEY").ExpectError(queryExecutionFailedError)
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	_, err := newStorage.GetRandomKey()
+	_, err := newStorage.GetRandom()
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}

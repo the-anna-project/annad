@@ -329,7 +329,7 @@ func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
 	}
 }
 
-func Test_Memory_GetRandomKey(t *testing.T) {
+func Test_Memory_GetRandom(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
 
@@ -356,7 +356,7 @@ func Test_Memory_GetRandomKey(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			newKey, err := newStorage.GetRandomKey()
+			newKey, err := newStorage.GetRandom()
 			if err != nil {
 				t.Fatal("expected", nil, "got", err)
 			}

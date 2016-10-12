@@ -252,8 +252,8 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	return result, nil
 }
 
-func (s *storage) GetRandomKey() (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandomKey")
+func (s *storage) GetRandom() (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
 
 	var result string
 	action := func() error {
@@ -269,7 +269,7 @@ func (s *storage) GetRandomKey() (string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetRandomKey", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetRandom", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}

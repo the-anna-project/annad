@@ -91,7 +91,7 @@ type SetStorage interface {
 // usage of the feature storage may look like this.
 //
 //     func (n *network) Foo() error {
-//       rk, err := n.Storage().Feature().GetRandomKey()
+//       rk, err := n.Storage().Feature().GetRandom()
 //       ...
 //     }
 //
@@ -131,10 +131,9 @@ type StringStorage interface {
 	// relationship.
 	Get(key string) (string, error)
 
-	// TODO GetRandom
-	// GetRandomKey returns a random key which was formerly stored within the
+	// GetRandom returns a random key which was formerly stored within the
 	// underlying storage.
-	GetRandomKey() (string, error)
+	GetRandom() (string, error)
 
 	// Set stores the given key value pair. Once persisted, value can be
 	// retrieved using Get.

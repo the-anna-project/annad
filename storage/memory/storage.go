@@ -150,10 +150,10 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 	return result, nil
 }
 
-func (s *storage) GetRandomKey() (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandomKey")
+func (s *storage) GetRandom() (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
 
-	result, err := s.RedisStorage.GetRandomKey()
+	result, err := s.RedisStorage.GetRandom()
 	if err != nil {
 		return "", maskAny(err)
 	}
