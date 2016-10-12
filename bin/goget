@@ -3,6 +3,7 @@
 # This script was heavily copied from https://github.com/joewalnes/go-getter.
 
 set -e
+set -x
 
 : ${GOPATH?"GOPATH not set"}
 : ${1?"Usage: $0 [path-to-go-deps]"}
