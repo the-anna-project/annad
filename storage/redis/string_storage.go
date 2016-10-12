@@ -101,3 +101,62 @@ func (s *storage) Set(key, value string) error {
 
 	return nil
 }
+
+func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		var cursor int64
+
+		// Start to scan the set until the cursor is 0 again. Note that we check for
+		// the closer twice. At first we prevent scans in case the closer was
+		// triggered directly, and second before each callback execution. That way
+		// ending the walk immediately is guaranteed.
+		for {
+			select {
+			case <-closer:
+				return nil
+			default:
+			}
+
+			reply, err := redis.Values(conn.Do("SCAN", cursor, "MATCH", glob, "COUNT", 100))
+			if err != nil {
+				return maskAny(err)
+			}
+
+			cursor, values, err := parseMultiBulkReply(reply)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			for _, v := range values {
+				select {
+				case <-closer:
+					return nil
+				default:
+				}
+
+				err := cb(v)
+				if err != nil {
+					return maskAny(err)
+				}
+			}
+
+			if cursor == 0 {
+				break
+			}
+		}
+
+		return nil
+	}
+
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkKeys", action), s.BackOffFactory(), s.retryErrorLogger)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}

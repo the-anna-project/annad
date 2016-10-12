@@ -106,17 +106,6 @@ type storage struct {
 	Type         spec.ObjectType
 }
 
-func (s *storage) Get(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
-
-	result, err := s.RedisStorage.Get(key)
-	if err != nil {
-		return "", maskAny(err)
-	}
-
-	return result, nil
-}
-
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
 
@@ -220,17 +209,6 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveScoredElement")
 
 	err := s.RedisStorage.RemoveScoredElement(key, element)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	return nil
-}
-
-func (s *storage) Set(key, value string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
-
-	err := s.RedisStorage.Set(key, value)
 	if err != nil {
 		return maskAny(err)
 	}

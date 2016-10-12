@@ -137,6 +137,16 @@ type StringStorage interface {
 	// Set stores the given key value pair. Once persisted, value can be
 	// retrieved using Get.
 	Set(key string, value string) error
+
+	// WalkKeys scans the key space with respect to the given glob and executes
+	// the callback for each found key.
+	//
+	// The walk is throttled. That means some amount of keys are fetched at once
+	// from the storage. After all fetched keys are iterated, the next batch of
+	// keys is fetched to continue the next iteration, until the whole key space
+	// is walked completely. The given closer can be used to end the walk
+	// immediately.
+	WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error
 }
 
 // StorageCollection represents a collection of Storage instances. This scopes
