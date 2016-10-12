@@ -273,6 +273,8 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 }
 
 func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	var err error
+
 	// Activate if the CLG's interface is satisfied by the given
 	// network payload.
 	networkPayload, err = n.Activate(CLG, networkPayload)
@@ -294,7 +296,7 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 
 	// Track the the given CLG and network payload to learn more about the
 	// connection paths created.
-	err := n.Track(CLG, networkPayload)
+	err = n.Track(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -406,13 +408,13 @@ func (n *network) Shutdown() {
 	})
 }
 
-func (n *network) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (n *network) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Track")
 
-	networkPayload, err := n.Tracker.Track(CLG, networkPayload)
+	err := n.Tracker.Track(CLG, networkPayload)
 	if err != nil {
-		return nil, maskAny(err)
+		return maskAny(err)
 	}
 
-	return networkPayload, nil
+	return nil
 }

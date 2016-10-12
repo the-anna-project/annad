@@ -29,8 +29,8 @@ type Tracker interface {
 	//     stored    1,2
 	//
 	// Database holds one connection path. We have one new connection path. One
-	// node of the new connection path is already stored in the database: 2. This
-	// causes the connection path of which one node of the new connection path is
+	// peer of the new connection path is already stored in the database: 2. This
+	// causes the connection path of which one peer of the new connection path is
 	// matching to be extended.
 	//
 	//     new        2,3
@@ -41,8 +41,8 @@ type Tracker interface {
 	//     stored    1,2,3
 	//
 	// Database holds one connection path. We have one new connection path. Two
-	// nodes of the new connection path are already stored in the database: 2,3.
-	// This causes the connection path of which two nodes of the new connection
+	// peers of the new connection path are already stored in the database: 2,3.
+	// This causes the connection path of which two peers of the new connection
 	// path are matching to be extended.
 	//
 	//     new        2,3,4
@@ -64,9 +64,9 @@ type Tracker interface {
 	//     stored    1,2,3,4
 	//
 	// Database holds one connection path. We have one new connection path. One
-	// node of the new connection path shows the connection path stored in the
-	// database must be split. Here the node 3 is already present, while the
-	// connection path 3,5 is not. This pattern shows node 3 is a CLG that
+	// peer of the new connection path shows the connection path stored in the
+	// database must be split. Here the peer 3 is already present, while the
+	// connection path 3,5 is not. This pattern shows peer 3 is a CLG that
 	// forwards to more than one other CLG. Hence we have to split the stored
 	// connection path to always only have linear connection paths stored. After
 	// splitting the existing connection path we have three connection paths
@@ -82,8 +82,8 @@ type Tracker interface {
 	//               3,5
 	//
 	// Database holds one connection path. We have one new connection path. One
-	// node of the new connection path is already stored in the database: 1. This
-	// causes the connection path of which one node of the new connection path is
+	// peer of the new connection path is already stored in the database: 1. This
+	// causes the connection path of which one peer of the new connection path is
 	// matching to be extended.
 	//
 	//     new        0,1

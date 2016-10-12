@@ -154,7 +154,7 @@ type Network interface {
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of
 	// the neural network to act accordingly.
-	Track(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+	Track(CLG CLG, networkPayload NetworkPayload) error
 
 	StorageProvider
 }

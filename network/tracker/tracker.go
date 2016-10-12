@@ -76,42 +76,48 @@ type tracker struct {
 	Type spec.ObjectType
 }
 
-// TODO
-func (t *tracker) AddCLGID(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	// Create connection pairs using the sources and destination tracked in the
-	// given network payload. There might be multiple connection pairs because
+func (t *tracker) TrackConnectionPaths(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// Create connection paths using the sources and destination tracked in the
+	// given network payload. There might be multiple connection paths because
 	// there might be multiple sources requesting one CLG together. The created
-	// connection pairs always contain the same destination, because there is only
-	// one destination tracked in the given network payload. Note that destination
-	// is the behaviour ID of the CLG currently being executed. connectionPairs
-	// look similar to the following structure.
+	// connection paths always contain the same destination, because there is only
+	// one destination tracked in the given network payload. Note that the
+	// destination is the behaviour ID of the CLG currently being executed.
+	// connection paths look similar to the following structure.
 	//
-	//     []connectionPair{
-	//       {
-	//         Source: 1,
-	//         Destination: 3,
-	//       },
-	//       {
-	//         Source: 2,
-	//         Destination: 3,
-	//       },
-	//     }
+	//     behaviourID,behaviourID
 	//
-	connectionPairs, err := createConnectionPairs(networkPayload.GetSources(), networkPayload.GetDestination())
+	connectionPaths, err := networkPayloadToConnectionPaths(networkPayload)
 	if err != nil {
 		return maskAny(err)
+	}
+
+	// This is the list of lookup functions which is executed seuqentially.
+	lookups := []func(cp string) error{
+		t.storeConnectionPath,
+		t.extendConnectionPath,
+		t.splitConnectionPath,
+	}
+
+	// Execute one lookup after another to track connection path patterns.
+	for _, cp := range connectionPaths {
+		for _, lookup := range lookups {
+			err = lookup(cp)
+			if err != nil {
+				return maskAny(err)
+			}
+		}
 	}
 
 	return nil
 }
 
-// TODO
 func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	t.Log.WithTags(spec.Tags{C: nil, L: "D", O: t, V: 13}, "call Track")
 
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) error{
-		t.AddCLGID,
+		t.TrackConnectionPaths,
 	}
 
 	// Execute one lookup after another to track connection path patterns.
