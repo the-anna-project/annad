@@ -15,6 +15,17 @@ func (s *storage) Get(key string) (string, error) {
 	return result, nil
 }
 
+func (s *storage) GetRandom() (string, error) {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
+
+	result, err := s.RedisStorage.GetRandom()
+	if err != nil {
+		return "", maskAny(err)
+	}
+
+	return result, nil
+}
+
 func (s *storage) Set(key, value string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
 

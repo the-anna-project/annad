@@ -106,17 +106,6 @@ type storage struct {
 	Type         spec.ObjectType
 }
 
-func (s *storage) GetRandom() (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
-
-	result, err := s.RedisStorage.GetRandom()
-	if err != nil {
-		return "", maskAny(err)
-	}
-
-	return result, nil
-}
-
 func (s *storage) GetStringMap(key string) (map[string]string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetStringMap")
 
