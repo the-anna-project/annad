@@ -1,19 +1,26 @@
 package spec
 
-// Storage represents a persistency management object. Different storages may be
-// provided using StorageCollectionProvider. Within a receiver function the
-// usage of the feature storage may look like this.
-//
-//     func (n *network) Foo() error {
-//       rk, err := n.Storage().Feature().GetRandomKey()
-//       ...
-//     }
-//
-type Storage interface {
+// ListStorage represents a storage implementation managing operations against
+// lists.
+type ListStorage interface {
+	// PopFromList returns the next element from the list identified by the given
+	// key. Note that a list is an ordered sequence of arbitrary elements.
+	// PushToList and PopFromList are operating according to a "first in, first
+	// out" primitive. If the requested list is empty, PopFromList blocks
+	// infinitely until an element is added to the list. Returned elements will
+	// also be removed from the specified list.
+	PopFromList(key string) (string, error)
 
-	// GetAllFromSet returns all elements from the stored stored under key.
-	GetAllFromSet(key string) ([]string, error)
+	// PushToList adds the given element to the list identified by the given key.
+	// Note that a list is an ordered sequence of arbitrary elements. PushToList
+	// and PopFromList are operating according to a "first in, first out"
+	// primitive.
+	PushToList(key string, element string) error
+}
 
+// ScoreStorage represents a storage implementation managing operations against
+// scores.
+type ScoreStorage interface {
 	// GetElementsByScore looks up all elements associated with the given score.
 	// To limit the number of returned elements, maxElements ca be used. Note
 	// that the list has this scheme.
@@ -34,33 +41,6 @@ type Storage interface {
 	//
 	GetHighestScoredElements(key string, maxElements int) ([]string, error)
 
-	// GetStringMap returns the hash map stored under the given key.
-	GetStringMap(key string) (map[string]string, error)
-
-	Object
-
-	// PopFromList returns the next element from the list identified by the given
-	// key. Note that a list is an ordered sequence of arbitrary elements.
-	// PushToList and PopFromList are operating according to a "first in, first
-	// out" primitive. If the requested list is empty, PopFromList blocks
-	// infinitely until an element is added to the list. Returned elements will
-	// also be removed from the specified list.
-	PopFromList(key string) (string, error)
-
-	// PushToList adds the given element to the list identified by the given key.
-	// Note that a list is an ordered sequence of arbitrary elements. PushToList
-	// and PopFromList are operating according to a "first in, first out"
-	// primitive.
-	PushToList(key string, element string) error
-
-	// PushToSet adds the given element to the set identified by the given key.
-	// Note that a set is an unordered collection of distinct elements.
-	PushToSet(key string, element string) error
-
-	// RemoveFromSet removes the given element from the set identified by the
-	// given key.
-	RemoveFromSet(key string, element string) error
-
 	// RemoveScoredElement removes the given element from the scored set under
 	// key.
 	RemoveScoredElement(key string, element string) error
@@ -68,16 +48,6 @@ type Storage interface {
 	// SetElementByScore persists the given element in the weighted list
 	// identified by key with respect to the given score.
 	SetElementByScore(key, element string, score float64) error
-
-	// SetStringMap stores the given stringMap under the given key.
-	SetStringMap(key string, stringMap map[string]string) error
-
-	// Shutdown ends all processes of the storage like shutting down a machine.
-	// The call to Shutdown blocks until the storage is completely shut down, so
-	// you might want to call it in a separate goroutine.
-	Shutdown()
-
-	StringStorage
 
 	// WalkScoredElements scans the scored set given by key and executes the
 	// callback for each found element. Note that the walk might ignores the score
@@ -89,6 +59,21 @@ type Storage interface {
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
 	WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
+}
+
+// SetStorage represents a storage implementation managing operations against
+// sets.
+type SetStorage interface {
+	// GetAllFromSet returns all elements from the stored stored under key.
+	GetAllFromSet(key string) ([]string, error)
+
+	// PushToSet adds the given element to the set identified by the given key.
+	// Note that a set is an unordered collection of distinct elements.
+	PushToSet(key string, element string) error
+
+	// RemoveFromSet removes the given element from the set identified by the
+	// given key.
+	RemoveFromSet(key string, element string) error
 
 	// WalkSet scans the set given by key and executes the callback for each found
 	// element.
@@ -101,6 +86,46 @@ type Storage interface {
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
 }
 
+// Storage represents a persistency management object. Different storages may be
+// provided using StorageCollectionProvider. Within a receiver function the
+// usage of the feature storage may look like this.
+//
+//     func (n *network) Foo() error {
+//       rk, err := n.Storage().Feature().GetRandomKey()
+//       ...
+//     }
+//
+type Storage interface {
+	ListStorage
+
+	Object
+
+	ScoreStorage
+
+	SetStorage
+
+	// Shutdown ends all processes of the storage like shutting down a machine.
+	// The call to Shutdown blocks until the storage is completely shut down, so
+	// you might want to call it in a separate goroutine.
+	Shutdown()
+
+	StringMapStorage
+
+	StringStorage
+}
+
+// StringMapStorage represents a storage implementation managing operations
+// against string maps.
+type StringMapStorage interface {
+	// GetStringMap returns the hash map stored under the given key.
+	GetStringMap(key string) (map[string]string, error)
+
+	// SetStringMap stores the given stringMap under the given key.
+	SetStringMap(key string, stringMap map[string]string) error
+}
+
+// StringStorage represents a storage implementation managing operations against
+// strings.
 type StringStorage interface {
 	// Get returns data associated with key. This is a simple key-value
 	// relationship.
