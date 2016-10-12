@@ -18,9 +18,9 @@ type ListStorage interface {
 	PushToList(key string, element string) error
 }
 
-// ScoreStorage represents a storage implementation managing operations against
-// scores.
-type ScoreStorage interface {
+// ScoredSetStorage represents a storage implementation managing operations
+// against scored sets.
+type ScoredSetStorage interface {
 	// GetElementsByScore looks up all elements associated with the given score.
 	// To limit the number of returned elements, maxElements ca be used. Note
 	// that the list has this scheme.
@@ -49,16 +49,15 @@ type ScoreStorage interface {
 	// identified by key with respect to the given score.
 	SetElementByScore(key, element string, score float64) error
 
-	// WalkScoredElements scans the scored set given by key and executes the
-	// callback for each found element. Note that the walk might ignores the score
-	// order.
+	// WalkScoredSet scans the scored set given by key and executes the callback
+	// for each found element. Note that the walk might ignores the score order.
 	//
 	// The walk is throttled. That means some amount of elements are fetched at
 	// once from the storage. After all fetched elements are iterated, the next
 	// batch of elements is fetched to continue the next iteration, until the
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
-	WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
+	WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
 }
 
 // SetStorage represents a storage implementation managing operations against
@@ -100,7 +99,7 @@ type Storage interface {
 
 	Object
 
-	ScoreStorage
+	ScoredSetStorage
 
 	SetStorage
 

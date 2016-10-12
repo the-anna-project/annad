@@ -427,7 +427,7 @@ func Test_Memory_GetRandom(t *testing.T) {
 //	}
 //}
 
-func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
+func Test_Memory_Push_WalkScoredSet_Remove(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
 
@@ -437,7 +437,7 @@ func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
 	}
 	var element2 []string
 	var score2 []float64
-	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
 		element2 = append(element2, element)
 		score2 = append(score2, score)
 		return nil
@@ -458,7 +458,7 @@ func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
 	}
 	element2 = []string{}
 	score2 = []float64{}
-	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
 		element2 = append(element2, element)
 		score2 = append(score2, score)
 		return nil
@@ -485,7 +485,7 @@ func Test_Memory_Push_WalkScoredElements_Remove(t *testing.T) {
 
 	var element3 string
 	var score3 float64
-	err = newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
 		element3 = element
 		score3 = score
 		return nil
@@ -789,7 +789,7 @@ func Test_Memory_WalkSet_Closer(t *testing.T) {
 	}
 }
 
-func Test_Memory_WalkScoredElements_Closer(t *testing.T) {
+func Test_Memory_WalkScoredSet_Closer(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
 
@@ -805,7 +805,7 @@ func Test_Memory_WalkScoredElements_Closer(t *testing.T) {
 	// Check that the walk does not happen, because we already ended it.
 	var element1 string
 	var score1 float64
-	err = newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+	err = newStorage.WalkScoredSet("test-key", closer, func(element string, score float64) error {
 		element1 = element
 		score1 = score
 		return nil

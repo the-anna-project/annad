@@ -268,10 +268,10 @@ func (s *storage) Shutdown() {
 	})
 }
 
-func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
+func (s *storage) WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredSet")
 
-	err := s.RedisStorage.WalkScoredElements(key, closer, cb)
+	err := s.RedisStorage.WalkScoredSet(key, closer, cb)
 	if err != nil {
 		return maskAny(err)
 	}

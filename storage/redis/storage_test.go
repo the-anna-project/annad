@@ -203,7 +203,7 @@ func Test_Storage_Score_RemoveScoredElement_Error(t *testing.T) {
 	}
 }
 
-func Test_Storage_Score_WalkScoredElements(t *testing.T) {
+func Test_Storage_Score_WalkScoredSet(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
 		[]uint8("0"),
@@ -213,7 +213,7 @@ func Test_Storage_Score_WalkScoredElements(t *testing.T) {
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	var values []interface{}
-	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err := newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
 		values = append(values, element, score)
 		return nil
 	})
@@ -225,7 +225,7 @@ func Test_Storage_Score_WalkScoredElements(t *testing.T) {
 	}
 }
 
-func Test_Storage_Score_WalkScoredElements_CloseDirectly(t *testing.T) {
+func Test_Storage_Score_WalkScoredSet_CloseDirectly(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
 		[]uint8("0"),
@@ -239,7 +239,7 @@ func Test_Storage_Score_WalkScoredElements_CloseDirectly(t *testing.T) {
 	closer <- struct{}{}
 
 	var values []interface{}
-	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+	err := newStorage.WalkScoredSet("test-key", closer, func(element string, score float64) error {
 		values = append(values, element, score)
 		return nil
 	})
@@ -251,7 +251,7 @@ func Test_Storage_Score_WalkScoredElements_CloseDirectly(t *testing.T) {
 	}
 }
 
-func Test_Storage_Score_WalkScoredElements_CloseAfterCallback(t *testing.T) {
+func Test_Storage_Score_WalkScoredSet_CloseAfterCallback(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
 		[]uint8("0"),
@@ -263,7 +263,7 @@ func Test_Storage_Score_WalkScoredElements_CloseAfterCallback(t *testing.T) {
 	var count int
 	closer := make(chan struct{}, 1)
 
-	err := newStorage.WalkScoredElements("test-key", closer, func(element string, score float64) error {
+	err := newStorage.WalkScoredSet("test-key", closer, func(element string, score float64) error {
 		count++
 
 		// Close and end walking.
@@ -279,19 +279,19 @@ func Test_Storage_Score_WalkScoredElements_CloseAfterCallback(t *testing.T) {
 	}
 }
 
-func Test_Storage_Score_WalkScoredElements_QueryError(t *testing.T) {
+func Test_Storage_Score_WalkScoredSet_QueryError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN").ExpectError(queryExecutionFailedError)
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	err := newStorage.WalkScoredElements("test-key", nil, nil)
+	err := newStorage.WalkScoredSet("test-key", nil, nil)
 	if !IsQueryExecutionFailed(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
 
-func Test_Storage_Score_WalkScoredElements_CallbackError(t *testing.T) {
+func Test_Storage_Score_WalkScoredSet_CallbackError(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("ZSCAN", "prefix:test-key", int64(0), "COUNT", 100).Expect([]interface{}{
 		[]uint8("0"),
@@ -300,7 +300,7 @@ func Test_Storage_Score_WalkScoredElements_CallbackError(t *testing.T) {
 
 	newStorage := testMustNewStorageWithConn(t, c)
 
-	err := newStorage.WalkScoredElements("test-key", nil, func(element string, score float64) error {
+	err := newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
 		return maskAny(queryExecutionFailedError)
 	})
 	if !IsQueryExecutionFailed(err) {

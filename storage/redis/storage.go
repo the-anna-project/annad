@@ -411,8 +411,8 @@ func (s *storage) Shutdown() {
 	})
 }
 
-func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredElements")
+func (s *storage) WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredSet")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -470,7 +470,7 @@ func (s *storage) WalkScoredElements(key string, closer <-chan struct{}, cb func
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkScoredSet", action), s.BackOffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
