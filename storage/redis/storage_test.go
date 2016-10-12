@@ -39,7 +39,7 @@ func Test_Storage_NewRedisStorage_Error_Log(t *testing.T) {
 	newStorageConfig.Log = nil
 	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
@@ -48,7 +48,7 @@ func Test_Storage_NewRedisStorage_Error_Pool(t *testing.T) {
 	newStorageConfig.Pool = nil
 	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
+		t.Fatal("expected", true, "got", false)
 	}
 }
 
@@ -57,6 +57,17 @@ func Test_Storage_NewRedisStorage_Error_Prefix(t *testing.T) {
 	newStorageConfig.Prefix = ""
 	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_Storage_Shutdown(t *testing.T) {
+	newStorageConfig := DefaultStorageConfig()
+	newStorage, err := NewStorage(newStorageConfig)
+	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
+	newStorage.Shutdown()
+	newStorage.Shutdown()
+	newStorage.Shutdown()
 }
