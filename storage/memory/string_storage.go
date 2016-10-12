@@ -37,6 +37,7 @@ func (s *storage) Set(key, value string) error {
 	return nil
 }
 
+// TODO test
 func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
 

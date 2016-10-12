@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_Memory_GetElementsByScore_Success(t *testing.T) {
+func Test_ScoredSetStorage_GetElementsByScore(t *testing.T) {
 	testCases := []struct {
 		Key          string
 		Score        float64
@@ -178,7 +178,7 @@ func Test_Memory_GetElementsByScore_Success(t *testing.T) {
 	}
 }
 
-func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
+func Test_ScoredSetStorage_GetHighestScoredElements(t *testing.T) {
 	testCases := []struct {
 		Key         string
 		MaxElements int
@@ -328,131 +328,7 @@ func Test_Memory_GetHighestScoredElements_Success(t *testing.T) {
 	}
 }
 
-func Test_Memory_Push_WalkScoredSet_Remove(t *testing.T) {
-	newStorage := MustNew()
-	defer newStorage.Shutdown()
-
-	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	var element2 []string
-	var score2 []float64
-	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
-		element2 = append(element2, element)
-		score2 = append(score2, score)
-		return nil
-	})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if !reflect.DeepEqual(element2, []string{"test-value-1"}) {
-		t.Fatal("expected", []string{"test-value-1"}, "got", element2)
-	}
-	if !reflect.DeepEqual(score2, []float64{0.8}) {
-		t.Fatal("expected", []float64{0.8}, "got", score2)
-	}
-	// Add second element.
-	err = newStorage.SetElementByScore("test-key", "test-value-2", 0.8)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	element2 = []string{}
-	score2 = []float64{}
-	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
-		element2 = append(element2, element)
-		score2 = append(score2, score)
-		return nil
-	})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if !reflect.DeepEqual(element2, []string{"test-value-1", "test-value-2"}) {
-		t.Fatal("expected", []string{"test-value-1", "test-value-2"}, "got", element2)
-	}
-	if !reflect.DeepEqual(score2, []float64{0.8, 0.8}) {
-		t.Fatal("expected", []float64{0.8, 0.8}, "got", score2)
-	}
-
-	// Check an element can be removed from a set.
-	err = newStorage.RemoveScoredElement("test-key", "test-value-1")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	err = newStorage.RemoveScoredElement("test-key", "test-value-2")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var element3 string
-	var score3 float64
-	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
-		element3 = element
-		score3 = score
-		return nil
-	})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if element3 != "" {
-		t.Fatal("expected", "", "got", element3)
-	}
-	if score3 != 0 {
-		t.Fatal("expected", "", "got", score3)
-	}
-}
-
-func Test_Memory_Push_WalkSet_Remove(t *testing.T) {
-	newStorage := MustNew()
-	defer newStorage.Shutdown()
-
-	// Check the set is empty by default
-	var element1 string
-	err := newStorage.WalkSet("test-key", nil, func(element string) error {
-		element1 = element
-		return nil
-	})
-	if element1 != "" {
-		t.Fatal("expected", "", "got", element1)
-	}
-
-	// Check an element can be pushed to a set.
-	err = newStorage.PushToSet("test-key", "test-value")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	var element2 string
-	err = newStorage.WalkSet("test-key", nil, func(element string) error {
-		element2 = element
-		return nil
-	})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if element2 != "test-value" {
-		t.Fatal("expected", "test-value", "got", element2)
-	}
-
-	// Check an element can be removed from a set.
-	err = newStorage.RemoveFromSet("test-key", "test-value")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	var element3 string
-	err = newStorage.WalkSet("test-key", nil, func(element string) error {
-		element3 = element
-		return nil
-	})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if element3 != "" {
-		t.Fatal("expected", "", "got", element3)
-	}
-}
-
-func Test_Memory_RemoveScoredElement(t *testing.T) {
+func Test_ScoredSetStorage_RemoveScoredElement(t *testing.T) {
 	testCases := []struct {
 		Elements      map[string]float64
 		RemoveElement string
@@ -559,115 +435,81 @@ func Test_Memory_RemoveScoredElement(t *testing.T) {
 	}
 }
 
-func Test_Memory_StringMap_GetSetGet(t *testing.T) {
+func Test_ScoredSetStorage_SetWalkRemove(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
 
-	value, err := newStorage.GetStringMap("foo")
+	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	if len(value) != 0 {
-		t.Fatal("expected", 0, "got", len(value))
-	}
-
-	err = newStorage.SetStringMap("foo", map[string]string{"bar": "baz"})
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	value, err = newStorage.GetStringMap("foo")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if len(value) != 1 {
-		t.Fatal("expected", 1, "got", len(value))
-	}
-	v, ok := value["bar"]
-	if !ok {
-		t.Fatal("expected", true, "got", false)
-	}
-	if v != "baz" {
-		t.Fatal("expected", "baz", "got", v)
-	}
-}
-
-func Test_Memory_Set_GetAllFromSet(t *testing.T) {
-	newStorage := MustNew()
-	defer newStorage.Shutdown()
-
-	var err error
-	err = newStorage.PushToSet("key", "element1")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	err = newStorage.PushToSet("key", "element2")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	err = newStorage.PushToSet("key", "element3")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	elements, err := newStorage.GetAllFromSet("key")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	if len(elements) != 3 {
-		t.Fatal("expected", 3, "got", len(elements))
-	}
-	if elements[0] != "element1" {
-		t.Fatal("expected", "element1", "got", elements[0])
-	}
-	if elements[1] != "element2" {
-		t.Fatal("expected", "element2", "got", elements[1])
-	}
-	if elements[2] != "element3" {
-		t.Fatal("expected", "element3", "got", elements[2])
-	}
-
-	// Fetching all elements from a set does not remove the fetched elements from
-	// the set. Multiple calls to GetAllFromSet always must return the same
-	// elements.
-	elements, err = newStorage.GetAllFromSet("key")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	if len(elements) != 3 {
-		t.Fatal("expected", 3, "got", len(elements))
-	}
-}
-
-func Test_Memory_WalkSet_Closer(t *testing.T) {
-	newStorage := MustNew()
-	defer newStorage.Shutdown()
-
-	err := newStorage.PushToSet("test-key", "test-value")
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	// Immediately close the walk.
-	closer := make(chan struct{}, 1)
-	closer <- struct{}{}
-
-	// Check that the walk does not happen, because we already ended it.
-	var element1 string
-	err = newStorage.WalkSet("test-key", closer, func(element string) error {
-		element1 = element
+	var element2 []string
+	var score2 []float64
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
+		element2 = append(element2, element)
+		score2 = append(score2, score)
 		return nil
 	})
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	if element1 != "" {
-		t.Fatal("expected", "", "got", element1)
+	if !reflect.DeepEqual(element2, []string{"test-value-1"}) {
+		t.Fatal("expected", []string{"test-value-1"}, "got", element2)
+	}
+	if !reflect.DeepEqual(score2, []float64{0.8}) {
+		t.Fatal("expected", []float64{0.8}, "got", score2)
+	}
+	// Add second element.
+	err = newStorage.SetElementByScore("test-key", "test-value-2", 0.8)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	element2 = []string{}
+	score2 = []float64{}
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
+		element2 = append(element2, element)
+		score2 = append(score2, score)
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if !reflect.DeepEqual(element2, []string{"test-value-1", "test-value-2"}) {
+		t.Fatal("expected", []string{"test-value-1", "test-value-2"}, "got", element2)
+	}
+	if !reflect.DeepEqual(score2, []float64{0.8, 0.8}) {
+		t.Fatal("expected", []float64{0.8, 0.8}, "got", score2)
+	}
+
+	// Check an element can be removed from a set.
+	err = newStorage.RemoveScoredElement("test-key", "test-value-1")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	err = newStorage.RemoveScoredElement("test-key", "test-value-2")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	var element3 string
+	var score3 float64
+	err = newStorage.WalkScoredSet("test-key", nil, func(element string, score float64) error {
+		element3 = element
+		score3 = score
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if element3 != "" {
+		t.Fatal("expected", "", "got", element3)
+	}
+	if score3 != 0 {
+		t.Fatal("expected", "", "got", score3)
 	}
 }
 
-func Test_Memory_WalkScoredSet_Closer(t *testing.T) {
+func Test_ScoredSetStorage_WalkScoredSet(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
 
