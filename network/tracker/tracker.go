@@ -77,28 +77,51 @@ type tracker struct {
 }
 
 // TODO
-func (t *tracker) AddCLGName(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	return networkPayload, nil
+func (t *tracker) AddCLGID(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// Create connection pairs using the sources and destination tracked in the
+	// given network payload. There might be multiple connection pairs because
+	// there might be multiple sources requesting one CLG together. The created
+	// connection pairs always contain the same destination, because there is only
+	// one destination tracked in the given network payload. Note that destination
+	// is the behaviour ID of the CLG currently being executed. connectionPairs
+	// look similar to the following structure.
+	//
+	//     []connectionPair{
+	//       {
+	//         Source: 1,
+	//         Destination: 3,
+	//       },
+	//       {
+	//         Source: 2,
+	//         Destination: 3,
+	//       },
+	//     }
+	//
+	connectionPairs, err := createConnectionPairs(networkPayload.GetSources(), networkPayload.GetDestination())
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 // TODO
-func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	t.Log.WithTags(spec.Tags{C: nil, L: "D", O: t, V: 13}, "call Track")
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error){
-		t.AddCLGName,
+	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) error{
+		t.AddCLGID,
 	}
 
-	// Execute one lookup after another and annotate the given network payload
-	// eventually.
+	// Execute one lookup after another to track connection path patterns.
 	var err error
 	for _, lookup := range lookups {
-		networkPayload, err = lookup(CLG, networkPayload)
+		err = lookup(CLG, networkPayload)
 		if err != nil {
-			return nil, maskAny(err)
+			return maskAny(err)
 		}
 	}
 
-	return networkPayload, nil
+	return nil
 }
