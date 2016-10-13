@@ -76,6 +76,7 @@ type tracker struct {
 	Type spec.ObjectType
 }
 
+// TODO
 func (t *tracker) TrackConnectionPaths(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	// Create connection paths using the sources and destination tracked in the
 	// given network payload. There might be multiple connection paths because
@@ -91,6 +92,37 @@ func (t *tracker) TrackConnectionPaths(CLG spec.CLG, networkPayload spec.Network
 	if err != nil {
 		return maskAny(err)
 	}
+
+	// TODO
+	//
+	// Identify events.
+	//
+	//     extend-head
+	//
+	//
+	//
+	//     match-head
+	//
+	//
+	//
+	// 		 match-path
+	//
+	//
+	//
+	//     match-glob
+	//
+	//
+	//
+	//     match-tail
+	//
+	//
+	//
+	//     extend-tail
+	//
+	//
+	//
+	//     split-path
+	//
 
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(cp string) error{
