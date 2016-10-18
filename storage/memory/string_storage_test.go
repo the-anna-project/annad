@@ -72,3 +72,86 @@ func Test_StringStorage_GetSetGet(t *testing.T) {
 		t.Fatal("expected", "bar", "got", value)
 	}
 }
+
+// TODO test globbing
+// TODO implement Remove
+
+func Test_StringStorage_WalkSetRemove(t *testing.T) {
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
+
+	// Verify the key space is empty by default.
+	var count1 int
+	err := newStorage.WalkKeys("*", nil, func(element string) error {
+		count1++
+		return nil
+	})
+	if count1 != 0 {
+		t.Fatal("expected", 0, "got", count1)
+	}
+
+	// Set a new key.
+	err = newStorage.Set("test-key", "test-value")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	var count2 int
+	var element2 string
+	err = newStorage.WalkKeys("*", nil, func(element string) error {
+		count2++
+		element2 = element
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count2 != 1 {
+		t.Fatal("expected", 1, "got", count2)
+	}
+	if element2 != "test-value" {
+		t.Fatal("expected", "test-value", "got", element2)
+	}
+
+	// Remove one key.
+	err = newStorage.Remove("test-key")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	// Verify there is now no key anymore.
+	var count3 int
+	err := newStorage.WalkKeys("*", nil, func(element string) error {
+		count3++
+		return nil
+	})
+	if count3 != 0 {
+		t.Fatal("expected", 0, "got", count3)
+	}
+}
+
+func Test_StringStorage_WalkKeys_Closer(t *testing.T) {
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
+
+	err := newStorage.PushToSet("test-key", "test-value")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	// Immediately close the walk.
+	closer := make(chan struct{}, 1)
+	closer <- struct{}{}
+
+	// Check that the walk does not happen, because we already ended it.
+	var element1 string
+	err = newStorage.WalkKeys("test-key", closer, func(element string) error {
+		element1 = element
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if element1 != "" {
+		t.Fatal("expected", "", "got", element1)
+	}
+}
