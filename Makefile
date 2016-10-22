@@ -2,11 +2,9 @@
 
 
 
-GOPATH := ${PWD}/.workspace
-PATH := ${PATH}:${PWD}/.workspace/bin:${PWD}/bin
-export GOPATH
-export PATH
-
+export SHELL := /bin/bash
+export GOPATH := $(PWD)/.workspace
+export PATH := $(PATH):$(PWD)/.workspace/bin:$(PWD)/bin
 
 
 VERSION := $(shell git rev-parse --short HEAD)
@@ -45,10 +43,10 @@ gogenerate:
 
 goget:
 	@# Setup workspace.
-	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
-	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@mkdir -p $(PWD)/.workspace/src/github.com/xh3b4sd/
+	@ln -fs $(PWD) $(PWD)/.workspace/src/github.com/xh3b4sd/
 	@# Pin project dependencies.
-	@goget ${PWD}/Gofile
+	@goget $(PWD)/Gofile
 	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
 

@@ -33,7 +33,7 @@ sed -e 's/#.*//' $1 | grep -v -e '^[[:space:]]*$' | while read PKG HASH; do
       svn update -q -r $HASH
       break
     else
-      DEST="$(readlink -f $DEST/..)"
+      DEST="$(dirname $DEST)"
     fi
   done
   if [ $FOUND_VCS -eq 0 ]; then
