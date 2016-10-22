@@ -134,6 +134,9 @@ type StringStorage interface {
 	// underlying storage.
 	GetRandom() (string, error)
 
+	// Remove deletes the given key.
+	Remove(key string) error
+
 	// Set stores the given key value pair. Once persisted, value can be
 	// retrieved using Get.
 	Set(key string, value string) error

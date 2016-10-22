@@ -2,6 +2,7 @@ package memory
 
 import (
 	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/storage/redis"
 )
 
 func (s *storage) Get(key string) (string, error) {
@@ -24,6 +25,19 @@ func (s *storage) GetRandom() (string, error) {
 	}
 
 	return result, nil
+}
+
+func (s *storage) Remove(key string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
+
+	err := s.RedisStorage.Remove(key)
+	if redis.IsNotFound(err) {
+		return maskAny(notFoundError)
+	} else if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
 }
 
 func (s *storage) Set(key, value string) error {

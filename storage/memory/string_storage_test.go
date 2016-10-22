@@ -73,8 +73,43 @@ func Test_StringStorage_GetSetGet(t *testing.T) {
 	}
 }
 
-// TODO test globbing
-// TODO implement Remove
+func Test_StringStorage_Remove_NotFound(t *testing.T) {
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
+
+	err := newStorage.Remove("foo")
+	if !IsNotFound(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_StringStorage_SetGetRemoveGet(t *testing.T) {
+	newStorage := MustNew()
+	defer newStorage.Shutdown()
+
+	err := newStorage.Set("foo", "bar")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	value, err := newStorage.Get("foo")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if value != "bar" {
+		t.Fatal("expected", "bar", "got", value)
+	}
+
+	err = newStorage.Remove("foo")
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+
+	_, err = newStorage.Get("foo")
+	if !IsNotFound(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
 
 func Test_StringStorage_WalkSetRemove(t *testing.T) {
 	newStorage := MustNew()
@@ -108,8 +143,8 @@ func Test_StringStorage_WalkSetRemove(t *testing.T) {
 	if count2 != 1 {
 		t.Fatal("expected", 1, "got", count2)
 	}
-	if element2 != "test-value" {
-		t.Fatal("expected", "test-value", "got", element2)
+	if element2 != "prefix:test-key" {
+		t.Fatal("expected", "prefix:test-key", "got", element2)
 	}
 
 	// Remove one key.
@@ -120,7 +155,7 @@ func Test_StringStorage_WalkSetRemove(t *testing.T) {
 
 	// Verify there is now no key anymore.
 	var count3 int
-	err := newStorage.WalkKeys("*", nil, func(element string) error {
+	err = newStorage.WalkKeys("*", nil, func(element string) error {
 		count3++
 		return nil
 	})

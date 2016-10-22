@@ -102,6 +102,49 @@ func (s *storage) Set(key, value string) error {
 	return nil
 }
 
+func (s *storage) Remove(key string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
+
+	errors := make(chan error, 1)
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		reply, err := redis.Int64(conn.Do("DEL", s.withPrefix(key)))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		if reply == 0 {
+			// To return the not found error we need to break through the retrier.
+			// Therefore we do not return the not found error here, but dispatch it to
+			// the calling goroutine. Further we simply fall through and return nil to
+			// finally stop the retrier.
+			errors <- maskAnyf(notFoundError, "DEL %s", s.withPrefix(key))
+			return nil
+		}
+
+		return nil
+	}
+
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Remove", action), s.BackOffFactory())
+	if err != nil {
+		return maskAny(err)
+	}
+
+	select {
+	case err := <-errors:
+		if err != nil {
+			return maskAny(err)
+		}
+	default:
+		// If there is no error, we simply fall through to return the result.
+	}
+
+	return nil
+}
+
 // TODO test
 func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
