@@ -1,22 +1,26 @@
 package spec
 
-// Storage represents a persistency management object. Different storages may be
-// provided using StorageCollectionProvider. Within a receiver function the
-// usage of the feature storage may look like this.
-//
-//     func (n *network) Foo() error {
-//       rk, err := n.Storage().Feature().GetRandomKey()
-//       ...
-//     }
-//
-type Storage interface {
-	// Get returns data associated with key. This is a simple key-value
-	// relationship.
-	Get(key string) (string, error)
+// ListStorage represents a storage implementation managing operations against
+// lists.
+type ListStorage interface {
+	// PopFromList returns the next element from the list identified by the given
+	// key. Note that a list is an ordered sequence of arbitrary elements.
+	// PushToList and PopFromList are operating according to a "first in, first
+	// out" primitive. If the requested list is empty, PopFromList blocks
+	// infinitely until an element is added to the list. Returned elements will
+	// also be removed from the specified list.
+	PopFromList(key string) (string, error)
 
-	// GetAllFromSet returns all elements from the stored stored under key.
-	GetAllFromSet(key string) ([]string, error)
+	// PushToList adds the given element to the list identified by the given key.
+	// Note that a list is an ordered sequence of arbitrary elements. PushToList
+	// and PopFromList are operating according to a "first in, first out"
+	// primitive.
+	PushToList(key string, element string) error
+}
 
+// ScoredSetStorage represents a storage implementation managing operations
+// against scored sets.
+type ScoredSetStorage interface {
 	// GetElementsByScore looks up all elements associated with the given score.
 	// To limit the number of returned elements, maxElements ca be used. Note
 	// that the list has this scheme.
@@ -37,28 +41,30 @@ type Storage interface {
 	//
 	GetHighestScoredElements(key string, maxElements int) ([]string, error)
 
-	// GetRandomKey returns a random key which was formerly stored within the
-	// underlying storage.
-	GetRandomKey() (string, error)
+	// RemoveScoredElement removes the given element from the scored set under
+	// key.
+	RemoveScoredElement(key string, element string) error
 
-	// GetStringMap returns the hash map stored under the given key.
-	GetStringMap(key string) (map[string]string, error)
+	// SetElementByScore persists the given element in the weighted list
+	// identified by key with respect to the given score.
+	SetElementByScore(key, element string, score float64) error
 
-	Object
+	// WalkScoredSet scans the scored set given by key and executes the callback
+	// for each found element. Note that the walk might ignores the score order.
+	//
+	// The walk is throttled. That means some amount of elements are fetched at
+	// once from the storage. After all fetched elements are iterated, the next
+	// batch of elements is fetched to continue the next iteration, until the
+	// given set is walked completely. The given closer can be used to end the
+	// walk immediately.
+	WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
+}
 
-	// PopFromList returns the next element from the list identified by the given
-	// key. Note that a list is an ordered sequence of arbitrary elements.
-	// PushToList and PopFromList are operating according to a "first in, first
-	// out" primitive. If the requested list is empty, PopFromList blocks
-	// infinitely until an element is added to the list. Returned elements will
-	// also be removed from the specified list.
-	PopFromList(key string) (string, error)
-
-	// PushToList adds the given element to the list identified by the given key.
-	// Note that a list is an ordered sequence of arbitrary elements. PushToList
-	// and PopFromList are operating according to a "first in, first out"
-	// primitive.
-	PushToList(key string, element string) error
+// SetStorage represents a storage implementation managing operations against
+// sets.
+type SetStorage interface {
+	// GetAllFromSet returns all elements from the stored stored under key.
+	GetAllFromSet(key string) ([]string, error)
 
 	// PushToSet adds the given element to the set identified by the given key.
 	// Note that a set is an unordered collection of distinct elements.
@@ -67,37 +73,6 @@ type Storage interface {
 	// RemoveFromSet removes the given element from the set identified by the
 	// given key.
 	RemoveFromSet(key string, element string) error
-
-	// RemoveScoredElement removes the given element from the scored set under
-	// key.
-	RemoveScoredElement(key string, element string) error
-
-	// Set stores the given key value pair. Once persisted, value can be
-	// retrieved using Get.
-	Set(key string, value string) error
-
-	// SetElementByScore persists the given element in the weighted list
-	// identified by key with respect to the given score.
-	SetElementByScore(key, element string, score float64) error
-
-	// SetStringMap stores the given stringMap under the given key.
-	SetStringMap(key string, stringMap map[string]string) error
-
-	// Shutdown ends all processes of the storage like shutting down a machine.
-	// The call to Shutdown blocks until the storage is completely shut down, so
-	// you might want to call it in a separate goroutine.
-	Shutdown()
-
-	// WalkScoredElements scans the scored set given by key and executes the
-	// callback for each found element. Note that the walk might ignores the score
-	// order.
-	//
-	// The walk is throttled. That means some amount of elements are fetched at
-	// once from the storage. After all fetched elements are iterated, the next
-	// batch of elements is fetched to continue the next iteration, until the
-	// given set is walked completely. The given closer can be used to end the
-	// walk immediately.
-	WalkScoredElements(key string, closer <-chan struct{}, cb func(element string, score float64) error) error
 
 	// WalkSet scans the set given by key and executes the callback for each found
 	// element.
@@ -108,6 +83,73 @@ type Storage interface {
 	// given set is walked completely. The given closer can be used to end the
 	// walk immediately.
 	WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error
+}
+
+// Storage represents a persistency management object. Different storages may be
+// provided using StorageCollectionProvider. Within a receiver function the
+// usage of the feature storage may look like this.
+//
+//     func (n *network) Foo() error {
+//       rk, err := n.Storage().Feature().GetRandom()
+//       ...
+//     }
+//
+type Storage interface {
+	ListStorage
+
+	Object
+
+	ScoredSetStorage
+
+	SetStorage
+
+	// Shutdown ends all processes of the storage like shutting down a machine.
+	// The call to Shutdown blocks until the storage is completely shut down, so
+	// you might want to call it in a separate goroutine.
+	Shutdown()
+
+	StringMapStorage
+
+	StringStorage
+}
+
+// StringMapStorage represents a storage implementation managing operations
+// against string maps.
+type StringMapStorage interface {
+	// GetStringMap returns the hash map stored under the given key.
+	GetStringMap(key string) (map[string]string, error)
+
+	// SetStringMap stores the given stringMap under the given key.
+	SetStringMap(key string, stringMap map[string]string) error
+}
+
+// StringStorage represents a storage implementation managing operations against
+// strings.
+type StringStorage interface {
+	// Get returns data associated with key. This is a simple key-value
+	// relationship.
+	Get(key string) (string, error)
+
+	// GetRandom returns a random key which was formerly stored within the
+	// underlying storage.
+	GetRandom() (string, error)
+
+	// Remove deletes the given key.
+	Remove(key string) error
+
+	// Set stores the given key value pair. Once persisted, value can be
+	// retrieved using Get.
+	Set(key string, value string) error
+
+	// WalkKeys scans the key space with respect to the given glob and executes
+	// the callback for each found key.
+	//
+	// The walk is throttled. That means some amount of keys are fetched at once
+	// from the storage. After all fetched keys are iterated, the next batch of
+	// keys is fetched to continue the next iteration, until the whole key space
+	// is walked completely. The given closer can be used to end the walk
+	// immediately.
+	WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error
 }
 
 // StorageCollection represents a collection of Storage instances. This scopes

@@ -27,11 +27,11 @@ func (c *clg) calculate(ctx spec.Context) error {
 		//
 		//     feature:%s:positions
 		//
-		key1, err := c.Storage().Feature().GetRandomKey()
+		key1, err := c.Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
-		key2, err := c.Storage().Feature().GetRandomKey()
+		key2, err := c.Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
