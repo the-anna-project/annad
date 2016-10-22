@@ -23,12 +23,16 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-// IsNotFound checks whether a redis response was empty.
+var notFoundError = errgo.New("not found")
+
+// IsNotFound checks whether a redis response was empty. Therefore it checks for
+// redigo.ErrNil and notFoundError.
 //
 //     ErrNil indicates that a reply value is nil.
 //
 func IsNotFound(err error) bool {
-	return errgo.Cause(err) == redis.ErrNil
+	c := errgo.Cause(err)
+	return c == notFoundError || c == redis.ErrNil
 }
 
 var invalidConfigError = errgo.New("invalid config")

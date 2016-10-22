@@ -5,4 +5,4 @@ github.com/golang/protobuf/proto            master
 github.com/golang/protobuf/protoc-gen-go    master
 github.com/xh3b4sd/clggen                   master
 github.com/xh3b4sd/worker-pool              master
-github.com/alicebob/miniredis               1f80df1c333b37a62eda288e37f173ebaa30085d
+github.com/alicebob/miniredis               bb985e34f0942b1d770bf96e87f830cf38804abe

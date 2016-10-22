@@ -2,11 +2,9 @@
 
 
 
-GOPATH := ${PWD}/.workspace
-PATH := ${PATH}:${PWD}/.workspace/bin:${PWD}/bin
-export GOPATH
-export PATH
-
+export SHELL := /bin/bash
+export GOPATH := $(PWD)/.workspace
+export PATH := $(PATH):$(PWD)/.workspace/bin:$(PWD)/bin
 
 
 VERSION := $(shell git rev-parse --short HEAD)
@@ -45,10 +43,10 @@ gogenerate:
 
 goget:
 	@# Setup workspace.
-	@mkdir -p ${PWD}/.workspace/src/github.com/xh3b4sd/
-	@ln -fs ${PWD} ${PWD}/.workspace/src/github.com/xh3b4sd/
+	@mkdir -p $(PWD)/.workspace/src/github.com/xh3b4sd/
+	@ln -fs $(PWD) $(PWD)/.workspace/src/github.com/xh3b4sd/
 	@# Pin project dependencies.
-	@goget ${PWD}/Gofile
+	@goget $(PWD)/Gofile
 	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
 
@@ -59,7 +57,14 @@ projectcheck:
 	@projectcheck
 
 protoc:
+ifeq ($(shell go env GOOS),linux)
 	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
+else ifeq ($(shell go env GOOS),darwin)
+	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-osx-x86_64.zip -O /tmp/protoc.zip
+else
+	@echo "unsupported platform"
+	@exit 1
+endif
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
 	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
