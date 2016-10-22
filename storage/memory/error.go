@@ -12,7 +12,7 @@ var (
 
 var notFoundError = errgo.New("not found")
 
-// sIsNotFound asserts notFoundError.
+// IsNotFound asserts notFoundError.
 func IsNotFound(err error) bool {
 	return errgo.Cause(err) == notFoundError || redis.IsNotFound(err)
 }
