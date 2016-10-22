@@ -75,33 +75,6 @@ func (s *storage) GetRandom() (string, error) {
 	return result, nil
 }
 
-func (s *storage) Set(key, value string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
-
-	action := func() error {
-		conn := s.Pool.Get()
-		defer conn.Close()
-
-		reply, err := redis.String(conn.Do("SET", s.withPrefix(key), value))
-		if err != nil {
-			return maskAny(err)
-		}
-
-		if reply != "OK" {
-			return maskAnyf(queryExecutionFailedError, "SET not executed correctly")
-		}
-
-		return nil
-	}
-
-	err := backoff.Retry(s.Instrumentation.WrapFunc("Set", action), s.BackOffFactory())
-	if err != nil {
-		return maskAny(err)
-	}
-
-	return nil
-}
-
 func (s *storage) Remove(key string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
 
@@ -145,7 +118,33 @@ func (s *storage) Remove(key string) error {
 	return nil
 }
 
-// TODO test
+func (s *storage) Set(key, value string) error {
+	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
+
+	action := func() error {
+		conn := s.Pool.Get()
+		defer conn.Close()
+
+		reply, err := redis.String(conn.Do("SET", s.withPrefix(key), value))
+		if err != nil {
+			return maskAny(err)
+		}
+
+		if reply != "OK" {
+			return maskAnyf(queryExecutionFailedError, "SET not executed correctly")
+		}
+
+		return nil
+	}
+
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Set", action), s.BackOffFactory())
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
 func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
 

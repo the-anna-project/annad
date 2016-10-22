@@ -120,3 +120,119 @@ func Test_StringStorage_Set_NoSuccess(t *testing.T) {
 		t.Fatal("expected", true, "got", false)
 	}
 }
+
+func Test_StringStorage_WalkKeys(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SCAN", int64(0), "MATCH", "*", "COUNT", 100).Expect([]interface{}{
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-key")},
+	})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	var count int
+	var element1 string
+
+	err := newStorage.WalkKeys("*", nil, func(key string) error {
+		count++
+		element1 = key
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count != 1 {
+		t.Fatal("expected", 1, "got", count)
+	}
+	if element1 != "test-key" {
+		t.Fatal("expected", "test-key", "got", element1)
+	}
+}
+
+func Test_StringStorage_WalkKeys_CloseDirectly(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SCAN", int64(0), "MATCH", "*", "COUNT", 100).Expect([]interface{}{
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-key")},
+	})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	var count int
+	// Directly close and end walking.
+	closer := make(chan struct{}, 1)
+	closer <- struct{}{}
+
+	err := newStorage.WalkKeys("*", closer, func(key string) error {
+		count++
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count != 0 {
+		t.Fatal("expected", 0, "got", count)
+	}
+}
+
+func Test_StringStorage_WalkKeys_CloseAfterCallback(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SCAN", int64(0), "MATCH", "*", "COUNT", 100).Expect([]interface{}{
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-key")},
+	})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	var count int
+	var element1 string
+	closer := make(chan struct{}, 1)
+
+	err := newStorage.WalkKeys("*", closer, func(key string) error {
+		count++
+		element1 = key
+
+		// Close and end walking.
+		closer <- struct{}{}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	if count != 1 {
+		t.Fatal("expected", 1, "got", count)
+	}
+	if element1 != "test-key" {
+		t.Fatal("expected", "test-key", "got", element1)
+	}
+}
+
+func Test_StringStorage_WalkKeys_QueryError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SCAN").ExpectError(queryExecutionFailedError)
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	err := newStorage.WalkKeys("*", nil, nil)
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
+
+func Test_StringStorage_WalkKeys_CallbackError(t *testing.T) {
+	c := redigomock.NewConn()
+	c.Command("SCAN", int64(0), "MATCH", "*", "COUNT", 100).Expect([]interface{}{
+		[]uint8("0"),
+		[]interface{}{[]uint8("test-key")},
+	})
+
+	newStorage := testMustNewStorageWithConn(t, c)
+
+	err := newStorage.WalkKeys("*", nil, func(key string) error {
+		return maskAny(queryExecutionFailedError)
+	})
+	if !IsQueryExecutionFailed(err) {
+		t.Fatal("expected", true, "got", false)
+	}
+}
