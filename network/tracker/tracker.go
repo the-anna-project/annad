@@ -119,6 +119,8 @@ func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 	if err != nil {
 		return maskAny(err)
 	}
+	go queue.Boot()
+	defer queue.Shutdown()
 
 	// TODO comment
 	// We need to provide a way to control the operations against the underlying
@@ -128,7 +130,7 @@ func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 	// work.
 	go func() {
 		// This is the list of lookup functions which is executed sequentially.
-		lookups := []func(e spec.Event) error{
+		lookups := []func(e event.Event) error{
 			t.ExecuteExtendHeadEvent,
 			t.ExecuteExtendTailEvent,
 			t.ExecuteNewPathEvent,
@@ -139,13 +141,11 @@ func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 			select {
 			case <-t.Closer:
 				return
-			case <-done:
+			case <-queue.GetComplete():
 				return
-			case <-queue.Complete():
-				return
-			case e := <-queue.Out():
+			case e := <-queue.GetOutput():
 				// Execute one lookup after another to track connection path patterns.
-				go func(e spec.Event) {
+				go func(e event.Event) {
 					for _, l := range lookups {
 						err := l(e)
 						if err != nil {
@@ -157,12 +157,15 @@ func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 		}
 	}()
 
-	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.In())
+	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.GetInput())
 	if err != nil {
 		return maskAny(err)
 	}
 
-	close(done)
+	err = <-queue.GetError()
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }

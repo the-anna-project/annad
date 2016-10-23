@@ -28,11 +28,11 @@ type Tracker interface {
 	//
 	//     after     1,2
 	//
-	// Database holds one connection path. We have one new connection path. One
-	// peer of the new connection path is already stored in the database: 2. This
-	// causes the connection path of which one peer of the new connection path is
-	// matching to be extended. The event identifying this case is called
-	// extend-tail.
+	// Database holds one connection path. We have one new connection path. The
+	// first peer of the new connection path is already stored as last peer in the
+	// database: 2. This causes the connection path of which one peer of the new
+	// connection path is matching to be extended. The event identifying this case
+	// is called extend-tail.
 	//
 	//     before    1,2
 	//
@@ -52,47 +52,6 @@ type Tracker interface {
 	//
 	//     after     1,2,3
 	//
-	// Database holds one connection path. We have one new connection path. Two
-	// peers of the new connection path are already stored in the database: 2,3.
-	// This causes the connection path of which two peers of the new connection
-	// path are matching to be extended. The event identifying this case is called
-	// extend-tail.
-	//
-	//     before    1,2,3
-	//
-	//     new       2,3,4
-	//
-	//     after     1,2,3,4
-	//
-	// Database holds one connection path. We have one new connection path. The
-	// new connection path matches completely the connection path already being
-	// stored in the database. The database state does not change. The event
-	// identifying this case is called match-glob.
-	//
-	//     before    1,2,3,4
-	//
-	//     new       2,3
-	//
-	//     after     1,2,3,4
-	//
-	// Database holds one connection path. We have one new connection path. One
-	// peer of the new connection path shows the connection path stored in the
-	// database must be split. Here the peer 3 is already present, while the
-	// connection path 3,5 is not. This pattern shows peer 3 is a CLG that
-	// forwards to more than one other CLG. Hence we have to split the stored
-	// connection path to always only have linear connection paths stored. After
-	// splitting the existing connection path we have three connection paths
-	// stored in the database. The event identifying this case is called
-	// split-path.
-	//
-	//     before    1,2,3,4
-	//
-	//     new       3,5
-	//
-	//     after     1,2,3
-	//               3,4
-	//               3,5
-	//
 	// Database holds three connection paths. We have one new connection path. One
 	// peer of the new connection path is already stored in the database: 1. This
 	// causes the connection path of which one peer of the new connection path is
@@ -100,13 +59,38 @@ type Tracker interface {
 	// extend-head.
 	//
 	//     before    1,2,3
-	//               3,4
-	//               3,5
 	//
 	//     new       0,1
 	//
 	//     after     0,1,2,3
-	//               3,4
-	//               3,5
+	//
+	// Database holds one connection path. We have one new connection path. The
+	// new connection path matches the body of the connection path already being
+	// stored in the database. The database state does not change. The event
+	// identifying this case is called match-body.
+	//
+	//     before    0,1,2,3
+	//
+	//     new       1,2
+	//
+	//     after     0,1,2,3
+	//
+	// Database holds one connection path. We have one new connection path. One
+	// peer of the new connection path shows the connection path stored in the
+	// database must be split. Here the peer 2 is already present, while the
+	// connection path 2,4 is not. This pattern shows peer 2 is a CLG that
+	// forwards to more than one other CLG. Hence we have to split the stored
+	// connection path to always only have linear connection paths stored. After
+	// splitting the existing connection path we have three connection paths
+	// stored in the database. The event identifying this case is called
+	// split-path.
+	//
+	//     before    0,1,2,3
+	//
+	//     new       2,4
+	//
+	//     after     0,1,2
+	//               2,3
+	//               2,4
 	//
 }
