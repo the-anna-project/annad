@@ -54,6 +54,7 @@ func initEvents(networkPayload spec.NetworkPayload) (map[string]Event, error) {
 	return events, nil
 }
 
+		for _, e := range eventQueue.GetEvents() {
 			var t EventType
 			if cp == key {
 				counter++
@@ -78,3 +79,4 @@ func initEvents(networkPayload spec.NetworkPayload) (map[string]Event, error) {
 
 			events[cp].ConnectionPath = key
 			events[cp].Type = t
+		}

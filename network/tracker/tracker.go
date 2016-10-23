@@ -77,8 +77,30 @@ type tracker struct {
 	Type spec.ObjectType
 }
 
+func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	var sources []string
+	for _, s := range networkPayload.GetSources() {
+		sources = append(sources, string(s))
+	}
+
+	destination := string(networkPayload.GetDestination())
+
+	err := t.ExecuteEvents(sources, destination)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
 // TODO
-func (t *tracker) CLGIDEvents(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// destination name is CLG.GetName()
+	// lookup source names in storage using source IDs from networkPayload
+}
+
+// TODO
+func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 	// TODO comment
 	// Create connection paths using the sources and destination tracked in the
 	// given network payload. There might be multiple connection paths because
@@ -90,64 +112,57 @@ func (t *tracker) CLGIDEvents(CLG spec.CLG, networkPayload spec.NetworkPayload) 
 	//
 	//     behaviourID,behaviourID
 	//
-	eventListConfig := event.DefaultEventListConfig()
-	eventListConfig.NetworkPayload = networkPayload
-	eventList, err := event.NewList(eventListConfig)
+	queueConfig := event.DefaultEventQueueConfig()
+	queueConfig.Destination = destination
+	queueConfig.Sources = sources
+	queue, err := event.NewQueue(queueConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
+	// TODO comment
 	// We need to provide a way to control the operations against the underlying
 	// storage. In case we tracked one event for each connection path we can stop
 	// the walk through the key space. Further we also need to be aware of
 	// external cancelation. In case the tracker is shut down, we need to stop all
 	// work.
-	closer := make(chan struct{}, 1)
 	go func() {
-		select {
-		case <-t.Closer:
-			close(closer)
-		case <-closer:
-			break
+		// This is the list of lookup functions which is executed sequentially.
+		lookups := []func(e spec.Event) error{
+			t.ExecuteExtendHeadEvent,
+			t.ExecuteExtendTailEvent,
+			t.ExecuteNewPathEvent,
+			t.ExecuteSplitPathEvent,
+		}
+
+		for {
+			select {
+			case <-t.Closer:
+				return
+			case <-done:
+				return
+			case <-queue.Complete():
+				return
+			case e := <-queue.Out():
+				// Execute one lookup after another to track connection path patterns.
+				go func(e spec.Event) {
+					for _, l := range lookups {
+						err := l(e)
+						if err != nil {
+							return maskAny(err)
+						}
+					}
+				}(e)
+			}
 		}
 	}()
 
-	err := t.Storage().Connection().WalkKeys("*", closer, func(key string) error {
-		for _, e := range eventList.GetEvents() {
-			err := eventList.Track(key)
-			if err != nil {
-				return maskAny(err)
-			}
-
-			if eventList.Complete() {
-				// In case we tracked one event for each given new connection we stop
-				// the walk through the key space, because there is nothing left to
-				// track.
-				close(closer)
-				return nil
-			}
-		}
-
-		return nil
-	})
-
-	// This is the list of lookup functions which is executed sequentially.
-	lookups := []func(e spec.Event) error{
-		t.ExecuteExtentHeadEvent,
-		t.ExecuteExtentHeadTail,
-		t.ExecuteNewPathEvent,
-		t.ExecuteSplitPathEvent,
+	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.In())
+	if err != nil {
+		return maskAny(err)
 	}
 
-	// Execute one lookup after another to track connection path patterns.
-	for _, e := range eventList.GetEvents() {
-		for _, l := range lookups {
-			err := l(e)
-			if err != nil {
-				return maskAny(err)
-			}
-		}
-	}
+	close(done)
 
 	return nil
 }
@@ -157,13 +172,14 @@ func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error 
 
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) error{
-		t.TrackCLGIDEvents,
+		t.CLGIDs,
+		t.CLGNames,
 	}
 
 	// Execute one lookup after another to track connection path patterns.
 	var err error
-	for _, lookup := range lookups {
-		err = lookup(CLG, networkPayload)
+	for _, l := range lookups {
+		err = l(CLG, networkPayload)
 		if err != nil {
 			return maskAny(err)
 		}
