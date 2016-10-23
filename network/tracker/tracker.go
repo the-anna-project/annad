@@ -4,6 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/network/tracker/event"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -77,7 +78,8 @@ type tracker struct {
 }
 
 // TODO
-func (t *tracker) TrackConnectionPaths(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+func (t *tracker) CLGIDEvents(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	// TODO comment
 	// Create connection paths using the sources and destination tracked in the
 	// given network payload. There might be multiple connection paths because
 	// there might be multiple sources requesting one CLG together. The created
@@ -88,53 +90,59 @@ func (t *tracker) TrackConnectionPaths(CLG spec.CLG, networkPayload spec.Network
 	//
 	//     behaviourID,behaviourID
 	//
-	connectionPaths, err := networkPayloadToConnectionPaths(networkPayload)
+	eventListConfig := event.DefaultEventListConfig()
+	eventListConfig.NetworkPayload = networkPayload
+	eventList, err := event.NewList(eventListConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
-	// TODO
-	//
-	// Identify events.
-	//
-	//     extend-head
-	//
-	//
-	//
-	//     match-head
-	//
-	//
-	//
-	// 		 match-path
-	//
-	//
-	//
-	//     match-glob
-	//
-	//
-	//
-	//     match-tail
-	//
-	//
-	//
-	//     extend-tail
-	//
-	//
-	//
-	//     split-path
-	//
+	// We need to provide a way to control the operations against the underlying
+	// storage. In case we tracked one event for each connection path we can stop
+	// the walk through the key space. Further we also need to be aware of
+	// external cancelation. In case the tracker is shut down, we need to stop all
+	// work.
+	closer := make(chan struct{}, 1)
+	go func() {
+		select {
+		case <-t.Closer:
+			close(closer)
+		case <-closer:
+			break
+		}
+	}()
 
-	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(cp string) error{
-		t.storeConnectionPath,
-		t.extendConnectionPath,
-		t.splitConnectionPath,
+	err := t.Storage().Connection().WalkKeys("*", closer, func(key string) error {
+		for _, e := range eventList.GetEvents() {
+			err := eventList.Track(key)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			if eventList.Complete() {
+				// In case we tracked one event for each given new connection we stop
+				// the walk through the key space, because there is nothing left to
+				// track.
+				close(closer)
+				return nil
+			}
+		}
+
+		return nil
+	})
+
+	// This is the list of lookup functions which is executed sequentially.
+	lookups := []func(e spec.Event) error{
+		t.ExecuteExtentHeadEvent,
+		t.ExecuteExtentHeadTail,
+		t.ExecuteNewPathEvent,
+		t.ExecuteSplitPathEvent,
 	}
 
 	// Execute one lookup after another to track connection path patterns.
-	for _, cp := range connectionPaths {
-		for _, lookup := range lookups {
-			err = lookup(cp)
+	for _, e := range eventList.GetEvents() {
+		for _, l := range lookups {
+			err := l(e)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -149,7 +157,7 @@ func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error 
 
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) error{
-		t.TrackConnectionPaths,
+		t.TrackCLGIDEvents,
 	}
 
 	// Execute one lookup after another to track connection path patterns.

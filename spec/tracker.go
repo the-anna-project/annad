@@ -8,60 +8,72 @@ type Tracker interface {
 	// TODO document the algorithm
 	//
 	// Database is empty. We have one new connection path. After adding the new
-	// connection path we have one connection path stored in the database.
+	// connection path we have one connection path stored in the database. The
+	// event identifying this case is called new-path.
+	//
+	//     before
 	//
 	//     new       1,2
 	//
-	//                |
-	//                v
-	//
-	//     stored
+	//     after     1,2
 	//
 	// Database holds one connection path. We have one new connection path. The
 	// new connection path equals the connection path already being stored in the
-	// database. The database state does not change.
+	// database. The database state does not change. The event identifying this
+	// case is called match-path.
+	//
+	//     before    1,2
 	//
 	//     new       1,2
 	//
-	//                |
-	//                v
-	//
-	//     stored    1,2
+	//     after     1,2
 	//
 	// Database holds one connection path. We have one new connection path. One
 	// peer of the new connection path is already stored in the database: 2. This
 	// causes the connection path of which one peer of the new connection path is
-	// matching to be extended.
+	// matching to be extended. The event identifying this case is called
+	// extend-tail.
 	//
-	//     new        2,3
+	//     before    1,2
 	//
-	//                 |
-	//                 v
+	//     new       2,3
 	//
-	//     stored    1,2,3
+	//     after     1,2,3
+	//
+	// Database holds one connection path. We have one new connection path. Two
+	// peers of the new connection path are already stored in the database: 1,2.
+	// The new connection path matches the head of the connection path already
+	// being stored in the database. The database state does not change. The event
+	// identifying this case is called match-head.
+	//
+	//     before    1,2,3
+	//
+	//     new       1,2
+	//
+	//     after     1,2,3
 	//
 	// Database holds one connection path. We have one new connection path. Two
 	// peers of the new connection path are already stored in the database: 2,3.
 	// This causes the connection path of which two peers of the new connection
-	// path are matching to be extended.
+	// path are matching to be extended. The event identifying this case is called
+	// extend-tail.
 	//
-	//     new        2,3,4
+	//     before    1,2,3
 	//
-	//                  |
-	//                  v
+	//     new       2,3,4
 	//
-	//     stored    1,2,3,4
+	//     after     1,2,3,4
 	//
 	// Database holds one connection path. We have one new connection path. The
 	// new connection path matches completely the connection path already being
-	// stored in the database. The database state does not change.
+	// stored in the database. The database state does not change. The event
+	// identifying this case is called match-glob.
 	//
-	//     new         2,3
+	//     before    1,2,3,4
 	//
-	//                  |
-	//                  v
+	//     new       2,3
 	//
-	//     stored    1,2,3,4
+	//     after     1,2,3,4
 	//
 	// Database holds one connection path. We have one new connection path. One
 	// peer of the new connection path shows the connection path stored in the
@@ -70,30 +82,31 @@ type Tracker interface {
 	// forwards to more than one other CLG. Hence we have to split the stored
 	// connection path to always only have linear connection paths stored. After
 	// splitting the existing connection path we have three connection paths
-	// stored in the database.
+	// stored in the database. The event identifying this case is called
+	// split-path.
 	//
-	//     new        3,5
+	//     before    1,2,3,4
 	//
-	//                 |
-	//                 v
+	//     new       3,5
 	//
-	//     stored    1,2,3
+	//     after     1,2,3
 	//               3,4
 	//               3,5
 	//
-	// Database holds one connection path. We have one new connection path. One
+	// Database holds three connection paths. We have one new connection path. One
 	// peer of the new connection path is already stored in the database: 1. This
 	// causes the connection path of which one peer of the new connection path is
-	// matching to be extended.
+	// matching to be extended. The event identifying this case is called
+	// extend-head.
 	//
-	//     new        0,1
+	//     before    1,2,3
+	//               3,4
+	//               3,5
 	//
-	//                 |
-	//                 v
+	//     new       0,1
 	//
-	//     stored    0,1,2
-	//               2,3
-	//               2,4
-	//
+	//     after     0,1,2,3
+	//               3,4
+	//               3,5
 	//
 }
