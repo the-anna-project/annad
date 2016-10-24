@@ -159,6 +159,9 @@ func Test_StringStorage_WalkSetRemove(t *testing.T) {
 		count3++
 		return nil
 	})
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
 	if count3 != 0 {
 		t.Fatal("expected", 0, "got", count3)
 	}
