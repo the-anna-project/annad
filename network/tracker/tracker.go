@@ -150,13 +150,13 @@ func (t *tracker) ProcessEvents(sources []string, destination string) error {
 		for _, cd := range connectionDetails {
 			wg.Add(1)
 			go func(cd connectionDetail) {
+				// TODO spec.Storage.SetIfExists ???
 				ok, err := t.Storage().Connection().Exists(cd.Connection)
 				if err != nil {
 					return maskAny(err)
 				}
 				if !ok {
-					// TODO what value to use?
-					err := t.Storage().Connection().Set(cd.Connection, "")
+					err := t.Storage().Connection().Set(cd.Connection, "{}")
 					if err != nil {
 						return maskAny(err)
 					}
@@ -168,13 +168,65 @@ func (t *tracker) ProcessEvents(sources []string, destination string) error {
 
 	go func() {
 		wg.Add(1)
+		// TODO what should happen with the key when it is modified in the middle of the loops? Requeing?
 		err := t.Storage().Connection().WalkKeys("*", t.Closer, func(key string) error {
+			splitted := strings.Split(key, ",")
+
 			for _, cd := range connectionDetails {
+				// extend head
 				if strings.HasPrefix(cp, cd.Destination) {
-					// extend head
+					// TODO
 				}
+
+				// extend tail
 				if strings.HasSuffix(cp, cd.Source) {
-					// extend tail
+					// TODO
+				}
+
+				// split path
+				for i, s := range splitted {
+					if i == 0 || i+1 >= len(splitted) {
+						// TODO comment
+						continue
+					}
+
+					if s != cd.Source || splitted[i+1] == cd.Destination {
+						// TODO comment
+						continue
+					}
+
+					// TODO comment We do not add the plain connection here, because this is already
+					// done above.
+
+					headSplit := strings.Join(splitted[i+1], ",")
+					ok, err := t.Storage().Connection().Exists(headSplit)
+					if err != nil {
+						return maskAny(err)
+					}
+					if !ok {
+						err := t.Storage().Connection().Set(headSplit, "{}")
+						if err != nil {
+							return maskAny(err)
+						}
+					}
+
+					tailSplit := strings.Join(splitted[i], ",")
+					ok, err := t.Storage().Connection().Exists(tailSplit)
+					if err != nil {
+						return maskAny(err)
+					}
+					if !ok {
+						err := t.Storage().Connection().Set(tailSplit, "{}")
+						if err != nil {
+							return maskAny(err)
+						}
+					}
+
+					// TODO comment
+					err := t.Storage().Connection().Remove(key)
+					if err != nil {
+						return maskAny(err)
+					}
 				}
 			}
 		})
