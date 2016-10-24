@@ -1,11 +1,11 @@
 package event
 
 var (
-	ExtendHeadType Type = "extend-head"
+	MatchBodyType Type = "match-body"
 )
 
 // Config represents the configuration used to create a new queue object.
-type ExtendHeadConfig struct {
+type MatchBodyConfig struct {
 	// Connection represents the new connection being tracked during the current
 	// event. This connection consist out of two peers. The first peer is
 	// Destination. The second peer is Source.
@@ -13,7 +13,7 @@ type ExtendHeadConfig struct {
 
 	// ConnectionPath represents the stored connection path matching the new
 	// connection according to the event being tracked. In this case,
-	// ExtendHeadType.
+	// MatchBodyType.
 	ConnectionPath string
 
 	// Destination represents the destination of the network payload currently
@@ -26,9 +26,9 @@ type ExtendHeadConfig struct {
 }
 
 // DefaultEventQueueConfig provides a default configuration to create a new
-// extend head object by best effort.
-func DefaultExtendHeadConfig() ExtendHeadConfig {
-	newConfig := ExtendHeadConfig{
+// match body object by best effort.
+func DefaultMatchBodyConfig() MatchBodyConfig {
+	newConfig := MatchBodyConfig{
 		Connection:     "",
 		ConnectionPath: "",
 		Destination:    "",
@@ -38,12 +38,12 @@ func DefaultExtendHeadConfig() ExtendHeadConfig {
 	return newConfig
 }
 
-// NewExtendHead creates a new configured extend head object.
-func NewExtendHead(config ExtendHeadConfig) (Event, error) {
-	newEvent := &extendHead{
-		ExtendHeadConfig: config,
+// NewMatchBody creates a new configured match body object.
+func NewMatchBody(config MatchBodyConfig) (Event, error) {
+	newEvent := &matchBody{
+		MatchBodyConfig: config,
 
-		Type: ExtendHeadType,
+		Type: MatchBodyType,
 	}
 
 	if newEvent.Connection == "" {
@@ -62,28 +62,28 @@ func NewExtendHead(config ExtendHeadConfig) (Event, error) {
 	return newEvent, nil
 }
 
-type extendHead struct {
-	ExtendHeadConfig
+type matchBody struct {
+	MatchBodyConfig
 
 	Type Type
 }
 
-func (eh *extendHead) GetConnection() string {
-	return eh.Connection
+func (mb *matchBody) GetConnection() string {
+	return mb.Connection
 }
 
-func (eh *extendHead) GetConnectionPath() string {
-	return eh.ConnectionPath
+func (mb *matchBody) GetConnectionPath() string {
+	return mb.ConnectionPath
 }
 
-func (eh *extendHead) GetDestination() string {
-	return eh.Destination
+func (mb *matchBody) GetDestination() string {
+	return mb.Destination
 }
 
-func (eh *extendHead) GetSource() string {
-	return eh.Source
+func (mb *matchBody) GetSource() string {
+	return mb.Source
 }
 
-func (eh *extendHead) GetType() Type {
-	return eh.Type
+func (mb *matchBody) GetType() Type {
+	return mb.Type
 }

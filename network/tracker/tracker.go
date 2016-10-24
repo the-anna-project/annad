@@ -1,10 +1,12 @@
 package tracker
 
 import (
+	"strings"
+	"sync"
+
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/network/tracker/event"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -100,7 +102,20 @@ func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) err
 }
 
 // TODO
-func (t *tracker) ExecuteEvents(sources []string, destination string) error {
+func (t *tracker) ProcessExtendHeadEvent(source, destination string) error {
+	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.GetInput())
+	if err != nil {
+		return maskAny(err)
+	}
+}
+
+type connectionDetail struct {
+	Connection  string
+	Destination string
+	Source      string
+}
+
+func (t *tracker) ProcessEvents(sources []string, destination string) error {
 	// TODO comment
 	// Create connection paths using the sources and destination tracked in the
 	// given network payload. There might be multiple connection paths because
@@ -112,60 +127,64 @@ func (t *tracker) ExecuteEvents(sources []string, destination string) error {
 	//
 	//     behaviourID,behaviourID
 	//
-	queueConfig := event.DefaultEventQueueConfig()
-	queueConfig.Destination = destination
-	queueConfig.Sources = sources
-	queue, err := event.NewQueue(queueConfig)
-	if err != nil {
-		return maskAny(err)
-	}
-	go queue.Boot()
-	defer queue.Shutdown()
-
-	// TODO comment
-	// We need to provide a way to control the operations against the underlying
-	// storage. In case we tracked one event for each connection path we can stop
-	// the walk through the key space. Further we also need to be aware of
-	// external cancelation. In case the tracker is shut down, we need to stop all
-	// work.
-	go func() {
-		// This is the list of lookup functions which is executed sequentially.
-		lookups := []func(e event.Event) error{
-			t.ExecuteExtendHeadEvent,
-			t.ExecuteExtendTailEvent,
-			t.ExecuteNewPathEvent,
-			t.ExecuteSplitPathEvent,
+	var connectionDetails []connectionDetail
+	for _, s := range sources {
+		cd := ConnectionDetail{
+			Connection:  s + "," + destination,
+			Destination: destination,
+			Source:      s,
 		}
+		connectionDetails = append(connectionDetails, cd)
+	}
 
-		for {
-			select {
-			case <-t.Closer:
-				return
-			case <-queue.GetComplete():
-				return
-			case e := <-queue.GetOutput():
-				// Execute one lookup after another to track connection path patterns.
-				go func(e event.Event) {
-					for _, l := range lookups {
-						err := l(e)
-						if err != nil {
-							return maskAny(err)
-						}
+	// This is the list of lookup functions which is executed sequentially.
+	//
+	//     extend head
+	//     extend tail
+	//     new path
+	//     split path
+
+	var wg sync.WaitGroup
+
+	go func() {
+		for _, cd := range connectionDetails {
+			wg.Add(1)
+			go func(cd connectionDetail) {
+				ok, err := t.Storage().Connection().Exists(cd.Connection)
+				if err != nil {
+					return maskAny(err)
+				}
+				if !ok {
+					// TODO what value to use?
+					err := t.Storage().Connection().Set(cd.Connection, "")
+					if err != nil {
+						return maskAny(err)
 					}
-				}(e)
-			}
+				}
+				wg.Done()
+			}(cd)
 		}
 	}()
 
-	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.GetInput())
-	if err != nil {
-		return maskAny(err)
-	}
+	go func() {
+		wg.Add(1)
+		err := t.Storage().Connection().WalkKeys("*", t.Closer, func(key string) error {
+			for _, cd := range connectionDetails {
+				if strings.HasPrefix(cp, cd.Destination) {
+					// extend head
+				}
+				if strings.HasSuffix(cp, cd.Source) {
+					// extend tail
+				}
+			}
+		})
+		if err != nil {
+			return maskAny(err)
+		}
+		wg.Done()
+	}()
 
-	err = <-queue.GetError()
-	if err != nil {
-		return maskAny(err)
-	}
+	wg.Wait()
 
 	return nil
 }

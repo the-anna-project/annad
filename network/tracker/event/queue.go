@@ -28,7 +28,7 @@ func DefaultConfig() QueueConfig {
 	return newConfig
 }
 
-	// TODO comment
+// TODO comment
 type Queue interface {
 	// TODO comment
 	// Boot initializes and starts the whole network like booting a machine. The
@@ -61,15 +61,15 @@ func NewQueue(config QueueConfig) (Queue, error) {
 	newQueue := &queue{
 		QueueConfig: config,
 
-		BootOnce:         sync.Once{},
-		Closer:           make(chan struct{}, 1),
-		Complete:     make(chan struct{}, 1),
+		BootOnce:          sync.Once{},
+		Closer:            make(chan struct{}, 1),
+		Complete:          make(chan struct{}, 1),
 		ConnectionDetails: nil,
-		Error:        make(chan error, 1),
-		Input:           make(chan string, 1),
-		ProcessedEvents:  0,
-		Output:          make(chan Event, 1),
-		ShutdownOnce:     sync.Once{},
+		Error:             make(chan error, 1),
+		Input:             make(chan string, 1),
+		ProcessedEvents:   0,
+		Output:            make(chan Event, 1),
+		ShutdownOnce:      sync.Once{},
 	}
 
 	if newQueue.Destination == "" {
@@ -93,11 +93,11 @@ type queue struct {
 
 	BootOnce          sync.Once
 	Closer            chan struct{}
-	Complete      chan struct{}
+	Complete          chan struct{}
 	ConnectionDetails []ConnectionDetail
-	Error         chan error
-	Input            chan string
-	Output           chan Event
+	Error             chan error
+	Input             chan string
+	Output            chan Event
 	ProcessedEvents   int32
 	ShutdownOnce      sync.Once
 }
@@ -154,121 +154,198 @@ func (q *queue) GetOutput() chan Event {
 	return q.Output
 }
 
-func (q *queue) Process(connectionPath string) ([]Event, error) {
-	var events []Event
+func (q *queue) NewExtendHeadEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
 
-	for _, connectionDetail := range q.ConnectionDetails {
-    // In case the current connection equals exactly the given connection path,
-    // we emit a MatchPath event.
-		if connectionDetail.Connection == connectionPath {
-      // TODO comment
-			atomic.AddInt32(&q.ProcessedEvents, 1)
-
-      config := DefaultMatchPathConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionPath = connectionPath
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewMatchPath(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // In case the current connection matches the head of the given connection
-    // path, we emit a MatchHead event.
-		if strings.HasPrefix(connectionPath, connectionDetail.Connection) {
-      config := DefaultMatchHeadConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionHead = connectionHead
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewMatchHead(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // In case the current connection matches the tail of the given connection
-    // path, we emit a MatchTail event.
-		if strings.HasSuffix(connectionPath, connectionDetail.Connection) {
-      config := DefaultMatchTailConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionTail = connectionTail
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewMatchTail(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // In case the current connection matches the body of the given connection
-    // path, we emit a MatchBody event.
-		if strings.Contains(connectionPath, connectionDetail.Connection) {
-      config := DefaultMatchBodyConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionBody = connectionBody
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewMatchBody(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // In case the last peer of the current connection matches the first peer of
-    // the given connection path, we emit a ExtendHead event.
-		if strings.HasPrefix(connectionPath, connectionDetail.Source) {
-      config := DefaultExtendHeadConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionBody = connectionBody
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewExtendHead(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // In case the first peer of the current connection matches the last peer of
-    // the given connection path, we emit a ExtendTail event.
-		if strings.HasSuffix(connectionPath, connectionDetail.Destination) {
-      config := DefaultExtendTailConfig()
-      config.Connection = connectionDetail.Connection
-      config.ConnectionBody = connectionBody
-      config.Destination = connectionDetail.Destination
-      config.Source = connectionDetail.Source
-      e, err := NewExtendTail(config)
-      if err != nil {
-        return nil, maskAny(err)
-      }
-			events = append(events, e)
-		}
-
-    // TODO detect split
-		if strings.HasSuffix(connectionPath, connectionDetail.Destination) {
-			t = EventSplitPath
-		}
-
-// TODO comment
-		if len(events) = 0 {
-			// When we get to here no other rule matched. That means
-			atomic.AddInt32(&q.ProcessedEvents, 1)
-			t = EventNewPath
-		}
-
-		if int(atomic.LoadInt32(&q.ProcessedEvents)) == len(q.ConnectionDetails) {
-			close(q.Complete)
+	// In case the last peer of the current connection matches the first peer of
+	// the given connection path, we emit a ExtendHead event.
+	if strings.HasPrefix(cp, cd.Destination) {
+		config := DefaultExtendHeadConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewExtendHead(config)
+		if err != nil {
+			return nil, maskAny(err)
 		}
 	}
 
-  return events, nil
+	return event, nil
+}
+
+func (q *queue) NewExtendTailEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// In case the first peer of the current connection matches the last peer of
+	// the given connection path, we emit a ExtendTail event.
+	if strings.HasSuffix(cp, cd.Source) {
+		config := DefaultExtendTailConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewExtendTail(config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return event, nil
+}
+
+func (q *queue) NewMatchBodyEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// In case the current connection matches the body of the given connection
+	// path, we emit a MatchBody event.
+	if strings.Contains(cp, cd.Connection) {
+		config := DefaultMatchBodyConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewMatchBody(config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return event, nil
+}
+
+func (q *queue) NewMatchHeadEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// In case the current connection matches the head of the given connection
+	// path, we emit a MatchHead event.
+	if strings.HasPrefix(cp, cd.Connection) {
+		config := DefaultMatchHeadConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewMatchHead(config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return event, nil
+}
+
+// TODO comment
+func (q *queue) NewMatchPathEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// In case the current connection equals exactly the given connection path,
+	// we emit a MatchPath event.
+	if cd.Connection == cp {
+		// TODO comment
+		atomic.AddInt32(&q.ProcessedEvents, 1)
+
+		config := DefaultMatchPathConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewMatchPath(config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return event, nil
+}
+
+// TODO
+func (q *queue) NewMatchTailEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// In case the current connection matches the tail of the given connection
+	// path, we emit a MatchTail event.
+	if strings.HasSuffix(cp, cd.Connection) {
+		config := DefaultMatchTailConfig()
+		config.Connection = cd.Connection
+		config.ConnectionPath = cp
+		config.Destination = cd.Destination
+		config.Source = cd.Source
+		event, err = NewMatchTail(config)
+		if err != nil {
+			return nil, maskAny(err)
+		}
+	}
+
+	return event, nil
+}
+
+// TODO
+func (q *queue) NewNewPathEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// TODO comment
+	if len(events) == 0 {
+		// When we get to here no other rule matched. That means
+		atomic.AddInt32(&q.ProcessedEvents, 1)
+	}
+
+	return event, nil
+}
+
+// TODO
+func (q *queue) NewSplitPathEvent(cd ConnectionDetail, cp string) (Event, error) {
+	var event Event
+	var err error
+
+	// TODO detect split
+
+	return event, nil
+}
+
+// TODO comment
+// cp is connection path
+func (q *queue) Process(cp string) ([]Event, error) {
+	var events []Event
+
+	lookups := []func(cd ConnectionDetail, cp string) (Event, error){
+		q.NewExtendHeadEvent,
+		q.NewExtendTailEvent,
+		q.NewMatchBodyEvent,
+		q.NewMatchHeadEvent,
+		q.NewMatchPathEvent,
+		q.NewMatchTailEvent,
+		q.NewNewPathEvent,
+		q.NewSplitPathEvent,
+	}
+
+	for _, cd := range q.ConnectionDetails {
+		for _, l := range lookups {
+			e, err := l(cd, cp)
+			if err != nil {
+				return nil, maskAny(err)
+			}
+			if e != nil {
+				events = append(events, e)
+			}
+		}
+	}
+
+	// TODO comment
+	if int(atomic.LoadInt32(&q.ProcessedEvents)) == len(q.ConnectionDetails) {
+		close(q.Complete)
+	}
+
+	// TODO filter relevant events
+	// e.g. NewPath must only be emited in case there is no other event
+
+	return events, nil
 }
 
 func (q *queue) Shutdown() {
