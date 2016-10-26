@@ -79,46 +79,22 @@ type tracker struct {
 	Type spec.ObjectType
 }
 
+// TODO
 func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	destinationID := string(networkPayload.GetDestination())
-	sourceIDs := []string{}
-
-	for _, s := range networkPayload.GetSources() {
-		sourceIDs = append(sourceIDs, string(s))
-	}
-
-	err := t.StoreConnections(sourceIDs, destinationID)
-	if err != nil {
-		return maskAny(err)
-	}
-
-	return nil
-}
-
-// TODO
-func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	destinationName := CLG.GetName()
 	sourceIDs := networkPayload.GetSources()
-	sourceNames := []string{}
 
 	errors := make(chan error, len(sourceIDs))
-	m := sync.Mutex{}
 	wg := sync.WaitGroup{}
 
 	for _, s := range sourceIDs {
 		wg.Add(1)
 		go func(s string) {
-			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name")
-			name, err := t.Storage().General().Get(behaviourNameKey)
+			behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:behaviour-id", s)
+			err := t.Storage().General().Set(behaviourIDKey, destinationID)
 			if err != nil {
 				errors <- maskAny(err)
 			}
-
-			m.Lock()
-			defer m.Unlock()
-
-			sourceNames = append(sourceNames, name)
-
 			wg.Done()
 		}(string(s))
 	}
@@ -134,26 +110,33 @@ func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) err
 		// TODO comment
 	}
 
-	err := t.StoreConnections(sourceNames, destinationName)
-	if err != nil {
-		return maskAny(err)
-	}
-
 	return nil
 }
 
-func (t *tracker) StoreConnections(sources []string, destination string) error {
-	errors := make(chan error, len(sources))
+// TODO
+func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+	destinationName := CLG.GetName()
+	sourceIDs := networkPayload.GetSources()
+
+	errors := make(chan error, len(sourceIDs))
 	wg := sync.WaitGroup{}
 
-	for _, s := range sources {
+	for _, s := range sourceIDs {
 		wg.Add(1)
 		go func(s string) {
-			destinationKey := key.NewNetworkKey("connection:raw:source:%s:desination", s)
-			err := t.Storage().General().Set(destinationKey, destination)
+			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name", s)
+			name, err := t.Storage().General().Get(behaviourNameKey)
 			if err != nil {
 				errors <- maskAny(err)
+			} else {
+				// TODO comment else
+				behaviourNameKey := key.NewNetworkKey("behaviour-name:%s:behaviour-name", name)
+				err := t.Storage().General().Set(behaviourNameKey, destinationName)
+				if err != nil {
+					errors <- maskAny(err)
+				}
 			}
+
 			wg.Done()
 		}(string(s))
 	}
