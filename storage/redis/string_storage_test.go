@@ -73,6 +73,8 @@ func Test_StringStorage_GetRandom_Success(t *testing.T) {
 	}
 }
 
+// Test_StringStorage_Remove_Error ensures that Remove does not throw any not
+// found error.
 func Test_StringStorage_Remove_Error(t *testing.T) {
 	c := redigomock.NewConn()
 	c.Command("DEL", "prefix:foo").Expect(int64(0))
@@ -80,8 +82,8 @@ func Test_StringStorage_Remove_Error(t *testing.T) {
 	newStorage := testMustNewStorageWithConn(t, c)
 
 	err := newStorage.Remove("foo")
-	if !IsNotFound(err) {
-		t.Fatal("expected", true, "got", false)
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
 	}
 }
 

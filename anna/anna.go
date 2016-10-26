@@ -55,6 +55,10 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			forwarder, err := newForwarder(a.Log, factoryCollection, a.StorageCollection)
 			panicOnError(err)
 
+			// tracker.
+			tracker, err := newTracker(a.Log, factoryCollection, a.StorageCollection)
+			panicOnError(err)
+
 			// network.
 			networkConfig := network.DefaultConfig()
 			networkConfig.Activator = activator
@@ -63,6 +67,7 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			networkConfig.GatewayCollection = gatewayCollection
 			networkConfig.Log = a.Log
 			networkConfig.StorageCollection = a.StorageCollection
+			networkConfig.Tracker = tracker
 			networkConfig.TextInput = newTextInput
 			networkConfig.TextOutput = newTextOutput
 			a.Network, err = network.New(networkConfig)

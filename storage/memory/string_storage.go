@@ -1,9 +1,6 @@
 package memory
 
-import (
-	"github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage/redis"
-)
+import "github.com/xh3b4sd/anna/spec"
 
 func (s *storage) Get(key string) (string, error) {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
@@ -31,9 +28,7 @@ func (s *storage) Remove(key string) error {
 	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
 
 	err := s.RedisStorage.Remove(key)
-	if redis.IsNotFound(err) {
-		return maskAny(notFoundError)
-	} else if err != nil {
+	if err != nil {
 		return maskAny(err)
 	}
 
