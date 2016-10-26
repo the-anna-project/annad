@@ -120,7 +120,8 @@ func (i *instrumentation) GetCounter(key string) (spec.Counter, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	_, err = prometheus.RegisterOrGet(newCounter.(*counter).ClientCounter)
+
+	err = prometheus.Register(newCounter.(*counter).ClientCounter)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -144,7 +145,8 @@ func (i *instrumentation) GetGauge(key string) (spec.Gauge, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	_, err = prometheus.RegisterOrGet(newGauge.(*gauge).ClientGauge)
+
+	err = prometheus.Register(newGauge.(*gauge).ClientGauge)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -168,7 +170,8 @@ func (i *instrumentation) GetHistogram(key string) (spec.Histogram, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	_, err = prometheus.RegisterOrGet(newHistogram.(*histogram).ClientHistogram)
+
+	err = prometheus.Register(newHistogram.(*histogram).ClientHistogram)
 	if err != nil {
 		return nil, maskAny(err)
 	}
