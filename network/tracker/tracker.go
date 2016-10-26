@@ -1,11 +1,11 @@
 package tracker
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/xh3b4sd/anna/factory"
 	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
@@ -80,14 +80,14 @@ type tracker struct {
 }
 
 func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	var sources []string
+	destinationID := string(networkPayload.GetDestination())
+	sourceIDs := []string{}
+
 	for _, s := range networkPayload.GetSources() {
-		sources = append(sources, string(s))
+		sourceIDs = append(sourceIDs, string(s))
 	}
 
-	destination := string(networkPayload.GetDestination())
-
-	err := t.ExecuteEvents(sources, destination)
+	err := t.StoreConnections(sourceIDs, destinationID)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -97,146 +97,77 @@ func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error
 
 // TODO
 func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	// destination name is CLG.GetName()
-	// lookup source names in storage using source IDs from networkPayload
-}
+	destinationName := CLG.GetName()
+	sourceIDs := networkPayload.GetSources()
+	sourceNames := []string{}
 
-// TODO
-func (t *tracker) ProcessExtendHeadEvent(source, destination string) error {
-	err := t.Storage().Connection().WalkKeys("*", t.Closer, queue.GetInput())
-	if err != nil {
-		return maskAny(err)
-	}
-}
+	errors := make(chan error, len(sourceIDs))
+	m := sync.Mutex{}
+	wg := sync.WaitGroup{}
 
-type connectionDetail struct {
-	Connection  string
-	Destination string
-	Source      string
-}
-
-func (t *tracker) ProcessEvents(sources []string, destination string) error {
-	// TODO comment
-	// Create connection paths using the sources and destination tracked in the
-	// given network payload. There might be multiple connection paths because
-	// there might be multiple sources requesting one CLG together. The created
-	// connection paths always contain the same destination, because there is only
-	// one destination tracked in the given network payload. Note that the
-	// destination is the behaviour ID of the CLG currently being executed.
-	// connection paths look similar to the following structure.
-	//
-	//     behaviourID,behaviourID
-	//
-	var connectionDetails []connectionDetail
-	for _, s := range sources {
-		cd := ConnectionDetail{
-			Connection:  s + "," + destination,
-			Destination: destination,
-			Source:      s,
-		}
-		connectionDetails = append(connectionDetails, cd)
-	}
-
-	// This is the list of lookup functions which is executed sequentially.
-	//
-	//     extend head
-	//     extend tail
-	//     new path
-	//     split path
-
-	var wg sync.WaitGroup
-
-	go func() {
-		for _, cd := range connectionDetails {
-			wg.Add(1)
-			go func(cd connectionDetail) {
-				// TODO spec.Storage.SetIfExists ???
-				ok, err := t.Storage().Connection().Exists(cd.Connection)
-				if err != nil {
-					return maskAny(err)
-				}
-				if !ok {
-					err := t.Storage().Connection().Set(cd.Connection, "{}")
-					if err != nil {
-						return maskAny(err)
-					}
-				}
-				wg.Done()
-			}(cd)
-		}
-	}()
-
-	go func() {
+	for _, s := range sourceIDs {
 		wg.Add(1)
-		// TODO what should happen with the key when it is modified in the middle of the loops? Requeing?
-		err := t.Storage().Connection().WalkKeys("*", t.Closer, func(key string) error {
-			splitted := strings.Split(key, ",")
-
-			for _, cd := range connectionDetails {
-				// extend head
-				if strings.HasPrefix(cp, cd.Destination) {
-					// TODO
-				}
-
-				// extend tail
-				if strings.HasSuffix(cp, cd.Source) {
-					// TODO
-				}
-
-				// split path
-				for i, s := range splitted {
-					if i == 0 || i+1 >= len(splitted) {
-						// TODO comment
-						continue
-					}
-
-					if s != cd.Source || splitted[i+1] == cd.Destination {
-						// TODO comment
-						continue
-					}
-
-					// TODO comment We do not add the plain connection here, because this is already
-					// done above.
-
-					headSplit := strings.Join(splitted[i+1], ",")
-					ok, err := t.Storage().Connection().Exists(headSplit)
-					if err != nil {
-						return maskAny(err)
-					}
-					if !ok {
-						err := t.Storage().Connection().Set(headSplit, "{}")
-						if err != nil {
-							return maskAny(err)
-						}
-					}
-
-					tailSplit := strings.Join(splitted[i], ",")
-					ok, err := t.Storage().Connection().Exists(tailSplit)
-					if err != nil {
-						return maskAny(err)
-					}
-					if !ok {
-						err := t.Storage().Connection().Set(tailSplit, "{}")
-						if err != nil {
-							return maskAny(err)
-						}
-					}
-
-					// TODO comment
-					err := t.Storage().Connection().Remove(key)
-					if err != nil {
-						return maskAny(err)
-					}
-				}
+		go func(s string) {
+			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name")
+			name, err := t.Storage().General().Get(behaviourNameKey)
+			if err != nil {
+				errors <- maskAny(err)
 			}
-		})
+
+			m.Lock()
+			defer m.Unlock()
+
+			sourceNames = append(sourceNames, name)
+
+			wg.Done()
+		}(string(s))
+	}
+
+	wg.Wait()
+
+	select {
+	case err := <-errors:
 		if err != nil {
 			return maskAny(err)
 		}
-		wg.Done()
-	}()
+	default:
+		// TODO comment
+	}
+
+	err := t.StoreConnections(sourceNames, destinationName)
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
+func (t *tracker) StoreConnections(sources []string, destination string) error {
+	errors := make(chan error, len(sources))
+	wg := sync.WaitGroup{}
+
+	for _, s := range sources {
+		wg.Add(1)
+		go func(s string) {
+			destinationKey := key.NewNetworkKey("connection:raw:source:%s:desination", s)
+			err := t.Storage().General().Set(destinationKey, destination)
+			if err != nil {
+				errors <- maskAny(err)
+			}
+			wg.Done()
+		}(string(s))
+	}
 
 	wg.Wait()
+
+	select {
+	case err := <-errors:
+		if err != nil {
+			return maskAny(err)
+		}
+	default:
+		// TODO comment
+	}
 
 	return nil
 }

@@ -73,16 +73,6 @@ func Test_StringStorage_GetSetGet(t *testing.T) {
 	}
 }
 
-func Test_StringStorage_Remove_NotFound(t *testing.T) {
-	newStorage := MustNew()
-	defer newStorage.Shutdown()
-
-	err := newStorage.Remove("foo")
-	if !IsNotFound(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
 func Test_StringStorage_SetGetRemoveGet(t *testing.T) {
 	newStorage := MustNew()
 	defer newStorage.Shutdown()
