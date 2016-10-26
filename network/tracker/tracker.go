@@ -79,7 +79,6 @@ type tracker struct {
 	Type spec.ObjectType
 }
 
-// TODO
 func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	destinationID := string(networkPayload.GetDestination())
 	sourceIDs := networkPayload.GetSources()
@@ -90,6 +89,7 @@ func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error
 	for _, s := range sourceIDs {
 		wg.Add(1)
 		go func(s string) {
+			// Persist the single CLG ID connections.
 			behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:behaviour-id", s)
 			err := t.Storage().General().Set(behaviourIDKey, destinationID)
 			if err != nil {
@@ -107,13 +107,12 @@ func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error
 			return maskAny(err)
 		}
 	default:
-		// TODO comment
+		// Nothing do here. No error occurred. All good.
 	}
 
 	return nil
 }
 
-// TODO
 func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
 	destinationName := CLG.GetName()
 	sourceIDs := networkPayload.GetSources()
@@ -129,7 +128,10 @@ func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) err
 			if err != nil {
 				errors <- maskAny(err)
 			} else {
-				// TODO comment else
+				// The errors channel is capable of buffering one error for each source
+				// ID. The else clause is necessary to queue only one possible error for
+				// each source ID. So in case the name lookup was successful, we are
+				// able to actually persist the single CLG name connection.
 				behaviourNameKey := key.NewNetworkKey("behaviour-name:%s:behaviour-name", name)
 				err := t.Storage().General().Set(behaviourNameKey, destinationName)
 				if err != nil {
@@ -149,7 +151,7 @@ func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) err
 			return maskAny(err)
 		}
 	default:
-		// TODO comment
+		// Nothing do here. No error occurred. All good.
 	}
 
 	return nil
