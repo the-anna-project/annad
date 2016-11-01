@@ -1,7 +1,7 @@
 package spec
 
 // ListStorage represents a storage implementation managing operations against
-// lists.
+// lists. Lists here contain arbitrary strings that are ordered by insertion.
 type ListStorage interface {
 	// PopFromList returns the next element from the list identified by the given
 	// key. Note that a list is an ordered sequence of arbitrary elements.
@@ -61,7 +61,7 @@ type ScoredSetStorage interface {
 }
 
 // SetStorage represents a storage implementation managing operations against
-// sets.
+// sets. Sets here contain unique strings that are unordered.
 type SetStorage interface {
 	// GetAllFromSet returns all elements from the stored stored under key.
 	GetAllFromSet(key string) ([]string, error)
@@ -160,7 +160,7 @@ type StorageCollection interface {
 	// information sequences separately. Because of the used key structures and
 	// scanning algorithms the feature storage must only be used to store data
 	// serving the same conceptual purpose. For instance random features can be
-	// retreived more efficiently when there are only keys belonging to features.
+	// retrieved more efficiently when there are only keys belonging to features.
 	// Other data structures in here would make the scanning algorithms less
 	// efficient.
 	Feature() Storage
