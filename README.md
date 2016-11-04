@@ -54,7 +54,7 @@ with us for the following topics and more. Further see the
 - Software architecture and software design.
 - Software engineering to get issues and pull requests done.
 - Documentation of code and concepts.
-- Scientific feedback and research in math, statistics and other relevant fields.
+- Scientific feedback and research in e.g. mathematics, statistics and graph theory.
 - Brainstorming and idea generation.
 - Hosting for web based solutions.
 - Integration in all kind of hardware and mobile devices.
