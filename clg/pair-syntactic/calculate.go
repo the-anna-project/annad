@@ -13,8 +13,8 @@ import (
 // TODO there is nothing that reads pairs
 func (c *clg) calculate(ctx spec.Context) error {
 	// The counter keeps track of the work already being done. We only increment
-	// the counter in case were not able to do our job. As soon as some threshold
-	// is reached, we stop trying.
+	// the counter in case we were not able to do our job. As soon as some
+	// threshold is reached, we stop trying.
 	var counter int
 
 	for {

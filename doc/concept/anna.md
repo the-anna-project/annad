@@ -45,14 +45,14 @@ Backpropagation is a term originating from the scientific field of machine
 learning. It is used in neural networks to propagate results back to the layer
 that initialized a computation. This allows information to flow back and to
 modify the way the computation is processed. That way, the circle is closed.
-E.g. a neural network knows about different arithmetics (+, -, *, /). It is
+E.g. a neural network knows about different arithmetics (+, -, \*, /). It is
 asked to compute the sum of two numbers. For training reasons it is also
 provided an expected result. The neural net is not implemented to act as a
 calculator, but it can find out how to do so. It takes the two numbers and
 tries out what happens when it feeds its known arithmetics. The results are
 compared against the initially given expected result. In case of an mismatch,
 this information, that the current iteration did not solve the given problem,
-is backpropagated and used to learn based on failure the same way as humans do.
+is back-propagated and used to learn based on failure the same way as humans do.
 At some point there will be enough iterations to actually calculate the sum of
 two numbers as requested. From then on, based on its experience, the neural
 network will be able to calculate the sum of two numbers instantly, because it
@@ -61,17 +61,17 @@ already knows how to do so.
 ### challenges
 Making the described concept successful is a matter of challenges, their
 complexity and their order in which Anna learns from them. Having a shit load
-of CLGs and letting Anna backpropagate on problems that are way to complex at
+of CLGs and letting Anna back-propagate on problems that are way to complex at
 the beginning will lead to nowhere. It is important what types of challenges
 she solves, and in which order she solves such challenges. Compare that to the
-average person not familar with chemistry. When you ask me to cause a specific
+average person not familiar with chemistry. When you ask me to cause a specific
 chemical reaction using some chemicals, I will probably only blow up the lab.
 Thus it is important how we teach Anna.
 
 ### modification
 To reach the AI level of intelligence a lot of modifications in the code base
 need to happen. In the first place this modifications need to be done by humans
-within ones lifestime. It is very very unlikely that all modifications
+within ones lifetime. It is very very unlikely that all modifications
 necessary to reach the AI level can be done by humans. The necessary work is
 way to complex and time consuming. Only the coordination of humans might be an
 issue here. Thus the overall goal to make AI happen is to make Anna be able to
