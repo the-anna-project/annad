@@ -4,7 +4,9 @@ connection can be seen as a neural connection. Such connections represent
 relationships between certain information and behaviours, represented in a multi
 dimensional space. [Inputs](input.md), [outputs](output.md) and [CLGs](clg.md)
 are wired together that way. Many of these connections interacting together
-dynamically, represent Anna's neural [network](network.md).
+dynamically, represent Anna's neural [network](network.md). Note that this
+document is eventually up to date. The nature of the Anna project is currently
+to be in rapid development. Concepts and ideas can change quite quickly.
 
 ### space
 The connection space can be seen as a multi dimensional vector space. In theory
@@ -90,7 +92,7 @@ within the connection space.
 
 ### lookup
 The process of looking up connections is triggered on demand and thus must be
-optimized for fast execution.
+optimised for fast execution.
 
 The lookup of connections happens within each CLG's execution scope to fetch all
 the peers that needs to be known to forward signals to. Connections will be
@@ -233,9 +235,9 @@ behaviour coordinate.
 
 ###### map CLG tree ID to behaviour ID
 When having a CLG tree ID given it needs to be mapped to the very first CLG
-within a specific CLG tree. This very first CLG is represented by a behaviour ID.
-This mapping resolves all behaviours of a whole CLG tree. The following key maps
-a CLG tree ID to the very first behaviour within this specific CLG tree.
+within a specific CLG tree. This very first CLG is represented by a behaviour
+ID. This mapping resolves all behaviours of a whole CLG tree. The following key
+maps a CLG tree ID to the very first behaviour within this specific CLG tree.
 
 ```
 <prefix>:clg-tree-id:<clg-tree-id>:first-behaviour-id    <behaviour-id>
@@ -243,40 +245,68 @@ a CLG tree ID to the very first behaviour within this specific CLG tree.
 
 ---
 
-###### map behaviour ID to behaviour IDs set
+###### [forwarder] map behaviour ID to behaviour IDs
 When having a single behaviour ID given it needs to be mapped to multiple
 behaviour IDs. This mapping represents connections linking from one behaviour to
 other behaviours within the connection space. That way dynamic CLG trees can be
 referenced. CLGs can lookup connections using their own behaviour IDs to know
-where to forward signals to. In case an exact expectation is known, the behaviour
-should change slightly over time to find more optimized ways of solving
-problems. In case a problem was able to be solved using some modifications, the
-behaviour can be updated completely. Note that the order of the stored behaviour
-IDs is not important, because we only need to make sure that signals are
-dispatched to each connected CLG. The following key maps a single behaviour ID to
-multiple behaviour IDs.
+where to forward signals to. In case an exact expectation is known, the
+behaviour should change slightly over time to find more optimised ways of
+solving problems. In case a problem was able to be solved using some
+modifications, the behaviour can be updated completely. Note that the order of
+the stored behaviour IDs is not important, because we only need to make sure
+that signals are dispatched to each connected CLG. The following key maps a
+single behaviour ID to multiple behaviour IDs.
 
 ```
-<prefix>:behaviour-id:<behaviour-id>:forward-behaviour-ids    <behaviour-id>,<behaviour-id>,...
+<prefix>:behaviour-id:<behaviour-id>:o:forwarder:behaviour-ids    <behaviour-id>,<behaviour-id>,...
 ```
 
 ---
 
-###### map behaviour ID to behaviour IDs list
+###### [activator] map behaviour ID to behaviour IDs
 When having a single behaviour ID given it needs to be mapped to multiple
 behaviour IDs. This mapping represents connections linking from one behaviour to
 other behaviours within the connection space. That way dynamic CLG trees can be
 referenced. CLGs can lookup connections using their own behaviour IDs to know
 which payloads to accept when being activated. In case an exact expectation is
-known, the behaviour should change slightly over time to find more optimized ways
-of solving problems. In case a problem was able to be solved using some
+known, the behaviour should change slightly over time to find more optimised
+ways of solving problems. In case a problem was able to be solved using some
 modifications, the behaviour can be updated completely. Note that the order of
-the stored behaviour IDs is important, because it reflects the input interface of
-the requested CLG. The following key maps a single behaviour ID to multiple
+the stored behaviour IDs is important, because it reflects the input interface
+of the requested CLG. The following key maps a single behaviour ID to multiple
 behaviour IDs.
 
 ```
-<prefix>:behaviour-id:<behaviour-id>:activate-behaviour-ids    <behaviour-id>,<behaviour-id>,...
+<prefix>:behaviour-id:<behaviour-id>:o:activator:behaviour-ids    <behaviour-id>,<behaviour-id>,...
+```
+
+---
+
+###### [tracker] map behaviour ID to behaviour IDs
+When having a single behaviour ID given it needs to be mapped to multiple
+behaviour IDs. This mapping represents connections linking from one behaviour to
+other behaviours within the connection space. That way dynamic CLG trees can be
+referenced. CLGs can lookup connections using their own behaviour IDs to know
+where payloads have been forwarded to already. The following key maps a single
+behaviour ID to multiple behaviour IDs.
+
+```
+<prefix>:behaviour-id:<behaviour-id>:o:tracker:behaviour-ids    <behaviour-id>,<behaviour-id>,...
+```
+
+---
+
+###### [tracker] map behaviour name to behaviour names
+When having a single behaviour name given it needs to be mapped to multiple
+behaviour names. This mapping represents connections linking from one behaviour
+to other behaviours within the connection space. That way dynamic CLG trees can
+be referenced. CLGs can lookup connections using their own behaviour names to
+know where payloads have been forwarded to already. The following key maps a
+single behaviour name to multiple behaviour names.
+
+```
+<prefix>:behaviour-name:<behaviour-name>:o:tracker:behaviour-names    <behaviour-name>,<behaviour-name>,...
 ```
 
 ---
@@ -285,8 +315,8 @@ behaviour IDs.
 When having a single behaviour ID given it needs to be mapped to its unique CLG
 name. That way behaviour can be resolved from its very unique ID to some actual
 functionality. This works even across reboots, because CLG IDs change where
-their names don't. The following key maps a single behaviour ID to its unique CLG
-name.
+their names don't. The following key maps a single behaviour ID to its unique
+CLG name.
 
 ```
 <prefix>:behaviour-id:<behaviour-id>:behaviour-name    <CLG-name>
@@ -296,7 +326,7 @@ name.
 
 ###### map behaviour name to weighted behaviour names
 When having a single behaviour name given it needs to be mapped to multiple
-weighted bahavior names. That way patterns of behaviour connections can be
+weighted behaviour names. That way patterns of behaviour connections can be
 tracked. The following key maps a single behaviour name to multiple behaviour
 weighted names.
 
