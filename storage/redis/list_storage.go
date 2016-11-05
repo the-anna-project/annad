@@ -28,7 +28,7 @@ func (s *storage) PopFromList(key string) (string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PopFromList", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PopFromList", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -51,7 +51,7 @@ func (s *storage) PushToList(key string, element string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToList", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToList", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}

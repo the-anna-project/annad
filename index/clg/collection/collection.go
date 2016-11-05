@@ -4,8 +4,8 @@ package collection
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -19,21 +19,21 @@ const (
 // object.
 type Config struct {
 	// Dependencies.
-	IDFactory spec.IDFactory
+	IDService spec.IDService
 	Log       spec.Log
 }
 
 // DefaultConfig provides a default configuration to create a new CLG
 // collection object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	newIDService, err := id.NewFactory(id.DefaultFactoryConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := Config{
 		// Dependencies.
-		IDFactory: newIDFactory,
+		IDService: newIDService,
 		Log:       log.New(log.DefaultConfig()),
 	}
 
@@ -58,7 +58,7 @@ func New(config Config) (spec.CLGCollection, error) {
 type collection struct {
 	Config
 
-	ID    spec.ObjectID
+	ID    string
 	Mutex sync.Mutex
 	Type  spec.ObjectType
 }

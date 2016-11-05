@@ -25,7 +25,7 @@ type NetworkPayload interface {
 	GetDestination() ObjectID
 
 	// GetID returns the object ID of the current network payload.
-	GetID() ObjectID
+	GetID() string
 
 	// GetArgs returns the sources of the current network payload, which must be
 	// the ID of a CLG registered within the neural network. One allowed exception
@@ -107,7 +107,7 @@ type Network interface {
 	// the corresponding network payload. EventHandler is called by EventListener.
 	EventHandler(CLG CLG, networkPayload NetworkPayload) error
 
-	FactoryProvider
+	ServiceProvider
 
 	// Forward is triggered after the CLGs calculation. Here will be decided what
 	// to do next. Like Activate, it is up to the CLG if it forwards signals to

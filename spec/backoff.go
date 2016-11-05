@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// BackOff represents the object managing backoff algorithms to retry actions.
-type BackOff interface {
+// Backoff represents the object managing backoff algorithms to retry actions.
+type Backoff interface {
 	// NextBackOff provides the duration expected to wait before retrying an
 	// action. time.Duration = -1 indicates that no more retry should be
 	// attempted.

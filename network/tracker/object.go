@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (t *tracker) GetID() spec.ObjectID {
+func (t *tracker) GetID() string {
 	return t.ID
 }
 

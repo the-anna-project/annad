@@ -26,7 +26,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 		return nil
 	}
 
-	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetElementsByScore", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -51,7 +51,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 		return nil
 	}
 
-	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetHighestScoredElements", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -74,7 +74,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveScoredElement", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveScoredElement", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -97,7 +97,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetElementByScore", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetElementByScore", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -164,7 +164,7 @@ func (s *storage) WalkScoredSet(key string, closer <-chan struct{}, cb func(elem
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkScoredSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkScoredSet", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}

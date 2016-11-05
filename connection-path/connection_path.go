@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"math"
 
-	"github.com/xh3b4sd/anna/factory/random"
+	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/spec"
 )
 

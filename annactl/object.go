@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *annactl) GetID() spec.ObjectID {
+func (a *annactl) GetID() string {
 	return a.ID
 }
 

@@ -34,5 +34,7 @@ type Anna interface {
 	// to call it in a separate goroutine.
 	Shutdown()
 
+	ServiceProvider
+
 	StorageProvider
 }

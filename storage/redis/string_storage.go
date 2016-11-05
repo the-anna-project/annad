@@ -33,7 +33,7 @@ func (s *storage) Get(key string) (string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("Get", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("Get", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -67,7 +67,7 @@ func (s *storage) GetRandom() (string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetRandom", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetRandom", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -90,7 +90,7 @@ func (s *storage) Remove(key string) error {
 		return nil
 	}
 
-	err := backoff.Retry(s.Instrumentation.WrapFunc("Remove", action), s.BackOffFactory())
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Remove", action), s.BackoffFactory())
 	if err != nil {
 		return maskAny(err)
 	}
@@ -117,7 +117,7 @@ func (s *storage) Set(key, value string) error {
 		return nil
 	}
 
-	err := backoff.Retry(s.Instrumentation.WrapFunc("Set", action), s.BackOffFactory())
+	err := backoff.Retry(s.Instrumentation.WrapFunc("Set", action), s.BackoffFactory())
 	if err != nil {
 		return maskAny(err)
 	}
@@ -176,7 +176,7 @@ func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key stri
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkKeys", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkKeys", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (s *storage) GetID() spec.ObjectID {
+func (s *storage) GetID() string {
 	return s.ID
 }
 

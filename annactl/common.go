@@ -35,7 +35,7 @@ func (a *annactl) GetSessionID() (string, error) {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call GetSession")
 
 	// Read session ID.
-	raw, err := a.FileSystem.ReadFile(SessionFilePath)
+	raw, err := a.Service().FS().ReadFile(SessionFilePath)
 	if _, ok := errgo.Cause(err).(*os.PathError); ok {
 		// Session file does not exist. Go ahead to create one.
 	} else if err != nil {
@@ -47,11 +47,11 @@ func (a *annactl) GetSessionID() (string, error) {
 	}
 
 	// Create session ID.
-	newSessionID, err := a.IDFactory.New()
+	newSessionID, err := a.Service().ID().New()
 	if err != nil {
 		return "", maskAny(err)
 	}
-	err = a.FileSystem.WriteFile(SessionFilePath, []byte(newSessionID), os.FileMode(0644))
+	err = a.Service().FS().WriteFile(SessionFilePath, []byte(newSessionID), os.FileMode(0644))
 	if err != nil {
 		return "", maskAny(err)
 	}

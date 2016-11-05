@@ -4,7 +4,7 @@ package spec
 // network. Each CLG is registered in the Network. From there signal are
 // dispatched in a dynamic fashion until some useful calculation took place.
 type CLG interface {
-	FactoryProvider
+	ServiceProvider
 
 	GatewayProvider
 
@@ -17,10 +17,10 @@ type CLG interface {
 
 	Object
 
-	// SetFactoryCollection configures the CLG's factory collection. This is done
+	// SetServiceCollection configures the CLG's factory collection. This is done
 	// for all CLGs, regardless if a CLG is making use of the factory collection
 	// or not.
-	SetFactoryCollection(factoryCollection FactoryCollection)
+	SetServiceCollection(ServiceCollection ServiceCollection)
 
 	// SetGatewayCollection configures the CLG's gateway collection. This is done
 	// for all CLGs, regardless if a CLG is making use of the gateway collection

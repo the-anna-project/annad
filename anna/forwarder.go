@@ -5,9 +5,9 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func newForwarder(newLog spec.Log, newFactoryCollection spec.FactoryCollection, newStorageCollection spec.StorageCollection) (spec.Forwarder, error) {
+func newForwarder(newLog spec.Log, newServiceCollection spec.ServiceCollection, newStorageCollection spec.StorageCollection) (spec.Forwarder, error) {
 	newForwarderConfig := forwarder.DefaultConfig()
-	newForwarderConfig.FactoryCollection = newFactoryCollection
+	newForwarderConfig.ServiceCollection = newServiceCollection
 	newForwarderConfig.Log = newLog
 	newForwarderConfig.StorageCollection = newStorageCollection
 	newForwarder, err := forwarder.New(newForwarderConfig)

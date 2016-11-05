@@ -3,8 +3,8 @@ package featureset
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/index/clg/collection/distribution"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -39,11 +39,11 @@ func DefaultFeatureConfig() FeatureConfig {
 // NewFeature creates a new configured feature object. A feature represents a
 // differentiable part of a given sequence.
 func NewFeature(config FeatureConfig) (spec.Feature, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	newIDService, err := id.NewService(id.DefaultServiceConfig())
 	if err != nil {
 		panic(err)
 	}
-	newID, err := newIDFactory.WithType(id.Hex128)
+	newID, err := newIDService.WithType(id.Hex128)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +79,7 @@ type feature struct {
 	FeatureConfig
 
 	Distribution spec.Distribution
-	ID           spec.ObjectID
+	ID           string
 	Mutex        sync.Mutex
 	Type         spec.ObjectType
 }

@@ -47,7 +47,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 		// feature is considered 4 characters long and the random factory takes a
 		// max parameter, which is exlusive.
 		feature := randomKey[8:12]
-		featureIndex, err := c.Factory().Random().CreateMax(5)
+		featureIndex, err := c.Service().Random().CreateMax(5)
 		if err != nil {
 			return "", maskAny(err)
 		}

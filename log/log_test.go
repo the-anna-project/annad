@@ -39,7 +39,7 @@ func testMustNewRootLogger(t *testing.T) spec.RootLogger {
 // tags.
 type object struct{}
 
-func (o *object) GetID() spec.ObjectID {
+func (o *object) GetID() string {
 	return spec.ObjectID("object-id")
 }
 

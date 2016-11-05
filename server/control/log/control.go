@@ -5,8 +5,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -53,7 +53,7 @@ func NewControl(config ControlConfig) (spec.LogControl, error) {
 type control struct {
 	ControlConfig
 
-	ID spec.ObjectID
+	ID string
 
 	Mutex sync.Mutex
 

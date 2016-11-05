@@ -3,10 +3,10 @@ package tracker
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -20,7 +20,7 @@ const (
 // Config represents the configuration used to create a new tracker object.
 type Config struct {
 	// Dependencies.
-	FactoryCollection spec.FactoryCollection
+	ServiceCollection spec.ServiceCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 }
@@ -30,7 +30,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FactoryCollection: factory.MustNewCollection(),
+		ServiceCollection: service.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 	}
@@ -50,7 +50,7 @@ func New(config Config) (spec.Tracker, error) {
 	if newTracker.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
-	if newTracker.FactoryCollection == nil {
+	if newTracker.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newTracker.StorageCollection == nil {
@@ -75,7 +75,7 @@ func MustNew() spec.Tracker {
 type tracker struct {
 	Config
 
-	ID   spec.ObjectID
+	ID   string
 	Type spec.ObjectType
 }
 

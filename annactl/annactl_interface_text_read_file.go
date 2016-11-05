@@ -41,7 +41,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 
 	ctx := context.Background()
 
-	b, err := a.FileSystem.ReadFile(args[0])
+	b, err := a.Service().FS().ReadFile(args[0])
 	if err != nil {
 		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}

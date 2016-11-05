@@ -13,18 +13,18 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
-	"github.com/xh3b4sd/anna/factory"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
 	"github.com/xh3b4sd/anna/network/forwarder"
 	"github.com/xh3b4sd/anna/network/tracker"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 
-	"github.com/xh3b4sd/worker-pool"
+	workerpool "github.com/xh3b4sd/worker-pool"
 )
 
 const (
@@ -37,7 +37,7 @@ const (
 type Config struct {
 	// Dependencies.
 	Activator         spec.Activator
-	FactoryCollection spec.FactoryCollection
+	ServiceCollection spec.ServiceCollection
 	Forwarder         spec.Forwarder
 	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
@@ -67,7 +67,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		Activator:         activator.MustNew(),
-		FactoryCollection: factory.MustNewCollection(),
+		ServiceCollection: service.MustNewCollection(),
 		Forwarder:         forwarder.MustNew(),
 		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
@@ -98,7 +98,7 @@ func New(config Config) (spec.Network, error) {
 	if newNetwork.Activator == nil {
 		return nil, maskAnyf(invalidConfigError, "activator must not be empty")
 	}
-	if newNetwork.FactoryCollection == nil {
+	if newNetwork.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newNetwork.Forwarder == nil {
@@ -148,7 +148,7 @@ type network struct {
 	CLGs map[string]spec.CLG
 
 	Closer       chan struct{}
-	ID           spec.ObjectID
+	ID           string
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
 }
@@ -349,11 +349,11 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 	}
 
 	// Create new IDs for the new CLG tree and the input CLG.
-	clgTreeID, err := n.Factory().ID().New()
+	clgTreeID, err := n.Service().ID().New()
 	if err != nil {
 		return maskAny(err)
 	}
-	behaviourID, err := n.Factory().ID().New()
+	behaviourID, err := n.Service().ID().New()
 	if err != nil {
 		return maskAny(err)
 	}
@@ -371,8 +371,8 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
-	newNetworkPayloadConfig.Destination = behaviourID
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{n.GetID()}
+	newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
+	newNetworkPayloadConfig.Sources = []spec.ObjectID{spec.ObjectID(n.GetID())}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)

@@ -3,11 +3,11 @@ package activator
 import (
 	"strings"
 
-	"github.com/xh3b4sd/anna/factory"
-	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/factory/permutation"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
+	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -21,7 +21,7 @@ const (
 // Config represents the configuration used to create a new activator object.
 type Config struct {
 	// Dependencies.
-	FactoryCollection spec.FactoryCollection
+	ServiceCollection spec.ServiceCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 }
@@ -31,7 +31,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FactoryCollection: factory.MustNewCollection(),
+		ServiceCollection: service.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 	}
@@ -48,7 +48,7 @@ func New(config Config) (spec.Activator, error) {
 		Type: ObjectType,
 	}
 
-	if newActivator.FactoryCollection == nil {
+	if newActivator.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newActivator.Log == nil {
@@ -76,7 +76,7 @@ func MustNew() spec.Activator {
 type activator struct {
 	Config
 
-	ID   spec.ObjectID
+	ID   string
 	Type spec.ObjectType
 }
 
@@ -285,7 +285,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 		// permutation step within the current iteration. As soon as the permutation
 		// list cannot be permuted anymore, we stop the permutation loop to choose
 		// one random combination of the tracked list in the next step below.
-		err = a.Factory().Permutation().PermuteBy(newPermutationList, 1)
+		err = a.Service().Permutation().PermuteBy(newPermutationList, 1)
 		if permutation.IsMaxGrowthReached(err) {
 			break
 		} else if err != nil {
@@ -299,7 +299,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// trees being created over time. This prevents us from choosing always only
 	// the first matching combination, which would lack discoveries of all
 	// potential combinations being created.
-	matchIndex, err := a.Factory().Random().CreateMax(len(possibleMatches))
+	matchIndex, err := a.Service().Random().CreateMax(len(possibleMatches))
 	if err != nil {
 		return nil, maskAny(err)
 	}

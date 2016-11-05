@@ -15,55 +15,55 @@ import (
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
-type testErrorIDFactory struct{}
+type testErrorIDService struct{}
 
-// New is only a test implementation of spec.IDFactory to do nothing but
+// New is only a test implementation of spec.IDService to do nothing but
 // returning some error we can check against.
-func (f *testErrorIDFactory) New() (spec.ObjectID, error) {
+func (f *testErrorIDService) New() (spec.ObjectID, error) {
 	return "", maskAny(invalidConfigError)
 }
 
-func (f *testErrorIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
+func (f *testErrorIDService) WithType(idType spec.IDType) (spec.ObjectID, error) {
 	return "", nil
 }
 
-type testIDFactory struct{}
+type testIDService struct{}
 
-// New is only a test implementation of spec.IDFactory to do nothing but
+// New is only a test implementation of spec.IDService to do nothing but
 // returning some error we can check against.
-func (f *testIDFactory) New() (spec.ObjectID, error) {
+func (f *testIDService) New() (spec.ObjectID, error) {
 	return "new-ID", nil
 }
 
-func (f *testIDFactory) WithType(idType spec.IDType) (spec.ObjectID, error) {
+func (f *testIDService) WithType(idType spec.IDType) (spec.ObjectID, error) {
 	return "", nil
 }
 
-type testFactoryCollection struct {
-	IDFactory spec.IDFactory
+type testServiceCollection struct {
+	IDService spec.IDService
 }
 
-func (c *testFactoryCollection) ID() spec.IDFactory {
-	return c.IDFactory
+func (c *testServiceCollection) ID() spec.IDService {
+	return c.IDService
 }
 
-func (c *testFactoryCollection) Permutation() spec.PermutationFactory {
+func (c *testServiceCollection) Permutation() spec.PermutationFactory {
 	return nil
 }
 
-func (c *testFactoryCollection) Random() spec.RandomFactory {
+func (c *testServiceCollection) Random() spec.RandomFactory {
 	return nil
 }
 
-func testMustNewErrorFactoryCollection(t *testing.T) spec.FactoryCollection {
-	return &testFactoryCollection{
-		IDFactory: &testErrorIDFactory{},
+func testMustNewErrorServiceCollection(t *testing.T) spec.ServiceCollection {
+	return &testServiceCollection{
+		IDService: &testErrorIDService{},
 	}
 }
 
-func testMustNewFactoryCollection(t *testing.T) spec.FactoryCollection {
-	return &testFactoryCollection{
-		IDFactory: &testIDFactory{},
+func testMustNewServiceCollection(t *testing.T) spec.ServiceCollection {
+	return &testServiceCollection{
+		IDService: &testIDService{},
 	}
 }
 
@@ -145,7 +145,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newFactoryCollection := testMustNewFactoryCollection(t)
+	newServiceCollection := testMustNewServiceCollection(t)
 	newStorageCollection := testMustNewStorageCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
@@ -153,7 +153,7 @@ func Test_CLG_Input_UnknownInputSequence(t *testing.T) {
 	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).FactoryCollection = newFactoryCollection
+	newCLG.(*clg).ServiceCollection = newServiceCollection
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
@@ -173,20 +173,20 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
 	newStorageCollection := testMustNewStorageCollection(t)
-	newFactoryCollection := testMustNewFactoryCollection(t)
+	newServiceCollection := testMustNewServiceCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
 	// unknown input sequence.
 	newInput := "test input"
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
-	newID, err := newFactoryCollection.ID().New()
+	newID, err := newServiceCollection.ID().New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).FactoryCollection = newFactoryCollection
+	newCLG.(*clg).ServiceCollection = newServiceCollection
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
@@ -214,18 +214,18 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 	}
 }
 
-func Test_CLG_Input_IDFactoryError(t *testing.T) {
+func Test_CLG_Input_IDServiceError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
 	newStorageCollection := testMustNewStorageCollection(t)
-	newFactoryCollection := testMustNewErrorFactoryCollection(t)
+	newServiceCollection := testMustNewErrorServiceCollection(t)
 
 	// Note we do not create a record for the test input. This test is about an
 	// unknown input sequence.
 	newInput := "test input"
 
 	// Set prepared storage to CLG we want to test.
-	newCLG.(*clg).FactoryCollection = newFactoryCollection
+	newCLG.(*clg).ServiceCollection = newServiceCollection
 	newCLG.(*clg).StorageCollection = newStorageCollection
 
 	// Execute CLG.
@@ -238,14 +238,14 @@ func Test_CLG_Input_IDFactoryError(t *testing.T) {
 func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newFactoryCollection := testMustNewFactoryCollection(t)
+	newServiceCollection := testMustNewServiceCollection(t)
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
 	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
-	newID, err := newFactoryCollection.ID().New()
+	newID, err := newServiceCollection.ID().New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -257,7 +257,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 
 	// Set prepared storage to CLG we want to test.
 	newCLG.(*clg).StorageCollection = newStorageCollection
-	newCLG.(*clg).FactoryCollection = newFactoryCollection
+	newCLG.(*clg).ServiceCollection = newServiceCollection
 
 	// Execute CLG.
 	err = newCLG.(*clg).calculate(newCtx, newInput)
@@ -269,14 +269,14 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 	newCLG := MustNew()
 	newCtx := context.MustNew()
-	newFactoryCollection := testMustNewFactoryCollection(t)
+	newServiceCollection := testMustNewServiceCollection(t)
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
 	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
-	newID, err := newFactoryCollection.ID().New()
+	newID, err := newServiceCollection.ID().New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -290,7 +290,7 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 
 	// Set prepared storage to CLG we want to test.
 	newCLG.(*clg).StorageCollection = newStorageCollection
-	newCLG.(*clg).FactoryCollection = newFactoryCollection
+	newCLG.(*clg).ServiceCollection = newServiceCollection
 
 	// Execute CLG.
 	err = newCLG.(*clg).calculate(newCtx, newInput)

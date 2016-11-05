@@ -7,9 +7,9 @@ import (
 
 	logcontrol "github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
-	"github.com/xh3b4sd/anna/factory/id"
-	"github.com/xh3b4sd/anna/file-system/memory"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -29,11 +29,10 @@ var (
 // object.
 type Config struct {
 	// Dependencies.
-	FileSystem    spec.FileSystem
-	IDFactory     spec.IDFactory
-	Log           spec.Log
-	LogControl    spec.LogControl
-	TextInterface spec.TextInterfaceClient
+	Log               spec.Log
+	LogControl        spec.LogControl
+	ServiceCollection spec.ServiceCollection
+	TextInterface     spec.TextInterfaceClient
 
 	// Settings.
 	Flags     Flags
@@ -56,11 +55,10 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		FileSystem:    memoryfilesystem.NewFileSystem(memoryfilesystem.DefaultConfig()),
-		IDFactory:     id.MustNewFactory(),
-		Log:           log.New(log.DefaultConfig()),
-		LogControl:    newLogControl,
-		TextInterface: newTextInterface,
+		Log:               log.New(log.DefaultConfig()),
+		LogControl:        newLogControl,
+		ServiceCollection: service.MustNewCollection(),
+		TextInterface:     newTextInterface,
 
 		// Settings.
 		Flags:     Flags{},
@@ -87,6 +85,9 @@ func New(config Config) (spec.Annactl, error) {
 	if newAnnactl.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
 	}
+	if newAnnactl.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 
 	return newAnnactl, nil
 }
@@ -96,7 +97,7 @@ type annactl struct {
 
 	BootOnce     sync.Once
 	Closer       chan struct{}
-	ID           spec.ObjectID
+	ID           string
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
 }
@@ -109,6 +110,10 @@ func (a *annactl) Boot() {
 
 		a.InitAnnactlCmd().Execute()
 	})
+}
+
+func (a *annactl) Service() spec.ServiceCollection {
+	return a.ServiceCollection
 }
 
 func (a *annactl) Shutdown() {

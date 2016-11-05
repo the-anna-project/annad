@@ -4,7 +4,7 @@ package spec
 // The forwarder obtains behaviour IDs for every single requested CLG of every
 // possible CLG tree.
 type Forwarder interface {
-	FactoryProvider
+	ServiceProvider
 
 	// Forward represents the public interface that bundles the following lookup
 	// functions.

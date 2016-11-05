@@ -129,6 +129,8 @@ type Annactl interface {
 	// InitAnnactlVersionCmd initializes the version command.
 	InitAnnactlVersionCmd() *cobra.Command
 
+	ServiceProvider
+
 	// Shutdown ends all processes of the command line tool like shutting down a
 	// machine. The call to Shutdown blocks until the command line tool is
 	// completely shut down, so you might want to call it in a separate

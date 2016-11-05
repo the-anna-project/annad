@@ -73,7 +73,7 @@ func (n *network) newCLGs() map[string]spec.CLG {
 	}
 
 	for name := range newCLGs {
-		newCLGs[name].SetFactoryCollection(n.FactoryCollection)
+		newCLGs[name].SetServiceCollection(n.ServiceCollection)
 		newCLGs[name].SetGatewayCollection(n.GatewayCollection)
 		newCLGs[name].SetLog(n.Log)
 		newCLGs[name].SetStorageCollection(n.StorageCollection)

@@ -35,8 +35,8 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			newTextInput := make(chan spec.TextRequest, 1000)
 			newTextOutput := make(chan spec.TextResponse, 1000)
 
-			// factory collection.
-			factoryCollection, err := newFactoryCollection()
+			// service collection.
+			serviceCollection, err := newServiceCollection()
 			panicOnError(err)
 
 			// gateway collection.
@@ -48,21 +48,21 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			panicOnError(err)
 
 			// activator.
-			activator, err := newActivator(a.Log, factoryCollection, a.StorageCollection)
+			activator, err := newActivator(a.Log, serviceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// forwarder.
-			forwarder, err := newForwarder(a.Log, factoryCollection, a.StorageCollection)
+			forwarder, err := newForwarder(a.Log, serviceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// tracker.
-			tracker, err := newTracker(a.Log, factoryCollection, a.StorageCollection)
+			tracker, err := newTracker(a.Log, serviceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// network.
 			networkConfig := network.DefaultConfig()
 			networkConfig.Activator = activator
-			networkConfig.FactoryCollection = factoryCollection
+			networkConfig.ServiceCollection = serviceCollection
 			networkConfig.Forwarder = forwarder
 			networkConfig.GatewayCollection = gatewayCollection
 			networkConfig.Log = a.Log

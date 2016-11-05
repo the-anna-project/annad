@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -57,7 +57,7 @@ func NewServer(config ServerConfig) (api.TextInterfaceServer, error) {
 type server struct {
 	ServerConfig
 
-	ID    spec.ObjectID
+	ID    string
 	Mutex sync.Mutex
 	Type  spec.ObjectType
 }

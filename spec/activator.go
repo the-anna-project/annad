@@ -18,7 +18,7 @@ type Activator interface {
 	// returned. The modifications of the updated queue are also persisted.
 	Activate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
 
-	FactoryProvider
+	ServiceProvider
 
 	// GetNetworkPayload compares the given queue against the stored configuration
 	// of the requested CLG. This configuration is a combination of behaviour IDs

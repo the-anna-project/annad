@@ -59,7 +59,7 @@ func (c *clg) calculate(ctx spec.Context) error {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
 			// we break the outer loop to be done.
-			newID, err := c.Factory().ID().New()
+			newID, err := c.Service().ID().New()
 			if err != nil {
 				return maskAny(err)
 			}
