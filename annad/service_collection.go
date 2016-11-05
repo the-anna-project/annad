@@ -9,6 +9,7 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -30,6 +31,10 @@ func newServiceCollection() (systemspec.ServiceCollection, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
+	textInputService, err := newTextInputService()
+	if err != nil {
+		return nil, maskAny(err)
+	}
 	textOutputService, err := newTextOutputService()
 	if err != nil {
 		return nil, maskAny(err)
@@ -40,6 +45,7 @@ func newServiceCollection() (systemspec.ServiceCollection, error) {
 	newCollectionConfig.IDService = idService
 	newCollectionConfig.PermutationService = permutationService
 	newCollectionConfig.RandomService = randomService
+	newCollectionConfig.TextInputService = textInputService
 	newCollectionConfig.TextOutputService = textOutputService
 	newCollection, err := service.NewCollection(newCollectionConfig)
 	if err != nil {
@@ -81,9 +87,12 @@ func newPermutationService() (servicespec.Permutation, error) {
 	return newService, nil
 }
 
-func newTextOutputService() (servicespec.TextOutput, error) {
-	newServiceConfig := textoutput.DefaultServiceConfig()
-	newService, err := textoutput.NewService(newServiceConfig)
+func newRandomService() (servicespec.Random, error) {
+	newServiceConfig := random.DefaultServiceConfig()
+	newServiceConfig.BackoffFactory = func() systemspec.Backoff {
+		return backoff.NewExponentialBackOff()
+	}
+	newService, err := random.NewService(newServiceConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -91,12 +100,19 @@ func newTextOutputService() (servicespec.TextOutput, error) {
 	return newService, nil
 }
 
-func newRandomService() (servicespec.Random, error) {
-	newServiceConfig := random.DefaultServiceConfig()
-	newServiceConfig.BackoffFactory = func() systemspec.Backoff {
-		return backoff.NewExponentialBackOff()
+func newTextInputService() (servicespec.TextInput, error) {
+	newServiceConfig := textinput.DefaultServiceConfig()
+	newService, err := textinput.NewService(newServiceConfig)
+	if err != nil {
+		return nil, maskAny(err)
 	}
-	newService, err := random.NewService(newServiceConfig)
+
+	return newService, nil
+}
+
+func newTextOutputService() (servicespec.TextOutput, error) {
+	newServiceConfig := textoutput.DefaultServiceConfig()
+	newService, err := textoutput.NewService(newServiceConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

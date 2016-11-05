@@ -63,6 +63,10 @@ func (c *testServiceCollection) Random() servicespec.Random {
 func (c *testServiceCollection) Shutdown() {
 }
 
+func (c *testServiceCollection) TextInput() servicespec.TextInput {
+	return nil
+}
+
 func (c *testServiceCollection) TextOutput() servicespec.TextOutput {
 	return nil
 }

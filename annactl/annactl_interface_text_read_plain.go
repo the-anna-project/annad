@@ -42,7 +42,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 
-	in := make(chan systemspec.TextRequest, 1000)
+	in := make(chan servicespec.TextRequest, 1000)
 	out := make(chan servicespec.TextResponse, 1000)
 
 	go func() {

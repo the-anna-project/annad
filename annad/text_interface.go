@@ -7,10 +7,9 @@ import (
 )
 
 // TODO text interface should be a service inside the service collection
-func newTextInterface(newLog spec.Log, newServiceCollection spec.ServiceCollection, newTextInput chan spec.TextRequest) (api.TextInterfaceServer, error) {
+func newTextInterface(newLog spec.Log, newServiceCollection spec.ServiceCollection) (api.TextInterfaceServer, error) {
 	newTextInterfaceConfig := text.DefaultServerConfig()
 	newTextInterfaceConfig.Log = newLog
-	newTextInterfaceConfig.TextInput = newTextInput
 	newTextInterfaceConfig.ServiceCollection = newServiceCollection
 	newTextInterface, err := text.NewServer(newTextInterfaceConfig)
 	if err != nil {

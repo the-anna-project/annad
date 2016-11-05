@@ -8,6 +8,7 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 )
 
@@ -19,6 +20,7 @@ type CollectionConfig struct {
 	IDService          spec.ID
 	PermutationService spec.Permutation
 	RandomService      spec.Random
+	TextInputService   spec.TextInput
 	TextOutputService  spec.TextOutput
 }
 
@@ -31,6 +33,7 @@ func DefaultCollectionConfig() CollectionConfig {
 		IDService:          id.MustNewService(),
 		PermutationService: permutation.MustNewService(),
 		RandomService:      random.MustNewService(),
+		TextInputService:   textinput.MustNewService(),
 		TextOutputService:  textoutput.MustNewService(),
 	}
 
@@ -56,6 +59,9 @@ func NewCollection(config CollectionConfig) (spec.Collection, error) {
 	}
 	if newCollection.RandomService == nil {
 		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
+	}
+	if newCollection.TextInputService == nil {
+		return nil, maskAnyf(invalidConfigError, "text input service must not be empty")
 	}
 	if newCollection.TextOutputService == nil {
 		return nil, maskAnyf(invalidConfigError, "text output service must not be empty")
@@ -109,6 +115,10 @@ func (c *collection) Shutdown() {
 
 		wg.Wait()
 	})
+}
+
+func (c *collection) TextInput() spec.TextInput {
+	return c.TextInputService
 }
 
 func (c *collection) TextOutput() spec.TextOutput {

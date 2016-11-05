@@ -22,6 +22,10 @@ type ServiceCollection interface {
 	// Random returns a random service. It is used to create random numbers.
 	Random() spec.Random
 
+	// TextInput returns an text output service. It is used to send text
+	// responses back to the client.
+	TextInput() spec.TextInput
+
 	// TextOutput returns an text output service. It is used to send text
 	// responses back to the client.
 	TextOutput() spec.TextOutput

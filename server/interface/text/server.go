@@ -23,7 +23,6 @@ const (
 type ServerConfig struct {
 	Log               systemspec.Log
 	ServiceCollection systemspec.ServiceCollection
-	TextInput         chan systemspec.TextRequest
 }
 
 // DefaultServerConfig provides a default configuration to create a new text
@@ -32,7 +31,6 @@ func DefaultServerConfig() ServerConfig {
 	newConfig := ServerConfig{
 		Log:               log.New(log.DefaultConfig()),
 		ServiceCollection: service.MustNewCollection(),
-		TextInput:         make(chan systemspec.TextRequest, 1000),
 	}
 
 	return newConfig
@@ -80,7 +78,7 @@ func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *api.Stre
 	return streamTextResponse
 }
 
-func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (systemspec.TextRequest, error) {
+func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (servicespec.TextRequest, error) {
 	textRequestConfig := api.DefaultTextRequestConfig()
 	textRequestConfig.Echo = streamTextRequest.Echo
 	//newTextRequestConfig.ExpectationRequest = expectationRequest
@@ -119,7 +117,7 @@ func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
 				fail <- maskAny(err)
 				return
 			}
-			s.TextInput <- textRequest
+			s.Service().TextInput().GetChannel() <- textRequest
 		}
 	}()
 

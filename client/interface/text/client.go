@@ -66,7 +66,7 @@ func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (serv
 	return textResponse, nil
 }
 
-func (c client) EncodeRequest(textRequest systemspec.TextRequest) *api.StreamTextRequest {
+func (c client) EncodeRequest(textRequest servicespec.TextRequest) *api.StreamTextRequest {
 	streamTextRequest := &api.StreamTextRequest{
 		Echo:      textRequest.GetEcho(),
 		Input:     textRequest.GetInput(),
@@ -76,7 +76,7 @@ func (c client) EncodeRequest(textRequest systemspec.TextRequest) *api.StreamTex
 	return streamTextRequest
 }
 
-func (c client) StreamText(ctx context.Context, in chan systemspec.TextRequest, out chan servicespec.TextResponse) error {
+func (c client) StreamText(ctx context.Context, in chan servicespec.TextRequest, out chan servicespec.TextResponse) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
 

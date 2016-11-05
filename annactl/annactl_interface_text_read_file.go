@@ -53,7 +53,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 		a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
-	in := make(chan systemspec.TextRequest, 1)
+	in := make(chan servicespec.TextRequest, 1)
 	out := make(chan servicespec.TextResponse, 1000)
 
 	go func() {

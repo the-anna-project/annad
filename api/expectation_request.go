@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // ExpectationRequestConfig represents the configuration used to create a new

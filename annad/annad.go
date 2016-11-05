@@ -31,9 +31,6 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 
 			a.Log.Register(a.GetType())
 
-			// text input/output channel.
-			newTextInput := make(chan spec.TextRequest, 1000)
-
 			// service collection.
 			a.ServiceCollection, err = newServiceCollection()
 			panicOnError(err)
@@ -62,7 +59,6 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			networkConfig.Log = a.Log
 			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.Tracker = tracker
-			networkConfig.TextInput = newTextInput
 			a.Network, err = network.New(networkConfig)
 			panicOnError(err)
 
@@ -71,7 +67,7 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 
 			// text interface.
-			textInterface, err := newTextInterface(a.Log, a.ServiceCollection, newTextInput)
+			textInterface, err := newTextInterface(a.Log, a.ServiceCollection)
 			panicOnError(err)
 
 			// server.

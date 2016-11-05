@@ -1,29 +1,29 @@
-package textoutput
+package textinput
 
 import (
 	"github.com/xh3b4sd/anna/service/spec"
 )
 
-// ServiceConfig represents the configuration used to create a new text output
+// ServiceConfig represents the configuration used to create a new text input
 // service object.
 type ServiceConfig struct {
 	// Settings.
-	Channel chan spec.TextResponse
+	Channel chan spec.TextRequest
 }
 
 // DefaultServiceConfig provides a default configuration to create a new text
-// output service object by best effort.
+// input service object by best effort.
 func DefaultServiceConfig() ServiceConfig {
 	newConfig := ServiceConfig{
 		// Settings.
-		Channel: make(chan spec.TextResponse, 1000),
+		Channel: make(chan spec.TextRequest, 1000),
 	}
 
 	return newConfig
 }
 
-// NewService creates a new configured text output service object.
-func NewService(config ServiceConfig) (spec.TextOutput, error) {
+// NewService creates a new configured text input service object.
+func NewService(config ServiceConfig) (spec.TextInput, error) {
 	newService := &service{
 		ServiceConfig: config,
 	}
@@ -37,7 +37,7 @@ func NewService(config ServiceConfig) (spec.TextOutput, error) {
 
 // MustNewService creates either a new default configured id service object, or
 // panics.
-func MustNewService() spec.TextOutput {
+func MustNewService() spec.TextInput {
 	newService, err := NewService(DefaultServiceConfig())
 	if err != nil {
 		panic(err)
@@ -50,6 +50,6 @@ type service struct {
 	ServiceConfig
 }
 
-func (s *service) GetChannel() chan spec.TextResponse {
+func (s *service) GetChannel() chan spec.TextRequest {
 	return s.Channel
 }
