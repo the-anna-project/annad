@@ -5,10 +5,11 @@ or hard facts and hints to give an explanation what is or could be there.
 Further they may describe how the project looks like. Concepts are always open
 to be discussed, wether they are implemented or not. This page basically
 collects information about the whole project. Be it to illustrate how some
-architecture looks like, or what cool autocompletions are there for biniaries.
+architecture looks like, or what cool autocompletions are there for binaries.
 
 ### table of contents
 - [anna](anna.md)
+- [annad](annad.md)
 - [annactl](annactl.md)
 - [autocompletion](autocompletion.md)
 - [client](client.md)

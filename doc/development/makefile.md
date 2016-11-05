@@ -7,7 +7,7 @@ make use of the following targets.
 
 ### all
 This is the best to start with. The target fetches dependencies like `goget`
-and compiles the binaries like `anna` and `annactl`.
+and compiles the binaries like `annad` and `annactl`.
 ```
 make all
 ```
@@ -18,11 +18,11 @@ valid.
 make
 ```
 
-### anna
-This target compiles the server binary `anna`. This binary can be executed to
+### annad
+This target compiles the server binary `annad`. This binary can be executed to
 launch Anna as process running on your system.
 ```
-make anna
+make annad
 ```
 
 ### annactl

@@ -2,7 +2,7 @@
 [Docker](https://github.com/docker/docker) provides container technology like
 [Rkt](https://github.com/coreos/rkt) and [LXC](https://linuxcontainers.org). In
 the Anna project we make use of docker to ship a docker image containing the
-[anna](/doc/development/makefile.md#anna) and
+[annad](/doc/development/makefile.md#annad) and
 [annactl](/doc/development/makefile.md#annactl) binaries. See also the
 [Dockerfile](/Dockerfile) and the [docker
 repository](https://hub.docker.com/r/xh3b4sd/anna) for more information.
@@ -17,9 +17,9 @@ docker pull xh3b4sd/anna:<tag>
 
 ### docker run
 Once pulled, the docker image can be used to run a docker container using the
-following command. Note that we execute the `anna` (server) binary here.
+following command. Note that we execute the `annad` (server) binary here.
 ```
-docker run xh3b4sd/anna:<tag> anna -h
+docker run xh3b4sd/anna:<tag> annad -h
 ```
 
 Once pulled, the docker image can be used to run a docker container using the
