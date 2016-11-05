@@ -14,7 +14,7 @@ import (
 // collection object.
 type CollectionConfig struct {
 	// Dependencies.
-	FSService          spec.FileSystem
+	FSService          spec.FS
 	IDService          spec.ID
 	PermutationService spec.Permutation
 	RandomService      spec.Random
@@ -75,7 +75,7 @@ type collection struct {
 	ShutdownOnce sync.Once
 }
 
-func (c *collection) FS() spec.FileSystem {
+func (c *collection) FS() spec.FS {
 	return c.FSService
 }
 

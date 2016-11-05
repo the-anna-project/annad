@@ -44,7 +44,7 @@ type testServiceCollection struct {
 	IDService servicespec.ID
 }
 
-func (c *testServiceCollection) FS() servicespec.FileSystem {
+func (c *testServiceCollection) FS() servicespec.FS {
 	return nil
 }
 

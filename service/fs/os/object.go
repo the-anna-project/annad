@@ -1,4 +1,4 @@
-package osfilesystem
+package os
 
 import (
 	"github.com/xh3b4sd/anna/spec"
