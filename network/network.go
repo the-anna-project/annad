@@ -13,7 +13,6 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
@@ -39,13 +38,10 @@ type Config struct {
 	Activator         spec.Activator
 	ServiceCollection spec.ServiceCollection
 	Forwarder         spec.Forwarder
-	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 	Tracker           spec.Tracker
-	// TODO move into GatewayCollection
-	TextInput  chan spec.TextRequest
-	TextOutput chan spec.TextResponse
+	TextInput         chan spec.TextRequest
 
 	// Settings.
 
@@ -69,12 +65,10 @@ func DefaultConfig() Config {
 		Activator:         activator.MustNew(),
 		ServiceCollection: service.MustNewCollection(),
 		Forwarder:         forwarder.MustNew(),
-		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 		Tracker:           tracker.MustNew(),
 		TextInput:         make(chan spec.TextRequest, 1000),
-		TextOutput:        make(chan spec.TextResponse, 1000),
 
 		// Settings.
 		Delay: 0,
@@ -98,17 +92,14 @@ func New(config Config) (spec.Network, error) {
 	if newNetwork.Activator == nil {
 		return nil, maskAnyf(invalidConfigError, "activator must not be empty")
 	}
-	if newNetwork.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
 	if newNetwork.Forwarder == nil {
 		return nil, maskAnyf(invalidConfigError, "forwarder must not be empty")
 	}
-	if newNetwork.GatewayCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "interface collection must not be empty")
-	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newNetwork.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 	if newNetwork.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
@@ -118,9 +109,6 @@ func New(config Config) (spec.Network, error) {
 	}
 	if newNetwork.TextInput == nil {
 		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
-	}
-	if newNetwork.TextOutput == nil {
-		return nil, maskAnyf(invalidConfigError, "text output channel must not be empty")
 	}
 
 	newNetwork.CLGs = newNetwork.newCLGs()

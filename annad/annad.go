@@ -33,14 +33,9 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 
 			// text input/output channel.
 			newTextInput := make(chan spec.TextRequest, 1000)
-			newTextOutput := make(chan spec.TextResponse, 1000)
 
 			// service collection.
-			serviceCollection, err := newServiceCollection()
-			panicOnError(err)
-
-			// gateway collection.
-			gatewayCollection, err := newGatewayCollection(newTextOutput)
+			a.ServiceCollection, err = newServiceCollection()
 			panicOnError(err)
 
 			// storage collection.
@@ -48,28 +43,26 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 
 			// activator.
-			activator, err := newActivator(a.Log, serviceCollection, a.StorageCollection)
+			activator, err := newActivator(a.Log, a.ServiceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// forwarder.
-			forwarder, err := newForwarder(a.Log, serviceCollection, a.StorageCollection)
+			forwarder, err := newForwarder(a.Log, a.ServiceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// tracker.
-			tracker, err := newTracker(a.Log, serviceCollection, a.StorageCollection)
+			tracker, err := newTracker(a.Log, a.ServiceCollection, a.StorageCollection)
 			panicOnError(err)
 
 			// network.
 			networkConfig := network.DefaultConfig()
 			networkConfig.Activator = activator
-			networkConfig.ServiceCollection = serviceCollection
+			networkConfig.ServiceCollection = a.ServiceCollection
 			networkConfig.Forwarder = forwarder
-			networkConfig.GatewayCollection = gatewayCollection
 			networkConfig.Log = a.Log
 			networkConfig.StorageCollection = a.StorageCollection
 			networkConfig.Tracker = tracker
 			networkConfig.TextInput = newTextInput
-			networkConfig.TextOutput = newTextOutput
 			a.Network, err = network.New(networkConfig)
 			panicOnError(err)
 
@@ -78,7 +71,7 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 
 			// text interface.
-			textInterface, err := newTextInterface(a.Log, newTextInput, newTextOutput)
+			textInterface, err := newTextInterface(a.Log, a.ServiceCollection, newTextInput)
 			panicOnError(err)
 
 			// server.

@@ -4,17 +4,17 @@ import (
 	"github.com/xh3b4sd/anna/clg/divide"
 	"github.com/xh3b4sd/anna/clg/greater"
 	"github.com/xh3b4sd/anna/clg/input"
-	"github.com/xh3b4sd/anna/clg/is-between"
-	"github.com/xh3b4sd/anna/clg/is-greater"
-	"github.com/xh3b4sd/anna/clg/is-lesser"
+	"github.com/xh3b4sd/anna/clg/isbetween"
+	"github.com/xh3b4sd/anna/clg/isgreater"
+	"github.com/xh3b4sd/anna/clg/islesser"
 	"github.com/xh3b4sd/anna/clg/lesser"
 	"github.com/xh3b4sd/anna/clg/multiply"
 	"github.com/xh3b4sd/anna/clg/output"
-	"github.com/xh3b4sd/anna/clg/pair-syntactic"
-	"github.com/xh3b4sd/anna/clg/read-information-id"
-	"github.com/xh3b4sd/anna/clg/read-separator"
+	"github.com/xh3b4sd/anna/clg/pairsyntactic"
+	"github.com/xh3b4sd/anna/clg/readinformationid"
+	"github.com/xh3b4sd/anna/clg/readseparator"
 	"github.com/xh3b4sd/anna/clg/round"
-	"github.com/xh3b4sd/anna/clg/split-features"
+	"github.com/xh3b4sd/anna/clg/splitfeatures"
 	"github.com/xh3b4sd/anna/clg/subtract"
 	"github.com/xh3b4sd/anna/clg/sum"
 	"github.com/xh3b4sd/anna/spec"
@@ -74,7 +74,6 @@ func (n *network) newCLGs() map[string]spec.CLG {
 
 	for name := range newCLGs {
 		newCLGs[name].SetServiceCollection(n.ServiceCollection)
-		newCLGs[name].SetGatewayCollection(n.GatewayCollection)
 		newCLGs[name].SetLog(n.Log)
 		newCLGs[name].SetStorageCollection(n.StorageCollection)
 	}

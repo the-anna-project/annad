@@ -131,8 +131,6 @@ type Network interface {
 	//
 	Forward(CLG CLG, networkPayload NetworkPayload) error
 
-	GatewayProvider
-
 	// InputListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network inputs. A network input is qualified by
 	// information sequences sent by clients who request some calculation from the

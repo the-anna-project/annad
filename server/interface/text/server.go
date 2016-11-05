@@ -6,31 +6,33 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	// ObjectType represents the object type of the text interface server object.
 	// This is used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "text-interface-server"
+	ObjectType systemspec.ObjectType = "text-interface-server" // TODO this is no server, it is an endpoint
 )
 
 // ServerConfig represents the configuration used to create a new text
 // interface object.
 type ServerConfig struct {
-	Log        spec.Log
-	TextInput  chan spec.TextRequest
-	TextOutput chan spec.TextResponse
+	Log               systemspec.Log
+	ServiceCollection systemspec.ServiceCollection
+	TextInput         chan systemspec.TextRequest
 }
 
 // DefaultServerConfig provides a default configuration to create a new text
 // interface object by best effort.
 func DefaultServerConfig() ServerConfig {
 	newConfig := ServerConfig{
-		Log:        log.New(log.DefaultConfig()),
-		TextInput:  make(chan spec.TextRequest, 1000),
-		TextOutput: make(chan spec.TextResponse, 1000),
+		Log:               log.New(log.DefaultConfig()),
+		ServiceCollection: service.MustNewCollection(),
+		TextInput:         make(chan systemspec.TextRequest, 1000),
 	}
 
 	return newConfig
@@ -40,13 +42,17 @@ func DefaultServerConfig() ServerConfig {
 func NewServer(config ServerConfig) (api.TextInterfaceServer, error) {
 	newServer := &server{
 		ServerConfig: config,
-		ID:           id.MustNew(),
-		Mutex:        sync.Mutex{},
-		Type:         ObjectType,
+
+		ID:    id.MustNew(),
+		Mutex: sync.Mutex{},
+		Type:  ObjectType,
 	}
 
 	if newServer.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newServer.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	newServer.Log.Register(newServer.GetType())
@@ -59,10 +65,10 @@ type server struct {
 
 	ID    string
 	Mutex sync.Mutex
-	Type  spec.ObjectType
+	Type  systemspec.ObjectType
 }
 
-func (s *server) DecodeResponse(textResponse spec.TextResponse) *api.StreamTextResponse {
+func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *api.StreamTextResponse {
 	streamTextResponse := &api.StreamTextResponse{
 		Code: api.CodeData,
 		Data: &api.StreamTextResponseData{
@@ -74,7 +80,7 @@ func (s *server) DecodeResponse(textResponse spec.TextResponse) *api.StreamTextR
 	return streamTextResponse
 }
 
-func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (spec.TextRequest, error) {
+func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (systemspec.TextRequest, error) {
 	textRequestConfig := api.DefaultTextRequestConfig()
 	textRequestConfig.Echo = streamTextRequest.Echo
 	//newTextRequestConfig.ExpectationRequest = expectationRequest
@@ -89,7 +95,7 @@ func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (spec.T
 }
 
 func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call StreamText")
+	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call StreamText")
 
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
@@ -124,7 +130,7 @@ func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
 			select {
 			case <-done:
 				return
-			case textResponse := <-s.TextOutput:
+			case textResponse := <-s.Service().TextOutput().GetChannel():
 				streamTextResponse := s.DecodeResponse(textResponse)
 				err := stream.Send(streamTextResponse)
 				if err != nil {

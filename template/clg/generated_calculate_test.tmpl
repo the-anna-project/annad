@@ -17,13 +17,6 @@ func Test_CLG_Factory(t *testing.T) {
   }
 }
 
-func Test_CLG_Gateway(t *testing.T) {
-  newCLG := MustNew()
-  if newCLG.Gateway() == nil {
-    t.Fatal("expected", false, "got", true)
-  }
-}
-
 func Test_CLG_GetCalculate(t *testing.T) {
   newCLG := MustNew()
   if reflect.TypeOf(newCLG.GetCalculate()).Kind() != reflect.Func {
@@ -42,15 +35,6 @@ func Test_CLG_GetName(t *testing.T) {
 func Test_CLG_New_ServiceCollection_Error(t *testing.T) {
   newConfig := DefaultConfig()
   newConfig.ServiceCollection = nil
-  _, err := New(newConfig)
-  if !IsInvalidConfig(err) {
-    t.Fatal("expected", true, "got", false)
-  }
-}
-
-func Test_CLG_New_GatewayCollection_Error(t *testing.T) {
-  newConfig := DefaultConfig()
-  newConfig.GatewayCollection = nil
   _, err := New(newConfig)
   if !IsInvalidConfig(err) {
     t.Fatal("expected", true, "got", false)
@@ -95,29 +79,6 @@ func Test_CLG_SetServiceCollection(t *testing.T) {
 
   if rawCLG.ServiceCollection != nil {
     t.Fatal("expected", nil, "got", "spec.ServiceCollection")
-  }
-}
-
-func Test_CLG_SetGatewayCollection(t *testing.T) {
-  newCLG := MustNew()
-  var rawCLG *clg
-
-  switch c := newCLG.(type) {
-  case *clg:
-    // all good
-    rawCLG = newCLG.(*clg)
-  default:
-    t.Fatal("expected", "*clg", "got", c)
-  }
-
-  if rawCLG.GatewayCollection == nil {
-    t.Fatal("expected", "spec.GatewayCollection", "got", nil)
-  }
-
-  newCLG.SetGatewayCollection(nil)
-
-  if rawCLG.GatewayCollection != nil {
-    t.Fatal("expected", nil, "got", "spec.GatewayCollection")
   }
 }
 

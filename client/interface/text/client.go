@@ -7,7 +7,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 // ClientConfig represents the configuration used to create a new text
@@ -32,7 +33,7 @@ func DefaultClientConfig() ClientConfig {
 }
 
 // NewClient creates a new configured text interface object.
-func NewClient(config ClientConfig) (spec.TextInterfaceClient, error) {
+func NewClient(config ClientConfig) (systemspec.TextInterfaceClient, error) {
 	newClient := &client{
 		ClientConfig: config,
 	}
@@ -50,7 +51,7 @@ type client struct {
 	ClientConfig
 }
 
-func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (spec.TextResponse, error) {
+func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (servicespec.TextResponse, error) {
 	if streamTextResponse.Code != api.CodeData {
 		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
 	}
@@ -65,7 +66,7 @@ func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (spec
 	return textResponse, nil
 }
 
-func (c client) EncodeRequest(textRequest spec.TextRequest) *api.StreamTextRequest {
+func (c client) EncodeRequest(textRequest systemspec.TextRequest) *api.StreamTextRequest {
 	streamTextRequest := &api.StreamTextRequest{
 		Echo:      textRequest.GetEcho(),
 		Input:     textRequest.GetInput(),
@@ -75,7 +76,7 @@ func (c client) EncodeRequest(textRequest spec.TextRequest) *api.StreamTextReque
 	return streamTextRequest
 }
 
-func (c client) StreamText(ctx context.Context, in chan spec.TextRequest, out chan spec.TextResponse) error {
+func (c client) StreamText(ctx context.Context, in chan systemspec.TextRequest, out chan servicespec.TextResponse) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
 
