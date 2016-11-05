@@ -9,20 +9,21 @@ import (
 
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	// ObjectType represents the object type of the OS file system object. This
 	// is used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "os-file-system"
+	ObjectType systemspec.ObjectType = "os-file-system"
 )
 
 // Config represents the configuration used to create a new OS file system
 // object.
 type Config struct {
 	// Dependencies.
-	Log spec.Log
+	Log systemspec.Log
 }
 
 // DefaultConfig provides a default configuration to create a new OS file
@@ -37,7 +38,7 @@ func DefaultConfig() Config {
 }
 
 // NewFileSystem creates a new configured real OS file system.
-func NewFileSystem(config Config) spec.FileSystem {
+func NewFileSystem(config Config) servicespec.FileSystem {
 	newFileSystem := &osFileSystem{
 		Config: config,
 		ID:     id.MustNew(),
@@ -55,11 +56,11 @@ type osFileSystem struct {
 
 	ID    string
 	Mutex sync.Mutex
-	Type  spec.ObjectType
+	Type  systemspec.ObjectType
 }
 
 func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
-	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call ReadFile")
+	osfs.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call ReadFile")
 
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -70,7 +71,7 @@ func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
 }
 
 func (osfs *osFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	osfs.Log.WithTags(spec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call WriteFile")
+	osfs.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call WriteFile")
 
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 
 func Test_RandomService_NewService_Error_RandService(t *testing.T) {
 	newConfig := DefaultServiceConfig()
-	newConfig.RandService = nil
+	newConfig.RandFactory = nil
 
 	_, err := NewService(newConfig)
 	if !IsInvalidConfig(err) {
@@ -42,7 +42,7 @@ func Test_RandomService_CreateNBetween_Error_RandReader(t *testing.T) {
 	newConfig := DefaultServiceConfig()
 	newConfig.Timeout = 10 * time.Millisecond
 
-	newConfig.RandService = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		return nil, maskAny(invalidConfigError)
 	}
 
@@ -64,7 +64,7 @@ func Test_RandomService_CreateNBetween_Error_Timeout(t *testing.T) {
 	newConfig := DefaultServiceConfig()
 	newConfig.Timeout = 20 * time.Millisecond
 
-	newConfig.RandService = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		time.Sleep(200 * time.Millisecond)
 		return rand.Int(randReader, max)
 	}

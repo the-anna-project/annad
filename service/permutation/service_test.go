@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // Test_Permutation_Service_PermuteBy_AbsoluteDelta tests permutations by

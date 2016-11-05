@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 func Test_IDService_NewService_Error_HashChars(t *testing.T) {
@@ -43,7 +43,7 @@ func Test_IDService_NewService_Error_Type(t *testing.T) {
 func Test_IDService_New_Error(t *testing.T) {
 	// Create custom random service with timeout config.
 	newRandomServiceConfig := random.DefaultServiceConfig()
-	newRandomServiceConfig.RandService = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+	newRandomServiceConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		return nil, maskAny(invalidConfigError)
 	}
 	newRandomService, err := random.NewService(newRandomServiceConfig)
@@ -67,7 +67,7 @@ func Test_IDService_New_Error(t *testing.T) {
 func Test_IDService_WithType_Error(t *testing.T) {
 	// Create custom random service with timeout config.
 	newRandomServiceConfig := random.DefaultServiceConfig()
-	newRandomServiceConfig.RandService = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
+	newRandomServiceConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		return nil, maskAny(invalidConfigError)
 	}
 	newRandomService, err := random.NewService(newRandomServiceConfig)
@@ -93,7 +93,7 @@ func Test_IDService_WithType_Error(t *testing.T) {
 func Test_IDService_New(t *testing.T) {
 	newService := MustNewService()
 
-	alreadySeen := map[spec.ObjectID]struct{}{}
+	alreadySeen := map[string]struct{}{}
 
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
@@ -122,7 +122,7 @@ func Test_IDService_New(t *testing.T) {
 func Test_IDService_WithType(t *testing.T) {
 	newService := MustNewService()
 
-	alreadySeen := map[spec.ObjectID]struct{}{}
+	alreadySeen := map[string]struct{}{}
 
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
