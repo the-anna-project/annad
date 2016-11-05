@@ -10,7 +10,7 @@ import (
 type ServiceCollection interface {
 	// FS returns a file system service. It is used to operate on file system
 	// abstractions of a certain type.
-	FS() spec.FileSystem
+	FS() spec.FS
 
 	// ID returns an ID service. It is used to create IDs of a certain type.
 	ID() spec.ID

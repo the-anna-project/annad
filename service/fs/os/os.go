@@ -1,6 +1,6 @@
-// Package osfilesystem implements spec.FileSystem and provides a real OS
+// Package os implements spec.FS and provides a real OS
 // bound file system implementation.
-package osfilesystem
+package os
 
 import (
 	"io/ioutil"
@@ -38,7 +38,7 @@ func DefaultConfig() Config {
 }
 
 // NewFileSystem creates a new configured real OS file system.
-func NewFileSystem(config Config) servicespec.FileSystem {
+func NewFileSystem(config Config) servicespec.FS {
 	newFileSystem := &osFileSystem{
 		Config: config,
 		ID:     id.MustNew(),

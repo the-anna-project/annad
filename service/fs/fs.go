@@ -1,2 +1,2 @@
-// Package fs implements spec.FileSystem to provide file system abstractions.
+// Package fs implements spec.FS to provide file system abstractions.
 package fs

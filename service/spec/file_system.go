@@ -4,9 +4,9 @@ import (
 	"os"
 )
 
-// FileSystem provides certain file system implementations for abstraction and
+// FS provides certain file system implementations for abstraction and
 // testing reasons.
-type FileSystem interface {
+type FS interface {
 	// TODO this should may be Metadata ???
 	//Object
 

@@ -35,7 +35,7 @@ func DefaultServiceConfig() ServiceConfig {
 }
 
 // NewService creates a new configured memory file system.
-func NewService(config ServiceConfig) (servicespec.FileSystem, error) {
+func NewService(config ServiceConfig) (servicespec.FS, error) {
 	newService := &service{
 		ServiceConfig: config,
 		ID:            id.MustNew(),
@@ -53,7 +53,7 @@ func NewService(config ServiceConfig) (servicespec.FileSystem, error) {
 
 // MustNewService creates either a new default configured id service object, or
 // panics.
-func MustNewService() servicespec.FileSystem {
+func MustNewService() servicespec.FS {
 	newService, err := NewService(DefaultServiceConfig())
 	if err != nil {
 		panic(err)
@@ -65,9 +65,8 @@ func MustNewService() servicespec.FileSystem {
 type service struct {
 	ServiceConfig
 
-	ID    string
-	Mutex sync.Mutex
-	// TODO use storage collection and make it configurable
+	ID      string
+	Mutex   sync.Mutex
 	Storage map[string][]byte
 	Type    spec.ObjectType
 }

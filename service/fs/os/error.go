@@ -1,4 +1,4 @@
-package osfilesystem
+package os
 
 import (
 	"github.com/juju/errgo"

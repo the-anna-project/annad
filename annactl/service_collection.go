@@ -43,10 +43,8 @@ func newServiceCollection() (spec.ServiceCollection, error) {
 	return newCollection, nil
 }
 
-// TODO rename filesystem to fs
-// TODO rename FileSystem to FS
 // TODO make mem/os configurable
-func newFileSystemService() (servicespec.FileSystem, error) {
+func newFileSystemService() (servicespec.FS, error) {
 	newServiceConfig := mem.DefaultServiceConfig()
 	newService, err := mem.NewService(newServiceConfig)
 	if err != nil {
