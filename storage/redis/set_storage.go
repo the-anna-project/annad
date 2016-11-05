@@ -27,7 +27,7 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetAllFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("GetAllFromSet", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -50,7 +50,7 @@ func (s *storage) PushToSet(key string, element string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("PushToSet", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -73,7 +73,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveFromSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("RemoveFromSet", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -132,7 +132,7 @@ func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element st
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkSet", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("WalkSet", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}

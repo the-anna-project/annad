@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (c *control) GetID() spec.ObjectID {
+func (c *control) GetID() string {
 	return c.ID
 }
 

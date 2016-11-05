@@ -37,7 +37,7 @@ func newConfiguredStorage(newLog spec.Log, storageType, storagePrefix, storageAd
 	switch storageType {
 	case "redis":
 		newStorageConfig := redis.DefaultStorageConfigWithAddr(storageAddr)
-		newStorageConfig.BackOffFactory = func() spec.BackOff {
+		newStorageConfig.BackoffFactory = func() spec.Backoff {
 			return backoff.NewExponentialBackOff()
 		}
 		newStorageConfig.Instrumentation, err = newPrometheusInstrumentation([]string{"Feature", "Storage", "Redis"})

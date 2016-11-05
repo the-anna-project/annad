@@ -15,7 +15,7 @@ type ObjectType string
 // Object so others know what object they are dealing with.
 type Object interface {
 	// GetID returns the objects's object ID.
-	GetID() ObjectID
+	GetID() string
 
 	// GetType returns the object's object type.
 	GetType() ObjectType

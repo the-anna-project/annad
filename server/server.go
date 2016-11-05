@@ -12,11 +12,11 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	logcontrol "github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -135,7 +135,7 @@ type server struct {
 	Closer       chan struct{}
 	GRPCServer   *grpc.Server
 	HTTPServer   *graceful.Server
-	ID           spec.ObjectID
+	ID           string
 	Mutex        sync.Mutex
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType

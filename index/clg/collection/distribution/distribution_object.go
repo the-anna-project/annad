@@ -4,7 +4,7 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (d *distribution) GetID() spec.ObjectID {
+func (d *distribution) GetID() string {
 	return d.ID
 }
 

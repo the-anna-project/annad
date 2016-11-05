@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/xh3b4sd/anna/context"
-	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -72,7 +72,7 @@ func MustNewNetworkPayload() spec.NetworkPayload {
 type networkPayload struct {
 	NetworkPayloadConfig
 
-	ID spec.ObjectID
+	ID string
 }
 
 func (np *networkPayload) GetArgs() []reflect.Value {
@@ -91,7 +91,7 @@ func (np *networkPayload) GetDestination() spec.ObjectID {
 	return np.Destination
 }
 
-func (np *networkPayload) GetID() spec.ObjectID {
+func (np *networkPayload) GetID() string {
 	return np.ID
 }
 

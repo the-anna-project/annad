@@ -11,7 +11,7 @@ import (
 
 	"github.com/mgutz/ansi"
 
-	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -116,7 +116,7 @@ func New(config Config) spec.Log {
 type log struct {
 	Config
 
-	ID spec.ObjectID
+	ID string
 
 	Mutex sync.Mutex
 

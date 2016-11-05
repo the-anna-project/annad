@@ -12,7 +12,7 @@ import (
 
 func Test_CLG_Factory(t *testing.T) {
 	newCLG := MustNew()
-	if newCLG.Factory() == nil {
+	if newCLG.Service() == nil {
 		t.Fatal("expected", false, "got", true)
 	}
 }
@@ -39,9 +39,9 @@ func Test_CLG_GetName(t *testing.T) {
 	}
 }
 
-func Test_CLG_New_FactoryCollection_Error(t *testing.T) {
+func Test_CLG_New_ServiceCollection_Error(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.FactoryCollection = nil
+	newConfig.ServiceCollection = nil
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", true, "got", false)
@@ -75,7 +75,7 @@ func Test_CLG_New_StorageCollection_Error(t *testing.T) {
 	}
 }
 
-func Test_CLG_SetFactoryCollection(t *testing.T) {
+func Test_CLG_SetServiceCollection(t *testing.T) {
 	newCLG := MustNew()
 	var rawCLG *clg
 
@@ -87,14 +87,14 @@ func Test_CLG_SetFactoryCollection(t *testing.T) {
 		t.Fatal("expected", "*clg", "got", c)
 	}
 
-	if rawCLG.FactoryCollection == nil {
-		t.Fatal("expected", "spec.FactoryCollection", "got", nil)
+	if rawCLG.ServiceCollection == nil {
+		t.Fatal("expected", "spec.ServiceCollection", "got", nil)
 	}
 
-	newCLG.SetFactoryCollection(nil)
+	newCLG.SetServiceCollection(nil)
 
-	if rawCLG.FactoryCollection != nil {
-		t.Fatal("expected", nil, "got", "spec.FactoryCollection")
+	if rawCLG.ServiceCollection != nil {
+		t.Fatal("expected", nil, "got", "spec.ServiceCollection")
 	}
 }
 

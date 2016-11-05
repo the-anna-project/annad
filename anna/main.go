@@ -8,10 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/server"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -34,6 +35,7 @@ type Config struct {
 	Log               spec.Log
 	Network           spec.Network
 	Server            spec.Server
+	ServiceCollection spec.ServiceCollection
 	StorageCollection spec.StorageCollection
 
 	// Settings.
@@ -54,6 +56,7 @@ func DefaultConfig() Config {
 		Log:               log.New(log.DefaultConfig()),
 		Network:           network.MustNew(),
 		Server:            newServer,
+		ServiceCollection: service.MustNewCollection(),
 		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.
@@ -84,6 +87,9 @@ func New(config Config) (spec.Anna, error) {
 	if newAnna.Server == nil {
 		return nil, maskAnyf(invalidConfigError, "server must not be empty")
 	}
+	if newAnna.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 	if newAnna.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
@@ -95,7 +101,7 @@ type anna struct {
 	Config
 
 	BootOnce     sync.Once
-	ID           spec.ObjectID
+	ID           string
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
 }
@@ -114,8 +120,12 @@ func (a *anna) Boot() {
 func (a *anna) ForceShutdown() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ForceShutdown")
 
-	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "force shutting down Anna")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "force shutting down annad")
 	os.Exit(0)
+}
+
+func (a *anna) Service() spec.ServiceCollection {
+	return a.ServiceCollection
 }
 
 func (a *anna) Shutdown() {
@@ -126,8 +136,8 @@ func (a *anna) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down storage")
-			a.Storage().Shutdown()
+			a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down service collection")
+			a.Service().Shutdown()
 			wg.Done()
 		}()
 
@@ -147,7 +157,7 @@ func (a *anna) Shutdown() {
 
 		wg.Wait()
 
-		a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down Anna")
+		a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down annad")
 		os.Exit(0)
 	})
 }

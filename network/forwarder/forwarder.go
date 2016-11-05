@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/factory"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -21,7 +21,7 @@ const (
 // Config represents the configuration used to create a new forwarder object.
 type Config struct {
 	// Dependencies.
-	FactoryCollection spec.FactoryCollection
+	ServiceCollection spec.ServiceCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 
@@ -38,7 +38,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FactoryCollection: factory.MustNewCollection(),
+		ServiceCollection: service.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 
@@ -59,7 +59,7 @@ func New(config Config) (spec.Forwarder, error) {
 	}
 
 	// Dependencies.
-	if newForwarder.FactoryCollection == nil {
+	if newForwarder.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newForwarder.Log == nil {
@@ -92,7 +92,7 @@ func MustNew() spec.Forwarder {
 type forwarder struct {
 	Config
 
-	ID   spec.ObjectID
+	ID   string
 	Type spec.ObjectType
 }
 
@@ -197,7 +197,7 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	// pseudo random decision. CreateMax takes a max paramater which is exclusive.
 	// Therefore we increment the configuration for the maximum signals desired by
 	// one, to reflect the maximum setting properly.
-	maxSignals, err := f.Factory().Random().CreateMax(f.GetMaxSignals() + 1)
+	maxSignals, err := f.Service().Random().CreateMax(f.GetMaxSignals() + 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -205,7 +205,7 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	// Create the desired number of behaviour IDs.
 	var newBehaviourIDs []string
 	for i := 0; i < maxSignals; i++ {
-		newBehaviourID, err := f.Factory().ID().New()
+		newBehaviourID, err := f.Service().ID().New()
 		if err != nil {
 			return nil, maskAny(err)
 		}

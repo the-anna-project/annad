@@ -24,7 +24,7 @@ func (s *storage) GetStringMap(key string) (map[string]string, error) {
 		return nil
 	}
 
-	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
+	err = backoff.RetryNotify(s.Instrumentation.WrapFunc("GetStringMap", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -51,7 +51,7 @@ func (s *storage) SetStringMap(key string, stringMap map[string]string) error {
 		return nil
 	}
 
-	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetStringMap", action), s.BackOffFactory(), s.retryErrorLogger)
+	err := backoff.RetryNotify(s.Instrumentation.WrapFunc("SetStringMap", action), s.BackoffFactory(), s.retryErrorLogger)
 	if err != nil {
 		return maskAny(err)
 	}

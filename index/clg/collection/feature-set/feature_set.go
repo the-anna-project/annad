@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -66,11 +66,11 @@ func DefaultConfig() Config {
 // New creates a new configured feature set object. A feature set tries to
 // detect all patterns within the configured input sequences.
 func New(config Config) (spec.FeatureSet, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	newIDService, err := id.NewService(id.DefaultServiceConfig())
 	if err != nil {
 		panic(err)
 	}
-	newID, err := newIDFactory.WithType(id.Hex128)
+	newID, err := newIDService.WithType(id.Hex128)
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +105,7 @@ type featureSet struct {
 	Config
 
 	Features []spec.Feature
-	ID       spec.ObjectID
+	ID       string
 	Mutex    sync.Mutex
 	Type     spec.ObjectType
 }

@@ -19,7 +19,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	if storage.IsNotFound(err) {
 		// The given information sequence was never seen before. Thus we register it
 		// now with its own very unique information ID.
-		newID, err := c.Factory().ID().New()
+		newID, err := c.Service().ID().New()
 		if err != nil {
 			return maskAny(err)
 		}

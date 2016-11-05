@@ -4,36 +4,37 @@ package collection
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/id"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	// ObjectTypeCLGCollection represents the object type of the CLG collection
 	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeCLGCollection spec.ObjectType = "clg-collection"
+	ObjectTypeCLGCollection systemspec.ObjectType = "clg-collection"
 )
 
 // Config represents the configuration used to create a new CLG collection
 // object.
 type Config struct {
 	// Dependencies.
-	IDFactory spec.IDFactory
-	Log       spec.Log
+	IDService servicespec.ID
+	Log       systemspec.Log
 }
 
 // DefaultConfig provides a default configuration to create a new CLG
 // collection object by best effort.
 func DefaultConfig() Config {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	newIDService, err := id.NewService(id.DefaultServiceConfig())
 	if err != nil {
 		panic(err)
 	}
 
 	newConfig := Config{
 		// Dependencies.
-		IDFactory: newIDFactory,
+		IDService: newIDService,
 		Log:       log.New(log.DefaultConfig()),
 	}
 
@@ -41,7 +42,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured CLG collection object.
-func New(config Config) (spec.CLGCollection, error) {
+func New(config Config) (systemspec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 
@@ -58,7 +59,7 @@ func New(config Config) (spec.CLGCollection, error) {
 type collection struct {
 	Config
 
-	ID    spec.ObjectID
+	ID    string
 	Mutex sync.Mutex
-	Type  spec.ObjectType
+	Type  systemspec.ObjectType
 }

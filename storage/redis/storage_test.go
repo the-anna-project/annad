@@ -25,9 +25,9 @@ func Test_Storage_DefaultStorageConfigWithAddr(t *testing.T) {
 	}
 }
 
-func Test_Storage_NewRedisStorage_Error_BackOffFactory(t *testing.T) {
+func Test_Storage_NewRedisStorage_Error_BackoffFactory(t *testing.T) {
 	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.BackOffFactory = nil
+	newStorageConfig.BackoffFactory = nil
 	_, err := NewStorage(newStorageConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)

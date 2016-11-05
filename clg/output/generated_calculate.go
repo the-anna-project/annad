@@ -6,10 +6,10 @@ package output
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	"github.com/xh3b4sd/anna/factory"
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
@@ -23,7 +23,7 @@ const (
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
 	// Dependencies.
-	FactoryCollection spec.FactoryCollection
+	ServiceCollection spec.ServiceCollection
 	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
@@ -34,7 +34,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		FactoryCollection: factory.MustNewCollection(),
+		ServiceCollection: service.MustNewCollection(),
 		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
@@ -53,7 +53,7 @@ func New(config Config) (spec.CLG, error) {
 	}
 
 	// Dependencies.
-	if newCLG.FactoryCollection == nil {
+	if newCLG.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
 	}
 	if newCLG.GatewayCollection == nil {
@@ -84,13 +84,13 @@ func MustNew() spec.CLG {
 type clg struct {
 	Config
 
-	ID   spec.ObjectID
+	ID   string
 	Name string
 	Type spec.ObjectType
 }
 
-func (c *clg) Factory() spec.FactoryCollection {
-	return c.FactoryCollection
+func (c *clg) Service() spec.ServiceCollection {
+	return c.ServiceCollection
 }
 
 func (c *clg) GetCalculate() interface{} {
@@ -105,8 +105,8 @@ func (c *clg) Gateway() spec.GatewayCollection {
 	return c.GatewayCollection
 }
 
-func (c *clg) SetFactoryCollection(factoryCollection spec.FactoryCollection) {
-	c.FactoryCollection = factoryCollection
+func (c *clg) SetServiceCollection(ServiceCollection spec.ServiceCollection) {
+	c.ServiceCollection = ServiceCollection
 }
 
 func (c *clg) SetGatewayCollection(gatewayCollection spec.GatewayCollection) {

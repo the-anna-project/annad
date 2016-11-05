@@ -7,7 +7,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -60,11 +60,11 @@ func DefaultConfig() Config {
 //                 x
 //
 func NewDistribution(config Config) (spec.Distribution, error) {
-	newIDFactory, err := id.NewFactory(id.DefaultFactoryConfig())
+	newIDService, err := id.NewService(id.DefaultServiceConfig())
 	if err != nil {
 		panic(err)
 	}
-	newID, err := newIDFactory.WithType(id.Hex128)
+	newID, err := newIDService.WithType(id.Hex128)
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func NewEmptyDistribution() spec.Distribution {
 type distribution struct {
 	Config
 
-	ID    spec.ObjectID
+	ID    string
 	Mutex sync.Mutex
 	Type  spec.ObjectType
 }

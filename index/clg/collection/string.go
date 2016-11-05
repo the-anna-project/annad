@@ -4,7 +4,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/xh3b4sd/anna/factory/id"
+	"github.com/xh3b4sd/anna/service/id"
 )
 
 func (c *collection) ContainsString(args ...interface{}) ([]interface{}, error) {
@@ -129,7 +129,7 @@ func (c *collection) NewIDString(args ...interface{}) ([]interface{}, error) {
 		return nil, maskAnyf(tooManyArgumentsError, "expected 0 got %d", len(args))
 	}
 
-	newID, err := c.IDFactory.WithType(id.Hex128)
+	newID, err := c.IDService.WithType(id.Hex128)
 	if err != nil {
 		return nil, maskAny(err)
 	}

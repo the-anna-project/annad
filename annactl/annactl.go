@@ -5,7 +5,6 @@ import (
 
 	logcontrol "github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
-	"github.com/xh3b4sd/anna/file-system/os"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -28,8 +27,9 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 
 			a.Log.Register(a.GetType())
 
-			// File system.
-			a.FileSystem = osfilesystem.NewFileSystem(osfilesystem.DefaultConfig())
+			// Service collection.
+			a.ServiceCollection, err = newServiceCollection()
+			panicOnError(err)
 
 			// Log control.
 			logControlConfig := logcontrol.DefaultControlConfig()

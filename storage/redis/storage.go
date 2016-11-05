@@ -6,9 +6,9 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/xh3b4sd/anna/factory/id"
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -28,9 +28,9 @@ type StorageConfig struct {
 
 	// Settings.
 
-	// BackOffFactory is supposed to be able to create a new spec.BackOff. Retry
+	// BackoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	BackOffFactory func() spec.BackOff
+	BackoffFactory func() spec.Backoff
 
 	Prefix string
 }
@@ -83,7 +83,7 @@ func DefaultStorageConfig() StorageConfig {
 		Pool:            NewPool(DefaultPoolConfig()),
 
 		// Settings.
-		BackOffFactory: func() spec.BackOff {
+		BackoffFactory: func() spec.Backoff {
 			return &backoff.StopBackOff{}
 		},
 		Prefix: "prefix",
@@ -110,7 +110,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 		return nil, maskAnyf(invalidConfigError, "connection pool must not be empty")
 	}
 	// Settings.
-	if newStorage.BackOffFactory == nil {
+	if newStorage.BackoffFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
 	}
 	if newStorage.Prefix == "" {
@@ -125,7 +125,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 type storage struct {
 	StorageConfig
 
-	ID           spec.ObjectID
+	ID           string
 	ShutdownOnce sync.Once
 	Type         spec.ObjectType
 }
