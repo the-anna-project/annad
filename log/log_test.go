@@ -40,7 +40,7 @@ func testMustNewRootLogger(t *testing.T) spec.RootLogger {
 type object struct{}
 
 func (o *object) GetID() string {
-	return spec.ObjectID("object-id")
+	return "object-id"
 }
 
 func (o *object) GetType() spec.ObjectType {
