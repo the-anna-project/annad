@@ -10,64 +10,72 @@ import (
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 	"github.com/xh3b4sd/anna/storage/redis"
 )
 
 type testErrorIDService struct{}
 
-// New is only a test implementation of spec.IDService to do nothing but
+// New is only a test implementation of servicespec.ID to do nothing but
 // returning some error we can check against.
-func (f *testErrorIDService) New() (spec.ObjectID, error) {
+func (f *testErrorIDService) New() (string, error) {
 	return "", maskAny(invalidConfigError)
 }
 
-func (f *testErrorIDService) WithType(idType spec.IDType) (spec.ObjectID, error) {
+func (f *testErrorIDService) WithType(idType servicespec.IDType) (string, error) {
 	return "", nil
 }
 
 type testIDService struct{}
 
-// New is only a test implementation of spec.IDService to do nothing but
+// New is only a test implementation of servicespec.ID to do nothing but
 // returning some error we can check against.
-func (f *testIDService) New() (spec.ObjectID, error) {
+func (f *testIDService) New() (string, error) {
 	return "new-ID", nil
 }
 
-func (f *testIDService) WithType(idType spec.IDType) (spec.ObjectID, error) {
+func (f *testIDService) WithType(idType servicespec.IDType) (string, error) {
 	return "", nil
 }
 
 type testServiceCollection struct {
-	IDService spec.IDService
+	IDService servicespec.ID
 }
 
-func (c *testServiceCollection) ID() spec.IDService {
+func (c *testServiceCollection) FS() servicespec.FileSystem {
+	return nil
+}
+
+func (c *testServiceCollection) ID() servicespec.ID {
 	return c.IDService
 }
 
-func (c *testServiceCollection) Permutation() spec.PermutationFactory {
+func (c *testServiceCollection) Permutation() servicespec.Permutation {
 	return nil
 }
 
-func (c *testServiceCollection) Random() spec.RandomFactory {
+func (c *testServiceCollection) Random() servicespec.Random {
 	return nil
 }
 
-func testMustNewErrorServiceCollection(t *testing.T) spec.ServiceCollection {
+func (c *testServiceCollection) Shutdown() {
+}
+
+func testMustNewErrorServiceCollection(t *testing.T) servicespec.ServiceCollection {
 	return &testServiceCollection{
 		IDService: &testErrorIDService{},
 	}
 }
 
-func testMustNewServiceCollection(t *testing.T) spec.ServiceCollection {
+func testMustNewServiceCollection(t *testing.T) servicespec.ServiceCollection {
 	return &testServiceCollection{
 		IDService: &testIDService{},
 	}
 }
 
-func testMustNewStorageCollection(t *testing.T) spec.StorageCollection {
+func testMustNewStorageCollection(t *testing.T) systemspec.StorageCollection {
 	newCollection, err := storage.NewCollection(storage.DefaultCollectionConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -76,7 +84,7 @@ func testMustNewStorageCollection(t *testing.T) spec.StorageCollection {
 	return newCollection
 }
 
-func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.StorageCollection {
+func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) systemspec.StorageCollection {
 	newFeatureStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -98,12 +106,12 @@ func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) spec.Stor
 	return newStorageCollection
 }
 
-func testMustNewNetworkPayload(t *testing.T, ctx spec.Context, input string) spec.NetworkPayload {
+func testMustNewNetworkPayload(t *testing.T, ctx systemspec.Context, input string) systemspec.NetworkPayload {
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(input)}
 	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{"source"}
+	newNetworkPayloadConfig.Sources = []systemspec.ObjectID{"source"}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

@@ -7,18 +7,17 @@ import (
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // CollectionConfig represents the configuration used to create a new service
 // collection object.
 type CollectionConfig struct {
 	// Dependencies.
-	FSService          servicespec.FileSystem
-	IDService          servicespec.ID
-	PermutationService servicespec.Permutation
-	RandomService      servicespec.Random
+	FSService          spec.FileSystem
+	IDService          spec.ID
+	PermutationService spec.Permutation
+	RandomService      spec.Random
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new
@@ -76,19 +75,19 @@ type collection struct {
 	ShutdownOnce sync.Once
 }
 
-func (c *collection) FS() servicespec.FileSystem {
+func (c *collection) FS() spec.FileSystem {
 	return c.FSService
 }
 
-func (c *collection) ID() servicespec.ID {
+func (c *collection) ID() spec.ID {
 	return c.IDService
 }
 
-func (c *collection) Permutation() servicespec.Permutation {
+func (c *collection) Permutation() spec.Permutation {
 	return c.PermutationService
 }
 
-func (c *collection) Random() servicespec.Random {
+func (c *collection) Random() spec.Random {
 	return c.RandomService
 }
 
