@@ -1,5 +1,5 @@
-// Package main implements a command line for Anna. Cobra CLI is used as
-// framework.
+// Package main implements a command line interface for the anna daemon. Cobra
+// CLI is used as framework.
 package main
 
 import (
@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	// ObjectType represents the object type of the anna object. This is used
+	// ObjectType represents the object type of the annad object. This is used
 	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "anna"
+	ObjectType spec.ObjectType = "annad"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 	version string
 )
 
-// Config represents the configuration used to create a new anna object.
+// Config represents the configuration used to create a new annad object.
 type Config struct {
 	// Dependencies.
 	Log               spec.Log
@@ -43,7 +43,7 @@ type Config struct {
 	Version string
 }
 
-// DefaultConfig provides a default configuration to create a new anna object
+// DefaultConfig provides a default configuration to create a new annad object
 // by best effort.
 func DefaultConfig() Config {
 	newServer, err := server.New(server.DefaultConfig())
@@ -67,9 +67,9 @@ func DefaultConfig() Config {
 	return newConfig
 }
 
-// New creates a new configured anna object.
-func New(config Config) (spec.Anna, error) {
-	newAnna := &anna{
+// New creates a new configured annad object.
+func New(config Config) (spec.Annad, error) {
+	newAnna := &annad{
 		Config: config,
 
 		BootOnce:     sync.Once{},
@@ -97,7 +97,7 @@ func New(config Config) (spec.Anna, error) {
 	return newAnna, nil
 }
 
-type anna struct {
+type annad struct {
 	Config
 
 	BootOnce     sync.Once
@@ -106,29 +106,29 @@ type anna struct {
 	Type         spec.ObjectType
 }
 
-func (a *anna) Boot() {
+func (a *annad) Boot() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
 		go a.writeStateInfo()
 
-		a.InitAnnaCmd().Execute()
+		a.InitAnnadCmd().Execute()
 	})
 }
 
-func (a *anna) ForceShutdown() {
+func (a *annad) ForceShutdown() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ForceShutdown")
 
 	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "force shutting down annad")
 	os.Exit(0)
 }
 
-func (a *anna) Service() spec.ServiceCollection {
+func (a *annad) Service() spec.ServiceCollection {
 	return a.ServiceCollection
 }
 
-func (a *anna) Shutdown() {
+func (a *annad) Shutdown() {
 	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
@@ -162,7 +162,7 @@ func (a *anna) Shutdown() {
 	})
 }
 
-func (a *anna) Storage() spec.StorageCollection {
+func (a *annad) Storage() spec.StorageCollection {
 	return a.StorageCollection
 }
 

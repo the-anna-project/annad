@@ -10,14 +10,14 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func (a *anna) InitAnnaCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnaCmd")
+func (a *annad) InitAnnadCmd() *cobra.Command {
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnadCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
-		Use:   "anna",
-		Short: "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
-		Long:  "Anna, Artificial Neural Network Aspiration, aims to be self-learning and self-improving software. For more information see https://github.com/xh3b4sd/anna.",
+		Use:   "annad",
+		Short: "Run the anna daemon. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Run the anna daemon. For more information see https://github.com/xh3b4sd/anna.",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 
@@ -93,11 +93,11 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 			a.Server, err = server.New(serverConfig)
 			panicOnError(err)
 		},
-		Run: a.ExecAnnaCmd,
+		Run: a.ExecAnnadCmd,
 	}
 
 	// Add sub commands.
-	newCmd.AddCommand(a.InitAnnaVersionCmd())
+	newCmd.AddCommand(a.InitAnnadVersionCmd())
 
 	// Define command line flags.
 	newCmd.PersistentFlags().StringVar(&a.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
@@ -115,15 +115,15 @@ func (a *anna) InitAnnaCmd() *cobra.Command {
 	return newCmd
 }
 
-func (a *anna) ExecAnnaCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnaCmd")
+func (a *annad) ExecAnnadCmd(cmd *cobra.Command, args []string) {
+	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnadCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 
-	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting Anna")
+	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting annad")
 
 	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting network")
 	go a.Network.Boot()

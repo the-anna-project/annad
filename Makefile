@@ -1,4 +1,4 @@
-.PHONY: all anna annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck protoc setup
+.PHONY: all annad annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck protoc setup
 
 
 
@@ -11,13 +11,13 @@ VERSION := $(shell git rev-parse --short HEAD)
 
 
 
-all: annactl anna
+all: annactl annad
 
-anna: gogenerate
+annad: gogenerate
 	@go build \
-		-o .workspace/bin/anna \
+		-o .workspace/bin/annad \
 		-ldflags "-X main.version=${VERSION}" \
-		github.com/xh3b4sd/anna/anna
+		github.com/xh3b4sd/anna/annad
 
 annactl: gogenerate
 	@go build \

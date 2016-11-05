@@ -1,4 +1,4 @@
-#compdef anna
+#compdef annad
 
 local -a options
 options=(
