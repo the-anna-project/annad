@@ -37,7 +37,7 @@ func DefaultServerConfig() ServerConfig {
 }
 
 // NewServer creates a new configured text interface object.
-func NewServer(config ServerConfig) (api.TextInterfaceServer, error) {
+func NewServer(config ServerConfig) (TextInterfaceServer, error) {
 	newServer := &server{
 		ServerConfig: config,
 
@@ -66,10 +66,10 @@ type server struct {
 	Type  systemspec.ObjectType
 }
 
-func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *api.StreamTextResponse {
-	streamTextResponse := &api.StreamTextResponse{
+func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *StreamTextResponse {
+	streamTextResponse := &StreamTextResponse{
 		Code: api.CodeData,
-		Data: &api.StreamTextResponseData{
+		Data: &StreamTextResponseData{
 			Output: textResponse.GetOutput(),
 		},
 		Text: api.TextData,
@@ -78,7 +78,7 @@ func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *api.Stre
 	return streamTextResponse
 }
 
-func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (servicespec.TextRequest, error) {
+func (s *server) EncodeRequest(streamTextRequest *StreamTextRequest) (servicespec.TextRequest, error) {
 	textRequestConfig := api.DefaultTextRequestConfig()
 	textRequestConfig.Echo = streamTextRequest.Echo
 	//textRequestConfig.Expectation = streamTextRequest.Expectation
@@ -92,7 +92,7 @@ func (s *server) EncodeRequest(streamTextRequest *api.StreamTextRequest) (servic
 	return textRequest, nil
 }
 
-func (s *server) StreamText(stream api.TextInterface_StreamTextServer) error {
+func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
 	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call StreamText")
 
 	done := make(chan struct{}, 1)

@@ -39,7 +39,8 @@ gofmt:
 
 gogenerate:
 	@go generate ./...
-	@protoc api/text_interface.proto --go_out=plugins=grpc:.
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/text_interface.proto
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:server/interface/text/ spec/text_interface.proto
 
 goget:
 	@# Setup workspace.
