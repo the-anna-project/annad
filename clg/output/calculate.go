@@ -133,7 +133,7 @@ func (c *clg) sendTextResponse(ctx spec.Context, informationSequence string) err
 		return maskAny(err)
 	}
 
-	c.Gateway().TextOutput().GetChannel() <- newTextResponse
+	c.Service().TextOutput().GetChannel() <- newTextResponse
 
 	return nil
 }

@@ -3,6 +3,8 @@ package spec
 import (
 	"encoding/json"
 	"reflect"
+
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // NetworkPayload represents the data container carried around within the
@@ -131,8 +133,6 @@ type Network interface {
 	//
 	Forward(CLG CLG, networkPayload NetworkPayload) error
 
-	GatewayProvider
-
 	// InputListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network inputs. A network input is qualified by
 	// information sequences sent by clients who request some calculation from the
@@ -142,7 +142,7 @@ type Network interface {
 	// InputHandler effectively executes the network input by invoking the input
 	// CLG using the incoming text request. InputHandler is called by
 	// InputListener.
-	InputHandler(CLG CLG, textRequest TextRequest) error
+	InputHandler(CLG CLG, textRequest spec.TextRequest) error
 
 	Object
 

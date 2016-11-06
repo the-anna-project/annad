@@ -6,11 +6,11 @@ import (
 	"github.com/xh3b4sd/anna/spec"
 )
 
-func newTextInterface(newLog spec.Log, newTextInput chan spec.TextRequest, newTextOutput chan spec.TextResponse) (api.TextInterfaceServer, error) {
+// TODO text interface should be a service inside the service collection
+func newTextInterface(newLog spec.Log, newServiceCollection spec.ServiceCollection) (api.TextInterfaceServer, error) {
 	newTextInterfaceConfig := text.DefaultServerConfig()
 	newTextInterfaceConfig.Log = newLog
-	newTextInterfaceConfig.TextInput = newTextInput
-	newTextInterfaceConfig.TextOutput = newTextOutput
+	newTextInterfaceConfig.ServiceCollection = newServiceCollection
 	newTextInterface, err := text.NewServer(newTextInterfaceConfig)
 	if err != nil {
 		return nil, maskAny(err)

@@ -63,13 +63,21 @@ func (c *testServiceCollection) Random() servicespec.Random {
 func (c *testServiceCollection) Shutdown() {
 }
 
-func testMustNewErrorServiceCollection(t *testing.T) servicespec.ServiceCollection {
+func (c *testServiceCollection) TextInput() servicespec.TextInput {
+	return nil
+}
+
+func (c *testServiceCollection) TextOutput() servicespec.TextOutput {
+	return nil
+}
+
+func testMustNewErrorServiceCollection(t *testing.T) servicespec.Collection {
 	return &testServiceCollection{
 		IDService: &testErrorIDService{},
 	}
 }
 
-func testMustNewServiceCollection(t *testing.T) servicespec.ServiceCollection {
+func testMustNewServiceCollection(t *testing.T) servicespec.Collection {
 	return &testServiceCollection{
 		IDService: &testIDService{},
 	}

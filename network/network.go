@@ -13,7 +13,6 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/context"
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
@@ -21,7 +20,9 @@ import (
 	"github.com/xh3b4sd/anna/network/tracker"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 
 	workerpool "github.com/xh3b4sd/worker-pool"
@@ -39,13 +40,9 @@ type Config struct {
 	Activator         spec.Activator
 	ServiceCollection spec.ServiceCollection
 	Forwarder         spec.Forwarder
-	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 	Tracker           spec.Tracker
-	// TODO move into GatewayCollection
-	TextInput  chan spec.TextRequest
-	TextOutput chan spec.TextResponse
 
 	// Settings.
 
@@ -69,12 +66,9 @@ func DefaultConfig() Config {
 		Activator:         activator.MustNew(),
 		ServiceCollection: service.MustNewCollection(),
 		Forwarder:         forwarder.MustNew(),
-		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 		Tracker:           tracker.MustNew(),
-		TextInput:         make(chan spec.TextRequest, 1000),
-		TextOutput:        make(chan spec.TextResponse, 1000),
 
 		// Settings.
 		Delay: 0,
@@ -98,29 +92,20 @@ func New(config Config) (spec.Network, error) {
 	if newNetwork.Activator == nil {
 		return nil, maskAnyf(invalidConfigError, "activator must not be empty")
 	}
-	if newNetwork.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
 	if newNetwork.Forwarder == nil {
 		return nil, maskAnyf(invalidConfigError, "forwarder must not be empty")
 	}
-	if newNetwork.GatewayCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "interface collection must not be empty")
-	}
 	if newNetwork.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	}
+	if newNetwork.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 	if newNetwork.StorageCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 	if newNetwork.Tracker == nil {
 		return nil, maskAnyf(invalidConfigError, "tracker must not be empty")
-	}
-	if newNetwork.TextInput == nil {
-		return nil, maskAnyf(invalidConfigError, "text input channel must not be empty")
-	}
-	if newNetwork.TextOutput == nil {
-		return nil, maskAnyf(invalidConfigError, "text output channel must not be empty")
 	}
 
 	newNetwork.CLGs = newNetwork.newCLGs()
@@ -325,7 +310,7 @@ func (n *network) InputListener(canceler <-chan struct{}) error {
 		select {
 		case <-canceler:
 			return maskAny(workerCanceledError)
-		case textRequest := <-n.TextInput:
+		case textRequest := <-n.Service().TextInput().GetChannel():
 			err := n.InputHandler(CLG, textRequest)
 			if err != nil {
 				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
@@ -334,7 +319,7 @@ func (n *network) InputListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error {
+func (n *network) InputHandler(CLG spec.CLG, textRequest servicespec.TextRequest) error {
 	// In case the text request defines the echo flag, we overwrite the given CLG
 	// directly to the output CLG. This will cause the created network payload to
 	// be forwarded to the output CLG without indirection. Note that this should
@@ -371,8 +356,8 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
-	newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
-	newNetworkPayloadConfig.Sources = []spec.ObjectID{spec.ObjectID(n.GetID())}
+	newNetworkPayloadConfig.Destination = systemspec.ObjectID(behaviourID)
+	newNetworkPayloadConfig.Sources = []systemspec.ObjectID{systemspec.ObjectID(n.GetID())}
 	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
@@ -401,15 +386,15 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest spec.TextRequest) error
 }
 
 func (n *network) Shutdown() {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Shutdown")
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Shutdown")
 
 	n.ShutdownOnce.Do(func() {
 		close(n.Closer)
 	})
 }
 
-func (n *network) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Track")
+func (n *network) Track(CLG systemspec.CLG, networkPayload systemspec.NetworkPayload) error {
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Track")
 
 	err := n.Tracker.Track(CLG, networkPayload)
 	if err != nil {

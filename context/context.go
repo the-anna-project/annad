@@ -9,7 +9,8 @@ import (
 	netcontext "golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 // Config represents the configuration used to create a new context object.
@@ -20,7 +21,7 @@ type Config struct {
 	Context       netcontext.Context
 	CLGName       string
 	CLGTreeID     string
-	Expectation   spec.Expectation
+	Expectation   servicespec.Expectation
 	InformationID string
 	SessionID     string
 }
@@ -43,7 +44,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured context object.
-func New(config Config) (spec.Context, error) {
+func New(config Config) (systemspec.Context, error) {
 	newContext := &context{
 		Config: config,
 
@@ -58,7 +59,7 @@ func New(config Config) (spec.Context, error) {
 }
 
 // MustNew creates either a new default configured context object, or panics.
-func MustNew() spec.Context {
+func MustNew() systemspec.Context {
 	newContext, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -73,7 +74,7 @@ type context struct {
 	ID string
 }
 
-func (c *context) Clone() spec.Context {
+func (c *context) Clone() systemspec.Context {
 	// At first we create a new context with its own very unique ID, which will
 	// not be cloned. All properties but the context ID must be cloned below.
 	newContext := MustNew()
@@ -134,7 +135,7 @@ func (c *context) GetCLGTreeID() (string, bool) {
 	return c.CLGTreeID, true
 }
 
-func (c *context) GetExpectation() (spec.Expectation, bool) {
+func (c *context) GetExpectation() (servicespec.Expectation, bool) {
 	if c.Expectation == nil {
 		return nil, false
 	}
@@ -174,7 +175,7 @@ func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.CLGTreeID = clgTreeID
 }
 
-func (c *context) SetExpectation(expectation spec.Expectation) {
+func (c *context) SetExpectation(expectation servicespec.Expectation) {
 	c.Expectation = expectation
 }
 

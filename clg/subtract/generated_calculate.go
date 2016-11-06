@@ -6,7 +6,6 @@ package subtract
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	"github.com/xh3b4sd/anna/gateway"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
@@ -24,7 +23,6 @@ const (
 type Config struct {
 	// Dependencies.
 	ServiceCollection spec.ServiceCollection
-	GatewayCollection spec.GatewayCollection
 	Log               spec.Log
 	StorageCollection spec.StorageCollection
 }
@@ -35,7 +33,6 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		ServiceCollection: service.MustNewCollection(),
-		GatewayCollection: gateway.MustNewCollection(),
 		Log:               log.New(log.DefaultConfig()),
 		StorageCollection: storage.MustNewCollection(),
 	}
@@ -55,9 +52,6 @@ func New(config Config) (spec.CLG, error) {
 	// Dependencies.
 	if newCLG.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
-	if newCLG.GatewayCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "gateway collection must not be empty")
 	}
 	if newCLG.Log == nil {
 		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
@@ -101,16 +95,8 @@ func (c *clg) GetName() string {
 	return c.Name
 }
 
-func (c *clg) Gateway() spec.GatewayCollection {
-	return c.GatewayCollection
-}
-
 func (c *clg) SetServiceCollection(ServiceCollection spec.ServiceCollection) {
 	c.ServiceCollection = ServiceCollection
-}
-
-func (c *clg) SetGatewayCollection(gatewayCollection spec.GatewayCollection) {
-	c.GatewayCollection = gatewayCollection
 }
 
 func (c *clg) SetLog(log spec.Log) {

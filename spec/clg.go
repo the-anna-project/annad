@@ -6,8 +6,6 @@ package spec
 type CLG interface {
 	ServiceProvider
 
-	GatewayProvider
-
 	// GetCalculate returns the CLG's calculate function which implements its
 	// actual business logic.
 	GetCalculate() interface{}
@@ -21,11 +19,6 @@ type CLG interface {
 	// for all CLGs, regardless if a CLG is making use of the factory collection
 	// or not.
 	SetServiceCollection(ServiceCollection ServiceCollection)
-
-	// SetGatewayCollection configures the CLG's gateway collection. This is done
-	// for all CLGs, regardless if a CLG is making use of the gateway collection
-	// or not.
-	SetGatewayCollection(gatewayCollection GatewayCollection)
 
 	// SetLog configures the CLG's logger. This is done for all CLGs, regardless
 	// if a CLG is making use of the logger or not.

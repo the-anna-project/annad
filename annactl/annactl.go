@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 
 	logcontrol "github.com/xh3b4sd/anna/client/control/log"
-	"github.com/xh3b4sd/anna/client/interface/text"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -38,9 +37,7 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 			panicOnError(err)
 
 			// Text interface.
-			textInterfaceConfig := text.DefaultClientConfig()
-			textInterfaceConfig.GRPCAddr = a.Flags.GRPCAddr
-			a.TextInterface, err = text.NewClient(textInterfaceConfig)
+			a.TextInterface, err = newTextInterface(a.ServiceCollection, a.Flags.GRPCAddr)
 			panicOnError(err)
 		},
 		Run: a.ExecAnnactlCmd,

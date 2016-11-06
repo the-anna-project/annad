@@ -22,6 +22,14 @@ type ServiceCollection interface {
 	// Random returns a random service. It is used to create random numbers.
 	Random() spec.Random
 
+	// TextInput returns an text output service. It is used to send text
+	// responses back to the client.
+	TextInput() spec.TextInput
+
+	// TextOutput returns an text output service. It is used to send text
+	// responses back to the client.
+	TextOutput() spec.TextOutput
+
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.

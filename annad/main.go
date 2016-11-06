@@ -57,6 +57,7 @@ func DefaultConfig() Config {
 		Network:           network.MustNew(),
 		Server:            newServer,
 		ServiceCollection: service.MustNewCollection(),
+		// TODO remove storage collection
 		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.

@@ -8,6 +8,8 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/textinput"
+	"github.com/xh3b4sd/anna/service/textoutput"
 )
 
 // CollectionConfig represents the configuration used to create a new service
@@ -18,6 +20,8 @@ type CollectionConfig struct {
 	IDService          spec.ID
 	PermutationService spec.Permutation
 	RandomService      spec.Random
+	TextInputService   spec.TextInput
+	TextOutputService  spec.TextOutput
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new
@@ -29,13 +33,15 @@ func DefaultCollectionConfig() CollectionConfig {
 		IDService:          id.MustNewService(),
 		PermutationService: permutation.MustNewService(),
 		RandomService:      random.MustNewService(),
+		TextInputService:   textinput.MustNewService(),
+		TextOutputService:  textoutput.MustNewService(),
 	}
 
 	return newConfig
 }
 
 // NewCollection creates a new configured service collection object.
-func NewCollection(config CollectionConfig) (spec.ServiceCollection, error) {
+func NewCollection(config CollectionConfig) (spec.Collection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,
 
@@ -54,13 +60,19 @@ func NewCollection(config CollectionConfig) (spec.ServiceCollection, error) {
 	if newCollection.RandomService == nil {
 		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
 	}
+	if newCollection.TextInputService == nil {
+		return nil, maskAnyf(invalidConfigError, "text input service must not be empty")
+	}
+	if newCollection.TextOutputService == nil {
+		return nil, maskAnyf(invalidConfigError, "text output service must not be empty")
+	}
 
 	return newCollection, nil
 }
 
 // MustNewCollection creates either a new default configured service collection
 // object, or panics.
-func MustNewCollection() spec.ServiceCollection {
+func MustNewCollection() spec.Collection {
 	newCollection, err := NewCollection(DefaultCollectionConfig())
 	if err != nil {
 		panic(err)
@@ -103,4 +115,12 @@ func (c *collection) Shutdown() {
 
 		wg.Wait()
 	})
+}
+
+func (c *collection) TextInput() spec.TextInput {
+	return c.TextInputService
+}
+
+func (c *collection) TextOutput() spec.TextOutput {
+	return c.TextOutputService
 }
