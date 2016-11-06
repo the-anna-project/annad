@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
@@ -40,10 +39,6 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceTextReadPlainCmd")
 
 	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-
-	in := make(chan servicespec.TextRequest, 1000)
-	out := make(chan servicespec.TextResponse, 1000)
 
 	go func() {
 		a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "Waiting for input.\n")
@@ -59,7 +54,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 				a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 			}
 
-			in <- newTextRequest
+			a.Service().TextInput().GetChannel() <- newTextRequest
 
 			err = scanner.Err()
 			if err != nil {
@@ -69,27 +64,16 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 	}()
 
 	go func() {
-		for {
-			select {
-			case textResponse := <-out:
-				fmt.Printf("%s\n", textResponse.GetOutput())
-			}
-		}
-	}()
-
-	fail := make(chan error, 1)
-
-	go func() {
-		select {
-		case <-a.Closer:
-			cancel()
-		case err := <-fail:
+		err := a.TextInterface.StreamText(ctx)
+		if err != nil {
 			a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 		}
 	}()
 
-	err := a.TextInterface.StreamText(ctx, in, out)
-	if err != nil {
-		fail <- maskAny(err)
+	for {
+		select {
+		case textResponse := <-a.Service().TextOutput().GetChannel():
+			fmt.Printf("%s\n", textResponse.GetOutput())
+		}
 	}
 }

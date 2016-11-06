@@ -9,7 +9,6 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/api"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
@@ -53,21 +52,18 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 		a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
 	}
 
-	in := make(chan servicespec.TextRequest, 1)
-	out := make(chan servicespec.TextResponse, 1000)
+	a.Service().TextInput().GetChannel() <- textRequest
 
 	go func() {
-		// TODO stream continuously
-		in <- textRequest
+		err = a.TextInterface.StreamText(ctx)
+		if err != nil {
+			a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
+		}
 	}()
-	err = a.TextInterface.StreamText(ctx, in, out) // TODO this should operate e.g. on the TextOutput service
-	if err != nil {
-		a.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
-	}
 
 	for {
 		select {
-		case textResponse := <-out:
+		case textResponse := <-a.Service().TextOutput().GetChannel():
 			fmt.Printf("%s\n", textResponse.GetOutput())
 		}
 	}

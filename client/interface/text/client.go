@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/service"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -14,6 +15,10 @@ import (
 // ClientConfig represents the configuration used to create a new text
 // interface object.
 type ClientConfig struct {
+	// Dependencies.
+
+	ServiceCollection systemspec.ServiceCollection
+
 	// Settings.
 
 	// GRPCAddr is the host:port representation based on the golang convention
@@ -25,7 +30,12 @@ type ClientConfig struct {
 // interface object by best effort.
 func DefaultClientConfig() ClientConfig {
 	newConfig := ClientConfig{
+		// Dependencies.
+
+		ServiceCollection: service.MustNewCollection(),
+
 		// Settings.
+
 		GRPCAddr: "127.0.0.1:9119",
 	}
 
@@ -36,6 +46,12 @@ func DefaultClientConfig() ClientConfig {
 func NewClient(config ClientConfig) (systemspec.TextInterfaceClient, error) {
 	newClient := &client{
 		ClientConfig: config,
+	}
+
+	// Dependencies.
+
+	if newClient.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	// Settings.
@@ -51,7 +67,7 @@ type client struct {
 	ClientConfig
 }
 
-func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (servicespec.TextResponse, error) {
+func (c *client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (servicespec.TextResponse, error) {
 	if streamTextResponse.Code != api.CodeData {
 		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
 	}
@@ -66,7 +82,7 @@ func (c client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (serv
 	return textResponse, nil
 }
 
-func (c client) EncodeRequest(textRequest servicespec.TextRequest) *api.StreamTextRequest {
+func (c *client) EncodeRequest(textRequest servicespec.TextRequest) *api.StreamTextRequest {
 	streamTextRequest := &api.StreamTextRequest{
 		Echo:      textRequest.GetEcho(),
 		Input:     textRequest.GetInput(),
@@ -76,7 +92,7 @@ func (c client) EncodeRequest(textRequest servicespec.TextRequest) *api.StreamTe
 	return streamTextRequest
 }
 
-func (c client) StreamText(ctx context.Context, in chan servicespec.TextRequest, out chan servicespec.TextResponse) error {
+func (c *client) StreamText(ctx context.Context) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
 
@@ -112,7 +128,7 @@ func (c client) StreamText(ctx context.Context, in chan servicespec.TextRequest,
 				fail <- maskAny(err)
 				return
 			}
-			out <- textResponse
+			c.Service().TextOutput().GetChannel() <- textResponse
 		}
 	}()
 
@@ -122,7 +138,7 @@ func (c client) StreamText(ctx context.Context, in chan servicespec.TextRequest,
 			select {
 			case <-done:
 				return
-			case textRequest := <-in:
+			case textRequest := <-c.Service().TextInput().GetChannel():
 				streamTextRequest := c.EncodeRequest(textRequest)
 				err := stream.Send(streamTextRequest)
 				if err != nil {
