@@ -3,7 +3,7 @@
 package sum
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // calculate creates the sum of the given float64s.

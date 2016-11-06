@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 func equalStrings(a, b []string) bool {
@@ -44,7 +44,7 @@ func mergeNetworkPayloads(networkPayloads []spec.NetworkPayload) (spec.NetworkPa
 	}
 
 	var args []reflect.Value
-	var sources []spec.ObjectID
+	var sources []string
 	for _, np := range networkPayloads {
 		for _, v := range np.GetArgs() {
 			args = append(args, v)
@@ -62,7 +62,7 @@ func mergeNetworkPayloads(networkPayloads []spec.NetworkPayload) (spec.NetworkPa
 	networkPayloadConfig := networkpayload.DefaultConfig()
 	networkPayloadConfig.Args = args
 	networkPayloadConfig.Context = ctx
-	networkPayloadConfig.Destination = spec.ObjectID(behaviourID)
+	networkPayloadConfig.Destination = string(behaviourID)
 	networkPayloadConfig.Sources = sources
 	networkPayload, err := networkpayload.New(networkPayloadConfig)
 	if err != nil {

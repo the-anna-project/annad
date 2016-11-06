@@ -3,7 +3,7 @@
 package divide
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // calculate creates the quotient of the given float64s.

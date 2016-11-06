@@ -6,24 +6,25 @@ import (
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/object/networkpayload"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
 	// ObjectType represents the object type of the forwarder object. This is used
 	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "forwarder"
+	ObjectType systemspec.ObjectType = "forwarder"
 )
 
 // Config represents the configuration used to create a new forwarder object.
 type Config struct {
 	// Dependencies.
-	ServiceCollection spec.ServiceCollection
-	Log               spec.Log
-	StorageCollection spec.StorageCollection
+	ServiceCollection systemspec.ServiceCollection
+	Log               systemspec.Log
+	StorageCollection systemspec.StorageCollection
 
 	// Settings.
 
@@ -50,7 +51,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured forwarder object.
-func New(config Config) (spec.Forwarder, error) {
+func New(config Config) (systemspec.Forwarder, error) {
 	newForwarder := &forwarder{
 		Config: config,
 
@@ -80,7 +81,7 @@ func New(config Config) (spec.Forwarder, error) {
 }
 
 // MustNew creates either a new default configured forwarder object, or panics.
-func MustNew() spec.Forwarder {
+func MustNew() systemspec.Forwarder {
 	newForwarder, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -93,21 +94,21 @@ type forwarder struct {
 	Config
 
 	ID   string
-	Type spec.ObjectType
+	Type systemspec.ObjectType
 }
 
-func (f *forwarder) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	f.Log.WithTags(spec.Tags{C: nil, L: "D", O: f, V: 13}, "call Forward")
+func (f *forwarder) Forward(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+	f.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: f, V: 13}, "call Forward")
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error){
+	lookups := []func(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error){
 		f.GetNetworkPayloads,
 		f.News,
 	}
 
 	// Execute one lookup after another. As soon as we find some behaviour IDs, we
 	// use them to forward the given network payload.
-	var newNetworkPayloads []spec.NetworkPayload
+	var newNetworkPayloads []objectspec.NetworkPayload
 	var err error
 	for _, lookup := range lookups {
 		newNetworkPayloads, err = lookup(CLG, networkPayload)
@@ -146,7 +147,7 @@ func (f *forwarder) GetMaxSignals() int {
 	return f.MaxSignals
 }
 
-func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error) {
+func (f *forwarder) GetNetworkPayloads(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Check if there are behaviour IDs known that we can use to forward the
@@ -166,7 +167,7 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	}
 
 	// Create a list of new network payloads.
-	var newNetworkPayloads []spec.NetworkPayload
+	var newNetworkPayloads []objectspec.NetworkPayload
 	for _, behaviourID := range newBehaviourIDs {
 		// Prepare a new context for the new network payload.
 		newCtx := ctx.Clone()
@@ -176,8 +177,8 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 		newNetworkPayloadConfig := networkpayload.DefaultConfig()
 		newNetworkPayloadConfig.Args = networkPayload.GetArgs()
 		newNetworkPayloadConfig.Context = newCtx
-		newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
-		newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+		newNetworkPayloadConfig.Destination = string(behaviourID)
+		newNetworkPayloadConfig.Sources = []string{networkPayload.GetDestination()}
 		newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 		if err != nil {
 			return nil, maskAny(err)
@@ -189,7 +190,7 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	return newNetworkPayloads, nil
 }
 
-func (f *forwarder) News(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error) {
+func (f *forwarder) News(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Decide how many new behaviour IDs should be created. This defines the
@@ -230,7 +231,7 @@ func (f *forwarder) News(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]sp
 	}
 
 	// Create a list of new network payloads.
-	var newNetworkPayloads []spec.NetworkPayload
+	var newNetworkPayloads []objectspec.NetworkPayload
 	for _, behaviourID := range newBehaviourIDs {
 		// Prepare a new context for the new network payload.
 		newCtx := ctx.Clone()
@@ -241,8 +242,8 @@ func (f *forwarder) News(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]sp
 		newNetworkPayloadConfig := networkpayload.DefaultConfig()
 		newNetworkPayloadConfig.Args = networkPayload.GetArgs()
 		newNetworkPayloadConfig.Context = newCtx
-		newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
-		newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
+		newNetworkPayloadConfig.Destination = string(behaviourID)
+		newNetworkPayloadConfig.Sources = []string{networkPayload.GetDestination()}
 		newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 		if err != nil {
 			return nil, maskAny(err)

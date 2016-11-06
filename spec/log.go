@@ -1,12 +1,14 @@
 package spec
 
+import "github.com/xh3b4sd/anna/object/spec"
+
 // Tags provides criteria to decide what log messages are supposed to be
 // logged. Emitted logs not matching the given criteria by Tags are not supposed
 // to be logged.
 type Tags struct {
 	// C represents the context passed through. Logs related to a specific
 	// context ID should be related to a common request.
-	C Context
+	C spec.Context
 
 	// L is the log level. E.g. debug or error.
 	L string

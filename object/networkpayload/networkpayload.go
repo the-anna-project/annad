@@ -4,8 +4,8 @@ import (
 	"reflect"
 
 	"github.com/xh3b4sd/anna/object/context"
+	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 // Config represents the configuration used to create a new
@@ -22,7 +22,7 @@ type Config struct {
 
 	// Destination represents the object ID of the CLG receiving the current
 	// network payload.
-	Destination spec.ObjectID
+	Destination string
 
 	// Sources represents the object IDs of the CLGs being involved providing the
 	// current network payload. In fact, a network payload can only be sent by
@@ -31,7 +31,7 @@ type Config struct {
 	// another CLG even if they are not able to satisfy the interface of the
 	// requested CLG on their own. This gives the neural network an opportunity
 	// to learn to combine CLGs as desired.
-	Sources []spec.ObjectID
+	Sources []string
 }
 
 // DefaultConfig provides a default configuration to create a new
@@ -87,7 +87,7 @@ func (np *networkPayload) GetCLGInput() []reflect.Value {
 	return append([]reflect.Value{reflect.ValueOf(np.GetContext())}, np.GetArgs()...)
 }
 
-func (np *networkPayload) GetDestination() spec.ObjectID {
+func (np *networkPayload) GetDestination() string {
 	return np.Destination
 }
 
@@ -95,7 +95,7 @@ func (np *networkPayload) GetID() string {
 	return np.ID
 }
 
-func (np *networkPayload) GetSources() []spec.ObjectID {
+func (np *networkPayload) GetSources() []string {
 	return np.Sources
 }
 

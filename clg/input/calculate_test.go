@@ -10,6 +10,7 @@ import (
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
@@ -114,12 +115,12 @@ func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) systemspe
 	return newStorageCollection
 }
 
-func testMustNew(t *testing.T, ctx systemspec.Context, input string) systemspec.NetworkPayload {
+func testMustNew(t *testing.T, ctx objectspec.Context, input string) objectspec.NetworkPayload {
 	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(input)}
 	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = "destination"
-	newNetworkPayloadConfig.Sources = []systemspec.ObjectID{"source"}
+	newNetworkPayloadConfig.Sources = []string{"source"}
 	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

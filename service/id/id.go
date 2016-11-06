@@ -2,7 +2,7 @@
 // strings.
 package id
 
-// MustNew returns a new spec.ObjectID of type Hex128. In case of any error
+// MustNew returns a new string of type Hex128. In case of any error
 // this method panics.
 func MustNew() string {
 	newID, err := MustNewService().WithType(Hex128)

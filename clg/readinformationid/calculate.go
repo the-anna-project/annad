@@ -4,7 +4,7 @@ package readinformationid
 
 import (
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // calculate fetches the information sequence stored under a specific
