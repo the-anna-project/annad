@@ -13,6 +13,7 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/key"
+	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -60,12 +61,12 @@ func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string
 	// We do not need to set the session ID because it never changes.
 
 	// Create a new network payload.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(informationSequence)}
 	newNetworkPayloadConfig.Context = newCtx
 	newNetworkPayloadConfig.Destination = spec.ObjectID(inputBehaviourID)
 	newNetworkPayloadConfig.Sources = []spec.ObjectID{spec.ObjectID(outputBehaviourID)}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}

@@ -3,7 +3,7 @@ package divide
 import (
 	"testing"
 
-	"github.com/xh3b4sd/anna/context"
+	"github.com/xh3b4sd/anna/object/context"
 )
 
 func Test_CLG_Divide(t *testing.T) {

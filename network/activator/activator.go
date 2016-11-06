@@ -123,7 +123,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error){
 		a.GetNetworkPayload,
-		a.NewNetworkPayload,
+		a.New,
 	}
 
 	// Execute one lookup after another. As soon as we find a network payload, we
@@ -245,7 +245,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	return newNetworkPayload, nil
 }
 
-func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (a *activator) New(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
 	// something that is easily comparable and efficient. By convention the first
 	// input argument of each CLG is a context. We remove the first argument here,

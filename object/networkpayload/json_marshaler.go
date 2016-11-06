@@ -1,21 +1,20 @@
-package api
+package networkpayload
 
 import (
 	"encoding/json"
 )
 
-func (np *networkPayload) UnmarshalJSON(b []byte) error {
+func (np *networkPayload) MarshalJSON() ([]byte, error) {
 	type NetworkPayloadClone networkPayload
 
-	aux := &struct {
+	b, err := json.Marshal(&struct {
 		*NetworkPayloadClone
 	}{
 		NetworkPayloadClone: (*NetworkPayloadClone)(np),
-	}
-	err := json.Unmarshal(b, &aux)
+	})
 	if err != nil {
-		return maskAny(err)
+		return nil, maskAny(err)
 	}
 
-	return nil
+	return b, nil
 }

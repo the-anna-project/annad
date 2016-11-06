@@ -1,16 +1,16 @@
-package api
+package networkpayload
 
 import (
 	"reflect"
 
-	"github.com/xh3b4sd/anna/context"
+	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
 )
 
-// NetworkPayloadConfig represents the configuration used to create a new
+// Config represents the configuration used to create a new
 // network payload object.
-type NetworkPayloadConfig struct {
+type Config struct {
 	// Settings.
 
 	// Args represents the arguments intended to be used for the requested CLG
@@ -34,10 +34,10 @@ type NetworkPayloadConfig struct {
 	Sources []spec.ObjectID
 }
 
-// DefaultNetworkPayloadConfig provides a default configuration to create a new
+// DefaultConfig provides a default configuration to create a new
 // network payload object by best effort.
-func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
-	newConfig := NetworkPayloadConfig{
+func DefaultConfig() Config {
+	newConfig := Config{
 		Args:        nil,
 		Context:     context.MustNew(),
 		Destination: "",
@@ -47,30 +47,30 @@ func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
 	return newConfig
 }
 
-// NewNetworkPayload creates a new configured network payload object.
-func NewNetworkPayload(config NetworkPayloadConfig) (spec.NetworkPayload, error) {
-	newNetworkPayload := &networkPayload{
-		NetworkPayloadConfig: config,
+// New creates a new configured network payload object.
+func New(config Config) (spec.NetworkPayload, error) {
+	newObject := &networkPayload{
+		Config: config,
 
 		ID: id.MustNew(),
 	}
 
-	return newNetworkPayload, nil
+	return newObject, nil
 }
 
-// MustNewNetworkPayload creates either a new default configured network payload
+// MustNew creates either a new default configured network payload
 // object, or panics.
-func MustNewNetworkPayload() spec.NetworkPayload {
-	newNetworkPayload, err := NewNetworkPayload(DefaultNetworkPayloadConfig())
+func MustNew() spec.NetworkPayload {
+	newObject, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	return newNetworkPayload
+	return newObject
 }
 
 type networkPayload struct {
-	NetworkPayloadConfig
+	Config
 
 	ID string
 }

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -59,12 +59,12 @@ func mergeNetworkPayloads(networkPayloads []spec.NetworkPayload) (spec.NetworkPa
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
-	networkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	networkPayloadConfig := networkpayload.DefaultConfig()
 	networkPayloadConfig.Args = args
 	networkPayloadConfig.Context = ctx
 	networkPayloadConfig.Destination = spec.ObjectID(behaviourID)
 	networkPayloadConfig.Sources = sources
-	networkPayload, err := api.NewNetworkPayload(networkPayloadConfig)
+	networkPayload, err := networkpayload.New(networkPayloadConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -86,7 +86,7 @@ func stringToQueue(s string) ([]spec.NetworkPayload, error) {
 	var queue []spec.NetworkPayload
 
 	for _, s := range strings.Split(s, ",") {
-		np := api.MustNewNetworkPayload()
+		np := networkpayload.MustNew()
 		err := json.Unmarshal([]byte(s), &np)
 		if err != nil {
 			return nil, maskAny(err)

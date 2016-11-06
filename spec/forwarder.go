@@ -10,7 +10,7 @@ type Forwarder interface {
 	// functions.
 	//
 	//     GetNetworkPayloads
-	//     NewNetworkPayloads
+	//     News
 	//
 	// The network payloads being found by any of the lookup functions listed
 	// above are queued by Forward.
@@ -27,10 +27,10 @@ type Forwarder interface {
 	// not any behaviour ID be found, an error is returned.
 	GetNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
-	// NewNetworkPayloads creates new connections to other CLGs in a pseudo random
+	// News creates new connections to other CLGs in a pseudo random
 	// manner. For each connection one network payload is created. The resulting
 	// list is returned.
-	NewNetworkPayloads(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
+	News(CLG CLG, networkPayload NetworkPayload) ([]NetworkPayload, error)
 
 	StorageProvider
 }

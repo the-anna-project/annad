@@ -8,7 +8,7 @@ type Activator interface {
 	// functions.
 	//
 	//     GetNetworkPayload
-	//     NewNetworkPayload
+	//     New
 	//
 	// Activate fetches the list of all queued network payloads of the requested
 	// CLG from the underlying storage. The stored list is merged with the given
@@ -34,14 +34,14 @@ type Activator interface {
 	// requested CLG can be found, an error is returned.
 	GetNetworkPayload(CLG CLG, queue []NetworkPayload) (NetworkPayload, error)
 
-	// NewNetworkPayload uses the given queue to find a combination of network
+	// New uses the given queue to find a combination of network
 	// payloads that fulfill the interface of the requested CLG. This creation
 	// process may be random or biased in some way. In case some created
 	// combination of network payloads fulfills the interface of the requested
 	// CLG, this found combination is stored as activation configuration for the
 	// requested CLG. In case no match using the permuted network payloads of the
 	// given queue can be found, an error is returned.
-	NewNetworkPayload(CLG CLG, queue []NetworkPayload) (NetworkPayload, error)
+	New(CLG CLG, queue []NetworkPayload) (NetworkPayload, error)
 
 	StorageProvider
 }

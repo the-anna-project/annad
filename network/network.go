@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
 	"github.com/xh3b4sd/anna/network/forwarder"
 	"github.com/xh3b4sd/anna/network/tracker"
+	"github.com/xh3b4sd/anna/object/context"
+	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
@@ -193,12 +193,12 @@ func (n *network) Calculate(CLG spec.CLG, networkPayload spec.NetworkPayload) (s
 		return nil, maskAny(err)
 	}
 
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = outputs
 	newNetworkPayloadConfig.Context = networkPayload.GetContext()
 	newNetworkPayloadConfig.Destination = networkPayload.GetDestination()
 	newNetworkPayloadConfig.Sources = networkPayload.GetSources()
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -217,7 +217,7 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 		if err != nil {
 			return maskAny(err)
 		}
-		networkPayload := api.MustNewNetworkPayload()
+		networkPayload := networkpayload.MustNew()
 		err = json.Unmarshal([]byte(element), &networkPayload)
 		if err != nil {
 			return maskAny(err)
@@ -353,12 +353,12 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest servicespec.TextRequest
 
 	// We transform the received text request to a network payload to have a
 	// conventional data structure within the neural network.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = systemspec.ObjectID(behaviourID)
 	newNetworkPayloadConfig.Sources = []systemspec.ObjectID{systemspec.ObjectID(n.GetID())}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}

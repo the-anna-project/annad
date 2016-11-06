@@ -3,9 +3,9 @@ package forwarder
 import (
 	"encoding/json"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/spec"
@@ -102,7 +102,7 @@ func (f *forwarder) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) er
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error){
 		f.GetNetworkPayloads,
-		f.NewNetworkPayloads,
+		f.News,
 	}
 
 	// Execute one lookup after another. As soon as we find some behaviour IDs, we
@@ -173,12 +173,12 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 		newCtx.SetBehaviourID(behaviourID)
 
 		// Create a new network payload.
-		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+		newNetworkPayloadConfig := networkpayload.DefaultConfig()
 		newNetworkPayloadConfig.Args = networkPayload.GetArgs()
 		newNetworkPayloadConfig.Context = newCtx
 		newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
 		newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
-		newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+		newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -189,7 +189,7 @@ func (f *forwarder) GetNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 	return newNetworkPayloads, nil
 }
 
-func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error) {
+func (f *forwarder) News(CLG spec.CLG, networkPayload spec.NetworkPayload) ([]spec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Decide how many new behaviour IDs should be created. This defines the
@@ -238,12 +238,12 @@ func (f *forwarder) NewNetworkPayloads(CLG spec.CLG, networkPayload spec.Network
 		// TODO set the paired CLG name to the new context
 
 		// Create a new network payload.
-		newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+		newNetworkPayloadConfig := networkpayload.DefaultConfig()
 		newNetworkPayloadConfig.Args = networkPayload.GetArgs()
 		newNetworkPayloadConfig.Context = newCtx
 		newNetworkPayloadConfig.Destination = spec.ObjectID(behaviourID)
 		newNetworkPayloadConfig.Sources = []spec.ObjectID{networkPayload.GetDestination()}
-		newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+		newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 		if err != nil {
 			return nil, maskAny(err)
 		}
