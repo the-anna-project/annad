@@ -1,15 +1,6 @@
 package spec
 
-// ExpectationRequest represents an expectation given with a text request to
-// define the expected outcome of a requested calculation. That way the
-// calculated result of the neural network can be checked against something the
-// client expects to be returned. By providing an expectation request the neural
-// network can be trained, because it calculates and iterates over its own
-// activities until the calculated output equals the provided expectation.
-type ExpectationRequest interface {
-	// GetExpectation returns the expectation of the current expectation request.
-	GetExpectation() Expectation
-}
+import "github.com/xh3b4sd/anna/object/spec"
 
 // TextInput provides a communication channel to send information sequences
 // back to the client.
@@ -27,7 +18,7 @@ type TextRequest interface {
 	GetEcho() bool
 
 	// GetExpectation returns the expectation of the current text request.
-	GetExpectation() Expectation
+	GetExpectation() spec.Expectation
 
 	// GetInput returns the input of the current text request.
 	GetInput() string

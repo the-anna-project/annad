@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 func (c *clg) calculate(ctx spec.Context, f float64, p int) (float64, error) {

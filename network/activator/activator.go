@@ -5,25 +5,26 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/permutation"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
 	// ObjectType represents the object type of the activator object. This is used
 	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "activator"
+	ObjectType systemspec.ObjectType = "activator"
 )
 
 // Config represents the configuration used to create a new activator object.
 type Config struct {
 	// Dependencies.
-	ServiceCollection spec.ServiceCollection
-	Log               spec.Log
-	StorageCollection spec.StorageCollection
+	ServiceCollection systemspec.ServiceCollection
+	Log               systemspec.Log
+	StorageCollection systemspec.StorageCollection
 }
 
 // DefaultConfig provides a default configuration to create a new activator
@@ -40,7 +41,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured activator object.
-func New(config Config) (spec.Activator, error) {
+func New(config Config) (systemspec.Activator, error) {
 	newActivator := &activator{
 		Config: config,
 
@@ -64,7 +65,7 @@ func New(config Config) (spec.Activator, error) {
 }
 
 // MustNew creates either a new default configured activator object, or panics.
-func MustNew() spec.Activator {
+func MustNew() systemspec.Activator {
 	newActivator, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -77,11 +78,11 @@ type activator struct {
 	Config
 
 	ID   string
-	Type spec.ObjectType
+	Type systemspec.ObjectType
 }
 
-func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Activate")
+func (a *activator) Activate(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Activate")
 
 	// Fetch the queued network payloads. queue is a string of comma separated
 	// JSON objects representing a specific network payload.
@@ -121,14 +122,14 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	}
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error){
+	lookups := []func(CLG systemspec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error){
 		a.GetNetworkPayload,
-		a.NewNetworkPayload,
+		a.New,
 	}
 
 	// Execute one lookup after another. As soon as we find a network payload, we
 	// return it.
-	var newNetworkPayload spec.NetworkPayload
+	var newNetworkPayload objectspec.NetworkPayload
 	for _, lookup := range lookups {
 		newNetworkPayload, err = lookup(CLG, queue)
 		if IsNetworkPayloadNotFound(err) {
@@ -146,7 +147,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 
 	// Filter all network payloads from the queue that are merged into the new
 	// network payload.
-	var newQueue []spec.NetworkPayload
+	var newQueue []objectspec.NetworkPayload
 	for _, s := range newNetworkPayload.GetSources() {
 		for _, np := range queue {
 			// At this point there is only one source given. That is the CLG that
@@ -176,7 +177,7 @@ func (a *activator) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (
 	return newNetworkPayload, nil
 }
 
-func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (a *activator) GetNetworkPayload(CLG systemspec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	// Fetch the combination of successful behaviour IDs which are known to be
 	// useful for the activation of the requested CLG. The network payloads sent
 	// by the CLGs being fetched here are known to be useful because they have
@@ -208,7 +209,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	// stored as connections. They represent the input interface of the requested
 	// CLG. Thus there must not be any variation applied to the lookup here,
 	// because we need the lookup to be reproducible.
-	var matches []spec.NetworkPayload
+	var matches []objectspec.NetworkPayload
 	for _, behaviourID := range behaviourIDs {
 		for _, np := range queue {
 			// At this point there is only one source given. That is the CLG that
@@ -245,7 +246,7 @@ func (a *activator) GetNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 	return newNetworkPayload, nil
 }
 
-func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error) {
+func (a *activator) New(CLG systemspec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
 	// something that is easily comparable and efficient. By convention the first
 	// input argument of each CLG is a context. We remove the first argument here,
@@ -267,7 +268,7 @@ func (a *activator) NewNetworkPayload(CLG spec.CLG, queue []spec.NetworkPayload)
 
 	// Permute the permutation list of the queued network payloads until we found
 	// all the matching combinations.
-	var possibleMatches [][]spec.NetworkPayload
+	var possibleMatches [][]objectspec.NetworkPayload
 	for {
 		// Check if the current combination of network payloads already satisfies
 		// the interface of the requested CLG. This is done in the first place to

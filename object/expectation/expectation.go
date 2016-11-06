@@ -3,7 +3,7 @@
 package expectation
 
 import (
-	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // Config represents the configuration used to create a new expectation response

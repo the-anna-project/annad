@@ -3,7 +3,7 @@
 package islesser
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // calculate checks whether the first given number is lesser than the other.

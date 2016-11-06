@@ -11,17 +11,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/api"
-	"github.com/xh3b4sd/anna/context"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network/activator"
 	"github.com/xh3b4sd/anna/network/forwarder"
 	"github.com/xh3b4sd/anna/network/tracker"
+	"github.com/xh3b4sd/anna/object/context"
+	"github.com/xh3b4sd/anna/object/networkpayload"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 
@@ -31,18 +31,18 @@ import (
 const (
 	// ObjectType represents the object type of the network object. This is used
 	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "network"
+	ObjectType systemspec.ObjectType = "network"
 )
 
 // Config represents the configuration used to create a new network object.
 type Config struct {
 	// Dependencies.
-	Activator         spec.Activator
-	ServiceCollection spec.ServiceCollection
-	Forwarder         spec.Forwarder
-	Log               spec.Log
-	StorageCollection spec.StorageCollection
-	Tracker           spec.Tracker
+	Activator         systemspec.Activator
+	ServiceCollection systemspec.ServiceCollection
+	Forwarder         systemspec.Forwarder
+	Log               systemspec.Log
+	StorageCollection systemspec.StorageCollection
+	Tracker           systemspec.Tracker
 
 	// Settings.
 
@@ -78,7 +78,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured network object.
-func New(config Config) (spec.Network, error) {
+func New(config Config) (systemspec.Network, error) {
 	newNetwork := &network{
 		Config: config,
 
@@ -115,7 +115,7 @@ func New(config Config) (spec.Network, error) {
 }
 
 // MustNew creates either a new default configured network object, or panics.
-func MustNew() spec.Network {
+func MustNew() systemspec.Network {
 	newNetwork, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -130,16 +130,16 @@ type network struct {
 	BootOnce sync.Once
 
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
-	CLGs map[string]spec.CLG
+	CLGs map[string]systemspec.CLG
 
 	Closer       chan struct{}
 	ID           string
 	ShutdownOnce sync.Once
-	Type         spec.ObjectType
+	Type         systemspec.ObjectType
 }
 
-func (n *network) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
+func (n *network) Activate(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Activate")
 
 	networkPayload, err := n.Activator.Activate(CLG, networkPayload)
 	if err != nil {
@@ -150,7 +150,7 @@ func (n *network) Activate(CLG spec.CLG, networkPayload spec.NetworkPayload) (sp
 }
 
 func (n *network) Boot() {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Boot")
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Boot")
 
 	n.BootOnce.Do(func() {
 		n.CLGs = n.newCLGs()
@@ -163,7 +163,7 @@ func (n *network) Boot() {
 			inputPoolConfig.WorkerFunc = n.InputListener
 			inputPool, err := workerpool.New(inputPoolConfig)
 			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				n.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
 			n.logWorkerErrors(inputPool.Execute())
@@ -177,7 +177,7 @@ func (n *network) Boot() {
 			eventPoolConfig.WorkerFunc = n.EventListener
 			eventPool, err := workerpool.New(eventPoolConfig)
 			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				n.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 			// Execute the worker pool and block until all work is done.
 			n.logWorkerErrors(eventPool.Execute())
@@ -185,20 +185,20 @@ func (n *network) Boot() {
 	})
 }
 
-func (n *network) Calculate(CLG spec.CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error) {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
+func (n *network) Calculate(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Calculate")
 
 	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetCLGInput()))
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = outputs
 	newNetworkPayloadConfig.Context = networkPayload.GetContext()
 	newNetworkPayloadConfig.Destination = networkPayload.GetDestination()
 	newNetworkPayloadConfig.Sources = networkPayload.GetSources()
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -217,7 +217,7 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 		if err != nil {
 			return maskAny(err)
 		}
-		networkPayload := api.MustNewNetworkPayload()
+		networkPayload := networkpayload.MustNew()
 		err = json.Unmarshal([]byte(element), &networkPayload)
 		if err != nil {
 			return maskAny(err)
@@ -257,7 +257,7 @@ func (n *network) EventListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+func (n *network) EventHandler(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
 	var err error
 
 	// Activate if the CLG's interface is satisfied by the given
@@ -289,8 +289,8 @@ func (n *network) EventHandler(CLG spec.CLG, networkPayload spec.NetworkPayload)
 	return nil
 }
 
-func (n *network) Forward(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	n.Log.WithTags(spec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
+func (n *network) Forward(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Forward")
 
 	err := n.Forwarder.Forward(CLG, networkPayload)
 	if err != nil {
@@ -313,13 +313,13 @@ func (n *network) InputListener(canceler <-chan struct{}) error {
 		case textRequest := <-n.Service().TextInput().GetChannel():
 			err := n.InputHandler(CLG, textRequest)
 			if err != nil {
-				n.Log.WithTags(spec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
+				n.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
 		}
 	}
 }
 
-func (n *network) InputHandler(CLG spec.CLG, textRequest servicespec.TextRequest) error {
+func (n *network) InputHandler(CLG systemspec.CLG, textRequest servicespec.TextRequest) error {
 	// In case the text request defines the echo flag, we overwrite the given CLG
 	// directly to the output CLG. This will cause the created network payload to
 	// be forwarded to the output CLG without indirection. Note that this should
@@ -353,12 +353,12 @@ func (n *network) InputHandler(CLG spec.CLG, textRequest servicespec.TextRequest
 
 	// We transform the received text request to a network payload to have a
 	// conventional data structure within the neural network.
-	newNetworkPayloadConfig := api.DefaultNetworkPayloadConfig()
+	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
-	newNetworkPayloadConfig.Destination = systemspec.ObjectID(behaviourID)
-	newNetworkPayloadConfig.Sources = []systemspec.ObjectID{systemspec.ObjectID(n.GetID())}
-	newNetworkPayload, err := api.NewNetworkPayload(newNetworkPayloadConfig)
+	newNetworkPayloadConfig.Destination = behaviourID
+	newNetworkPayloadConfig.Sources = []string{n.GetID()}
+	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -393,7 +393,7 @@ func (n *network) Shutdown() {
 	})
 }
 
-func (n *network) Track(CLG systemspec.CLG, networkPayload systemspec.NetworkPayload) error {
+func (n *network) Track(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
 	n.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: n, V: 13}, "call Track")
 
 	err := n.Tracker.Track(CLG, networkPayload)

@@ -1,16 +1,16 @@
-package api
+package networkpayload
 
 import (
 	"reflect"
 
-	"github.com/xh3b4sd/anna/context"
+	"github.com/xh3b4sd/anna/object/context"
+	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
 )
 
-// NetworkPayloadConfig represents the configuration used to create a new
+// Config represents the configuration used to create a new
 // network payload object.
-type NetworkPayloadConfig struct {
+type Config struct {
 	// Settings.
 
 	// Args represents the arguments intended to be used for the requested CLG
@@ -22,7 +22,7 @@ type NetworkPayloadConfig struct {
 
 	// Destination represents the object ID of the CLG receiving the current
 	// network payload.
-	Destination spec.ObjectID
+	Destination string
 
 	// Sources represents the object IDs of the CLGs being involved providing the
 	// current network payload. In fact, a network payload can only be sent by
@@ -31,13 +31,13 @@ type NetworkPayloadConfig struct {
 	// another CLG even if they are not able to satisfy the interface of the
 	// requested CLG on their own. This gives the neural network an opportunity
 	// to learn to combine CLGs as desired.
-	Sources []spec.ObjectID
+	Sources []string
 }
 
-// DefaultNetworkPayloadConfig provides a default configuration to create a new
+// DefaultConfig provides a default configuration to create a new
 // network payload object by best effort.
-func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
-	newConfig := NetworkPayloadConfig{
+func DefaultConfig() Config {
+	newConfig := Config{
 		Args:        nil,
 		Context:     context.MustNew(),
 		Destination: "",
@@ -47,30 +47,30 @@ func DefaultNetworkPayloadConfig() NetworkPayloadConfig {
 	return newConfig
 }
 
-// NewNetworkPayload creates a new configured network payload object.
-func NewNetworkPayload(config NetworkPayloadConfig) (spec.NetworkPayload, error) {
-	newNetworkPayload := &networkPayload{
-		NetworkPayloadConfig: config,
+// New creates a new configured network payload object.
+func New(config Config) (spec.NetworkPayload, error) {
+	newObject := &networkPayload{
+		Config: config,
 
 		ID: id.MustNew(),
 	}
 
-	return newNetworkPayload, nil
+	return newObject, nil
 }
 
-// MustNewNetworkPayload creates either a new default configured network payload
+// MustNew creates either a new default configured network payload
 // object, or panics.
-func MustNewNetworkPayload() spec.NetworkPayload {
-	newNetworkPayload, err := NewNetworkPayload(DefaultNetworkPayloadConfig())
+func MustNew() spec.NetworkPayload {
+	newObject, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	return newNetworkPayload
+	return newObject
 }
 
 type networkPayload struct {
-	NetworkPayloadConfig
+	Config
 
 	ID string
 }
@@ -87,7 +87,7 @@ func (np *networkPayload) GetCLGInput() []reflect.Value {
 	return append([]reflect.Value{reflect.ValueOf(np.GetContext())}, np.GetArgs()...)
 }
 
-func (np *networkPayload) GetDestination() spec.ObjectID {
+func (np *networkPayload) GetDestination() string {
 	return np.Destination
 }
 
@@ -95,7 +95,7 @@ func (np *networkPayload) GetID() string {
 	return np.ID
 }
 
-func (np *networkPayload) GetSources() []spec.ObjectID {
+func (np *networkPayload) GetSources() []string {
 	return np.Sources
 }
 

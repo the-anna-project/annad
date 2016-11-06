@@ -1,7 +1,8 @@
 package api
 
 import (
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // TextRequestConfig represents the configuration used to create a new text
@@ -15,11 +16,11 @@ type TextRequestConfig struct {
 	// client/server integration of the gRPC stream implementation.
 	Echo bool
 
-	// ExpectationRequest represents the expectation object. This is used to
-	// match against the calculated output. In case there is an expectation
-	// given, the neural network tries to calculate an output until it generated
-	// one that matches the given expectation.
-	ExpectationRequest spec.ExpectationRequest
+	// Expectation represents the expectation object. This is used to match
+	// against the calculated output. In case there is an expectation given, the
+	// neural network tries to calculate an output until it generated one that
+	// matches the given expectation.
+	Expectation objectspec.Expectation
 
 	// Input represents the input being fed into the neural network. There must
 	// be a none empty input given when requesting calculations from the neural
@@ -35,17 +36,17 @@ type TextRequestConfig struct {
 // text request object by best effort.
 func DefaultTextRequestConfig() TextRequestConfig {
 	newConfig := TextRequestConfig{
-		Echo:               false,
-		ExpectationRequest: nil,
-		Input:              "",
-		SessionID:          "",
+		Echo:        false,
+		Expectation: nil,
+		Input:       "",
+		SessionID:   "",
 	}
 
 	return newConfig
 }
 
 // NewTextRequest creates a new configured text request object.
-func NewTextRequest(config TextRequestConfig) (spec.TextRequest, error) {
+func NewTextRequest(config TextRequestConfig) (servicespec.TextRequest, error) {
 	newTextRequest := &textRequest{
 		TextRequestConfig: config,
 	}
@@ -62,7 +63,7 @@ func NewTextRequest(config TextRequestConfig) (spec.TextRequest, error) {
 
 // MustNewTextRequest creates either a new default configured text request
 // object, or panics.
-func MustNewTextRequest() spec.TextRequest {
+func MustNewTextRequest() servicespec.TextRequest {
 	newTextRequest, err := NewTextRequest(DefaultTextRequestConfig())
 	if err != nil {
 		panic(err)
@@ -79,8 +80,8 @@ func (tr *textRequest) GetEcho() bool {
 	return tr.Echo
 }
 
-func (tr *textRequest) GetExpectation() spec.Expectation {
-	return tr.ExpectationRequest.GetExpectation()
+func (tr *textRequest) GetExpectation() objectspec.Expectation {
+	return tr.Expectation
 }
 
 func (tr *textRequest) GetInput() string {

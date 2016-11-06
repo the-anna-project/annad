@@ -3,7 +3,7 @@
 package isgreater
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 // calculate checks whether the first given number is greater than the other.

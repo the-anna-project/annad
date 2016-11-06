@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
@@ -61,7 +61,7 @@ type context struct {
 	SessionID string
 }
 
-func (c *context) Clone() systemspec.Context {
+func (c *context) Clone() objectspec.Context {
 	return c
 }
 
@@ -89,7 +89,7 @@ func (c *context) GetCLGTreeID() (string, bool) {
 	return c.CLGTreeID, true
 }
 
-func (c *context) GetExpectation() (servicespec.Expectation, bool) {
+func (c *context) GetExpectation() (objectspec.Expectation, bool) {
 	return nil, false
 }
 
@@ -121,7 +121,7 @@ func (c *context) SetCLGTreeID(clgTreeID string) {
 	c.CLGTreeID = clgTreeID
 }
 
-func (c *context) SetExpectation(expectation servicespec.Expectation) {
+func (c *context) SetExpectation(expectation objectspec.Expectation) {
 
 }
 
@@ -141,7 +141,7 @@ func (c *context) Value(key interface{}) interface{} {
 	return nil
 }
 
-func testMustNewContext(t *testing.T) systemspec.Context {
+func testMustNewContext(t *testing.T) objectspec.Context {
 	newContext := &context{
 		CLGTreeID: "clg-tree-id",
 		ID:        "context-id",

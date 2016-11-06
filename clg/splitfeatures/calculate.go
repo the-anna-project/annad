@@ -22,7 +22,7 @@ import (
 
 	"github.com/xh3b4sd/anna/index/clg/collection/feature-set"
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 const (

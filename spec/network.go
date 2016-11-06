@@ -1,56 +1,9 @@
 package spec
 
 import (
-	"encoding/json"
-	"reflect"
-
-	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
-
-// NetworkPayload represents the data container carried around within the
-// neural network.
-type NetworkPayload interface {
-	// GetArgs returns the arguments of the current network payload.
-	GetArgs() []reflect.Value
-
-	// GetCLGInput returns a list of arguments intended to be provided as input
-	// for a CLG's execution. The list of arguments exists of the arguments
-	// configured to the network payload and the context configured to the network
-	// payload. Note that the context is always the first argument in the list.
-	GetCLGInput() []reflect.Value
-
-	// GetContext returns the context of the current network payload.
-	GetContext() Context
-
-	// GetArgs returns the destination of the current network payload, which must
-	// be the ID of a CLG registered within the neural network.
-	GetDestination() ObjectID
-
-	// GetID returns the object ID of the current network payload.
-	GetID() string
-
-	// GetArgs returns the sources of the current network payload, which must be
-	// the ID of a CLG registered within the neural network. One allowed exception
-	// is the very first source of the very first network payload, which is
-	// created within the network when user input is received to forward it to the
-	// input CLG.
-	GetSources() []ObjectID
-
-	json.Marshaler
-	json.Unmarshaler
-
-	// SetArgs sets the arguments of the current network payload.
-	SetArgs(args []reflect.Value)
-
-	// String returns the concatenated string representations of the currently
-	// configured arguments.
-	String() string
-
-	// Validate throws an error if the current network payload is not valid. An
-	// network payload is not valid if it does ot have any context, destination or
-	// sources defined.
-	Validate() error
-}
 
 // Network provides a neural network based on dynamic and self improving CLG
 // execution. The network provides input and output channels. When input is
@@ -77,7 +30,7 @@ type Network interface {
 	//                             | CLG |
 	//                             |-----|
 	//
-	Activate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+	Activate(CLG CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -93,7 +46,7 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(CLG CLG, networkPayload NetworkPayload) (NetworkPayload, error)
+	Calculate(CLG CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error)
 
 	// EventListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network events. A network event is qualified by
@@ -107,7 +60,7 @@ type Network interface {
 
 	// EventHandler effectively executes a network event associated to a CLG and
 	// the corresponding network payload. EventHandler is called by EventListener.
-	EventHandler(CLG CLG, networkPayload NetworkPayload) error
+	EventHandler(CLG CLG, networkPayload spec.NetworkPayload) error
 
 	ServiceProvider
 
@@ -131,7 +84,7 @@ type Network interface {
 	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
 	//     |-----|     |-----|     |-----|     |-----|     |-----|
 	//
-	Forward(CLG CLG, networkPayload NetworkPayload) error
+	Forward(CLG CLG, networkPayload spec.NetworkPayload) error
 
 	// InputListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network inputs. A network input is qualified by
@@ -142,7 +95,7 @@ type Network interface {
 	// InputHandler effectively executes the network input by invoking the input
 	// CLG using the incoming text request. InputHandler is called by
 	// InputListener.
-	InputHandler(CLG CLG, textRequest spec.TextRequest) error
+	InputHandler(CLG CLG, textRequest servicespec.TextRequest) error
 
 	Object
 
@@ -154,7 +107,7 @@ type Network interface {
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of
 	// the neural network to act accordingly.
-	Track(CLG CLG, networkPayload NetworkPayload) error
+	Track(CLG CLG, networkPayload spec.NetworkPayload) error
 
 	StorageProvider
 }

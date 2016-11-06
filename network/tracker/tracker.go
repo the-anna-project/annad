@@ -5,24 +5,25 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 )
 
 const (
 	// ObjectType represents the object type of the tracker object. This is used
 	// e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "tracker"
+	ObjectType systemspec.ObjectType = "tracker"
 )
 
 // Config represents the configuration used to create a new tracker object.
 type Config struct {
 	// Dependencies.
-	ServiceCollection spec.ServiceCollection
-	Log               spec.Log
-	StorageCollection spec.StorageCollection
+	ServiceCollection systemspec.ServiceCollection
+	Log               systemspec.Log
+	StorageCollection systemspec.StorageCollection
 }
 
 // DefaultConfig provides a default configuration to create a new tracker object
@@ -39,7 +40,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured tracker object.
-func New(config Config) (spec.Tracker, error) {
+func New(config Config) (systemspec.Tracker, error) {
 	newTracker := &tracker{
 		Config: config,
 
@@ -63,7 +64,7 @@ func New(config Config) (spec.Tracker, error) {
 }
 
 // MustNew creates either a new default configured tracker object, or panics.
-func MustNew() spec.Tracker {
+func MustNew() systemspec.Tracker {
 	newTracker, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -76,10 +77,10 @@ type tracker struct {
 	Config
 
 	ID   string
-	Type spec.ObjectType
+	Type systemspec.ObjectType
 }
 
-func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+func (t *tracker) CLGIDs(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
 	destinationID := string(networkPayload.GetDestination())
 	sourceIDs := networkPayload.GetSources()
 
@@ -113,7 +114,7 @@ func (t *tracker) CLGIDs(CLG spec.CLG, networkPayload spec.NetworkPayload) error
 	return nil
 }
 
-func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
+func (t *tracker) CLGNames(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
 	destinationName := CLG.GetName()
 	sourceIDs := networkPayload.GetSources()
 
@@ -157,11 +158,11 @@ func (t *tracker) CLGNames(CLG spec.CLG, networkPayload spec.NetworkPayload) err
 	return nil
 }
 
-func (t *tracker) Track(CLG spec.CLG, networkPayload spec.NetworkPayload) error {
-	t.Log.WithTags(spec.Tags{C: nil, L: "D", O: t, V: 13}, "call Track")
+func (t *tracker) Track(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+	t.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: t, V: 13}, "call Track")
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG spec.CLG, networkPayload spec.NetworkPayload) error{
+	lookups := []func(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error{
 		t.CLGIDs,
 		t.CLGNames,
 	}

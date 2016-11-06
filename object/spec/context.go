@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 
 	"golang.org/x/net/context"
-
-	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // Context represents a container holding scope specific information.
@@ -31,7 +29,7 @@ type Context interface {
 
 	// GetExpectation returns the expectation of the current context. The second
 	// return value expresses the existence of the key requested.
-	GetExpectation() (spec.Expectation, bool)
+	GetExpectation() (Expectation, bool)
 
 	// GetID returns the context's ID representing the very unique scope of its
 	// own lifetime. This can be useful for e.g. gathering logs bound to one
@@ -61,7 +59,7 @@ type Context interface {
 	SetCLGTreeID(clgTreeID string)
 
 	// SetExpectation sets the given expectation to the current context.
-	SetExpectation(expectation spec.Expectation)
+	SetExpectation(expectation Expectation)
 
 	// SetInformationID sets the given information ID to the current context.
 	SetInformationID(informationID string)
