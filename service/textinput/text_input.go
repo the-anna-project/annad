@@ -3,14 +3,15 @@
 package textinput
 
 import (
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // Config represents the configuration used to create a new text input
 // service object.
 type Config struct {
 	// Settings.
-	Channel chan spec.TextRequest
+	Channel chan objectspec.TextInput
 }
 
 // DefaultConfig provides a default configuration to create a new text
@@ -18,14 +19,14 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		Channel: make(chan spec.TextRequest, 1000),
+		Channel: make(chan objectspec.TextInput, 1000),
 	}
 
 	return newConfig
 }
 
 // New creates a new configured text input service object.
-func New(config Config) (spec.TextInput, error) {
+func New(config Config) (servicespec.TextInput, error) {
 	newService := &service{
 		Config: config,
 	}
@@ -39,7 +40,7 @@ func New(config Config) (spec.TextInput, error) {
 
 // MustNew creates either a new default configured id service object, or
 // panics.
-func MustNew() spec.TextInput {
+func MustNew() servicespec.TextInput {
 	newService, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -52,6 +53,6 @@ type service struct {
 	Config
 }
 
-func (s *service) GetChannel() chan spec.TextRequest {
+func (s *service) GetChannel() chan objectspec.TextInput {
 	return s.Channel
 }

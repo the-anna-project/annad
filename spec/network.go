@@ -2,7 +2,6 @@ package spec
 
 import (
 	"github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // Network provides a neural network based on dynamic and self improving CLG
@@ -95,7 +94,7 @@ type Network interface {
 	// InputHandler effectively executes the network input by invoking the input
 	// CLG using the incoming text request. InputHandler is called by
 	// InputListener.
-	InputHandler(CLG CLG, textRequest servicespec.TextRequest) error
+	InputHandler(CLG CLG, textInput spec.TextInput) error
 
 	Object
 

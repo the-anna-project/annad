@@ -1,13 +1,12 @@
-package api
+package textinput
 
 import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
-// TextRequestConfig represents the configuration used to create a new text
+// Config represents the configuration used to create a new text
 // response object.
-type TextRequestConfig struct {
+type Config struct {
 	// Settings.
 
 	// Echo being set to true causes the provided input simply to be echoed back.
@@ -20,7 +19,7 @@ type TextRequestConfig struct {
 	// against the calculated output. In case there is an expectation given, the
 	// neural network tries to calculate an output until it generated one that
 	// matches the given expectation.
-	Expectation objectspec.Expectation
+	Expectation spec.Expectation
 
 	// Input represents the input being fed into the neural network. There must
 	// be a none empty input given when requesting calculations from the neural
@@ -32,10 +31,10 @@ type TextRequestConfig struct {
 	SessionID string
 }
 
-// DefaultTextRequestConfig provides a default configuration to create a new
+// DefaultConfig provides a default configuration to create a new
 // text request object by best effort.
-func DefaultTextRequestConfig() TextRequestConfig {
-	newConfig := TextRequestConfig{
+func DefaultConfig() Config {
+	newConfig := Config{
 		Echo:        false,
 		Expectation: nil,
 		Input:       "",
@@ -45,49 +44,49 @@ func DefaultTextRequestConfig() TextRequestConfig {
 	return newConfig
 }
 
-// NewTextRequest creates a new configured text request object.
-func NewTextRequest(config TextRequestConfig) (servicespec.TextRequest, error) {
-	newTextRequest := &textRequest{
-		TextRequestConfig: config,
+// New creates a new configured text request object.
+func New(config Config) (spec.TextInput, error) {
+	newObject := &textInput{
+		Config: config,
 	}
 
-	if newTextRequest.Input == "" {
+	if newObject.Input == "" {
 		return nil, maskAnyf(invalidConfigError, "input must not be empty")
 	}
-	if newTextRequest.SessionID == "" {
+	if newObject.SessionID == "" {
 		return nil, maskAnyf(invalidConfigError, "session ID must not be empty")
 	}
 
-	return newTextRequest, nil
+	return newObject, nil
 }
 
-// MustNewTextRequest creates either a new default configured text request
+// MustNew creates either a new default configured text request
 // object, or panics.
-func MustNewTextRequest() servicespec.TextRequest {
-	newTextRequest, err := NewTextRequest(DefaultTextRequestConfig())
+func MustNew() spec.TextInput {
+	newObject, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
 
-	return newTextRequest
+	return newObject
 }
 
-type textRequest struct {
-	TextRequestConfig
+type textInput struct {
+	Config
 }
 
-func (tr *textRequest) GetEcho() bool {
-	return tr.Echo
+func (ti *textInput) GetEcho() bool {
+	return ti.Echo
 }
 
-func (tr *textRequest) GetExpectation() objectspec.Expectation {
-	return tr.Expectation
+func (ti *textInput) GetExpectation() spec.Expectation {
+	return ti.Expectation
 }
 
-func (tr *textRequest) GetInput() string {
-	return tr.Input
+func (ti *textInput) GetInput() string {
+	return ti.Input
 }
 
-func (tr *textRequest) GetSessionID() string {
-	return tr.SessionID
+func (ti *textInput) GetSessionID() string {
+	return ti.SessionID
 }

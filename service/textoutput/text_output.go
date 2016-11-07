@@ -37,9 +37,9 @@ func NewService(config ServiceConfig) (spec.TextOutput, error) {
 	return newService, nil
 }
 
-// MustNewService creates either a new default configured id service object, or
+// MustNew creates either a new default configured id service object, or
 // panics.
-func MustNewService() spec.TextOutput {
+func MustNew() spec.TextOutput {
 	newService, err := NewService(DefaultServiceConfig())
 	if err != nil {
 		panic(err)

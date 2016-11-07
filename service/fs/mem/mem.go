@@ -40,7 +40,7 @@ func DefaultConfig() Config {
 func New(config Config) (servicespec.FS, error) {
 	newService := &service{
 		Config:  config,
-		ID:      id.MustNew(),
+		ID:      id.MustNewID(),
 		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
 		Type:    ObjectType,

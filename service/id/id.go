@@ -44,7 +44,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
 		HashChars:     "abcdef0123456789", // hex character set
-		RandomService: random.MustNewService(),
+		RandomService: random.MustNew(),
 		Type:          Hex128,
 	}
 

@@ -66,18 +66,9 @@ func DefaultConfig() Config {
 // New creates a new configured feature set object. A feature set tries to
 // detect all patterns within the configured input sequences.
 func New(config Config) (spec.FeatureSet, error) {
-	newIDService, err := id.NewService(id.DefaultServiceConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDService.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFeatureSet := &featureSet{
 		Config: config,
-		ID:     newID,
+		ID:     id.MustNewID(),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeFeatureSet,
 	}

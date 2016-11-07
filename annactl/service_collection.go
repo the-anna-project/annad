@@ -45,8 +45,8 @@ func newServiceCollection() (spec.ServiceCollection, error) {
 
 // TODO make mem/os configurable
 func newFileSystemService() (servicespec.FS, error) {
-	newServiceConfig := mem.DefaultServiceConfig()
-	newService, err := mem.NewService(newServiceConfig)
+	newConfig := mem.DefaultConfig()
+	newService, err := mem.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -55,9 +55,9 @@ func newFileSystemService() (servicespec.FS, error) {
 }
 
 func newIDService(randomService servicespec.Random) (servicespec.ID, error) {
-	newServiceConfig := id.DefaultServiceConfig()
-	newServiceConfig.RandomService = randomService
-	newService, err := id.NewService(newServiceConfig)
+	newConfig := id.DefaultConfig()
+	newConfig.RandomService = randomService
+	newService, err := id.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -66,8 +66,8 @@ func newIDService(randomService servicespec.Random) (servicespec.ID, error) {
 }
 
 func newPermutationService() (servicespec.Permutation, error) {
-	newServiceConfig := permutation.DefaultServiceConfig()
-	newService, err := permutation.NewService(newServiceConfig)
+	newConfig := permutation.DefaultConfig()
+	newService, err := permutation.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -76,11 +76,11 @@ func newPermutationService() (servicespec.Permutation, error) {
 }
 
 func newRandomService() (servicespec.Random, error) {
-	newServiceConfig := random.DefaultServiceConfig()
-	newServiceConfig.BackoffFactory = func() spec.Backoff {
+	newConfig := random.DefaultConfig()
+	newConfig.BackoffFactory = func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
-	newService, err := random.NewService(newServiceConfig)
+	newService, err := random.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

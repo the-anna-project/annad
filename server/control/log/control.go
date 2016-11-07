@@ -36,7 +36,7 @@ func DefaultControlConfig() ControlConfig {
 func NewControl(config ControlConfig) (spec.LogControl, error) {
 	newControl := &control{
 		ControlConfig: config,
-		ID:            id.MustNew(),
+		ID:            id.MustNewID(),
 		Mutex:         sync.Mutex{},
 		Type:          ObjectType,
 	}

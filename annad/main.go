@@ -74,7 +74,7 @@ func New(config Config) (spec.Annad, error) {
 		Config: config,
 
 		BootOnce:     sync.Once{},
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,
 	}

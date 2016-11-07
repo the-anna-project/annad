@@ -60,18 +60,9 @@ func DefaultConfig() Config {
 //                 x
 //
 func NewDistribution(config Config) (spec.Distribution, error) {
-	newIDService, err := id.NewService(id.DefaultServiceConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDService.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newDistribution := &distribution{
 		Config: config,
-		ID:     newID,
+		ID:     id.MustNewID(),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectTypeDistribution,
 	}

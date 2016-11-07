@@ -9,44 +9,44 @@ import (
 )
 
 func Test_RandomService_NewService_Error_RandService(t *testing.T) {
-	newConfig := DefaultServiceConfig()
+	newConfig := DefaultConfig()
 	newConfig.RandFactory = nil
 
-	_, err := NewService(newConfig)
+	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
 func Test_RandomService_NewService_Error_RandReader(t *testing.T) {
-	newConfig := DefaultServiceConfig()
+	newConfig := DefaultConfig()
 	newConfig.RandReader = nil
 
-	_, err := NewService(newConfig)
+	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
 func Test_RandomService_NewService_Error_Timeout(t *testing.T) {
-	newConfig := DefaultServiceConfig()
+	newConfig := DefaultConfig()
 	newConfig.Timeout = 0
 
-	_, err := NewService(newConfig)
+	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {
 		t.Fatal("expected", nil, "got", err)
 	}
 }
 
 func Test_RandomService_CreateNBetween_Error_RandReader(t *testing.T) {
-	newConfig := DefaultServiceConfig()
+	newConfig := DefaultConfig()
 	newConfig.Timeout = 10 * time.Millisecond
 
 	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
 		return nil, maskAny(invalidConfigError)
 	}
 
-	newService, err := NewService(newConfig)
+	newService, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -61,7 +61,7 @@ func Test_RandomService_CreateNBetween_Error_RandReader(t *testing.T) {
 }
 
 func Test_RandomService_CreateNBetween_Error_Timeout(t *testing.T) {
-	newConfig := DefaultServiceConfig()
+	newConfig := DefaultConfig()
 	newConfig.Timeout = 20 * time.Millisecond
 
 	newConfig.RandFactory = func(randReader io.Reader, max *big.Int) (n *big.Int, err error) {
@@ -69,7 +69,7 @@ func Test_RandomService_CreateNBetween_Error_Timeout(t *testing.T) {
 		return rand.Int(randReader, max)
 	}
 
-	newService, err := NewService(newConfig)
+	newService, err := New(newConfig)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
@@ -84,7 +84,7 @@ func Test_RandomService_CreateNBetween_Error_Timeout(t *testing.T) {
 }
 
 func Test_RandomService_CreateNBetween_GenerateNNumbers(t *testing.T) {
-	newService := MustNewService()
+	newService := MustNew()
 
 	n := 5
 	max := 10
@@ -99,7 +99,7 @@ func Test_RandomService_CreateNBetween_GenerateNNumbers(t *testing.T) {
 }
 
 func Test_RandomService_CreateNBetween_GenerateRandomNumbers(t *testing.T) {
-	newService := MustNewService()
+	newService := MustNew()
 
 	n := 100
 	max := 10

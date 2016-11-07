@@ -41,7 +41,7 @@ func DefaultConfig() Config {
 func NewFileSystem(config Config) servicespec.FS {
 	newFileSystem := &osFileSystem{
 		Config: config,
-		ID:     id.MustNew(),
+		ID:     id.MustNewID(),
 		Mutex:  sync.Mutex{},
 		Type:   ObjectType,
 	}

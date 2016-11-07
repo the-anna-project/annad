@@ -55,7 +55,7 @@ func New(config Config) (systemspec.Forwarder, error) {
 	newForwarder := &forwarder{
 		Config: config,
 
-		ID:   id.MustNew(),
+		ID:   id.MustNewID(),
 		Type: ObjectType,
 	}
 

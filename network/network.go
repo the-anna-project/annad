@@ -21,7 +21,6 @@ import (
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 
@@ -84,7 +83,7 @@ func New(config Config) (systemspec.Network, error) {
 
 		BootOnce:     sync.Once{},
 		Closer:       make(chan struct{}, 1),
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,
 	}
@@ -310,8 +309,8 @@ func (n *network) InputListener(canceler <-chan struct{}) error {
 		select {
 		case <-canceler:
 			return maskAny(workerCanceledError)
-		case textRequest := <-n.Service().TextInput().GetChannel():
-			err := n.InputHandler(CLG, textRequest)
+		case textInput := <-n.Service().TextInput().GetChannel():
+			err := n.InputHandler(CLG, textInput)
 			if err != nil {
 				n.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: n, V: 4}, "%#v", maskAny(err))
 			}
@@ -319,13 +318,13 @@ func (n *network) InputListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (n *network) InputHandler(CLG systemspec.CLG, textRequest servicespec.TextRequest) error {
+func (n *network) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInput) error {
 	// In case the text request defines the echo flag, we overwrite the given CLG
 	// directly to the output CLG. This will cause the created network payload to
 	// be forwarded to the output CLG without indirection. Note that this should
 	// only be used for testing purposes to bypass more complex neural network
 	// activities to directly respond with the received input.
-	if textRequest.GetEcho() {
+	if textInput.GetEcho() {
 		var ok bool
 		CLG, ok = n.CLGs["output"]
 		if !ok {
@@ -348,13 +347,13 @@ func (n *network) InputHandler(CLG systemspec.CLG, textRequest servicespec.TextR
 	ctx.SetBehaviourID(string(behaviourID))
 	ctx.SetCLGName(CLG.GetName())
 	ctx.SetCLGTreeID(string(clgTreeID))
-	ctx.SetExpectation(textRequest.GetExpectation())
-	ctx.SetSessionID(textRequest.GetSessionID())
+	ctx.SetExpectation(textInput.GetExpectation())
+	ctx.SetSessionID(textInput.GetSessionID())
 
 	// We transform the received text request to a network payload to have a
 	// conventional data structure within the neural network.
 	newNetworkPayloadConfig := networkpayload.DefaultConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textRequest.GetInput())}
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textInput.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
 	newNetworkPayloadConfig.Destination = behaviourID
 	newNetworkPayloadConfig.Sources = []string{n.GetID()}

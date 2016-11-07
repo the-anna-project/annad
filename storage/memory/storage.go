@@ -77,7 +77,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 		StorageConfig: config,
 
 		Closer:       closer,
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		RedisStorage: newRedisStorage,
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,

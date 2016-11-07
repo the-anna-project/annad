@@ -39,19 +39,10 @@ func DefaultFeatureConfig() FeatureConfig {
 // NewFeature creates a new configured feature object. A feature represents a
 // differentiable part of a given sequence.
 func NewFeature(config FeatureConfig) (spec.Feature, error) {
-	newIDService, err := id.NewService(id.DefaultServiceConfig())
-	if err != nil {
-		panic(err)
-	}
-	newID, err := newIDService.WithType(id.Hex128)
-	if err != nil {
-		panic(err)
-	}
-
 	newFeature := &feature{
 		Distribution:  nil,
 		FeatureConfig: config,
-		ID:            newID,
+		ID:            id.MustNewID(),
 		Mutex:         sync.Mutex{},
 		Type:          ObjectTypeFeature,
 	}

@@ -6,6 +6,8 @@ import (
 
 	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/log"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	"github.com/xh3b4sd/anna/object/textinput"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
@@ -41,7 +43,7 @@ func NewServer(config ServerConfig) (TextInterfaceServer, error) {
 	newServer := &server{
 		ServerConfig: config,
 
-		ID:    id.MustNew(),
+		ID:    id.MustNewID(),
 		Mutex: sync.Mutex{},
 		Type:  ObjectType,
 	}
@@ -78,18 +80,18 @@ func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *StreamTe
 	return streamTextResponse
 }
 
-func (s *server) EncodeRequest(streamTextRequest *StreamTextRequest) (servicespec.TextRequest, error) {
-	textRequestConfig := api.DefaultTextRequestConfig()
-	textRequestConfig.Echo = streamTextRequest.Echo
-	//textRequestConfig.Expectation = streamTextRequest.Expectation
-	textRequestConfig.Input = streamTextRequest.Input
-	textRequestConfig.SessionID = streamTextRequest.SessionID
-	textRequest, err := api.NewTextRequest(textRequestConfig)
+func (s *server) EncodeRequest(streamTextRequest *StreamTextRequest) (objectspec.TextInput, error) {
+	textInputConfig := textinput.DefaultConfig()
+	textInputConfig.Echo = streamTextRequest.Echo
+	//textInputConfig.Expectation = streamTextRequest.Expectation
+	textInputConfig.Input = streamTextRequest.Input
+	textInputConfig.SessionID = streamTextRequest.SessionID
+	textInput, err := textinput.New(textInputConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
 
-	return textRequest, nil
+	return textInput, nil
 }
 
 func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
