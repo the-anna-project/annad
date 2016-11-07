@@ -24,7 +24,7 @@ const (
 // interface object.
 type ServerConfig struct {
 	Log               systemspec.Log
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 }
 
 // DefaultServerConfig provides a default configuration to create a new text

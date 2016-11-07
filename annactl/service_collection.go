@@ -9,10 +9,10 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
-func newServiceCollection() (spec.ServiceCollection, error) {
+func newServiceCollection() (servicespec.Collection, error) {
 	fileSystemService, err := newFileSystemService()
 	if err != nil {
 		return nil, maskAny(err)
@@ -77,7 +77,7 @@ func newPermutationService() (servicespec.Permutation, error) {
 
 func newRandomService() (servicespec.Random, error) {
 	newConfig := random.DefaultConfig()
-	newConfig.BackoffFactory = func() spec.Backoff {
+	newConfig.BackoffFactory = func() systemspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 	newService, err := random.New(newConfig)

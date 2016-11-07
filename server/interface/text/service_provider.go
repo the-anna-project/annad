@@ -1,9 +1,9 @@
 package text
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-func (s *server) Service() spec.ServiceCollection {
+func (s *server) Service() servicespec.Collection {
 	return s.ServiceCollection
 }

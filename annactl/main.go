@@ -10,13 +10,14 @@ import (
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	// ObjectType represents the object type of the command line object.  This is
 	// used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "annactl"
+	ObjectType systemspec.ObjectType = "annactl"
 )
 
 var (
@@ -29,10 +30,10 @@ var (
 // object.
 type Config struct {
 	// Dependencies.
-	Log               spec.Log
-	LogControl        spec.LogControl
-	ServiceCollection spec.ServiceCollection
-	TextInterface     spec.TextInterfaceClient
+	Log               systemspec.Log
+	LogControl        systemspec.LogControl
+	ServiceCollection servicespec.Collection
+	TextInterface     systemspec.TextInterfaceClient
 
 	// Settings.
 	Flags     Flags
@@ -70,7 +71,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured command line object.
-func New(config Config) (spec.Annactl, error) {
+func New(config Config) (systemspec.Annactl, error) {
 	// annactl
 	newAnnactl := &annactl{
 		Config: config,
@@ -79,7 +80,7 @@ func New(config Config) (spec.Annactl, error) {
 		Closer:       make(chan struct{}, 1),
 		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
-		Type:         spec.ObjectType(ObjectType),
+		Type:         systemspec.ObjectType(ObjectType),
 	}
 
 	if newAnnactl.Log == nil {
@@ -99,11 +100,11 @@ type annactl struct {
 	Closer       chan struct{}
 	ID           string
 	ShutdownOnce sync.Once
-	Type         spec.ObjectType
+	Type         systemspec.ObjectType
 }
 
 func (a *annactl) Boot() {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
+	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -112,12 +113,12 @@ func (a *annactl) Boot() {
 	})
 }
 
-func (a *annactl) Service() spec.ServiceCollection {
+func (a *annactl) Service() servicespec.Collection {
 	return a.ServiceCollection
 }
 
 func (a *annactl) Shutdown() {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
+	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		close(a.Closer)

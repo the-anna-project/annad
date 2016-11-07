@@ -18,7 +18,7 @@ import (
 type ClientConfig struct {
 	// Dependencies.
 
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 
 	// Settings.
 
