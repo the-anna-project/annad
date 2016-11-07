@@ -15,8 +15,6 @@ import (
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 const (
@@ -38,7 +36,6 @@ type Config struct {
 	Network           systemspec.Network
 	Server            systemspec.Server
 	ServiceCollection servicespec.Collection
-	StorageCollection storagespec.Collection
 
 	// Settings.
 	Flags   Flags
@@ -59,8 +56,6 @@ func DefaultConfig() Config {
 		Network:           network.MustNew(),
 		Server:            newServer,
 		ServiceCollection: service.MustNewCollection(),
-		// TODO remove storage collection
-		StorageCollection: storage.MustNewCollection(),
 
 		// Settings.
 		Flags:   Flags{},
@@ -93,9 +88,6 @@ func New(config Config) (systemspec.Annad, error) {
 	if newAnna.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
-	if newAnna.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
 
 	return newAnna, nil
 }
@@ -114,7 +106,6 @@ func (a *annad) Boot() {
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
-		go a.writeStateInfo()
 
 		a.InitAnnadCmd().Execute()
 	})
@@ -163,10 +154,6 @@ func (a *annad) Shutdown() {
 		a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down annad")
 		os.Exit(0)
 	})
-}
-
-func (a *annad) Storage() storagespec.Collection {
-	return a.StorageCollection
 }
 
 func init() {

@@ -36,19 +36,19 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 
 			// storage collection.
-			a.StorageCollection, err = newStorageCollection(a.Log, a.Flags)
+			newStorageCollection, err := newStorageCollection(a.Log, a.Flags)
 			panicOnError(err)
 
 			// activator.
-			activator, err := newActivator(a.Log, a.ServiceCollection, a.StorageCollection)
+			activator, err := newActivator(a.Log, a.ServiceCollection, newStorageCollection)
 			panicOnError(err)
 
 			// forwarder.
-			forwarder, err := newForwarder(a.Log, a.ServiceCollection, a.StorageCollection)
+			forwarder, err := newForwarder(a.Log, a.ServiceCollection, newStorageCollection)
 			panicOnError(err)
 
 			// tracker.
-			tracker, err := newTracker(a.Log, a.ServiceCollection, a.StorageCollection)
+			tracker, err := newTracker(a.Log, a.ServiceCollection, newStorageCollection)
 			panicOnError(err)
 
 			// network.
@@ -57,7 +57,7 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			networkConfig.ServiceCollection = a.ServiceCollection
 			networkConfig.Forwarder = forwarder
 			networkConfig.Log = a.Log
-			networkConfig.StorageCollection = a.StorageCollection
+			networkConfig.StorageCollection = newStorageCollection
 			networkConfig.Tracker = tracker
 			a.Network, err = network.New(networkConfig)
 			panicOnError(err)
