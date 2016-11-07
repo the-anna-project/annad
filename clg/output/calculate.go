@@ -11,10 +11,10 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/object/spec"
+	"github.com/xh3b4sd/anna/object/textoutput"
 )
 
 // TODO there is no CLG to read from the certenty pyramid
@@ -91,7 +91,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// calculated. This then means we are probably not in a training situation.
 	expectation, ok := ctx.GetExpectation()
 	if !ok {
-		err := c.sendTextResponse(ctx, informationSequence)
+		err := c.sendTextOutput(ctx, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -104,7 +104,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// calculated result, we simply return it.
 	calculatedOutput := expectation.GetOutput()
 	if informationSequence == calculatedOutput {
-		err := c.sendTextResponse(ctx, informationSequence)
+		err := c.sendTextOutput(ctx, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -124,17 +124,17 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	return maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
 }
 
-func (c *clg) sendTextResponse(ctx spec.Context, informationSequence string) error {
+func (c *clg) sendTextOutput(ctx spec.Context, informationSequence string) error {
 	// Return the calculated output to the requesting client, if the
 	// current CLG is the output CLG.
-	newTextResponseConfig := api.DefaultTextResponseConfig()
-	newTextResponseConfig.Output = informationSequence
-	newTextResponse, err := api.NewTextResponse(newTextResponseConfig)
+	newTextOutputConfig := textoutput.DefaultConfig()
+	newTextOutputConfig.Output = informationSequence
+	newTextOutput, err := textoutput.New(newTextOutputConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
-	c.Service().TextOutput().GetChannel() <- newTextResponse
+	c.Service().TextOutput().GetChannel() <- newTextOutput
 
 	return nil
 }
