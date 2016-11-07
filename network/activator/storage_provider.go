@@ -1,9 +1,9 @@
 package activator
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func (a *activator) Storage() spec.StorageCollection {
+func (a *activator) Storage() storagespec.Collection {
 	return a.StorageCollection
 }

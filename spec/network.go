@@ -1,7 +1,9 @@
 package spec
 
 import (
-	"github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 // Network provides a neural network based on dynamic and self improving CLG
@@ -29,7 +31,7 @@ type Network interface {
 	//                             | CLG |
 	//                             |-----|
 	//
-	Activate(CLG CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error)
+	Activate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
@@ -45,7 +47,7 @@ type Network interface {
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
-	Calculate(CLG CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error)
+	Calculate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
 	// EventListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network events. A network event is qualified by
@@ -59,9 +61,7 @@ type Network interface {
 
 	// EventHandler effectively executes a network event associated to a CLG and
 	// the corresponding network payload. EventHandler is called by EventListener.
-	EventHandler(CLG CLG, networkPayload spec.NetworkPayload) error
-
-	ServiceProvider
+	EventHandler(CLG CLG, networkPayload objectspec.NetworkPayload) error
 
 	// Forward is triggered after the CLGs calculation. Here will be decided what
 	// to do next. Like Activate, it is up to the CLG if it forwards signals to
@@ -83,7 +83,7 @@ type Network interface {
 	//     | CLG |     | CLG |     | CLG |     | CLG |     | CLG |
 	//     |-----|     |-----|     |-----|     |-----|     |-----|
 	//
-	Forward(CLG CLG, networkPayload spec.NetworkPayload) error
+	Forward(CLG CLG, networkPayload objectspec.NetworkPayload) error
 
 	// InputListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network inputs. A network input is qualified by
@@ -94,7 +94,7 @@ type Network interface {
 	// InputHandler effectively executes the network input by invoking the input
 	// CLG using the incoming text request. InputHandler is called by
 	// InputListener.
-	InputHandler(CLG CLG, textInput spec.TextInput) error
+	InputHandler(CLG CLG, textInput objectspec.TextInput) error
 
 	Object
 
@@ -106,7 +106,9 @@ type Network interface {
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of
 	// the neural network to act accordingly.
-	Track(CLG CLG, networkPayload spec.NetworkPayload) error
+	Track(CLG CLG, networkPayload objectspec.NetworkPayload) error
 
-	StorageProvider
+	servicespec.Provider
+
+	storagespec.Provider
 }

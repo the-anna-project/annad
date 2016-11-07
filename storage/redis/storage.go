@@ -9,28 +9,29 @@ import (
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 const (
 	// ObjectType represents the object type of the redis storage object. This is
 	// used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "redis-storage"
+	ObjectType systemspec.ObjectType = "redis-storage"
 )
 
 // StorageConfig represents the configuration used to create a new redis
 // storage object.
 type StorageConfig struct {
 	// Dependencies.
-	Instrumentation spec.Instrumentation
-	Log             spec.Log
+	Instrumentation systemspec.Instrumentation
+	Log             systemspec.Log
 	Pool            *redis.Pool
 
 	// Settings.
 
 	// BackoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	BackoffFactory func() spec.Backoff
+	BackoffFactory func() systemspec.Backoff
 
 	Prefix string
 }
@@ -83,7 +84,7 @@ func DefaultStorageConfig() StorageConfig {
 		Pool:            NewPool(DefaultPoolConfig()),
 
 		// Settings.
-		BackoffFactory: func() spec.Backoff {
+		BackoffFactory: func() systemspec.Backoff {
 			return &backoff.StopBackOff{}
 		},
 		Prefix: "prefix",
@@ -93,7 +94,7 @@ func DefaultStorageConfig() StorageConfig {
 }
 
 // NewStorage creates a new configured redis storage object.
-func NewStorage(config StorageConfig) (spec.Storage, error) {
+func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 	newStorage := &storage{
 		StorageConfig: config,
 
@@ -127,11 +128,11 @@ type storage struct {
 
 	ID           string
 	ShutdownOnce sync.Once
-	Type         spec.ObjectType
+	Type         systemspec.ObjectType
 }
 
 func (s *storage) Shutdown() {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		s.Pool.Close()

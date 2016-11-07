@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/xh3b4sd/anna/network/tracker"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func newTracker(newLog spec.Log, newServiceCollection spec.ServiceCollection, newStorageCollection spec.StorageCollection) (spec.Tracker, error) {
+func newTracker(newLog systemspec.Log, newServiceCollection servicespec.Collection, newStorageCollection storagespec.Collection) (systemspec.Tracker, error) {
 	newTrackerConfig := tracker.DefaultConfig()
 	newTrackerConfig.ServiceCollection = newServiceCollection
 	newTrackerConfig.Log = newLog

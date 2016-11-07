@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/xh3b4sd/anna/network/forwarder"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func newForwarder(newLog spec.Log, newServiceCollection spec.ServiceCollection, newStorageCollection spec.StorageCollection) (spec.Forwarder, error) {
+func newForwarder(newLog systemspec.Log, newServiceCollection servicespec.Collection, newStorageCollection storagespec.Collection) (systemspec.Forwarder, error) {
 	newForwarderConfig := forwarder.DefaultConfig()
 	newForwarderConfig.ServiceCollection = newServiceCollection
 	newForwarderConfig.Log = newLog

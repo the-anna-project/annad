@@ -1,9 +1,9 @@
 package network
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-func (n *network) Service() spec.ServiceCollection {
+func (n *network) Service() servicespec.Collection {
 	return n.ServiceCollection
 }

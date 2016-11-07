@@ -3,8 +3,8 @@ package storage
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/memory"
+	"github.com/xh3b4sd/anna/storage/spec"
 )
 
 // CollectionConfig represents the configuration used to create a new storage
@@ -28,7 +28,7 @@ func DefaultCollectionConfig() CollectionConfig {
 }
 
 // NewCollection creates a new configured storage collection object.
-func NewCollection(config CollectionConfig) (spec.StorageCollection, error) {
+func NewCollection(config CollectionConfig) (spec.Collection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,
 
@@ -47,7 +47,7 @@ func NewCollection(config CollectionConfig) (spec.StorageCollection, error) {
 
 // MustNewCollection creates either a new default configured storage collection
 // object, or panics.
-func MustNewCollection() spec.StorageCollection {
+func MustNewCollection() spec.Collection {
 	newCollection, err := NewCollection(DefaultCollectionConfig())
 	if err != nil {
 		panic(err)

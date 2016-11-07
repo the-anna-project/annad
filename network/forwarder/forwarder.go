@@ -9,8 +9,10 @@ import (
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 const (
@@ -22,9 +24,9 @@ const (
 // Config represents the configuration used to create a new forwarder object.
 type Config struct {
 	// Dependencies.
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 	Log               systemspec.Log
-	StorageCollection systemspec.StorageCollection
+	StorageCollection storagespec.Collection
 
 	// Settings.
 

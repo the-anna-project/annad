@@ -5,10 +5,10 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func testMustNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
+func testMustNewStorageWithConn(t *testing.T, c redis.Conn) storagespec.Storage {
 	newStorage, err := NewStorage(DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

@@ -1,6 +1,10 @@
 package spec
 
-import "github.com/xh3b4sd/anna/object/spec"
+import (
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
+)
 
 // Activator represents an management layer to organize CLG activation rules.
 // The activator obtains network payloads for every single requested CLG of
@@ -18,9 +22,7 @@ type Activator interface {
 	// Activate found a matching network payload, the network payloads it is made
 	// of are removed from the stored queue and the created network payload is
 	// returned. The modifications of the updated queue are also persisted.
-	Activate(CLG CLG, networkPayload spec.NetworkPayload) (spec.NetworkPayload, error)
-
-	ServiceProvider
+	Activate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
 	// GetNetworkPayload compares the given queue against the stored configuration
 	// of the requested CLG. This configuration is a combination of behaviour IDs
@@ -34,7 +36,7 @@ type Activator interface {
 	// stored queue. In case no activation configuration of the requested CLG is
 	// stored, or no match using the stored configuration associated with the
 	// requested CLG can be found, an error is returned.
-	GetNetworkPayload(CLG CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error)
+	GetNetworkPayload(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
 	// New uses the given queue to find a combination of network
 	// payloads that fulfill the interface of the requested CLG. This creation
@@ -43,7 +45,9 @@ type Activator interface {
 	// CLG, this found combination is stored as activation configuration for the
 	// requested CLG. In case no match using the permuted network payloads of the
 	// given queue can be found, an error is returned.
-	New(CLG CLG, queue []spec.NetworkPayload) (spec.NetworkPayload, error)
+	New(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
-	StorageProvider
+	servicespec.Provider
+
+	storagespec.Provider
 }
