@@ -4,8 +4,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textinput"
 	"github.com/xh3b4sd/anna/service"
@@ -70,11 +70,11 @@ type server struct {
 
 func (s *server) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextResponse {
 	streamTextResponse := &StreamTextResponse{
-		Code: api.CodeData,
+		Code: networkresponse.CodeData,
 		Data: &StreamTextResponseData{
 			Output: textOutput.GetOutput(),
 		},
-		Text: api.TextData,
+		Text: networkresponse.TextData,
 	}
 
 	return streamTextResponse

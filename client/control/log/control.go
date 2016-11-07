@@ -6,7 +6,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -63,16 +63,16 @@ func (c *control) ResetLevels(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.ResetLevelsResponse)
+	apiResponse := response.(networkresponse.ResetLevels)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.
@@ -89,16 +89,16 @@ func (c *control) ResetObjects(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.ResetObjectsResponse)
+	apiResponse := response.(networkresponse.ResetObjects)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.
@@ -115,16 +115,16 @@ func (c *control) ResetVerbosity(ctx context.Context) error {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.ResetVerbosityResponse)
+	apiResponse := response.(networkresponse.ResetVerbosity)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.
@@ -136,21 +136,21 @@ func (c *control) ResetVerbosity(ctx context.Context) error {
 }
 
 func (c *control) SetLevels(ctx context.Context, levels string) error {
-	response, err := c.setLevels(ctx, api.SetLevelsRequest{Levels: levels})
+	response, err := c.setLevels(ctx, networkresponse.SetLevelsRequest{Levels: levels})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.SetLevelsResponse)
+	apiResponse := response.(networkresponse.SetLevels)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.
@@ -162,21 +162,21 @@ func (c *control) SetLevels(ctx context.Context, levels string) error {
 }
 
 func (c *control) SetObjects(ctx context.Context, objects string) error {
-	response, err := c.setObjects(ctx, api.SetObjectsRequest{Objects: objects})
+	response, err := c.setObjects(ctx, networkresponse.SetObjectsRequest{Objects: objects})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.SetObjectsResponse)
+	apiResponse := response.(networkresponse.SetObjects)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.
@@ -188,21 +188,21 @@ func (c *control) SetObjects(ctx context.Context, objects string) error {
 }
 
 func (c *control) SetVerbosity(ctx context.Context, verbosity int) error {
-	response, err := c.setVerbosity(ctx, api.SetVerbosityRequest{Verbosity: verbosity})
+	response, err := c.setVerbosity(ctx, networkresponse.SetVerbosityRequest{Verbosity: verbosity})
 	if err != nil {
 		return maskAnyf(invalidAPIResponseError, err.Error())
 	}
 
-	apiResponse := response.(api.SetVerbosityResponse)
+	apiResponse := response.(networkresponse.SetVerbosity)
 
-	if api.WithError(nil).Code == apiResponse.Code {
+	if networkresponse.WithError(nil).Code == apiResponse.Code {
 		switch t := apiResponse.Data.(type) {
 		case string:
 			return maskAnyf(invalidAPIResponseError, t)
 		}
 	}
 
-	if api.WithSuccess().Code == apiResponse.Code {
+	if networkresponse.WithSuccess().Code == apiResponse.Code {
 		switch apiResponse.Data.(type) {
 		case string:
 			// We received the expected response.

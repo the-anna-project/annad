@@ -6,7 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textoutput"
 	"github.com/xh3b4sd/anna/service"
@@ -70,8 +70,8 @@ type client struct {
 }
 
 func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objectspec.TextOutput, error) {
-	if streamTextResponse.Code != api.CodeData {
-		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
+	if streamTextResponse.Code != networkresponse.CodeData {
+		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", networkresponse.CodeData)
 	}
 
 	textOutputConfig := textoutput.DefaultConfig()

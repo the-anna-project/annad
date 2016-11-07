@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 )
 
 // reset levels
@@ -23,7 +23,7 @@ func resetLevelsEncoder(ctx context.Context, r *http.Request, request interface{
 }
 
 func resetLevelsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.ResetLevelsResponse
+	var response networkresponse.ResetLevels
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -40,7 +40,7 @@ func resetObjectsEncoder(ctx context.Context, r *http.Request, request interface
 }
 
 func resetObjectsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.ResetObjectsResponse
+	var response networkresponse.ResetObjects
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -57,7 +57,7 @@ func resetVerbosityEncoder(ctx context.Context, r *http.Request, request interfa
 }
 
 func resetVerbosityDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.ResetVerbosityResponse
+	var response networkresponse.ResetVerbosity
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -74,7 +74,7 @@ func setLevelsEncoder(ctx context.Context, r *http.Request, request interface{})
 }
 
 func setLevelsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.SetLevelsResponse
+	var response networkresponse.SetLevels
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -91,7 +91,7 @@ func setObjectsEncoder(ctx context.Context, r *http.Request, request interface{}
 }
 
 func setObjectsDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.SetObjectsResponse
+	var response networkresponse.SetObjects
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }
@@ -108,7 +108,7 @@ func setVerbosityEncoder(ctx context.Context, r *http.Request, request interface
 }
 
 func setVerbosityDecoder(ctx context.Context, resp *http.Response) (interface{}, error) {
-	var response api.SetVerbosityResponse
+	var response networkresponse.SetVerbosity
 	err := json.NewDecoder(resp.Body).Decode(&response)
 	return response, maskAny(err)
 }

@@ -1,25 +1,25 @@
-package api
+package networkresponse
 
 // reset levels
 
-// ResetLevelsResponse represents the response's payload of the route used to
+// ResetLevels represents the response's payload of the route used to
 // reset log levels. This payload by convention follows the same schema as all
 // other API responses.
-type ResetLevelsResponse Response
+type ResetLevels Object
 
 // reset object types
 
-// ResetObjectsResponse represents the response's payload of the route used to
+// ResetObjects represents the response's payload of the route used to
 // reset log objects. This payload by convention follows the same schema as all
 // other API responses.
-type ResetObjectsResponse Response
+type ResetObjects Object
 
 // reset verbosity
 
-// ResetVerbosityResponse represents the response's payload of the route used to
+// ResetVerbosity represents the response's payload of the route used to
 // reset log verbosity. This payload by convention follows the same schema as
 // all other API responses.
-type ResetVerbosityResponse Response
+type ResetVerbosity Object
 
 // set levels
 
@@ -29,10 +29,10 @@ type SetLevelsRequest struct {
 	Levels string `json:"levels,omitempty"`
 }
 
-// SetLevelsResponse represents the response's payload of the route used to set
+// SetLevels represents the response's payload of the route used to set
 // log levels. This payload by convention follows the same schema as all other
 // API responses.
-type SetLevelsResponse Response
+type SetLevels Object
 
 // set object types
 
@@ -42,10 +42,10 @@ type SetObjectsRequest struct {
 	Objects string `json:"objects,omitempty"`
 }
 
-// SetObjectsResponse represents the response's payload of the route used to set
+// SetObjects represents the response's payload of the route used to set
 // log objects. This payload by convention follows the same schema as all
 // other API responses.
-type SetObjectsResponse Response
+type SetObjects Object
 
 // set verbosity types
 
@@ -55,7 +55,7 @@ type SetVerbosityRequest struct {
 	Verbosity int `json:"verbosity,omitempty"`
 }
 
-// SetVerbosityResponse represents the response's payload of the route used to
+// SetVerbosity represents the response's payload of the route used to
 // set log verbosity. This payload by convention follows the same schema as
 // all other API responses.
-type SetVerbosityResponse Response
+type SetVerbosity Object

@@ -1,7 +1,7 @@
-// Package api implements structures and helpers for network responses. The
-// server packages makes use of this to provide a consistent API response
-// scheme.
-package api
+// Package networkresponse implements structures and helpers for network
+// responses. The server packages makes use of this to provide a consistent API
+// response scheme.
+package networkresponse
 
 var (
 	// CodeData represents the API response code of a data response.
@@ -23,8 +23,8 @@ var (
 	TextError = "error"
 )
 
-// Response is the response type each API call should return.
-type Response struct {
+// Object is the response type each API call should return.
+type Object struct {
 	Code string      `json:"code,omitempty"`
 	Data interface{} `json:"data,omitempty"`
 	Text string      `json:"text,omitempty"`
@@ -32,8 +32,8 @@ type Response struct {
 
 // WithData returns a response having the given data set as Data. Text 'data'
 // translates to the Code 10001.
-func WithData(data interface{}) Response {
-	return Response{
+func WithData(data interface{}) Object {
+	return Object{
 		Code: CodeData,
 		Data: data,
 		Text: TextData,
@@ -42,8 +42,8 @@ func WithData(data interface{}) Response {
 
 // WithSuccess returns a response indicating the success of the requested
 // action. Text 'success' translates to the Code 10002.
-func WithSuccess() Response {
-	return Response{
+func WithSuccess() Object {
+	return Object{
 		Code: CodeSuccess,
 		Data: "",
 		Text: TextSuccess,
@@ -52,12 +52,12 @@ func WithSuccess() Response {
 
 // WithError returns a response indicating an error of the requested action.
 // Text 'error' translates to the Code 10003.
-func WithError(err error) Response {
+func WithError(err error) Object {
 	msg := ""
 	if err != nil {
 		msg = err.Error()
 	}
-	return Response{
+	return Object{
 		Code: CodeError,
 		Data: msg,
 		Text: TextError,

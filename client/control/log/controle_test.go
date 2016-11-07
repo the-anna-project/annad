@@ -11,7 +11,7 @@ import (
 	"github.com/juju/errgo"
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/api"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -38,10 +38,10 @@ func testMaybeNewLogControlAndServer(t *testing.T, handler http.Handler) (spec.L
 // reset levels
 
 // Test_Log_LogControl_ResetLevels_001 checks for LogControl.ResetLevels to work
-// properly under normal conditions using api.WithSuccess.
+// properly under normal conditions using networkresponse.WithSuccess.
 func Test_Log_LogControl_ResetLevels_001(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -57,10 +57,10 @@ func Test_Log_LogControl_ResetLevels_001(t *testing.T) {
 }
 
 // Test_Log_LogControl_ResetLevels_002 checks for LogControl.ResetLevels to handle
-// errors properly on valid error responses using api.WithError.
+// errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_ResetLevels_002(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -108,10 +108,10 @@ func Test_Log_LogControl_ResetLevels_004(t *testing.T) {
 // reset objects
 
 // Test_Log_LogControl_ResetObjects_005 checks for LogControl.ResetObjects to work
-// properly under normal conditions using api.WithSuccess.
+// properly under normal conditions using networkresponse.WithSuccess.
 func Test_Log_LogControl_ResetObjects_005(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -127,10 +127,10 @@ func Test_Log_LogControl_ResetObjects_005(t *testing.T) {
 }
 
 // Test_Log_LogControl_ResetObjects_006 checks for LogControl.ResetObjects to
-// handle errors properly on valid error responses using api.WithError.
+// handle errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_ResetObjects_006(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -178,10 +178,10 @@ func Test_Log_LogControl_ResetObjects_008(t *testing.T) {
 // reset verbosity
 
 // Test_Log_LogControl_ResetVerbosity_009 checks for LogControl.ResetVerbosity to
-// work properly under normal conditions using api.WithSuccess.
+// work properly under normal conditions using networkresponse.WithSuccess.
 func Test_Log_LogControl_ResetVerbosity_009(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -197,10 +197,10 @@ func Test_Log_LogControl_ResetVerbosity_009(t *testing.T) {
 }
 
 // Test_Log_LogControl_ResetVerbosity_010 checks for LogControl.ResetVerbosity to
-// handle errors properly on valid error responses using api.WithError.
+// handle errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_ResetVerbosity_010(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -248,10 +248,10 @@ func Test_Log_LogControl_ResetVerbosity_012(t *testing.T) {
 // set levels
 
 // Test_Log_LogControl_SetLevels_013 checks for LogControl.SetLevels to work
-// properly under normal conditions using api.WithSuccess.
+// properly under normal conditions using networkresponsnetworkresponseWithSuccess.
 func Test_Log_LogControl_SetLevels_013(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -267,10 +267,10 @@ func Test_Log_LogControl_SetLevels_013(t *testing.T) {
 }
 
 // Test_Log_LogControl_SetLevels_014 checks for LogControl.SetLevels to handle
-// errors properly on valid error responses using api.WithError.
+// errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_SetLevels_014(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -318,10 +318,10 @@ func Test_Log_LogControl_SetLevels_016(t *testing.T) {
 // set objects
 
 // Test_Log_LogControl_SetObjects_017 checks for LogControl.SetObjects to work
-// properly under normal conditions using api.WithSuccess.
+// properly under normal conditions using networkresponse.WithSuccess.
 func Test_Log_LogControl_SetObjects_017(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -337,10 +337,10 @@ func Test_Log_LogControl_SetObjects_017(t *testing.T) {
 }
 
 // Test_Log_LogControl_SetObjects_018 checks for LogControl.SetObjects to handle
-// errors properly on valid error responses using api.WithError.
+// errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_SetObjects_018(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -388,10 +388,10 @@ func Test_Log_LogControl_SetObjects_020(t *testing.T) {
 // set verbosity
 
 // Test_Log_LogControl_SetVerbosity_021 checks for LogControl.SetVerbosity to work
-// properly under normal conditions using api.WithSuccess.
+// properly under normal conditions using networkresponse.WithSuccess.
 func Test_Log_LogControl_SetVerbosity_021(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithSuccess()
+		response := networkresponse.WithSuccess()
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
@@ -407,10 +407,10 @@ func Test_Log_LogControl_SetVerbosity_021(t *testing.T) {
 }
 
 // Test_Log_LogControl_SetVerbosity_022 checks for LogControl.SetVerbosity to
-// handle errors properly on valid error responses using api.WithError.
+// handle errors properly on valid error responses using networkresponse.WithError.
 func Test_Log_LogControl_SetVerbosity_022(t *testing.T) {
 	newLogControl, ts := testMaybeNewLogControlAndServer(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response := api.WithError(errgo.Newf("test error"))
+		response := networkresponse.WithError(errgo.Newf("test error"))
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			t.Fatalf("json.NewEncoder returned error: %#v", err)
