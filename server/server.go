@@ -95,7 +95,7 @@ func New(config Config) (spec.Server, error) {
 			},
 			Timeout: 3 * time.Second,
 		},
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
 		Type:         spec.ObjectType(ObjectTypeServer),

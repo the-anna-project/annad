@@ -9,12 +9,10 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/service/textinput"
-	"github.com/xh3b4sd/anna/service/textoutput"
-	systemspec "github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/spec"
 )
 
-func newServiceCollection() (systemspec.ServiceCollection, error) {
+func newServiceCollection() (spec.ServiceCollection, error) {
 	fileSystemService, err := newFileSystemService()
 	if err != nil {
 		return nil, maskAny(err)
@@ -31,22 +29,12 @@ func newServiceCollection() (systemspec.ServiceCollection, error) {
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	textInputService, err := newTextInputService()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	textOutputService, err := newTextOutputService()
-	if err != nil {
-		return nil, maskAny(err)
-	}
 
 	newCollectionConfig := service.DefaultCollectionConfig()
 	newCollectionConfig.FSService = fileSystemService
 	newCollectionConfig.IDService = idService
 	newCollectionConfig.PermutationService = permutationService
 	newCollectionConfig.RandomService = randomService
-	newCollectionConfig.TextInputService = textInputService
-	newCollectionConfig.TextOutputService = textOutputService
 	newCollection, err := service.NewCollection(newCollectionConfig)
 	if err != nil {
 		return nil, maskAny(err)
@@ -57,8 +45,8 @@ func newServiceCollection() (systemspec.ServiceCollection, error) {
 
 // TODO make mem/os configurable
 func newFileSystemService() (servicespec.FS, error) {
-	newServiceConfig := mem.DefaultServiceConfig()
-	newService, err := mem.NewService(newServiceConfig)
+	newConfig := mem.DefaultConfig()
+	newService, err := mem.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -67,9 +55,9 @@ func newFileSystemService() (servicespec.FS, error) {
 }
 
 func newIDService(randomService servicespec.Random) (servicespec.ID, error) {
-	newServiceConfig := id.DefaultServiceConfig()
-	newServiceConfig.RandomService = randomService
-	newService, err := id.NewService(newServiceConfig)
+	newConfig := id.DefaultConfig()
+	newConfig.RandomService = randomService
+	newService, err := id.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -78,8 +66,8 @@ func newIDService(randomService servicespec.Random) (servicespec.ID, error) {
 }
 
 func newPermutationService() (servicespec.Permutation, error) {
-	newServiceConfig := permutation.DefaultServiceConfig()
-	newService, err := permutation.NewService(newServiceConfig)
+	newConfig := permutation.DefaultConfig()
+	newService, err := permutation.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -88,31 +76,11 @@ func newPermutationService() (servicespec.Permutation, error) {
 }
 
 func newRandomService() (servicespec.Random, error) {
-	newServiceConfig := random.DefaultServiceConfig()
-	newServiceConfig.BackoffFactory = func() systemspec.Backoff {
+	newConfig := random.DefaultConfig()
+	newConfig.BackoffFactory = func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
-	newService, err := random.NewService(newServiceConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newService, nil
-}
-
-func newTextInputService() (servicespec.TextInput, error) {
-	newServiceConfig := textinput.DefaultServiceConfig()
-	newService, err := textinput.NewService(newServiceConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newService, nil
-}
-
-func newTextOutputService() (servicespec.TextOutput, error) {
-	newServiceConfig := textoutput.DefaultServiceConfig()
-	newService, err := textoutput.NewService(newServiceConfig)
+	newService, err := random.New(newConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

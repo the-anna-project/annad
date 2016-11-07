@@ -121,7 +121,7 @@ func Test_Permutation_Service_PermuteBy_AbsoluteDelta(t *testing.T) {
 		},
 	}
 
-	newService := MustNewService()
+	newService := MustNew()
 
 	for i, testCase := range testCases {
 		// Note we use list service for all test cases.
@@ -181,7 +181,7 @@ func Test_Permutation_Service_PermuteBy_Increment(t *testing.T) {
 	}
 
 	// Note we use the same service for all test cases.
-	newService := MustNewService()
+	newService := MustNew()
 	newList := testMaybeNewList(t)
 
 	for i, testCase := range testCases {
@@ -260,7 +260,7 @@ func Test_Permutation_Service_PermuteBy_RelativeDelta(t *testing.T) {
 	}
 
 	// Note we use the same service for all test cases.
-	newService := MustNewService()
+	newService := MustNew()
 	newList := testMaybeNewList(t)
 
 	for i, testCase := range testCases {

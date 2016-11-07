@@ -27,7 +27,7 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new CLG
 // collection object by best effort.
 func DefaultConfig() Config {
-	newIDService, err := id.NewService(id.DefaultServiceConfig())
+	newIDService, err := id.New(id.DefaultConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +46,7 @@ func New(config Config) (systemspec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 
-		ID:    id.MustNew(),
+		ID:    id.MustNewID(),
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeCLGCollection,
 	}

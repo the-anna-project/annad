@@ -102,7 +102,7 @@ func New(config Config) spec.Log {
 	newLog := log{
 		Config: config,
 
-		ID:                id.MustNew(),
+		ID:                id.MustNewID(),
 		Mutex:             sync.Mutex{},
 		RegisteredObjects: []spec.ObjectType{},
 		Type:              ObjectType,

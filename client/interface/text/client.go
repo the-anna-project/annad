@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/xh3b4sd/anna/api"
+	objectpec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
@@ -82,11 +83,11 @@ func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (service
 	return textResponse, nil
 }
 
-func (c *client) EncodeRequest(textRequest servicespec.TextRequest) *StreamTextRequest {
+func (c *client) EncodeRequest(textInput objectpec.TextInput) *StreamTextRequest {
 	streamTextRequest := &StreamTextRequest{
-		Echo:      textRequest.GetEcho(),
-		Input:     textRequest.GetInput(),
-		SessionID: textRequest.GetSessionID(),
+		Echo:      textInput.GetEcho(),
+		Input:     textInput.GetInput(),
+		SessionID: textInput.GetSessionID(),
 	}
 
 	return streamTextRequest
@@ -138,8 +139,8 @@ func (c *client) StreamText(ctx context.Context) error {
 			select {
 			case <-done:
 				return
-			case textRequest := <-c.Service().TextInput().GetChannel():
-				streamTextRequest := c.EncodeRequest(textRequest)
+			case textInput := <-c.Service().TextInput().GetChannel():
+				streamTextRequest := c.EncodeRequest(textInput)
 				err := stream.Send(streamTextRequest)
 				if err != nil {
 					fail <- maskAny(err)

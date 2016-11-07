@@ -44,7 +44,7 @@ func DefaultConfig() Config {
 func New(config Config) (spec.CLG, error) {
 	newCLG := &clg{
 		Config: config,
-		ID:     id.MustNew(),
+		ID:     id.MustNewID(),
 		Name:   "multiply",
 		Type:   ObjectType,
 	}

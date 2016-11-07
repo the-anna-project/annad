@@ -44,7 +44,7 @@ func New(config Config) (systemspec.Tracker, error) {
 	newTracker := &tracker{
 		Config: config,
 
-		ID:   id.MustNew(),
+		ID:   id.MustNewID(),
 		Type: ObjectType,
 	}
 

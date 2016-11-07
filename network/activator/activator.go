@@ -45,7 +45,7 @@ func New(config Config) (systemspec.Activator, error) {
 	newActivator := &activator{
 		Config: config,
 
-		ID:   id.MustNew(),
+		ID:   id.MustNewID(),
 		Type: ObjectType,
 	}
 

@@ -62,7 +62,7 @@ func DefaultConfig() Config {
 
 		// Settings.
 		Flags:     Flags{},
-		SessionID: string(id.MustNew()),
+		SessionID: string(id.MustNewID()),
 		Version:   version,
 	}
 
@@ -77,7 +77,7 @@ func New(config Config) (spec.Annactl, error) {
 
 		BootOnce:     sync.Once{},
 		Closer:       make(chan struct{}, 1),
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
 		Type:         spec.ObjectType(ObjectType),
 	}

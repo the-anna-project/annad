@@ -52,7 +52,7 @@ func New(config Config) (spec.NetworkPayload, error) {
 	newObject := &networkPayload{
 		Config: config,
 
-		ID: id.MustNew(),
+		ID: id.MustNewID(),
 	}
 
 	return newObject, nil

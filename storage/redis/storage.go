@@ -97,7 +97,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:           id.MustNew(),
+		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
 		Type:         ObjectType,
 	}

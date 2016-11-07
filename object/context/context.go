@@ -47,7 +47,7 @@ func New(config Config) (spec.Context, error) {
 	newContext := &context{
 		Config: config,
 
-		ID: string(id.MustNew()),
+		ID: string(id.MustNewID()),
 	}
 
 	if newContext.Context == nil {

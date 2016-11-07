@@ -45,7 +45,7 @@ func Test_Permutation_NewList_Error_Values(t *testing.T) {
 func Test_Permutation_List_GetIndizes(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	newService := MustNewService()
+	newService := MustNew()
 	newList := testMaybeNewList(t, testValues)
 
 	// Make sure the initial index is empty.
@@ -82,7 +82,7 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 func Test_Permutation_List_GetRawValues(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	newService := MustNewService()
+	newService := MustNew()
 	newList := testMaybeNewList(t, testValues)
 
 	// Make sure the initial values are still obtained on the fresh Service.

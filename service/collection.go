@@ -29,12 +29,12 @@ type CollectionConfig struct {
 func DefaultCollectionConfig() CollectionConfig {
 	newConfig := CollectionConfig{
 		// Dependencies.
-		FSService:          mem.MustNewService(),
-		IDService:          id.MustNewService(),
-		PermutationService: permutation.MustNewService(),
-		RandomService:      random.MustNewService(),
-		TextInputService:   textinput.MustNewService(),
-		TextOutputService:  textoutput.MustNewService(),
+		FSService:          mem.MustNew(),
+		IDService:          id.MustNew(),
+		PermutationService: permutation.MustNew(),
+		RandomService:      random.MustNew(),
+		TextInputService:   textinput.MustNew(),
+		TextOutputService:  textoutput.MustNew(),
 	}
 
 	return newConfig
