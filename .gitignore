@@ -2,3 +2,5 @@
 coverage.txt
 profile.out
 .workspace
+clg/*/generate*
+*.pb.go
