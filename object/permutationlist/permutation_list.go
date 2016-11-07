@@ -1,12 +1,12 @@
-package permutation
+package permutationlist
 
 import (
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
 )
 
-// ListConfig represents the configuration used to create a new permutation
+// Config represents the configuration used to create a new permutation
 // list object.
-type ListConfig struct {
+type Config struct {
 	// Settings.
 
 	// Indizes represents an ordered list where each index represents a raw value
@@ -20,10 +20,10 @@ type ListConfig struct {
 	RawValues []interface{}
 }
 
-// DefaultListConfig provides a default configuration to create a new
+// DefaultConfig provides a default configuration to create a new
 // permutation list object by best effort.
-func DefaultListConfig() ListConfig {
-	newConfig := ListConfig{
+func DefaultConfig() Config {
+	newConfig := Config{
 		// Settings.
 		Indizes:   []int{},
 		MaxGrowth: 5,
@@ -33,28 +33,28 @@ func DefaultListConfig() ListConfig {
 	return newConfig
 }
 
-// NewList creates a new configured permutation list object.
-func NewList(config ListConfig) (spec.PermutationList, error) {
+// New creates a new configured permutation list object.
+func New(config Config) (objectspec.PermutationList, error) {
 	// Create new object.
-	newList := &list{
-		ListConfig: config,
+	newObject := &list{
+		Config: config,
 
 		PermutedValues: []interface{}{},
 	}
 
 	// Validate new object.
-	if newList.MaxGrowth < 1 {
+	if newObject.MaxGrowth < 1 {
 		return nil, maskAnyf(invalidConfigError, "max growth must be 1 or greater")
 	}
-	if len(newList.RawValues) < 2 {
+	if len(newObject.RawValues) < 2 {
 		return nil, maskAnyf(invalidConfigError, "raw values must be 2 or greater")
 	}
 
-	return newList, nil
+	return newObject, nil
 }
 
 type list struct {
-	ListConfig
+	Config
 
 	// PermutedValues represents the permuted list of RawValues. Initially this is
 	// the zero value []interface{}{}.

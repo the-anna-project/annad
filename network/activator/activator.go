@@ -5,6 +5,7 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/object/permutationlist"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
@@ -260,10 +261,10 @@ func (a *activator) New(CLG systemspec.CLG, queue []objectspec.NetworkPayload) (
 
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.
-	newPermutationListConfig := permutation.DefaultListConfig()
+	newPermutationListConfig := permutationlist.DefaultConfig()
 	newPermutationListConfig.MaxGrowth = len(clgTypes)
 	newPermutationListConfig.RawValues = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newPermutationListConfig)
+	newPermutationList, err := permutationlist.New(newPermutationListConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

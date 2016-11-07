@@ -34,7 +34,8 @@
 package permutation
 
 import (
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // Config represents the configuration used to create a new permutation
@@ -50,7 +51,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured permutation service object.
-func New(config Config) (spec.Permutation, error) {
+func New(config Config) (servicespec.Permutation, error) {
 	// Create new object.
 	newService := &service{
 		Config: config,
@@ -61,7 +62,7 @@ func New(config Config) (spec.Permutation, error) {
 
 // MustNew creates either a new default configured random service object,
 // or panics.
-func MustNew() spec.Permutation {
+func MustNew() servicespec.Permutation {
 	newService, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -74,7 +75,7 @@ type service struct {
 	Config
 }
 
-func (s *service) PermuteBy(list spec.PermutationList, delta int) error {
+func (s *service) PermuteBy(list objectspec.PermutationList, delta int) error {
 	if delta < 1 {
 		return nil
 	}
