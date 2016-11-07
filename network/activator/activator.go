@@ -5,12 +5,15 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/object/permutationlist"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/permutation"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 const (
@@ -22,9 +25,9 @@ const (
 // Config represents the configuration used to create a new activator object.
 type Config struct {
 	// Dependencies.
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 	Log               systemspec.Log
-	StorageCollection systemspec.StorageCollection
+	StorageCollection storagespec.Collection
 }
 
 // DefaultConfig provides a default configuration to create a new activator
@@ -258,10 +261,10 @@ func (a *activator) New(CLG systemspec.CLG, queue []objectspec.NetworkPayload) (
 
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.
-	newPermutationListConfig := permutation.DefaultListConfig()
+	newPermutationListConfig := permutationlist.DefaultConfig()
 	newPermutationListConfig.MaxGrowth = len(clgTypes)
 	newPermutationListConfig.RawValues = queueToValues(queue)
-	newPermutationList, err := permutation.NewList(newPermutationListConfig)
+	newPermutationList, err := permutationlist.New(newPermutationListConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}

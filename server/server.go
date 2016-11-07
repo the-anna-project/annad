@@ -16,22 +16,22 @@ import (
 	logcontrol "github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 const (
 	// ObjectTypeServer represents the object type of the server object. This is
 	// used e.g. to register itself to the logger.
-	ObjectTypeServer spec.ObjectType = "server"
+	ObjectTypeServer systemspec.ObjectType = "server"
 )
 
 // Config represents the configuration used to create a new server object.
 type Config struct {
 	// Dependencies.
 
-	Instrumentation spec.Instrumentation
-	Log             spec.Log
-	LogControl      spec.LogControl
+	Instrumentation systemspec.Instrumentation
+	Log             systemspec.Log
+	LogControl      systemspec.LogControl
 	TextInterface   text.TextInterfaceServer
 
 	// Settings.
@@ -81,7 +81,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured server object.
-func New(config Config) (spec.Server, error) {
+func New(config Config) (systemspec.Server, error) {
 	newServer := &server{
 		Config: config,
 
@@ -98,7 +98,7 @@ func New(config Config) (spec.Server, error) {
 		ID:           id.MustNewID(),
 		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
-		Type:         spec.ObjectType(ObjectTypeServer),
+		Type:         systemspec.ObjectType(ObjectTypeServer),
 	}
 
 	// Dependencies.
@@ -137,11 +137,11 @@ type server struct {
 	ID           string
 	Mutex        sync.Mutex
 	ShutdownOnce sync.Once
-	Type         spec.ObjectType
+	Type         systemspec.ObjectType
 }
 
 func (s *server) Boot() {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Boot")
+	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Boot")
 
 	s.BootOnce.Do(func() {
 		ctx := context.Background()
@@ -168,14 +168,14 @@ func (s *server) Boot() {
 			select {
 			case <-s.Closer:
 			case err := <-fail:
-				s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
+				s.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
 			}
 		}()
 		go func() {
-			s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
+			s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
 			listener, err := net.Listen("tcp", s.GRPCAddr)
 			if err != nil {
-				s.Log.WithTags(spec.Tags{C: nil, L: "F", O: s, V: 1}, "%#v", maskAny(err))
+				s.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: s, V: 1}, "%#v", maskAny(err))
 			}
 			err = s.GRPCServer.Serve(listener)
 			if err != nil {
@@ -185,17 +185,17 @@ func (s *server) Boot() {
 
 		// HTTP server.
 		go func() {
-			s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 14}, "HTTP server starts to listen on '%s'", s.HTTPAddr)
+			s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 14}, "HTTP server starts to listen on '%s'", s.HTTPAddr)
 			err := s.HTTPServer.ListenAndServe()
 			if err != nil {
-				s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
+				s.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
 			}
 		}()
 	})
 }
 
 func (s *server) Shutdown() {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		close(s.Closer)

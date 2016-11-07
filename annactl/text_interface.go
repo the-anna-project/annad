@@ -2,11 +2,12 @@ package main
 
 import (
 	"github.com/xh3b4sd/anna/client/interface/text"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 // TODO text interface should be a service inside the service collection
-func newTextInterface(newServiceCollection spec.ServiceCollection, gRPCAddr string) (spec.TextInterfaceClient, error) {
+func newTextInterface(newServiceCollection servicespec.Collection, gRPCAddr string) (systemspec.TextInterfaceClient, error) {
 	textInterfaceConfig := text.DefaultClientConfig()
 	textInterfaceConfig.GRPCAddr = gRPCAddr
 	textInterfaceConfig.ServiceCollection = newServiceCollection

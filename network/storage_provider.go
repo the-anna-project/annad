@@ -1,9 +1,9 @@
 package network
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func (n *network) Storage() spec.StorageCollection {
+func (n *network) Storage() storagespec.Collection {
 	return n.StorageCollection
 }

@@ -1,6 +1,7 @@
 package spec
 
 // IDType represents some kind of configuration for ID creation.
+// TODO remove type when metadata is introduced
 type IDType int
 
 // ID creates pseudo random hash generation used for ID assignment.

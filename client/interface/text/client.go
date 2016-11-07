@@ -6,8 +6,9 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/xh3b4sd/anna/api"
-	objectpec "github.com/xh3b4sd/anna/object/spec"
+	"github.com/xh3b4sd/anna/object/networkresponse"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	"github.com/xh3b4sd/anna/object/textoutput"
 	"github.com/xh3b4sd/anna/service"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
@@ -18,7 +19,7 @@ import (
 type ClientConfig struct {
 	// Dependencies.
 
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 
 	// Settings.
 
@@ -68,14 +69,14 @@ type client struct {
 	ClientConfig
 }
 
-func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (servicespec.TextResponse, error) {
-	if streamTextResponse.Code != api.CodeData {
-		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
+func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objectspec.TextOutput, error) {
+	if streamTextResponse.Code != networkresponse.CodeData {
+		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", networkresponse.CodeData)
 	}
 
-	textResponseConfig := api.DefaultTextResponseConfig()
-	textResponseConfig.Output = streamTextResponse.Data.Output
-	textResponse, err := api.NewTextResponse(textResponseConfig)
+	textOutputConfig := textoutput.DefaultConfig()
+	textOutputConfig.Output = streamTextResponse.Data.Output
+	textResponse, err := textoutput.New(textOutputConfig)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -83,7 +84,7 @@ func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (service
 	return textResponse, nil
 }
 
-func (c *client) EncodeRequest(textInput objectpec.TextInput) *StreamTextRequest {
+func (c *client) EncodeRequest(textInput objectspec.TextInput) *StreamTextRequest {
 	streamTextRequest := &StreamTextRequest{
 		Echo:      textInput.GetEcho(),
 		Input:     textInput.GetInput(),

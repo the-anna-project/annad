@@ -1,9 +1,9 @@
 package tracker
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func (t *tracker) Storage() spec.StorageCollection {
+func (t *tracker) Storage() storagespec.Collection {
 	return t.StorageCollection
 }

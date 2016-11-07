@@ -9,14 +9,15 @@ import (
 
 	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/redis"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 const (
 	// ObjectType represents the object type of the memory storage object. This
 	// is used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "memory-storage"
+	ObjectType systemspec.ObjectType = "memory-storage"
 )
 
 // StorageConfig represents the configuration used to create a new memory
@@ -24,7 +25,7 @@ const (
 type StorageConfig struct {
 	// Dependencies.
 
-	Log spec.Log
+	Log systemspec.Log
 }
 
 // DefaultStorageConfig provides a default configuration to create a new memory
@@ -41,7 +42,7 @@ func DefaultStorageConfig() StorageConfig {
 // NewStorage creates a new configured memory storage object. Therefore it
 // manages an in-memory redis instance which can be shut down using the
 // configured closer. This is used for local development.
-func NewStorage(config StorageConfig) (spec.Storage, error) {
+func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 	addrChan := make(chan string, 1)
 	closer := make(chan struct{}, 1)
 	redisAddr := ""
@@ -65,7 +66,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 	}
 
 	newRedisStorageConfig := redis.DefaultStorageConfigWithAddr(redisAddr)
-	newRedisStorageConfig.BackoffFactory = func() spec.Backoff {
+	newRedisStorageConfig.BackoffFactory = func() systemspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 	newRedisStorage, err := redis.NewStorage(newRedisStorageConfig)
@@ -87,7 +88,7 @@ func NewStorage(config StorageConfig) (spec.Storage, error) {
 }
 
 // MustNew creates either a new default configured storage object, or panics.
-func MustNew() spec.Storage {
+func MustNew() storagespec.Storage {
 	newStorage, err := NewStorage(DefaultStorageConfig())
 	if err != nil {
 		panic(err)
@@ -101,13 +102,13 @@ type storage struct {
 
 	Closer       chan struct{}
 	ID           string
-	RedisStorage spec.Storage
+	RedisStorage storagespec.Storage
 	ShutdownOnce sync.Once
-	Type         spec.ObjectType
+	Type         systemspec.ObjectType
 }
 
 func (s *storage) Shutdown() {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		close(s.Closer)

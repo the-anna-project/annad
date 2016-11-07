@@ -1,9 +1,9 @@
 package forwarder
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func (f *forwarder) Storage() spec.StorageCollection {
+func (f *forwarder) Storage() storagespec.Collection {
 	return f.StorageCollection
 }

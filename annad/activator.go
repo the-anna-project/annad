@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/xh3b4sd/anna/network/activator"
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
+	systemspec "github.com/xh3b4sd/anna/spec"
+	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-func newActivator(newLog spec.Log, newServiceCollection spec.ServiceCollection, newStorageCollection spec.StorageCollection) (spec.Activator, error) {
+func newActivator(newLog systemspec.Log, newServiceCollection servicespec.Collection, newStorageCollection storagespec.Collection) (systemspec.Activator, error) {
 	newActivatorConfig := activator.DefaultConfig()
 	newActivatorConfig.ServiceCollection = newServiceCollection
 	newActivatorConfig.Log = newLog

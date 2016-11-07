@@ -4,8 +4,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/object/networkresponse"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textinput"
 	"github.com/xh3b4sd/anna/service"
@@ -24,7 +24,7 @@ const (
 // interface object.
 type ServerConfig struct {
 	Log               systemspec.Log
-	ServiceCollection systemspec.ServiceCollection
+	ServiceCollection servicespec.Collection
 }
 
 // DefaultServerConfig provides a default configuration to create a new text
@@ -68,13 +68,13 @@ type server struct {
 	Type  systemspec.ObjectType
 }
 
-func (s *server) DecodeResponse(textResponse servicespec.TextResponse) *StreamTextResponse {
+func (s *server) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextResponse {
 	streamTextResponse := &StreamTextResponse{
-		Code: api.CodeData,
+		Code: networkresponse.CodeData,
 		Data: &StreamTextResponseData{
-			Output: textResponse.GetOutput(),
+			Output: textOutput.GetOutput(),
 		},
-		Text: api.TextData,
+		Text: networkresponse.TextData,
 	}
 
 	return streamTextResponse
@@ -130,8 +130,8 @@ func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
 			select {
 			case <-done:
 				return
-			case textResponse := <-s.Service().TextOutput().GetChannel():
-				streamTextResponse := s.DecodeResponse(textResponse)
+			case textOutput := <-s.Service().TextOutput().GetChannel():
+				streamTextResponse := s.DecodeResponse(textOutput)
 				err := stream.Send(streamTextResponse)
 				if err != nil {
 					fail <- maskAny(err)

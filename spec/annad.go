@@ -2,6 +2,8 @@ package spec
 
 import (
 	"github.com/spf13/cobra"
+
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // Annad represents the anna daemon object. It contains all further objects and
@@ -34,7 +36,5 @@ type Annad interface {
 	// to call it in a separate goroutine.
 	Shutdown()
 
-	ServiceProvider
-
-	StorageProvider
+	servicespec.Provider
 }

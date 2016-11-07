@@ -2,6 +2,8 @@ package spec
 
 import (
 	"github.com/spf13/cobra"
+
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // Annactl represents the business logic implementation usable in command line
@@ -129,7 +131,7 @@ type Annactl interface {
 	// InitAnnactlVersionCmd initializes the version command.
 	InitAnnactlVersionCmd() *cobra.Command
 
-	ServiceProvider
+	servicespec.Provider
 
 	// Shutdown ends all processes of the command line tool like shutting down a
 	// machine. The call to Shutdown blocks until the command line tool is

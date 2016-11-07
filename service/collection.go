@@ -7,7 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 )
@@ -16,12 +16,12 @@ import (
 // collection object.
 type CollectionConfig struct {
 	// Dependencies.
-	FSService          spec.FS
-	IDService          spec.ID
-	PermutationService spec.Permutation
-	RandomService      spec.Random
-	TextInputService   spec.TextInput
-	TextOutputService  spec.TextOutput
+	FSService          servicespec.FS
+	IDService          servicespec.ID
+	PermutationService servicespec.Permutation
+	RandomService      servicespec.Random
+	TextInputService   servicespec.TextInput
+	TextOutputService  servicespec.TextOutput
 }
 
 // DefaultCollectionConfig provides a default configuration to create a new
@@ -41,7 +41,7 @@ func DefaultCollectionConfig() CollectionConfig {
 }
 
 // NewCollection creates a new configured service collection object.
-func NewCollection(config CollectionConfig) (spec.Collection, error) {
+func NewCollection(config CollectionConfig) (servicespec.Collection, error) {
 	newCollection := &collection{
 		CollectionConfig: config,
 
@@ -72,7 +72,7 @@ func NewCollection(config CollectionConfig) (spec.Collection, error) {
 
 // MustNewCollection creates either a new default configured service collection
 // object, or panics.
-func MustNewCollection() spec.Collection {
+func MustNewCollection() servicespec.Collection {
 	newCollection, err := NewCollection(DefaultCollectionConfig())
 	if err != nil {
 		panic(err)
@@ -87,19 +87,19 @@ type collection struct {
 	ShutdownOnce sync.Once
 }
 
-func (c *collection) FS() spec.FS {
+func (c *collection) FS() servicespec.FS {
 	return c.FSService
 }
 
-func (c *collection) ID() spec.ID {
+func (c *collection) ID() servicespec.ID {
 	return c.IDService
 }
 
-func (c *collection) Permutation() spec.Permutation {
+func (c *collection) Permutation() servicespec.Permutation {
 	return c.PermutationService
 }
 
-func (c *collection) Random() spec.Random {
+func (c *collection) Random() servicespec.Random {
 	return c.RandomService
 }
 
@@ -117,10 +117,10 @@ func (c *collection) Shutdown() {
 	})
 }
 
-func (c *collection) TextInput() spec.TextInput {
+func (c *collection) TextInput() servicespec.TextInput {
 	return c.TextInputService
 }
 
-func (c *collection) TextOutput() spec.TextOutput {
+func (c *collection) TextOutput() servicespec.TextOutput {
 	return c.TextOutputService
 }

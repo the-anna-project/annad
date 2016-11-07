@@ -14,7 +14,7 @@ func Test_Storage_GetID(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	if firstStorage.GetID() == secondStorage.GetID() {
+	if firstStorage.(*storage).GetID() == secondStorage.(*storage).GetID() {
 		t.Fatal("expected", "different IDs", "got", "equal IDs")
 	}
 }
@@ -25,7 +25,7 @@ func Test_Storage_GetType(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	if newStorage.GetType() != ObjectType {
-		t.Fatal("expected", ObjectType, "got", newStorage.GetType())
+	if newStorage.(*storage).GetType() != ObjectType {
+		t.Fatal("expected", ObjectType, "got", newStorage.(*storage).GetType())
 	}
 }
