@@ -11,7 +11,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/xh3b4sd/anna/api"
 	"github.com/xh3b4sd/anna/instrumentation/memory"
 	"github.com/xh3b4sd/anna/log"
 	logcontrol "github.com/xh3b4sd/anna/server/control/log"
@@ -33,7 +32,7 @@ type Config struct {
 	Instrumentation spec.Instrumentation
 	Log             spec.Log
 	LogControl      spec.LogControl
-	TextInterface   api.TextInterfaceServer
+	TextInterface   text.TextInterfaceServer
 
 	// Settings.
 
@@ -157,7 +156,7 @@ func (s *server) Boot() {
 		http.Handle(s.Instrumentation.GetHTTPEndpoint(), s.Instrumentation.GetHTTPHandler())
 
 		// Text interface.
-		api.RegisterTextInterfaceServer(s.GRPCServer, s.TextInterface)
+		text.RegisterTextInterfaceServer(s.GRPCServer, s.TextInterface)
 
 		// Create the gRPC server. The Serve method below is returning listener
 		// errors, if any. In case net.Listener.Accept is called and waits for

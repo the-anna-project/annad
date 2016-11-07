@@ -67,7 +67,7 @@ type client struct {
 	ClientConfig
 }
 
-func (c *client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (servicespec.TextResponse, error) {
+func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (servicespec.TextResponse, error) {
 	if streamTextResponse.Code != api.CodeData {
 		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", api.CodeData)
 	}
@@ -82,8 +82,8 @@ func (c *client) DecodeResponse(streamTextResponse *api.StreamTextResponse) (ser
 	return textResponse, nil
 }
 
-func (c *client) EncodeRequest(textRequest servicespec.TextRequest) *api.StreamTextRequest {
-	streamTextRequest := &api.StreamTextRequest{
+func (c *client) EncodeRequest(textRequest servicespec.TextRequest) *StreamTextRequest {
+	streamTextRequest := &StreamTextRequest{
 		Echo:      textRequest.GetEcho(),
 		Input:     textRequest.GetInput(),
 		SessionID: textRequest.GetSessionID(),
@@ -102,7 +102,7 @@ func (c *client) StreamText(ctx context.Context) error {
 	}
 	defer conn.Close()
 
-	client := api.NewTextInterfaceClient(conn)
+	client := NewTextInterfaceClient(conn)
 	stream, err := client.StreamText(ctx)
 	if err != nil {
 		return maskAny(err)
