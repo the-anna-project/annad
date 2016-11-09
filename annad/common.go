@@ -3,8 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func panicOnError(err error) {
@@ -14,7 +12,7 @@ func panicOnError(err error) {
 }
 
 func (a *annad) listenToSignal() {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call listenToSignal")
+	a.Service().Log().Line("func", "listenToSignal")
 
 	listener := make(chan os.Signal, 2)
 	signal.Notify(listener, os.Interrupt, os.Kill)

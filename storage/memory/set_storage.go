@@ -1,11 +1,7 @@
 package memory
 
-import (
-	"github.com/xh3b4sd/anna/spec"
-)
-
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
+	s.Service().Log().Line("func", "GetAllFromSet")
 
 	result, err := s.RedisStorage.GetAllFromSet(key)
 	if err != nil {
@@ -16,7 +12,7 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 }
 
 func (s *storage) PushToSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+	s.Service().Log().Line("func", "PushToSet")
 
 	err := s.RedisStorage.PushToSet(key, element)
 	if err != nil {
@@ -27,7 +23,7 @@ func (s *storage) PushToSet(key string, element string) error {
 }
 
 func (s *storage) RemoveFromSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveFromSet")
+	s.Service().Log().Line("func", "RemoveFromSet")
 
 	err := s.RedisStorage.RemoveFromSet(key, element)
 	if err != nil {
@@ -38,7 +34,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkSet")
+	s.Service().Log().Line("func", "WalkSet")
 
 	err := s.RedisStorage.WalkSet(key, closer, cb)
 	if err != nil {

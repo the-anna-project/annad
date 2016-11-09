@@ -16,6 +16,9 @@ import (
 // Config represents the configuration used to create a new random
 // service object.
 type Config struct {
+	// Dependencies.
+	ServiceCollection servicespec.Collection
+
 	// Settings.
 
 	// BackoffFactory is supposed to be able to create a new spec.Backoff. Retry
@@ -39,6 +42,9 @@ type Config struct {
 // service object by best effort.
 func DefaultConfig() Config {
 	newConfig := Config{
+		// Dependencies.
+		ServiceCollection: nil,
+
 		// Settings.
 		BackoffFactory: func() spec.Backoff {
 			return &backoff.StopBackOff{}
@@ -57,6 +63,12 @@ func New(config Config) (servicespec.Random, error) {
 		Config: config,
 	}
 
+	// Dependencies.
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	// Settings.
 	if newService.BackoffFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
 	}
@@ -70,11 +82,18 @@ func New(config Config) (servicespec.Random, error) {
 		return nil, maskAnyf(invalidConfigError, "creation timeout must not be empty")
 	}
 
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["name"] = "random"
+	newService.Metadata["type"] = "service"
+
 	return newService, nil
 }
 
-// MustNew creates either a new default configured random service object,
-// or panics.
+// MustNew creates either a new default configured random service, or panics.
 func MustNew() servicespec.Random {
 	newService, err := New(DefaultConfig())
 	if err != nil {
@@ -86,6 +105,8 @@ func MustNew() servicespec.Random {
 
 type service struct {
 	Config
+
+	Metadata map[string]string
 }
 
 func (s *service) CreateMax(max int) (int, error) {

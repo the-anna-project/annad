@@ -5,19 +5,11 @@ package main
 import (
 	"sync"
 
-	logcontrol "github.com/xh3b4sd/anna/client/control/log"
 	"github.com/xh3b4sd/anna/client/interface/text"
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectType represents the object type of the command line object.  This is
-	// used e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "annactl"
 )
 
 var (
@@ -30,8 +22,6 @@ var (
 // object.
 type Config struct {
 	// Dependencies.
-	Log               systemspec.Log
-	LogControl        systemspec.LogControl
 	ServiceCollection servicespec.Collection
 	TextInterface     systemspec.TextInterfaceClient
 
@@ -44,11 +34,6 @@ type Config struct {
 // DefaultConfig provides a default configuration to create a new command line
 // object by best effort.
 func DefaultConfig() Config {
-	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newTextInterface, err := text.NewClient(text.DefaultClientConfig())
 	if err != nil {
 		panic(err)
@@ -56,8 +41,6 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		Log:               log.New(log.DefaultConfig()),
-		LogControl:        newLogControl,
 		ServiceCollection: service.MustNewCollection(),
 		TextInterface:     newTextInterface,
 
@@ -78,14 +61,9 @@ func New(config Config) (systemspec.Annactl, error) {
 
 		BootOnce:     sync.Once{},
 		Closer:       make(chan struct{}, 1),
-		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
-		Type:         systemspec.ObjectType(ObjectType),
 	}
 
-	if newAnnactl.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
 	if newAnnactl.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
@@ -98,13 +76,11 @@ type annactl struct {
 
 	BootOnce     sync.Once
 	Closer       chan struct{}
-	ID           string
 	ShutdownOnce sync.Once
-	Type         systemspec.ObjectType
 }
 
 func (a *annactl) Boot() {
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
+	a.Service().Log().Line("func", "Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -118,7 +94,7 @@ func (a *annactl) Service() servicespec.Collection {
 }
 
 func (a *annactl) Shutdown() {
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
+	a.Service().Log().Line("func", "Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		close(a.Closer)

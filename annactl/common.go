@@ -5,8 +5,6 @@ import (
 	"os/signal"
 
 	"github.com/juju/errgo"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func panicOnError(err error) {
@@ -16,7 +14,7 @@ func panicOnError(err error) {
 }
 
 func (a *annactl) listenToSignal() {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call listenToSignal")
+	a.Service().Log().Line("func", "listenToSignal")
 
 	listener := make(chan os.Signal, 1)
 	signal.Notify(listener, os.Interrupt, os.Kill)
@@ -32,7 +30,7 @@ const (
 )
 
 func (a *annactl) GetSessionID() (string, error) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call GetSession")
+	a.Service().Log().Line("func", "GetSession")
 
 	// Read session ID.
 	raw, err := a.Service().FS().ReadFile(SessionFilePath)

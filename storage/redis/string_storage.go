@@ -3,12 +3,10 @@ package redis
 import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *storage) Get(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
+	s.Service().Log().Line("func", "Get")
 
 	errors := make(chan error, 1)
 
@@ -51,7 +49,7 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetRandom() (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
+	s.Service().Log().Line("func", "GetRandom")
 
 	var result string
 	action := func() error {
@@ -76,7 +74,7 @@ func (s *storage) GetRandom() (string, error) {
 }
 
 func (s *storage) Remove(key string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
+	s.Service().Log().Line("func", "Remove")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -99,7 +97,7 @@ func (s *storage) Remove(key string) error {
 }
 
 func (s *storage) Set(key, value string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
+	s.Service().Log().Line("func", "Set")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -126,7 +124,7 @@ func (s *storage) Set(key, value string) error {
 }
 
 func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
+	s.Service().Log().Line("func", "WalkKeys")
 
 	action := func() error {
 		conn := s.Pool.Get()

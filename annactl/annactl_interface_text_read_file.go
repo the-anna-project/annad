@@ -9,11 +9,10 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/object/textinput"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlInterfaceTextReadFileCmd")
+	a.Service().Log().Line("func", "InitAnnactlInterfaceTextReadFileCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -32,7 +31,7 @@ func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceTextReadFileCmd")
+	a.Service().Log().Line("func", "ExecAnnactlInterfaceTextReadFileCmd")
 
 	if len(args) == 0 || len(args) >= 2 {
 		cmd.HelpFunc()(cmd, nil)
@@ -43,13 +42,13 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 
 	b, err := a.Service().FS().ReadFile(args[0])
 	if err != nil {
-		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
+		a.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 
 	textRequest := textinput.MustNew()
 	err = json.Unmarshal(b, &textRequest)
 	if err != nil {
-		a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
+		a.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 
 	a.Service().TextInput().GetChannel() <- textRequest
@@ -57,7 +56,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 	go func() {
 		err = a.TextInterface.StreamText(ctx)
 		if err != nil {
-			a.Log.WithTags(spec.Tags{C: nil, L: "F", O: a, V: 1}, "%#v", maskAny(err))
+			a.Service().Log().Line("msg", "%#v", maskAny(err))
 		}
 	}()
 

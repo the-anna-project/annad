@@ -11,7 +11,7 @@ import (
 const (
 	// ObjectTypeFeature represents the object type of the feature object. This
 	// is used e.g. to register itself to the logger.
-	ObjectTypeFeature spec.ObjectType = "feature"
+	ObjectTypeFeature string = "feature"
 )
 
 // FeatureConfig represents the configuration used to create a new feature
@@ -72,7 +72,7 @@ type feature struct {
 	Distribution spec.Distribution
 	ID           string
 	Mutex        sync.Mutex
-	Type         spec.ObjectType
+	Type         string
 }
 
 func (f *feature) AddPosition(position []float64) error {

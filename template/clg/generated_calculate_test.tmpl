@@ -41,15 +41,6 @@ func Test_CLG_New_ServiceCollection_Error(t *testing.T) {
   }
 }
 
-func Test_CLG_New_LogError(t *testing.T) {
-  newConfig := DefaultConfig()
-  newConfig.Log = nil
-  _, err := New(newConfig)
-  if !IsInvalidConfig(err) {
-    t.Fatal("expected", true, "got", false)
-  }
-}
-
 func Test_CLG_New_StorageCollection_Error(t *testing.T) {
   newConfig := DefaultConfig()
   newConfig.StorageCollection = nil
@@ -79,29 +70,6 @@ func Test_CLG_SetServiceCollection(t *testing.T) {
 
   if rawCLG.ServiceCollection != nil {
     t.Fatal("expected", nil, "got", "spec.ServiceCollection")
-  }
-}
-
-func Test_CLG_SetLog(t *testing.T) {
-  newCLG := MustNew()
-  var rawCLG *clg
-
-  switch c := newCLG.(type) {
-  case *clg:
-    // all good
-    rawCLG = newCLG.(*clg)
-  default:
-    t.Fatal("expected", "*clg", "got", c)
-  }
-
-  if rawCLG.Log == nil {
-    t.Fatal("expected", "spec.Log", "got", nil)
-  }
-
-  newCLG.SetLog(nil)
-
-  if rawCLG.Log != nil {
-    t.Fatal("expected", nil, "got", "spec.Log")
   }
 }
 

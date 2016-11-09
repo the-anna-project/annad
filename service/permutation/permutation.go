@@ -40,12 +40,18 @@ import (
 
 // Config represents the configuration used to create a new permutation
 // service object.
-type Config struct{}
+type Config struct {
+	// Dependencies.
+	ServiceCollection servicespec.Collection
+}
 
 // DefaultConfig provides a default configuration to create a new
 // permutation service object by best effort.
 func DefaultConfig() Config {
-	newConfig := Config{}
+	newConfig := Config{
+		// Dependencies.
+		ServiceCollection: nil,
+	}
 
 	return newConfig
 }
@@ -56,6 +62,19 @@ func New(config Config) (servicespec.Permutation, error) {
 	newService := &service{
 		Config: config,
 	}
+
+	// Dependencies
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["name"] = "permutation"
+	newService.Metadata["type"] = "service"
 
 	return newService, nil
 }
@@ -73,6 +92,8 @@ func MustNew() servicespec.Permutation {
 
 type service struct {
 	Config
+
+	Metadata map[string]string
 }
 
 func (s *service) PermuteBy(list objectspec.PermutationList, delta int) error {

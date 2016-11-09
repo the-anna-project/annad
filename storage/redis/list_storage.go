@@ -3,12 +3,10 @@ package redis
 import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *storage) PopFromList(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
+	s.Service().Log().Line("func", "PopFromList")
 
 	var result string
 	action := func() error {
@@ -37,7 +35,7 @@ func (s *storage) PopFromList(key string) (string, error) {
 }
 
 func (s *storage) PushToList(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
+	s.Service().Log().Line("func", "PushToList")
 
 	action := func() error {
 		conn := s.Pool.Get()

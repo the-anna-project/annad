@@ -1,11 +1,7 @@
 package memory
 
-import (
-	"github.com/xh3b4sd/anna/spec"
-)
-
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
+	s.Service().Log().Line("func", "GetElementsByScore")
 
 	result, err := s.RedisStorage.GetElementsByScore(key, score, maxElements)
 	if err != nil {
@@ -16,7 +12,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
+	s.Service().Log().Line("func", "GetHighestScoredElements")
 
 	result, err := s.RedisStorage.GetHighestScoredElements(key, maxElements)
 	if err != nil {
@@ -27,7 +23,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 }
 
 func (s *storage) RemoveScoredElement(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveScoredElement")
+	s.Service().Log().Line("func", "RemoveScoredElement")
 
 	err := s.RedisStorage.RemoveScoredElement(key, element)
 	if err != nil {
@@ -38,7 +34,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 }
 
 func (s *storage) SetElementByScore(key, element string, score float64) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetElementByScore")
+	s.Service().Log().Line("func", "SetElementByScore")
 
 	err := s.RedisStorage.SetElementByScore(key, element, score)
 	if err != nil {
@@ -49,7 +45,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 }
 
 func (s *storage) WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredSet")
+	s.Service().Log().Line("func", "WalkScoredSet")
 
 	err := s.RedisStorage.WalkScoredSet(key, closer, cb)
 	if err != nil {

@@ -8,31 +8,21 @@ import (
 	"time"
 
 	"github.com/tylerb/graceful"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	"github.com/xh3b4sd/anna/instrumentation/memory"
-	"github.com/xh3b4sd/anna/log"
-	logcontrol "github.com/xh3b4sd/anna/server/control/log"
 	"github.com/xh3b4sd/anna/server/interface/text"
-	"github.com/xh3b4sd/anna/service/id"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectTypeServer represents the object type of the server object. This is
-	// used e.g. to register itself to the logger.
-	ObjectTypeServer systemspec.ObjectType = "server"
 )
 
 // Config represents the configuration used to create a new server object.
 type Config struct {
 	// Dependencies.
 
-	Instrumentation systemspec.Instrumentation
-	Log             systemspec.Log
-	LogControl      systemspec.LogControl
-	TextInterface   text.TextInterfaceServer
+	Instrumentation   systemspec.Instrumentation
+	ServiceCollection servicespec.Collection
+	TextInterface     text.TextInterfaceServer
 
 	// Settings.
 
@@ -53,11 +43,6 @@ func DefaultConfig() Config {
 		panic(err)
 	}
 
-	newLogControl, err := logcontrol.NewControl(logcontrol.DefaultControlConfig())
-	if err != nil {
-		panic(err)
-	}
-
 	newTextInterface, err := text.NewServer(text.DefaultServerConfig())
 	if err != nil {
 		panic(err)
@@ -66,10 +51,9 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 
-		Instrumentation: newInstrumentation,
-		Log:             log.New(log.DefaultConfig()),
-		LogControl:      newLogControl,
-		TextInterface:   newTextInterface,
+		Instrumentation:   newInstrumentation,
+		ServiceCollection: nil,
+		TextInterface:     newTextInterface,
 
 		// Settings.
 
@@ -95,26 +79,18 @@ func New(config Config) (systemspec.Server, error) {
 			},
 			Timeout: 3 * time.Second,
 		},
-		ID:           id.MustNewID(),
-		Mutex:        sync.Mutex{},
 		ShutdownOnce: sync.Once{},
-		Type:         systemspec.ObjectType(ObjectTypeServer),
 	}
 
 	// Dependencies.
-
-	if newServer.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
-	if newServer.LogControl == nil {
-		return nil, maskAnyf(invalidConfigError, "log control must not be empty")
+	if newServer.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 	if newServer.TextInterface == nil {
 		return nil, maskAnyf(invalidConfigError, "text interface must not be empty")
 	}
 
 	// Settings.
-
 	if newServer.GRPCAddr == "" {
 		return nil, maskAnyf(invalidConfigError, "gRPC address must not be empty")
 	}
@@ -122,7 +98,13 @@ func New(config Config) (systemspec.Server, error) {
 		return nil, maskAnyf(invalidConfigError, "HTTP address must not be empty")
 	}
 
-	newServer.Log.Register(newServer.GetType())
+	id, err := newServer.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newServer.Metadata["id"] = id
+	newServer.Metadata["name"] = "server"
+	newServer.Metadata["type"] = "service"
 
 	return newServer, nil
 }
@@ -134,24 +116,14 @@ type server struct {
 	Closer       chan struct{}
 	GRPCServer   *grpc.Server
 	HTTPServer   *graceful.Server
-	ID           string
-	Mutex        sync.Mutex
+	Metadata     map[string]string
 	ShutdownOnce sync.Once
-	Type         systemspec.ObjectType
 }
 
 func (s *server) Boot() {
-	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Boot")
+	s.Service().Log().Line("func", "Boot")
 
 	s.BootOnce.Do(func() {
-		ctx := context.Background()
-
-		// Log control.
-		newLogControlHandlers := logcontrol.NewHandlers(ctx, s.LogControl)
-		for url, handler := range newLogControlHandlers {
-			http.Handle(url, handler)
-		}
-
 		// Instrumentation.
 		http.Handle(s.Instrumentation.GetHTTPEndpoint(), s.Instrumentation.GetHTTPHandler())
 
@@ -168,14 +140,14 @@ func (s *server) Boot() {
 			select {
 			case <-s.Closer:
 			case err := <-fail:
-				s.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
+				s.Service().Log().Line("msg", "%#v", maskAny(err))
 			}
 		}()
 		go func() {
-			s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 14}, "gRPC server starts to listen on '%s'", s.GRPCAddr)
+			s.Service().Log().Line("msg", "gRPC server starts to listen on '%s'", s.GRPCAddr)
 			listener, err := net.Listen("tcp", s.GRPCAddr)
 			if err != nil {
-				s.Log.WithTags(systemspec.Tags{C: nil, L: "F", O: s, V: 1}, "%#v", maskAny(err))
+				s.Service().Log().Line("msg", "%#v", maskAny(err))
 			}
 			err = s.GRPCServer.Serve(listener)
 			if err != nil {
@@ -185,17 +157,17 @@ func (s *server) Boot() {
 
 		// HTTP server.
 		go func() {
-			s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 14}, "HTTP server starts to listen on '%s'", s.HTTPAddr)
+			s.Service().Log().Line("msg", "HTTP server starts to listen on '%s'", s.HTTPAddr)
 			err := s.HTTPServer.ListenAndServe()
 			if err != nil {
-				s.Log.WithTags(systemspec.Tags{C: nil, L: "E", O: s, V: 4}, "%#v", maskAny(err))
+				s.Service().Log().Line("msg", "%#v", maskAny(err))
 			}
 		}()
 	})
 }
 
 func (s *server) Shutdown() {
-	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Service().Log().Line("func", "Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		close(s.Closer)

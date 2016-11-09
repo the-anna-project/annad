@@ -8,19 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/server"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectType represents the object type of the annad object. This is used
-	// e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "annad"
 )
 
 var (
@@ -32,7 +25,6 @@ var (
 // Config represents the configuration used to create a new annad object.
 type Config struct {
 	// Dependencies.
-	Log               systemspec.Log
 	Network           systemspec.Network
 	Server            systemspec.Server
 	ServiceCollection servicespec.Collection
@@ -52,7 +44,6 @@ func DefaultConfig() Config {
 
 	newConfig := Config{
 		// Dependencies.
-		Log:               log.New(log.DefaultConfig()),
 		Network:           network.MustNew(),
 		Server:            newServer,
 		ServiceCollection: service.MustNewCollection(),
@@ -76,9 +67,7 @@ func New(config Config) (systemspec.Annad, error) {
 		Type:         ObjectType,
 	}
 
-	if newAnna.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
+	// Dependencies.
 	if newAnna.Network == nil {
 		return nil, maskAnyf(invalidConfigError, "network must not be empty")
 	}
@@ -98,11 +87,11 @@ type annad struct {
 	BootOnce     sync.Once
 	ID           string
 	ShutdownOnce sync.Once
-	Type         systemspec.ObjectType
+	Type         string
 }
 
 func (a *annad) Boot() {
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Boot")
+	a.Service().Log().Line("func", "Boot")
 
 	a.BootOnce.Do(func() {
 		go a.listenToSignal()
@@ -112,9 +101,9 @@ func (a *annad) Boot() {
 }
 
 func (a *annad) ForceShutdown() {
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call ForceShutdown")
+	a.Service().Log().Line("func", "ForceShutdown")
 
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "force shutting down annad")
+	a.Service().Log().Line("msg", "force shutting down annad")
 	os.Exit(0)
 }
 
@@ -123,35 +112,35 @@ func (a *annad) Service() servicespec.Collection {
 }
 
 func (a *annad) Shutdown() {
-	a.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: a, V: 13}, "call Shutdown")
+	a.Service().Log().Line("func", "Shutdown")
 
 	a.ShutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down service collection")
+			a.Service().Log().Line("msg", "shutting down service collection")
 			a.Service().Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down network")
+			a.Service().Log().Line("msg", "shutting down network")
 			a.Network.Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down server")
+			a.Service().Log().Line("msg", "shutting down server")
 			a.Server.Shutdown()
 			wg.Done()
 		}()
 
 		wg.Wait()
 
-		a.Log.WithTags(systemspec.Tags{C: nil, L: "I", O: a, V: 10}, "shutting down annad")
+		a.Service().Log().Line("msg", "shutting down annad")
 		os.Exit(0)
 	})
 }

@@ -7,17 +7,23 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-// ServiceConfig represents the configuration used to create a new text output
+// Config represents the configuration used to create a new text output
 // service object.
-type ServiceConfig struct {
+type Config struct {
+	// Dependencies.
+	ServiceCollection servicespec.Collection
+
 	// Settings.
 	Channel chan objectspec.TextOutput
 }
 
 // DefaultServiceConfig provides a default configuration to create a new text
 // output service object by best effort.
-func DefaultServiceConfig() ServiceConfig {
-	newConfig := ServiceConfig{
+func DefaultServiceConfig() Config {
+	newConfig := Config{
+		// Dependencies.
+		ServiceCollection: nil,
+
 		// Settings.
 		Channel: make(chan objectspec.TextOutput, 1000),
 	}
@@ -26,19 +32,33 @@ func DefaultServiceConfig() ServiceConfig {
 }
 
 // NewService creates a new configured text output service object.
-func NewService(config ServiceConfig) (servicespec.TextOutput, error) {
+func NewService(config Config) (servicespec.TextOutput, error) {
 	newService := &service{
-		ServiceConfig: config,
+		Config: config,
 	}
 
+	// Dependencies.
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	// Settings.
 	if newService.Channel == nil {
 		return nil, maskAnyf(invalidConfigError, "channel must not be empty")
 	}
 
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["name"] = "text-input"
+	newService.Metadata["type"] = "service"
+
 	return newService, nil
 }
 
-// MustNew creates either a new default configured id service object, or
+// MustNew creates either a new default configured text output service, or
 // panics.
 func MustNew() servicespec.TextOutput {
 	newService, err := NewService(DefaultServiceConfig())
@@ -50,7 +70,9 @@ func MustNew() servicespec.TextOutput {
 }
 
 type service struct {
-	ServiceConfig
+	Config
+
+	Metadata map[string]string
 }
 
 func (s *service) GetChannel() chan objectspec.TextOutput {

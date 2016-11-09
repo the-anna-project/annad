@@ -4,24 +4,24 @@ package id
 
 import (
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 const (
 	// Hex128 creates a new hexa decimal encoded, pseudo random, 128 bit hash.
-	Hex128 spec.IDType = 16
+	Hex128 int = 16
 
 	// Hex512 creates a new hexa decimal encoded, pseudo random, 512 bit hash.
-	Hex512 spec.IDType = 64
+	Hex512 int = 64
 
 	// Hex1024 creates a new hexa decimal encoded, pseudo random, 1024 bit hash.
-	Hex1024 spec.IDType = 128
+	Hex1024 int = 128
 
 	// Hex2048 creates a new hexa decimal encoded, pseudo random, 2048 bit hash.
-	Hex2048 spec.IDType = 256
+	Hex2048 int = 256
 
 	// Hex4096 creates a new hexa decimal encoded, pseudo random, 4096 bit hash.
-	Hex4096 spec.IDType = 512
+	Hex4096 int = 512
 )
 
 // Config represents the configuration used to create a new ID service
@@ -33,9 +33,11 @@ type Config struct {
 	HashChars string
 
 	// Random represents a service returning random numbers.
-	RandomService spec.Random
+	RandomService servicespec.Random
 
-	Type spec.IDType
+	ServiceCollection servicespec.Collection
+
+	Type int
 }
 
 // DefaultConfig provides a default configuration to create a new ID service
@@ -43,16 +45,17 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Settings.
-		HashChars:     "abcdef0123456789", // hex character set
-		RandomService: random.MustNew(),
-		Type:          Hex128,
+		HashChars:         "abcdef0123456789", // hex character set
+		RandomService:     random.MustNew(),
+		ServiceCollection: nil,
+		Type:              Hex128,
 	}
 
 	return newConfig
 }
 
 // New creates a new configured ID service object.
-func New(config Config) (spec.ID, error) {
+func New(config Config) (servicespec.ID, error) {
 	newService := &service{
 		Config: config,
 	}
@@ -63,16 +66,27 @@ func New(config Config) (spec.ID, error) {
 	if newService.RandomService == nil {
 		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
 	}
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 	if newService.Type == 0 {
 		return nil, maskAnyf(invalidConfigError, "ID type must not be empty")
 	}
+
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["name"] = "id"
+	newService.Metadata["type"] = "service"
 
 	return newService, nil
 }
 
 // MustNew creates either a new default configured id service object, or
 // panics.
-func MustNew() spec.ID {
+func MustNew() servicespec.ID {
 	newService, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -94,6 +108,8 @@ func MustNewID() string {
 
 type service struct {
 	Config
+
+	Metadata map[string]string
 }
 
 func (s *service) New() (string, error) {
@@ -105,7 +121,7 @@ func (s *service) New() (string, error) {
 	return ID, nil
 }
 
-func (s *service) WithType(idType spec.IDType) (string, error) {
+func (s *service) WithType(idType int) (string, error) {
 	n := int(idType)
 	max := len(s.HashChars)
 

@@ -16,36 +16,6 @@ type Annactl interface {
 	// ExecAnnactlCmd executes the root command.
 	ExecAnnactlCmd(cmd *cobra.Command, args []string)
 
-	// ExecAnnactlControlCmd executes the control command.
-	ExecAnnactlControlCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogCmd executes the control log
-	ExecAnnactlControlLogCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogResetCmd executes the control log
-	ExecAnnactlControlLogResetCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogResetLevelsCmd executes the control log
-	ExecAnnactlControlLogResetLevelsCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogResetObjectsCmd executes the control log
-	ExecAnnactlControlLogResetObjectsCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogResetVerbosityCmd executes the control log
-	ExecAnnactlControlLogResetVerbosityCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogSetCmd executes the control log
-	ExecAnnactlControlLogSetCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogSetLevelsCmd executes the control log
-	ExecAnnactlControlLogSetLevelsCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogSetObjectsCmd executes the control log
-	ExecAnnactlControlLogSetObjectsCmd(cmd *cobra.Command, args []string)
-
-	// ExecAnnactlControlLogSetVerbosityCmd executes the control log
-	ExecAnnactlControlLogSetVerbosityCmd(cmd *cobra.Command, args []string)
-
 	// ExecAnnactlInterfaceCmd executes the interface command.
 	ExecAnnactlInterfaceCmd(cmd *cobra.Command, args []string)
 
@@ -73,42 +43,6 @@ type Annactl interface {
 
 	// InitAnnactlCmd initializes the root command.
 	InitAnnactlCmd() *cobra.Command
-
-	// InitAnnactlControlCmd initializes the control command.
-	InitAnnactlControlCmd() *cobra.Command
-
-	// InitAnnactlControlLogCmd initializes the control log command.
-	InitAnnactlControlLogCmd() *cobra.Command
-
-	// InitAnnactlControlLogResetCmd initializes the control log reset command.
-	InitAnnactlControlLogResetCmd() *cobra.Command
-
-	// InitAnnactlControlLogResetLevelsCmd initializes the control log reset
-	// levels command.
-	InitAnnactlControlLogResetLevelsCmd() *cobra.Command
-
-	// InitAnnactlControlLogResetObjectsCmd initializes the control log reset
-	// objects command.
-	InitAnnactlControlLogResetObjectsCmd() *cobra.Command
-
-	// InitAnnactlControlLogResetVerbosityCmd initializes the control log reset
-	// verbosity command.
-	InitAnnactlControlLogResetVerbosityCmd() *cobra.Command
-
-	// InitAnnactlControlLogSetCmd initializes the control log set command.
-	InitAnnactlControlLogSetCmd() *cobra.Command
-
-	// InitAnnactlControlLogSetLevelsCmd initializes the control log set levels
-	// command.
-	InitAnnactlControlLogSetLevelsCmd() *cobra.Command
-
-	// InitAnnactlControlLogSetObjectsCmd initializes the control log set objects
-	// command.
-	InitAnnactlControlLogSetObjectsCmd() *cobra.Command
-
-	// InitAnnactlControlLogSetVerbosityCmd initializes the control log set
-	// verbosity command.
-	InitAnnactlControlLogSetVerbosityCmd() *cobra.Command
 
 	// InitAnnactlInterfaceCmd initializes the interface command.
 	InitAnnactlInterfaceCmd() *cobra.Command

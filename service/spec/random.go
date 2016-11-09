@@ -12,4 +12,7 @@ type Random interface {
 	// generated numbers are within the range [0 max), which means that max is
 	// exclusive.
 	CreateNMax(n, max int) ([]int, error)
+
+	// GetMetadata returns the service's metadata.
+	GetMetadata() map[string]string
 }

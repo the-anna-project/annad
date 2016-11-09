@@ -5,25 +5,15 @@ package os
 import (
 	"io/ioutil"
 	"os"
-	"sync"
 
-	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectType represents the object type of the OS file system object. This
-	// is used e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "os-file-system"
 )
 
 // Config represents the configuration used to create a new OS file system
 // object.
 type Config struct {
 	// Dependencies.
-	Log systemspec.Log
+	ServiceCollection servicespec.Collection
 }
 
 // DefaultConfig provides a default configuration to create a new OS file
@@ -31,36 +21,53 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log: log.New(log.DefaultConfig()),
+		ServiceCollection: nil,
 	}
 
 	return newConfig
 }
 
-// NewFileSystem creates a new configured real OS file system.
-func NewFileSystem(config Config) servicespec.FS {
-	newFileSystem := &osFileSystem{
+// New creates a new configured OS file system.
+func New(config Config) (servicespec.FS, error) {
+	newService := &service{
 		Config: config,
-		ID:     id.MustNewID(),
-		Mutex:  sync.Mutex{},
-		Type:   ObjectType,
 	}
 
-	newFileSystem.Log.Register(newFileSystem.GetType())
+	// Dependencies
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 
-	return newFileSystem
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["kind"] = "os"
+	newService.Metadata["name"] = "file-system"
+	newService.Metadata["type"] = "service"
+
+	return newService
 }
 
-type osFileSystem struct {
+// MustNew creates either a new default configured id service, or panics.
+func MustNew() servicespec.FS {
+	newService, err := New(DefaultConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	return newService
+}
+
+type service struct {
 	Config
 
-	ID    string
-	Mutex sync.Mutex
-	Type  systemspec.ObjectType
+	Metadata map[string]string
 }
 
-func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
-	osfs.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call ReadFile")
+func (s *service) ReadFile(filename string) ([]byte, error) {
+	s.Service().Log().Line("func", "ReadFile")
 
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -70,8 +77,8 @@ func (osfs *osFileSystem) ReadFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-func (osfs *osFileSystem) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	osfs.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: osfs, V: 13}, "call WriteFile")
+func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
+	s.Service().Log().Line("func", "WriteFile")
 
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {

@@ -1,14 +1,9 @@
 package main
 
-import (
-	"github.com/spf13/cobra"
-
-	logcontrol "github.com/xh3b4sd/anna/client/control/log"
-	"github.com/xh3b4sd/anna/spec"
-)
+import "github.com/spf13/cobra"
 
 func (a *annactl) InitAnnactlCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlCmd")
+	a.Service().Log().Line("func", "InitAnnactlCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -18,22 +13,8 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			var err error
 
-			// Log.
-			err = a.Log.SetLevels(a.Flags.ControlLogLevels)
-			panicOnError(err)
-			err = a.Log.SetVerbosity(a.Flags.ControlLogVerbosity)
-			panicOnError(err)
-
-			a.Log.Register(a.GetType())
-
 			// Service collection.
 			a.ServiceCollection, err = newServiceCollection()
-			panicOnError(err)
-
-			// Log control.
-			logControlConfig := logcontrol.DefaultControlConfig()
-			logControlConfig.URL.Host = a.Flags.HTTPAddr
-			a.LogControl, err = logcontrol.NewControl(logControlConfig)
 			panicOnError(err)
 
 			// Text interface.
@@ -44,21 +25,18 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 	}
 
 	// Add sub commands.
-	newCmd.AddCommand(a.InitAnnactlControlCmd())
 	newCmd.AddCommand(a.InitAnnactlInterfaceCmd())
 	newCmd.AddCommand(a.InitAnnactlVersionCmd())
 
 	// Define command line flags.
 	newCmd.PersistentFlags().StringVar(&a.Flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
 	newCmd.PersistentFlags().StringVar(&a.Flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
-	newCmd.PersistentFlags().StringVarP(&a.Flags.ControlLogLevels, "control-log-levels", "l", "", "set log levels for log control (e.g. E,F)")
-	newCmd.PersistentFlags().IntVarP(&a.Flags.ControlLogVerbosity, "control-log-verbosity", "v", 10, "set log verbosity for log control")
 
 	return newCmd
 }
 
 func (a *annactl) ExecAnnactlCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlCmd")
+	a.Service().Log().Line("func", "ExecAnnactlCmd")
 
 	cmd.HelpFunc()(cmd, nil)
 }

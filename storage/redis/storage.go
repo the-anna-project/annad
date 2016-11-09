@@ -7,25 +7,18 @@ import (
 	"github.com/garyburd/redigo/redis"
 
 	"github.com/xh3b4sd/anna/instrumentation/memory"
-	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/service/id"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
-
-const (
-	// ObjectType represents the object type of the redis storage object. This is
-	// used e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "redis-storage"
 )
 
 // StorageConfig represents the configuration used to create a new redis
 // storage object.
 type StorageConfig struct {
 	// Dependencies.
-	Instrumentation systemspec.Instrumentation
-	Log             systemspec.Log
-	Pool            *redis.Pool
+	Instrumentation   systemspec.Instrumentation
+	Pool              *redis.Pool
+	ServiceCollection servicespec.Collection
 
 	// Settings.
 
@@ -79,9 +72,9 @@ func DefaultStorageConfig() StorageConfig {
 
 	newStorageConfig := StorageConfig{
 		// Dependencies.
-		Instrumentation: newInstrumentation,
-		Log:             log.New(log.DefaultConfig()),
-		Pool:            NewPool(DefaultPoolConfig()),
+		Instrumentation:   newInstrumentation,
+		Pool:              NewPool(DefaultPoolConfig()),
+		ServiceCollection: nil,
 
 		// Settings.
 		BackoffFactory: func() systemspec.Backoff {
@@ -98,18 +91,17 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 	newStorage := &storage{
 		StorageConfig: config,
 
-		ID:           id.MustNewID(),
 		ShutdownOnce: sync.Once{},
-		Type:         ObjectType,
 	}
 
 	// Dependencies.
-	if newStorage.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
 	if newStorage.Pool == nil {
 		return nil, maskAnyf(invalidConfigError, "connection pool must not be empty")
 	}
+	if newStorage.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
 	// Settings.
 	if newStorage.BackoffFactory == nil {
 		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
@@ -118,7 +110,14 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 		return nil, maskAnyf(invalidConfigError, "prefix must not be empty")
 	}
 
-	newStorage.Log.Register(newStorage.GetType())
+	id, err := newStorage.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newStorage.Metadata["id"] = id
+	newStorage.Metadata["kind"] = "redis"
+	newStorage.Metadata["name"] = "storage"
+	newStorage.Metadata["type"] = "service"
 
 	return newStorage, nil
 }
@@ -126,13 +125,12 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 type storage struct {
 	StorageConfig
 
-	ID           string
+	Metadata     map[string]string
 	ShutdownOnce sync.Once
-	Type         systemspec.ObjectType
 }
 
 func (s *storage) Shutdown() {
-	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Service().Log().Line("func", "Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		s.Pool.Close()

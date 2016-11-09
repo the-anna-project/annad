@@ -4,12 +4,10 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (a *annactl) InitAnnactlVersionCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlVersionCmd")
+	a.Service().Log().Line("func", "InitAnnactlVersionCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -23,7 +21,7 @@ func (a *annactl) InitAnnactlVersionCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlVersionCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlVersionCmd")
+	a.Service().Log().Line("func", "ExecAnnactlVersionCmd")
 
 	fmt.Printf("%s\n", a.Version)
 }

@@ -7,8 +7,8 @@ import (
 // FS provides certain file system implementations for abstraction and
 // testing reasons.
 type FS interface {
-	// TODO this should may be Metadata ???
-	//Object
+	// GetMetadata returns the service's metadata.
+	GetMetadata() map[string]string
 
 	// ReadFile is aligned to ioutil.ReadFile.
 	ReadFile(filename string) ([]byte, error)

@@ -6,23 +6,14 @@ import (
 	"os"
 	"sync"
 
-	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectType represents the object type of the memory file system object.
-	// This is used e.g. to register itself to the logger.
-	ObjectType spec.ObjectType = "memory-file-system"
 )
 
 // Config represents the configuration used to create a new memory file
 // system service object.
 type Config struct {
 	// Dependencies.
-	Log spec.Log
+	ServiceCollection servicespec.Collection
 }
 
 // DefaultConfig provides a default configuration to create a new memory
@@ -30,7 +21,7 @@ type Config struct {
 func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
-		Log: log.New(log.DefaultConfig()),
+		ServiceCollection: nil,
 	}
 
 	return newConfig
@@ -40,21 +31,28 @@ func DefaultConfig() Config {
 func New(config Config) (servicespec.FS, error) {
 	newService := &service{
 		Config:  config,
-		ID:      id.MustNewID(),
 		Mutex:   sync.Mutex{},
 		Storage: map[string][]byte{},
-		Type:    ObjectType,
 	}
 
-	if newService.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
+	// Dependencies
+	if newService.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
+
+	id, err := newService.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newService.Metadata["id"] = id
+	newService.Metadata["kind"] = "memory"
+	newService.Metadata["name"] = "file-system"
+	newService.Metadata["type"] = "service"
 
 	return newService, nil
 }
 
-// MustNew creates either a new default configured id service object, or
-// panics.
+// MustNew creates either a new default configured id service, or panics.
 func MustNew() servicespec.FS {
 	newService, err := New(DefaultConfig())
 	if err != nil {
@@ -67,14 +65,14 @@ func MustNew() servicespec.FS {
 type service struct {
 	Config
 
-	ID      string
+	Metadata map[string]string
+	// TODO actually use mutex
 	Mutex   sync.Mutex
 	Storage map[string][]byte
-	Type    spec.ObjectType
 }
 
 func (s *service) ReadFile(filename string) ([]byte, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call ReadFile")
+	s.Service().Log().Line("func", "ReadFile")
 
 	if bytes, ok := s.Storage[filename]; ok {
 		return bytes, nil
@@ -90,7 +88,7 @@ func (s *service) ReadFile(filename string) ([]byte, error) {
 }
 
 func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WriteFile")
+	s.Service().Log().Line("func", "WriteFile")
 
 	s.Storage[filename] = bytes
 	return nil

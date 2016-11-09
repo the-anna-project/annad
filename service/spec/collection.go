@@ -11,6 +11,9 @@ type Collection interface {
 	// ID returns an ID service. It is used to create IDs of a certain type.
 	ID() ID
 
+	// Log returns a log service. It is used to print log messages.
+	Log() Log
+
 	// Permutation returns a permutation service. It is used to permute instances
 	// of type PermutationList.
 	Permutation() Permutation

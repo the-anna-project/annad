@@ -6,26 +6,16 @@ package {{.PackageName}}
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-  "github.com/xh3b4sd/anna/log"
   "github.com/xh3b4sd/anna/service"
-  "github.com/xh3b4sd/anna/service/id"
   servicespec "github.com/xh3b4sd/anna/service/spec"
-  systemspec "github.com/xh3b4sd/anna/spec"
   "github.com/xh3b4sd/anna/storage"
   storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
-
-const (
-  // ObjectType represents the object type of the CLG object. This is used e.g.
-  // to register itself to the logger.
-  ObjectType systemspec.ObjectType = "{{.CLGName}}-clg"
 )
 
 // Config represents the configuration used to create a new CLG object.
 type Config struct {
   // Dependencies.
   ServiceCollection servicespec.Collection
-  Log               systemspec.Log
   StorageCollection storagespec.Collection
 }
 
@@ -35,7 +25,6 @@ func DefaultConfig() Config {
   newConfig := Config{
     // Dependencies.
     ServiceCollection: service.MustNewCollection(),
-    Log:               log.New(log.DefaultConfig()),
     StorageCollection: storage.MustNewCollection(),
   }
 
@@ -43,46 +32,45 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured CLG object.
-func New(config Config) (systemspec.CLG, error) {
-  newCLG := &clg{
+func New(config Config) (servicespec.CLG, error) {
+  newService := &clg{
     Config: config,
-    ID:     id.MustNewID(),
-    Name:   "{{.CLGName}}",
-    Type:   ObjectType,
   }
 
   // Dependencies.
-  if newCLG.ServiceCollection == nil {
+  if newService.ServiceCollection == nil {
     return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
   }
-  if newCLG.Log == nil {
-    return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-  }
-  if newCLG.StorageCollection == nil {
+  if newService.StorageCollection == nil {
     return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
   }
 
-  newCLG.Log.Register(newCLG.GetType())
+  id, err := newService.Service().ID().New()
+  if err != nil {
+    return nil, maskAny(err)
+  }
+  newService.Metadata["id"] = id
+  newService.Metadata["kind"] = "{{.CLGName}}"
+  newService.Metadata["name"] = "clg"
+  newService.Metadata["type"] = "service"
 
-  return newCLG, nil
+  return newService, nil
 }
 
 // MustNew creates either a new default configured CLG object, or panics.
-func MustNew() systemspec.CLG {
-  newCLG, err := New(DefaultConfig())
+func MustNew() servicespec.CLG {
+  newService, err := New(DefaultConfig())
   if err != nil {
     panic(err)
   }
 
-  return newCLG
+  return newService
 }
 
 type clg struct {
   Config
 
-  ID string
-  Name string
-  Type systemspec.ObjectType
+  Metadata map[string]string
 }
 
 func (c *clg) Service() servicespec.Collection {
@@ -93,16 +81,8 @@ func (c *clg) GetCalculate() interface{} {
   return c.calculate
 }
 
-func (c *clg) GetName() string {
-  return c.Name
-}
-
 func (c *clg) SetServiceCollection(serviceCollection servicespec.Collection) {
   c.ServiceCollection = serviceCollection
-}
-
-func (c *clg) SetLog(log systemspec.Log) {
-  c.Log = log
 }
 
 func (c *clg) SetStorageCollection(storageCollection storagespec.Collection) {

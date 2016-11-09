@@ -14,7 +14,7 @@ import (
 const (
 	// ObjectTypeFeatureSet represents the object type of the feature set object.
 	// This is used e.g. to register itself to the logger.
-	ObjectTypeFeatureSet spec.ObjectType = "feature-set"
+	ObjectTypeFeatureSet string = "feature-set"
 )
 
 // Config represents the configuration used to create a new feature set object.
@@ -98,7 +98,7 @@ type featureSet struct {
 	Features []spec.Feature
 	ID       string
 	Mutex    sync.Mutex
-	Type     spec.ObjectType
+	Type     string
 }
 
 func (fs *featureSet) GetFeatures() []spec.Feature {

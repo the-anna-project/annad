@@ -7,11 +7,10 @@ import (
 
 	"github.com/xh3b4sd/anna/network"
 	"github.com/xh3b4sd/anna/server"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (a *annad) InitAnnadCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnadCmd")
+	a.Service().Log().Line("func", "InitAnnadCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -28,8 +27,6 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 			err = a.Log.SetVerbosity(a.Flags.ControlLogVerbosity)
 			panicOnError(err)
-
-			a.Log.Register(a.GetType())
 
 			// service collection.
 			a.ServiceCollection, err = newServiceCollection()
@@ -105,19 +102,19 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 }
 
 func (a *annad) ExecAnnadCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnadCmd")
+	a.Service().Log().Line("func", "ExecAnnadCmd")
 
 	if len(args) > 0 {
 		cmd.HelpFunc()(cmd, nil)
 		os.Exit(1)
 	}
 
-	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting annad")
+	a.Service().Log().Line("msg", "booting annad")
 
-	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting network")
+	a.Service().Log().Line("msg", "booting network")
 	go a.Network.Boot()
 
-	a.Log.WithTags(spec.Tags{C: nil, L: "I", O: a, V: 10}, "booting server")
+	a.Service().Log().Line("msg", "booting server")
 	go a.Server.Boot()
 
 	// Block the main goroutine forever. The process is only supposed to be ended

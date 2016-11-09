@@ -1,11 +1,7 @@
 package memory
 
-import (
-	"github.com/xh3b4sd/anna/spec"
-)
-
 func (s *storage) PopFromList(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PopFromList")
+	s.Service().Log().Line("func", "PopFromList")
 
 	result, err := s.RedisStorage.PopFromList(key)
 	if err != nil {
@@ -16,7 +12,7 @@ func (s *storage) PopFromList(key string) (string, error) {
 }
 
 func (s *storage) PushToList(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToList")
+	s.Service().Log().Line("func", "PushToList")
 
 	err := s.RedisStorage.PushToList(key, element)
 	if err != nil {

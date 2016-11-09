@@ -10,4 +10,7 @@ type TextInput interface {
 	// GetChannel returns a channel which is used to send text responses back to
 	// the client.
 	GetChannel() chan objectspec.TextInput
+
+	// GetMetadata returns the service's metadata.
+	GetMetadata() map[string]string
 }

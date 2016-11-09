@@ -5,6 +5,7 @@ import (
 
 	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/id"
+	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
@@ -18,6 +19,7 @@ type CollectionConfig struct {
 	// Dependencies.
 	FSService          servicespec.FS
 	IDService          servicespec.ID
+	LogService         servicespec.Log
 	PermutationService servicespec.Permutation
 	RandomService      servicespec.Random
 	TextInputService   servicespec.TextInput
@@ -31,6 +33,7 @@ func DefaultCollectionConfig() CollectionConfig {
 		// Dependencies.
 		FSService:          mem.MustNew(),
 		IDService:          id.MustNew(),
+		LogService:         log.MustNew(),
 		PermutationService: permutation.MustNew(),
 		RandomService:      random.MustNew(),
 		TextInputService:   textinput.MustNew(),
@@ -54,6 +57,9 @@ func NewCollection(config CollectionConfig) (servicespec.Collection, error) {
 	if newCollection.IDService == nil {
 		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
 	}
+	if newCollection.LogService == nil {
+		return nil, maskAnyf(invalidConfigError, "log service must not be empty")
+	}
 	if newCollection.PermutationService == nil {
 		return nil, maskAnyf(invalidConfigError, "permutation service must not be empty")
 	}
@@ -70,8 +76,8 @@ func NewCollection(config CollectionConfig) (servicespec.Collection, error) {
 	return newCollection, nil
 }
 
-// MustNewCollection creates either a new default configured service collection
-// object, or panics.
+// MustNewCollection creates either a new default configured service collection,
+// or panics.
 func MustNewCollection() servicespec.Collection {
 	newCollection, err := NewCollection(DefaultCollectionConfig())
 	if err != nil {
@@ -93,6 +99,10 @@ func (c *collection) FS() servicespec.FS {
 
 func (c *collection) ID() servicespec.ID {
 	return c.IDService
+}
+
+func (c *collection) Log() servicespec.Log {
+	return c.LogService
 }
 
 func (c *collection) Permutation() servicespec.Permutation {

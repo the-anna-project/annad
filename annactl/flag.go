@@ -18,8 +18,5 @@ type Flags struct {
 	GRPCAddr string
 	HTTPAddr string
 
-	ControlLogLevels    string
-	ControlLogVerbosity int
-
 	InterfaceTextReadPlain InterfaceTextReadPlainFlags
 }

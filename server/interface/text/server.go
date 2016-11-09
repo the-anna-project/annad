@@ -2,28 +2,18 @@ package text
 
 import (
 	"io"
-	"sync"
 
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/object/networkresponse"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textinput"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
-)
-
-const (
-	// ObjectType represents the object type of the text interface server object.
-	// This is used e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "text-interface-server" // TODO this is no server, it is an endpoint
 )
 
 // ServerConfig represents the configuration used to create a new text
 // interface object.
 type ServerConfig struct {
-	Log               systemspec.Log
 	ServiceCollection servicespec.Collection
 }
 
@@ -31,7 +21,6 @@ type ServerConfig struct {
 // interface object by best effort.
 func DefaultServerConfig() ServerConfig {
 	newConfig := ServerConfig{
-		Log:               log.New(log.DefaultConfig()),
 		ServiceCollection: service.MustNewCollection(),
 	}
 
@@ -43,19 +32,16 @@ func NewServer(config ServerConfig) (TextInterfaceServer, error) {
 	newServer := &server{
 		ServerConfig: config,
 
-		ID:    id.MustNewID(),
-		Mutex: sync.Mutex{},
-		Type:  ObjectType,
+		Metadata: map[string]string{
+			"id":   id.MustNewID(),
+			"name": "text",
+			"type": "endpoint",
+		},
 	}
 
-	if newServer.Log == nil {
-		return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-	}
 	if newServer.ServiceCollection == nil {
 		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
-
-	newServer.Log.Register(newServer.GetType())
 
 	return newServer, nil
 }
@@ -63,9 +49,7 @@ func NewServer(config ServerConfig) (TextInterfaceServer, error) {
 type server struct {
 	ServerConfig
 
-	ID    string
-	Mutex sync.Mutex
-	Type  systemspec.ObjectType
+	Metadata map[string]string
 }
 
 func (s *server) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextResponse {
@@ -95,7 +79,7 @@ func (s *server) EncodeRequest(streamTextRequest *StreamTextRequest) (objectspec
 }
 
 func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
-	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call StreamText")
+	s.Service().Log().Line("func", "StreamText")
 
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
