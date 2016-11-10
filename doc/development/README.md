@@ -12,3 +12,4 @@ processes.
 - [makefile](makefile.md)
 - [requirements](requirements.md)
 - [setup](setup.md)
+- [vendoring](vendoring.md)
