@@ -20,7 +20,7 @@ var (
 
 // New creates a new annad service.
 func New() systemspec.Annad {
-	newAnna := &annad{}
+	return &annad{}
 }
 
 type annad struct {
@@ -95,7 +95,7 @@ func (a *annad) SetServiceCollection(sc servicespec.Collection) {
 func (a *annad) Shutdown() {
 	a.Service().Log().Line("func", "Shutdown")
 
-	a.ShutdownOnce.Do(func() {
+	a.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
 		wg.Add(1)
@@ -108,7 +108,7 @@ func (a *annad) Shutdown() {
 		wg.Add(1)
 		go func() {
 			a.Service().Log().Line("msg", "shutting down server")
-			a.Server.Shutdown()
+			a.server.Shutdown()
 			wg.Done()
 		}()
 
@@ -136,8 +136,7 @@ func init() {
 }
 
 func main() {
-	newAnna, err := New(DefaultConfig())
-	panicOnError(err)
+	newAnnad := New()
 
-	newAnna.Boot()
+	newAnnad.Boot()
 }

@@ -7,14 +7,16 @@ import (
 )
 
 // TODO text interface should be a service inside the service collection
-func newTextInterface(newServiceCollection servicespec.Collection, gRPCAddr string) (systemspec.TextInterfaceClient, error) {
-	textInterfaceConfig := text.DefaultClientConfig()
-	textInterfaceConfig.GRPCAddr = gRPCAddr
-	textInterfaceConfig.ServiceCollection = newServiceCollection
-	newClient, err := text.NewClient(textInterfaceConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+func newTextInterface(newServiceCollection servicespec.Collection, gRPCAddr string) systemspec.TextInterfaceClient {
+	newClient := text.New()
+	newClient.SetGRPCAddress(gRPCAddr)
+	newClient.SetServiceCollection(newServiceCollection)
 
-	return newClient, nil
+	err := newClient.Validate()
+	panicOnError(err)
+
+	err = newClient.Configure()
+	panicOnError(err)
+
+	return newClient
 }

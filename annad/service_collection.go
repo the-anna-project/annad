@@ -19,7 +19,6 @@ import (
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
-	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 func newServiceCollection() servicespec.Collection {
@@ -54,17 +53,17 @@ func newServiceCollection() servicespec.Collection {
 	collection.SetTextOutput(textOutputService)
 	collection.SetTracker(trackerService)
 
-	activatorService.SetCollection(collection)
-	forwarderService.SetCollection(collection)
-	fileSystemService.SetCollection(collection)
-	idService.SetCollection(collection)
-	logService.SetCollection(collection)
-	networkService.SetCollection(collection)
-	permutationService.SetCollection(collection)
-	randomService.SetCollection(collection)
-	textInputService.SetCollection(collection)
-	textOutputService.SetCollection(collection)
-	trackerService.SetCollection(collection)
+	activatorService.SetServiceCollection(collection)
+	forwarderService.SetServiceCollection(collection)
+	fileSystemService.SetServiceCollection(collection)
+	idService.SetServiceCollection(collection)
+	logService.SetServiceCollection(collection)
+	networkService.SetServiceCollection(collection)
+	permutationService.SetServiceCollection(collection)
+	randomService.SetServiceCollection(collection)
+	textInputService.SetServiceCollection(collection)
+	textOutputService.SetServiceCollection(collection)
+	trackerService.SetServiceCollection(collection)
 
 	// Validate.
 	err = collection.Validate()
@@ -158,7 +157,7 @@ func newPermutationService() servicespec.Permutation {
 func newRandomService() servicespec.Random {
 	newService := random.New()
 
-	newService.SetBackoffFactory(func() systemspec.Backoff {
+	newService.SetBackoffFactory(func() servicespec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
 

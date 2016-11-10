@@ -44,8 +44,6 @@ func (c *client) Configure() error {
 		"type": "service",
 	}
 
-	c.gRPCAddr = "127.0.0.1:9119"
-
 	return nil
 }
 
@@ -76,6 +74,10 @@ func (c *client) EncodeRequest(textInput objectspec.TextInput) *StreamTextReques
 
 func (c *client) Service() servicespec.Collection {
 	return c.serviceCollection
+}
+
+func (c *client) SetGRPCAddress(gRPCAddr string) {
+	c.gRPCAddr = gRPCAddr
 }
 
 func (c *client) SetServiceCollection(sc servicespec.Collection) {
@@ -156,6 +158,10 @@ func (c *client) Validate() error {
 	// Dependencies.
 	if c.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	// Settings.
+	if c.gRPCAddr == "" {
+		return maskAnyf(invalidConfigError, "gRPC address must not be empty")
 	}
 
 	return nil

@@ -10,7 +10,6 @@ import (
 	"github.com/cenk/backoff"
 
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 // New creates a new random service.
@@ -31,7 +30,7 @@ type service struct {
 
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	backoffFactory func() spec.Backoff
+	backoffFactory func() servicespec.Backoff
 	// randFactory represents a service returning random values. Here e.g.
 	// crypto/rand.Int can be used.
 	randFactory func(rand io.Reader, max *big.Int) (n *big.Int, err error)
@@ -57,7 +56,7 @@ func (s *service) Configure() error {
 	}
 
 	// Settings.
-	s.backoffFactory = func() spec.Backoff {
+	s.backoffFactory = func() servicespec.Backoff {
 		return &backoff.StopBackOff{}
 	}
 	s.randFactory = rand.Int
@@ -127,6 +126,10 @@ func (s *service) Metadata() map[string]string {
 
 func (s *service) Service() servicespec.Collection {
 	return s.serviceCollection
+}
+
+func (s *service) SetBackoffFactory(bf func() servicespec.Backoff) {
+	s.backoffFactory = bf
 }
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {

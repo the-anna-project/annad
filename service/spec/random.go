@@ -19,6 +19,7 @@ type Random interface {
 
 	Service() Collection
 
+	SetBackoffFactory(bf func() Backoff)
 	SetServiceCollection(sc Collection)
 
 	Validate() error

@@ -23,5 +23,5 @@ func (a *annad) InitAnnadVersionCmd() *cobra.Command {
 func (a *annad) ExecAnnadVersionCmd(cmd *cobra.Command, args []string) {
 	a.Service().Log().Line("func", "ExecAnnadVersionCmd")
 
-	fmt.Printf("%s\n", a.Version)
+	fmt.Printf("%s\n", a.version)
 }

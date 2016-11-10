@@ -19,7 +19,6 @@ import (
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
-	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 func newServiceCollection() servicespec.Collection {
@@ -158,7 +157,7 @@ func newPermutationService() servicespec.Permutation {
 func newRandomService() servicespec.Random {
 	newService := random.New()
 
-	newService.SetBackoffFactory(func() systemspec.Backoff {
+	newService.SetBackoffFactory(func() servicespec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
 

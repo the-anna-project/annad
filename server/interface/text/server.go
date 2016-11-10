@@ -21,7 +21,7 @@ type ServerConfig struct {
 // interface object by best effort.
 func DefaultServerConfig() ServerConfig {
 	newConfig := ServerConfig{
-		ServiceCollection: service.MustNewCollection(),
+		ServiceCollection: service.NewCollection(),
 	}
 
 	return newConfig

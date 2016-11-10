@@ -24,7 +24,7 @@ type StorageConfig struct {
 
 	// BackoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	BackoffFactory func() systemspec.Backoff
+	BackoffFactory func() servicespec.Backoff
 
 	Prefix string
 }
@@ -77,7 +77,7 @@ func DefaultStorageConfig() StorageConfig {
 		ServiceCollection: nil,
 
 		// Settings.
-		BackoffFactory: func() systemspec.Backoff {
+		BackoffFactory: func() servicespec.Backoff {
 			return &backoff.StopBackOff{}
 		},
 		Prefix: "prefix",

@@ -92,14 +92,11 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 		Short: "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			var err error
-
 			// Service collection.
 			a.serviceCollection = newServiceCollection()
 
 			// Text interface.
-			a.textInterface, err = newTextInterface(a.serviceCollection, a.flags.GRPCAddr)
-			panicOnError(err)
+			a.textInterface = newTextInterface(a.serviceCollection, a.flags.GRPCAddr)
 		},
 		Run: a.ExecAnnactlCmd,
 	}

@@ -36,8 +36,6 @@ func MustNewID() string {
 type service struct {
 	// Dependencies.
 
-	// randomService represents a service returning random numbers.
-	randomService     servicespec.Random
 	serviceCollection servicespec.Collection
 
 	// Internals.
@@ -97,7 +95,7 @@ func (s *service) WithType(idType int) (string, error) {
 	n := int(idType)
 	max := len(s.hashChars)
 
-	newRandomNumbers, err := s.randomService.CreateNMax(n, max)
+	newRandomNumbers, err := s.Service().Random().CreateNMax(n, max)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -113,9 +111,6 @@ func (s *service) WithType(idType int) (string, error) {
 
 func (s *service) Validate() error {
 	// Dependencies.
-	if s.randomService == nil {
-		return maskAnyf(invalidConfigError, "random service must not be empty")
-	}
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/cenk/backoff"
 
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage/redis"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
@@ -58,7 +57,7 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 	}
 
 	newRedisStorageConfig := redis.DefaultStorageConfigWithAddr(redisAddr)
-	newRedisStorageConfig.BackoffFactory = func() systemspec.Backoff {
+	newRedisStorageConfig.BackoffFactory = func() servicespec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 	newRedisStorage, err := redis.NewStorage(newRedisStorageConfig)

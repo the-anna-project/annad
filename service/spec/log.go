@@ -17,6 +17,7 @@ type Log interface {
 	Validate() error
 }
 
+// RootLogger is the underlying logger actually printing log messages.
 type RootLogger interface {
 	Log(v ...interface{}) error
 }
