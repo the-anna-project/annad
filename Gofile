@@ -1,8 +1,0 @@
-github.com/client9/misspell/cmd/misspell    master
-github.com/fzipp/gocyclo                    master
-github.com/golang/lint/golint               master
-github.com/golang/protobuf/proto            master
-github.com/golang/protobuf/protoc-gen-go    master
-github.com/xh3b4sd/clggen                   master
-github.com/xh3b4sd/worker-pool              master
-github.com/alicebob/miniredis               bb985e34f0942b1d770bf96e87f830cf38804abe
