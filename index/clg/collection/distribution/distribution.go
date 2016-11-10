@@ -14,7 +14,7 @@ import (
 const (
 	// ObjectTypeDistribution represents the object type of the distribution
 	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeDistribution spec.ObjectType = "distribution"
+	ObjectTypeDistribution string = "distribution"
 )
 
 // Config represents the configuration used to create a new distribution
@@ -103,7 +103,7 @@ type distribution struct {
 
 	ID    string
 	Mutex sync.Mutex
-	Type  spec.ObjectType
+	Type  string
 }
 
 func (d *distribution) Calculate() []float64 {

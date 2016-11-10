@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/spec"
 )
 
 func Test_IDService_NewService_Error_HashChars(t *testing.T) {
@@ -32,7 +31,7 @@ func Test_IDService_NewService_Error_RandService(t *testing.T) {
 
 func Test_IDService_NewService_Error_Type(t *testing.T) {
 	newConfig := DefaultConfig()
-	newConfig.Type = spec.IDType(0)
+	newConfig.Type = int(0)
 
 	_, err := New(newConfig)
 	if !IsInvalidConfig(err) {

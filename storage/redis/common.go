@@ -3,12 +3,10 @@ package redis
 import (
 	"strconv"
 	"time"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *storage) retryErrorLogger(err error, d time.Duration) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "E", O: s, V: 4}, "retry error: %#v", maskAny(err))
+	s.Service().Log().Line("msg", "retry error: %#v", maskAny(err))
 }
 
 func (s *storage) withPrefix(keys ...string) string {

@@ -7,25 +7,16 @@ import (
 	"github.com/alicebob/miniredis"
 	"github.com/cenk/backoff"
 
-	"github.com/xh3b4sd/anna/log"
-	"github.com/xh3b4sd/anna/service/id"
-	systemspec "github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/storage/redis"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
-
-const (
-	// ObjectType represents the object type of the memory storage object. This
-	// is used e.g. to register itself to the logger.
-	ObjectType systemspec.ObjectType = "memory-storage"
 )
 
 // StorageConfig represents the configuration used to create a new memory
 // storage object.
 type StorageConfig struct {
 	// Dependencies.
-
-	Log systemspec.Log
+	ServiceCollection servicespec.Collection
 }
 
 // DefaultStorageConfig provides a default configuration to create a new memory
@@ -33,7 +24,7 @@ type StorageConfig struct {
 func DefaultStorageConfig() StorageConfig {
 	newConfig := StorageConfig{
 		// Dependencies.
-		Log: log.New(log.DefaultConfig()),
+		ServiceCollection: nil,
 	}
 
 	return newConfig
@@ -66,7 +57,7 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 	}
 
 	newRedisStorageConfig := redis.DefaultStorageConfigWithAddr(redisAddr)
-	newRedisStorageConfig.BackoffFactory = func() systemspec.Backoff {
+	newRedisStorageConfig.BackoffFactory = func() servicespec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 	newRedisStorage, err := redis.NewStorage(newRedisStorageConfig)
@@ -78,11 +69,23 @@ func NewStorage(config StorageConfig) (storagespec.Storage, error) {
 		StorageConfig: config,
 
 		Closer:       closer,
-		ID:           id.MustNewID(),
 		RedisStorage: newRedisStorage,
 		ShutdownOnce: sync.Once{},
-		Type:         ObjectType,
 	}
+
+	// Dependencies
+	if newStorage.ServiceCollection == nil {
+		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	id, err := newStorage.Service().ID().New()
+	if err != nil {
+		return nil, maskAny(err)
+	}
+	newStorage.Metadata["id"] = id
+	newStorage.Metadata["kind"] = "memory"
+	newStorage.Metadata["name"] = "storage"
+	newStorage.Metadata["type"] = "service"
 
 	return newStorage, nil
 }
@@ -101,14 +104,13 @@ type storage struct {
 	StorageConfig
 
 	Closer       chan struct{}
-	ID           string
+	Metadata     map[string]string
 	RedisStorage storagespec.Storage
 	ShutdownOnce sync.Once
-	Type         systemspec.ObjectType
 }
 
 func (s *storage) Shutdown() {
-	s.Log.WithTags(systemspec.Tags{C: nil, L: "D", O: s, V: 13}, "call Shutdown")
+	s.Service().Log().Line("func", "Shutdown")
 
 	s.ShutdownOnce.Do(func() {
 		close(s.Closer)

@@ -3,6 +3,8 @@ package spec
 // Random creates pseudo random numbers. The service might implement
 // retries using backoff strategies and timeouts.
 type Random interface {
+	Configure() error
+
 	// CreateMax tries to create one new pseudo random number. The generated
 	// number is within the range [0 max), which means that max is exclusive.
 	CreateMax(max int) (int, error)
@@ -12,4 +14,13 @@ type Random interface {
 	// generated numbers are within the range [0 max), which means that max is
 	// exclusive.
 	CreateNMax(n, max int) ([]int, error)
+
+	Metadata() map[string]string
+
+	Service() Collection
+
+	SetBackoffFactory(bf func() Backoff)
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 }

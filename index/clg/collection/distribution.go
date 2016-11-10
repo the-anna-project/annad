@@ -66,7 +66,7 @@ func (c *collection) GetNameDistribution(args ...interface{}) ([]interface{}, er
 		return nil, maskAnyf(tooManyArgumentsError, "expected 1 got %d", len(args))
 	}
 
-	newName := d.GetName()
+	newName := d.Metadata()["name"]
 
 	return []interface{}{newName}, nil
 }

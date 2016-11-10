@@ -6,6 +6,10 @@ import (
 
 // Permutation creates permutations of arbitrary lists as configured.
 type Permutation interface {
+	Configure() error
+
+	Metadata() map[string]string
+
 	// PermuteBy permutes the configured values by applying the given delta to
 	// the currently configured indizes. Error might indicate that the configured
 	// max growth is reached. It processes the essentiaal operation of permuting
@@ -33,4 +37,10 @@ type Permutation interface {
 	//         []interface{"a", "a"}
 	//
 	PermuteBy(list objectspec.PermutationList, delta int) error
+
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 }

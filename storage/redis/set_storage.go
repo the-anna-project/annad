@@ -3,12 +3,10 @@ package redis
 import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *storage) GetAllFromSet(key string) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetAllFromSet")
+	s.Service().Log().Line("func", "GetAllFromSet")
 
 	var result []string
 	action := func() error {
@@ -36,7 +34,7 @@ func (s *storage) GetAllFromSet(key string) ([]string, error) {
 }
 
 func (s *storage) PushToSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call PushToSet")
+	s.Service().Log().Line("func", "PushToSet")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -59,7 +57,7 @@ func (s *storage) PushToSet(key string, element string) error {
 }
 
 func (s *storage) RemoveFromSet(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveFromSet")
+	s.Service().Log().Line("func", "RemoveFromSet")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -82,7 +80,7 @@ func (s *storage) RemoveFromSet(key string, element string) error {
 }
 
 func (s *storage) WalkSet(key string, closer <-chan struct{}, cb func(element string) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkSet")
+	s.Service().Log().Line("func", "WalkSet")
 
 	action := func() error {
 		conn := s.Pool.Get()

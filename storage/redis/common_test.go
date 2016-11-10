@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xh3b4sd/anna/log"
+	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/spec"
 )
 
@@ -38,13 +38,14 @@ func testMustNewRootLogger(t *testing.T) spec.RootLogger {
 func Test_RedisStorage_retryErrorLogger(t *testing.T) {
 	newRootLogger := testMustNewRootLogger(t)
 
-	newLogConfig := log.DefaultConfig()
-	newLogConfig.RootLogger = newRootLogger
-	newLog := log.New(newLogConfig)
+	newLog := log.New()
+	newLog.SetRootLogger(newRootLogger)
 
-	newConfig := DefaultStorageConfig()
-	newConfig.Log = newLog
-	newStorage, err := NewStorage(newConfig)
+	err := newLog.Validate()
+	if err != nil {
+		t.Fatal("expected", nil, "got", err)
+	}
+	err := newLog.Configure()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}

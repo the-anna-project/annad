@@ -5,12 +5,10 @@ import (
 
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/xh3b4sd/anna/spec"
 )
 
 func (s *storage) GetElementsByScore(key string, score float64, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetElementsByScore")
+	s.Service().Log().Line("func", "GetElementsByScore")
 
 	var result []string
 	var err error
@@ -35,7 +33,7 @@ func (s *storage) GetElementsByScore(key string, score float64, maxElements int)
 }
 
 func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetHighestScoredElements")
+	s.Service().Log().Line("func", "GetHighestScoredElements")
 
 	var result []string
 	var err error
@@ -60,7 +58,7 @@ func (s *storage) GetHighestScoredElements(key string, maxElements int) ([]strin
 }
 
 func (s *storage) RemoveScoredElement(key string, element string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call RemoveScoredElement")
+	s.Service().Log().Line("func", "RemoveScoredElement")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -83,7 +81,7 @@ func (s *storage) RemoveScoredElement(key string, element string) error {
 }
 
 func (s *storage) SetElementByScore(key, element string, score float64) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call SetElementByScore")
+	s.Service().Log().Line("func", "SetElementByScore")
 
 	action := func() error {
 		conn := s.Pool.Get()
@@ -106,7 +104,7 @@ func (s *storage) SetElementByScore(key, element string, score float64) error {
 }
 
 func (s *storage) WalkScoredSet(key string, closer <-chan struct{}, cb func(element string, score float64) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkScoredSet")
+	s.Service().Log().Line("func", "WalkScoredSet")
 
 	action := func() error {
 		conn := s.Pool.Get()

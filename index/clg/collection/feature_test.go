@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/index/clg/collection/feature-set"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/index/clg/collection/featureset"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 func Test_Feature_AddPositionFeature(t *testing.T) {
@@ -223,8 +223,8 @@ func Test_Feature_GetDistributionFeature(t *testing.T) {
 			if len(output) > 1 {
 				t.Fatal("expected", 1, "got", len(output))
 			}
-			if d.GetName() != testCase.ExpectedName {
-				t.Fatal("case", i+1, "expected", testCase.ExpectedName, "got", d.GetName())
+			if d.Metadata()["name"] != testCase.ExpectedName {
+				t.Fatal("case", i+1, "expected", testCase.ExpectedName, "got", d.Metadata()["name"])
 			}
 			if !reflect.DeepEqual(d.GetVectors(), testCase.ExpectedVectors) {
 				t.Fatal("case", i+1, "expected", testCase.ExpectedVectors, "got", d.GetVectors())

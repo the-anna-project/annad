@@ -7,7 +7,17 @@ import (
 // TextInput provides a communication channel to send information sequences
 // back to the client.
 type TextInput interface {
-	// GetChannel returns a channel which is used to send text responses back to
-	// the client.
-	GetChannel() chan objectspec.TextInput
+	Configure() error
+
+	// Channel returns a channel which is used to send text responses back to the
+	// client.
+	Channel() chan objectspec.TextInput
+
+	Metadata() map[string]string
+
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 }

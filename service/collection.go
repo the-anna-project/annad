@@ -3,124 +3,189 @@ package service
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/service/fs/mem"
-	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/service/permutation"
-	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/service/textinput"
-	"github.com/xh3b4sd/anna/service/textoutput"
 )
 
-// CollectionConfig represents the configuration used to create a new service
-// collection object.
-type CollectionConfig struct {
-	// Dependencies.
-	FSService          servicespec.FS
-	IDService          servicespec.ID
-	PermutationService servicespec.Permutation
-	RandomService      servicespec.Random
-	TextInputService   servicespec.TextInput
-	TextOutputService  servicespec.TextOutput
-}
-
-// DefaultCollectionConfig provides a default configuration to create a new
-// service collection object by best effort.
-func DefaultCollectionConfig() CollectionConfig {
-	newConfig := CollectionConfig{
-		// Dependencies.
-		FSService:          mem.MustNew(),
-		IDService:          id.MustNew(),
-		PermutationService: permutation.MustNew(),
-		RandomService:      random.MustNew(),
-		TextInputService:   textinput.MustNew(),
-		TextOutputService:  textoutput.MustNew(),
-	}
-
-	return newConfig
-}
-
-// NewCollection creates a new configured service collection object.
-func NewCollection(config CollectionConfig) (servicespec.Collection, error) {
-	newCollection := &collection{
-		CollectionConfig: config,
-
-		ShutdownOnce: sync.Once{},
-	}
-
-	if newCollection.FSService == nil {
-		return nil, maskAnyf(invalidConfigError, "file system service must not be empty")
-	}
-	if newCollection.IDService == nil {
-		return nil, maskAnyf(invalidConfigError, "ID service must not be empty")
-	}
-	if newCollection.PermutationService == nil {
-		return nil, maskAnyf(invalidConfigError, "permutation service must not be empty")
-	}
-	if newCollection.RandomService == nil {
-		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
-	}
-	if newCollection.TextInputService == nil {
-		return nil, maskAnyf(invalidConfigError, "text input service must not be empty")
-	}
-	if newCollection.TextOutputService == nil {
-		return nil, maskAnyf(invalidConfigError, "text output service must not be empty")
-	}
-
-	return newCollection, nil
-}
-
-// MustNewCollection creates either a new default configured service collection
-// object, or panics.
-func MustNewCollection() servicespec.Collection {
-	newCollection, err := NewCollection(DefaultCollectionConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newCollection
+// NewCollection creates a new service collection.
+func NewCollection() servicespec.Collection {
+	return &collection{}
 }
 
 type collection struct {
-	CollectionConfig
+	// Dependencies.
 
-	ShutdownOnce sync.Once
+	activator   servicespec.Activator
+	forwarder   servicespec.Forwarder
+	fs          servicespec.FS
+	id          servicespec.ID
+	log         servicespec.Log
+	network     servicespec.Network
+	permutation servicespec.Permutation
+	random      servicespec.Random
+	textInput   servicespec.TextInput
+	textOutput  servicespec.TextOutput
+	tracker     servicespec.Tracker
+
+	// Internals.
+
+	metadata     map[string]string
+	shutdownOnce sync.Once
+}
+
+func (c *collection) Configure() error {
+	// Internals.
+
+	id, err := c.ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	c.metadata = map[string]string{
+		"id":   id,
+		"name": "collection",
+		"type": "service",
+	}
+
+	c.shutdownOnce = sync.Once{}
+
+	return nil
+}
+
+func (c *collection) Activator() servicespec.Activator {
+	return c.activator
+}
+
+func (c *collection) Forwarder() servicespec.Forwarder {
+	return c.forwarder
 }
 
 func (c *collection) FS() servicespec.FS {
-	return c.FSService
+	return c.fs
 }
 
 func (c *collection) ID() servicespec.ID {
-	return c.IDService
+	return c.id
+}
+
+func (c *collection) Log() servicespec.Log {
+	return c.log
+}
+
+func (c *collection) Network() servicespec.Network {
+	return c.network
+}
+
+func (c *collection) Metadata() map[string]string {
+	return c.metadata
 }
 
 func (c *collection) Permutation() servicespec.Permutation {
-	return c.PermutationService
+	return c.permutation
 }
 
 func (c *collection) Random() servicespec.Random {
-	return c.RandomService
+	return c.random
 }
 
 func (c *collection) Shutdown() {
-	c.ShutdownOnce.Do(func() {
+	c.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
-		//wg.Add(1)
-		//go func() {
-		//	c.TODO().Shutdown()
-		//	wg.Done()
-		//}()
+		wg.Add(1)
+		go func() {
+			c.Log().Line("msg", "shutting down network")
+			c.Network().Shutdown()
+			wg.Done()
+		}()
 
 		wg.Wait()
 	})
 }
 
+func (c *collection) SetActivator(a servicespec.Activator) {
+	c.activator = a
+}
+
+func (c *collection) SetForwarder(f servicespec.Forwarder) {
+	c.forwarder = f
+}
+
+func (c *collection) SetFS(fs servicespec.FS) {
+	c.fs = fs
+}
+
+func (c *collection) SetID(id servicespec.ID) {
+	c.id = id
+}
+
+func (c *collection) SetLog(l servicespec.Log) {
+	c.log = l
+}
+
+func (c *collection) SetNetwork(n servicespec.Network) {
+	c.network = n
+}
+
+func (c *collection) SetPermutation(p servicespec.Permutation) {
+	c.permutation = p
+}
+
+func (c *collection) SetRandom(r servicespec.Random) {
+	c.random = r
+}
+
+func (c *collection) SetTextInput(ti servicespec.TextInput) {
+	c.textInput = ti
+}
+
+func (c *collection) SetTextOutput(to servicespec.TextOutput) {
+	c.textOutput = to
+}
+
+func (c *collection) SetTracker(t servicespec.Tracker) {
+	c.tracker = t
+}
+
 func (c *collection) TextInput() servicespec.TextInput {
-	return c.TextInputService
+	return c.textInput
 }
 
 func (c *collection) TextOutput() servicespec.TextOutput {
-	return c.TextOutputService
+	return c.textOutput
+}
+
+func (c *collection) Tracker() servicespec.Tracker {
+	return c.tracker
+}
+
+func (c *collection) Validate() error {
+	// Dependencies.
+	if c.activator == nil {
+		return maskAnyf(invalidConfigError, "activator service must not be empty")
+	}
+	if c.forwarder == nil {
+		return maskAnyf(invalidConfigError, "forwarder service must not be empty")
+	}
+	if c.id == nil {
+		return maskAnyf(invalidConfigError, "ID service must not be empty")
+	}
+	if c.log == nil {
+		return maskAnyf(invalidConfigError, "log service must not be empty")
+	}
+	if c.permutation == nil {
+		return maskAnyf(invalidConfigError, "permutation service must not be empty")
+	}
+	if c.random == nil {
+		return maskAnyf(invalidConfigError, "random service must not be empty")
+	}
+	if c.textInput == nil {
+		return maskAnyf(invalidConfigError, "text input service must not be empty")
+	}
+	if c.textOutput == nil {
+		return maskAnyf(invalidConfigError, "text output service must not be empty")
+	}
+	if c.tracker == nil {
+		return maskAnyf(invalidConfigError, "tracker service must not be empty")
+	}
+
+	return nil
 }

@@ -1,9 +1,7 @@
 package memory
 
-import "github.com/xh3b4sd/anna/spec"
-
 func (s *storage) Get(key string) (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Get")
+	s.Service().Log().Line("func", "Get")
 
 	result, err := s.RedisStorage.Get(key)
 	if err != nil {
@@ -14,7 +12,7 @@ func (s *storage) Get(key string) (string, error) {
 }
 
 func (s *storage) GetRandom() (string, error) {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call GetRandom")
+	s.Service().Log().Line("func", "GetRandom")
 
 	result, err := s.RedisStorage.GetRandom()
 	if err != nil {
@@ -25,7 +23,7 @@ func (s *storage) GetRandom() (string, error) {
 }
 
 func (s *storage) Remove(key string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Remove")
+	s.Service().Log().Line("func", "Remove")
 
 	err := s.RedisStorage.Remove(key)
 	if err != nil {
@@ -36,7 +34,7 @@ func (s *storage) Remove(key string) error {
 }
 
 func (s *storage) Set(key, value string) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call Set")
+	s.Service().Log().Line("func", "Set")
 
 	err := s.RedisStorage.Set(key, value)
 	if err != nil {
@@ -47,7 +45,7 @@ func (s *storage) Set(key, value string) error {
 }
 
 func (s *storage) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {
-	s.Log.WithTags(spec.Tags{C: nil, L: "D", O: s, V: 13}, "call WalkKeys")
+	s.Service().Log().Line("func", "WalkKeys")
 
 	err := s.RedisStorage.WalkKeys(glob, closer, cb)
 	if err != nil {

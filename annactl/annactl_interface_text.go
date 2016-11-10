@@ -1,13 +1,9 @@
 package main
 
-import (
-	"github.com/spf13/cobra"
-
-	"github.com/xh3b4sd/anna/spec"
-)
+import "github.com/spf13/cobra"
 
 func (a *annactl) InitAnnactlInterfaceTextCmd() *cobra.Command {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call InitAnnactlInterfaceTextCmd")
+	a.Service().Log().Line("func", "InitAnnactlInterfaceTextCmd")
 
 	// Create new command.
 	newCmd := &cobra.Command{
@@ -24,7 +20,7 @@ func (a *annactl) InitAnnactlInterfaceTextCmd() *cobra.Command {
 }
 
 func (a *annactl) ExecAnnactlInterfaceTextCmd(cmd *cobra.Command, args []string) {
-	a.Log.WithTags(spec.Tags{C: nil, L: "D", O: a, V: 13}, "call ExecAnnactlInterfaceTextCmd")
+	a.Service().Log().Line("func", "ExecAnnactlInterfaceTextCmd")
 
 	cmd.HelpFunc()(cmd, nil)
 }

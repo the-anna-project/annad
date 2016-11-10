@@ -332,7 +332,7 @@ func Test_Distribution_GetName(t *testing.T) {
 		if err != nil {
 			t.Fatal("expected", nil, "got", err)
 		}
-		output := newDistribution.GetName()
+		output := newDistribution.Metadata()["name"]
 
 		if output != testCase.Expected {
 			t.Fatal("case", i+1, "expected", testCase.Expected, "got", output)

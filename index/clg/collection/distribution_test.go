@@ -348,8 +348,8 @@ func Test_Distribution_GetNewDistribution(t *testing.T) {
 			// configuration getter.
 			name, err := ArgToString(testCase.Input, 1, defaultConfig.Name)
 			testMaybeFatalCase(t, i, err)
-			if d.GetName() != name {
-				t.Fatal("case", i+1, "expected", name, "got", d.GetName())
+			if d.Metadata()["name"] != name {
+				t.Fatal("case", i+1, "expected", name, "got", d.Metadata()["name"])
 			}
 			staticChannels, err := ArgToFloat64Slice(testCase.Input, 2, defaultConfig.StaticChannels)
 			testMaybeFatalCase(t, i, err)

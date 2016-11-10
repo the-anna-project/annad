@@ -6,109 +6,75 @@ package {{.PackageName}}
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-  "github.com/xh3b4sd/anna/log"
-  "github.com/xh3b4sd/anna/service"
-  "github.com/xh3b4sd/anna/service/id"
   servicespec "github.com/xh3b4sd/anna/service/spec"
-  systemspec "github.com/xh3b4sd/anna/spec"
-  "github.com/xh3b4sd/anna/storage"
   storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-const (
-  // ObjectType represents the object type of the CLG object. This is used e.g.
-  // to register itself to the logger.
-  ObjectType systemspec.ObjectType = "{{.CLGName}}-clg"
-)
+// New creates a new {{.PackageName}} CLG service.
+func New() servicespec.CLG {
+  return &service{}
+}
 
-// Config represents the configuration used to create a new CLG object.
-type Config struct {
+type service struct {
   // Dependencies.
-  ServiceCollection servicespec.Collection
-  Log               systemspec.Log
-  StorageCollection storagespec.Collection
+
+  serviceCollection servicespec.Collection
+  storageCollection storagespec.Collection
+
+  // Settings.
+
+  metadata map[string]string
 }
 
-// DefaultConfig provides a default configuration to create a new CLG object by
-// best effort.
-func DefaultConfig() Config {
-  newConfig := Config{
-    // Dependencies.
-    ServiceCollection: service.MustNewCollection(),
-    Log:               log.New(log.DefaultConfig()),
-    StorageCollection: storage.MustNewCollection(),
-  }
+func (s *service) Configure() error {
+  // Settings.
 
-  return newConfig
-}
-
-// New creates a new configured CLG object.
-func New(config Config) (systemspec.CLG, error) {
-  newCLG := &clg{
-    Config: config,
-    ID:     id.MustNewID(),
-    Name:   "{{.CLGName}}",
-    Type:   ObjectType,
-  }
-
-  // Dependencies.
-  if newCLG.ServiceCollection == nil {
-    return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-  }
-  if newCLG.Log == nil {
-    return nil, maskAnyf(invalidConfigError, "logger must not be empty")
-  }
-  if newCLG.StorageCollection == nil {
-    return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-  }
-
-  newCLG.Log.Register(newCLG.GetType())
-
-  return newCLG, nil
-}
-
-// MustNew creates either a new default configured CLG object, or panics.
-func MustNew() systemspec.CLG {
-  newCLG, err := New(DefaultConfig())
+  id, err := s.Service().ID().New()
   if err != nil {
-    panic(err)
+    return maskAny(err)
+  }
+  s.metadata = map[string]string{
+    "id":   id,
+    "kind": "{{.PackageName}}",
+    "name": "activator",
+    "type": "service",
   }
 
-  return newCLG
+  return nil
 }
 
-type clg struct {
-  Config
-
-  ID string
-  Name string
-  Type systemspec.ObjectType
+func (s *service) GetCalculate() interface{} {
+  return s.calculate
 }
 
-func (c *clg) Service() servicespec.Collection {
-  return c.ServiceCollection
+func (s *service) Metadata() map[string]string {
+  return s.metadata
 }
 
-func (c *clg) GetCalculate() interface{} {
-  return c.calculate
+func (s *service) Service() servicespec.Collection {
+  return s.serviceCollection
 }
 
-func (c *clg) GetName() string {
-  return c.Name
+func (s *service) SetServiceCollection(serviceCollection servicespec.Collection) {
+  s.serviceCollection = serviceCollection
 }
 
-func (c *clg) SetServiceCollection(serviceCollection servicespec.Collection) {
-  c.ServiceCollection = serviceCollection
+func (s *service) SetStorageCollection(storageCollection storagespec.Collection) {
+  s.storageCollection = storageCollection
 }
 
-func (c *clg) SetLog(log systemspec.Log) {
-  c.Log = log
+func (s *service) Storage() storagespec.Collection {
+  return s.storageCollection
 }
 
-func (c *clg) SetStorageCollection(storageCollection storagespec.Collection) {
-  c.StorageCollection = storageCollection
-}
+func (s *service) Validate() error {
+  // Dependencies.
+  if s.serviceCollection == nil {
+    return maskAnyf(invalidConfigError, "service collection must not be empty")
+  }
+  if s.storageCollection == nil {
+    return maskAnyf(invalidConfigError, "storage collection must not be empty")
+  }
 
-func (c *clg) Storage() storagespec.Collection {
-  return c.StorageCollection
+  return nil
 }

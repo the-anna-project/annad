@@ -7,52 +7,65 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-// Config represents the configuration used to create a new text input
-// service object.
-type Config struct {
-	// Settings.
-	Channel chan objectspec.TextInput
-}
-
-// DefaultConfig provides a default configuration to create a new text
-// input service object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Settings.
-		Channel: make(chan objectspec.TextInput, 1000),
-	}
-
-	return newConfig
-}
-
-// New creates a new configured text input service object.
-func New(config Config) (servicespec.TextInput, error) {
-	newService := &service{
-		Config: config,
-	}
-
-	if newService.Channel == nil {
-		return nil, maskAnyf(invalidConfigError, "channel must not be empty")
-	}
-
-	return newService, nil
-}
-
-// MustNew creates either a new default configured id service object, or
-// panics.
-func MustNew() servicespec.TextInput {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new text input service.
+func New() servicespec.TextInput {
+	return &service{}
 }
 
 type service struct {
-	Config
+	// Dependencies.
+
+	serviceCollection servicespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+
+	// Settings.
+
+	channel chan objectspec.TextInput
 }
 
-func (s *service) GetChannel() chan objectspec.TextInput {
-	return s.Channel
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "text-input",
+		"type": "service",
+	}
+
+	// Settings.
+	s.channel = make(chan objectspec.TextInput, 1000)
+
+	return nil
+}
+
+func (s *service) Channel() chan objectspec.TextInput {
+	return s.channel
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	return nil
 }

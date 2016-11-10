@@ -4,8 +4,8 @@ package collection
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service/id"
+	"github.com/xh3b4sd/anna/service/log"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -13,7 +13,7 @@ import (
 const (
 	// ObjectTypeCLGCollection represents the object type of the CLG collection
 	// object. This is used e.g. to register itself to the logger.
-	ObjectTypeCLGCollection systemspec.ObjectType = "clg-collection"
+	ObjectTypeCLGCollection string = "clg-collection"
 )
 
 // Config represents the configuration used to create a new CLG collection
@@ -35,14 +35,14 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		IDService: newIDService,
-		Log:       log.New(log.DefaultConfig()),
+		Log:       log.New(),
 	}
 
 	return newConfig
 }
 
 // New creates a new configured CLG collection object.
-func New(config Config) (systemspec.CLGCollection, error) {
+func New(config Config) (servicespec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 
@@ -50,8 +50,6 @@ func New(config Config) (systemspec.CLGCollection, error) {
 		Mutex: sync.Mutex{},
 		Type:  ObjectTypeCLGCollection,
 	}
-
-	newCollection.Log.Register(newCollection.GetType())
 
 	return newCollection, nil
 }
@@ -61,5 +59,5 @@ type collection struct {
 
 	ID    string
 	Mutex sync.Mutex
-	Type  systemspec.ObjectType
+	Type  string
 }

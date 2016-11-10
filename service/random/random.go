@@ -10,82 +10,60 @@ import (
 	"github.com/cenk/backoff"
 
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/spec"
 )
 
-// Config represents the configuration used to create a new random
-// service object.
-type Config struct {
-	// Settings.
-
-	// BackoffFactory is supposed to be able to create a new spec.Backoff. Retry
-	// implementations can make use of this to decide when to retry.
-	BackoffFactory func() spec.Backoff
-
-	// RandFactory represents a service returning random values. Here e.g.
-	// crypto/rand.Int can be used.
-	RandFactory func(rand io.Reader, max *big.Int) (n *big.Int, err error)
-
-	// RandReader represents an instance of a cryptographically strong
-	// pseudo-random generator. Here e.g. crypto/rand.Reader can be used.
-	RandReader io.Reader
-
-	// Timeout represents the deadline being waited during random number creation
-	// before returning a timeout error.
-	Timeout time.Duration
-}
-
-// DefaultConfig provides a default configuration to create a new random
-// service object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Settings.
-		BackoffFactory: func() spec.Backoff {
-			return &backoff.StopBackOff{}
-		},
-		RandFactory: rand.Int,
-		RandReader:  rand.Reader,
-		Timeout:     1 * time.Second,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured random service object.
-func New(config Config) (servicespec.Random, error) {
-	newService := &service{
-		Config: config,
-	}
-
-	if newService.BackoffFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "backoff factory must not be empty")
-	}
-	if newService.RandFactory == nil {
-		return nil, maskAnyf(invalidConfigError, "random factory must not be empty")
-	}
-	if newService.RandReader == nil {
-		return nil, maskAnyf(invalidConfigError, "random reader must not be empty")
-	}
-	if newService.Timeout == 0 {
-		return nil, maskAnyf(invalidConfigError, "creation timeout must not be empty")
-	}
-
-	return newService, nil
-}
-
-// MustNew creates either a new default configured random service object,
-// or panics.
-func MustNew() servicespec.Random {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new random service.
+func New() servicespec.Random {
+	return &service{}
 }
 
 type service struct {
-	Config
+	// Dependencies.
+
+	serviceCollection servicespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+
+	// Settings.
+
+	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
+	// implementations can make use of this to decide when to retry.
+	backoffFactory func() servicespec.Backoff
+	// randFactory represents a service returning random values. Here e.g.
+	// crypto/rand.Int can be used.
+	randFactory func(rand io.Reader, max *big.Int) (n *big.Int, err error)
+	// randReader represents an instance of a cryptographically strong
+	// pseudo-random generator. Here e.g. crypto/rand.Reader can be used.
+	randReader io.Reader
+	// timeout represents the deadline being waited during random number creation
+	// before returning a timeout error.
+	timeout time.Duration
+}
+
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "random",
+		"type": "service",
+	}
+
+	// Settings.
+	s.backoffFactory = func() servicespec.Backoff {
+		return &backoff.StopBackOff{}
+	}
+	s.randFactory = rand.Int
+	s.randReader = rand.Reader
+	s.timeout = 1 * time.Second
+
+	return nil
 }
 
 func (s *service) CreateMax(max int) (int, error) {
@@ -97,7 +75,7 @@ func (s *service) CreateMax(max int) (int, error) {
 
 		go func() {
 			m := big.NewInt(int64(max))
-			j, err := s.RandFactory(s.RandReader, m)
+			j, err := s.randFactory(s.randReader, m)
 			if err != nil {
 				fail <- maskAny(err)
 				return
@@ -109,8 +87,8 @@ func (s *service) CreateMax(max int) (int, error) {
 		}()
 
 		select {
-		case <-time.After(s.Timeout):
-			return maskAnyf(timeoutError, "after %s", s.Timeout)
+		case <-time.After(s.timeout):
+			return maskAnyf(timeoutError, "after %s", s.timeout)
 		case err := <-fail:
 			return maskAny(err)
 		case <-done:
@@ -119,7 +97,7 @@ func (s *service) CreateMax(max int) (int, error) {
 	}
 
 	// Execute the action wrapped with a retrier.
-	err := backoff.Retry(action, s.BackoffFactory())
+	err := backoff.Retry(action, s.backoffFactory())
 	if err != nil {
 		return 0, maskAny(err)
 	}
@@ -140,4 +118,29 @@ func (s *service) CreateNMax(n, max int) ([]int, error) {
 	}
 
 	return result, nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetBackoffFactory(bf func() servicespec.Backoff) {
+	s.backoffFactory = bf
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	return nil
 }

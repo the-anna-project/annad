@@ -33,6 +33,4 @@ type Distribution interface {
 	// calculated based on their channel locations. Note that each vector has a
 	// weight of 1.
 	GetVectors() [][]float64
-
-	Object
 }
