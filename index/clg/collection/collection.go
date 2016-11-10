@@ -4,8 +4,8 @@ package collection
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/log"
 	"github.com/xh3b4sd/anna/service/id"
+	"github.com/xh3b4sd/anna/service/log"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -35,7 +35,7 @@ func DefaultConfig() Config {
 	newConfig := Config{
 		// Dependencies.
 		IDService: newIDService,
-		Log:       log.New(log.DefaultConfig()),
+		Log:       log.New(),
 	}
 
 	return newConfig
