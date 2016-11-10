@@ -38,62 +38,39 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-// Config represents the configuration used to create a new permutation
-// service object.
-type Config struct {
-	// Dependencies.
-	ServiceCollection servicespec.Collection
-}
-
-// DefaultConfig provides a default configuration to create a new
-// permutation service object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: nil,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured permutation service object.
-func New(config Config) (servicespec.Permutation, error) {
-	// Create new object.
-	newService := &service{
-		Config: config,
-	}
-
-	// Dependencies
-	if newService.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	id, err := newService.Service().ID().New()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newService.Metadata["id"] = id
-	newService.Metadata["name"] = "permutation"
-	newService.Metadata["type"] = "service"
-
-	return newService, nil
-}
-
-// MustNew creates either a new default configured random service object,
-// or panics.
-func MustNew() servicespec.Permutation {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new permutation service.
+func New() servicespec.Permutation {
+	return &service{}
 }
 
 type service struct {
-	Config
+	// Dependencies.
 
-	Metadata map[string]string
+	serviceCollection servicespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+}
+
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "permutation",
+		"type": "service",
+	}
+
+	return nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
 }
 
 func (s *service) PermuteBy(list objectspec.PermutationList, delta int) error {
@@ -107,6 +84,23 @@ func (s *service) PermuteBy(list objectspec.PermutationList, delta int) error {
 	}
 
 	list.SetIndizes(newIndizes)
+
+	return nil
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 
 	return nil
 }

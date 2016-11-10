@@ -1,5 +1,7 @@
 package collection
 
+import "github.com/xh3b4sd/anna/index/clg/collection/featureset"
+
 func (c *collection) AddPositionFeature(args ...interface{}) ([]interface{}, error) {
 	f, err := ArgToFeature(args, 0)
 	if err != nil {

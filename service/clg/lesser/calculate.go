@@ -7,7 +7,7 @@ import (
 )
 
 // calculate returns the number that is lesser than the other.
-func (c *clg) calculate(ctx spec.Context, a, b float64) float64 {
+func (s *service) calculate(ctx spec.Context, a, b float64) float64 {
 	if a < b {
 		return a
 	}

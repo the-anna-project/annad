@@ -6,69 +6,42 @@ import (
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/permutationlist"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/permutation"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-// Config represents the configuration used to create a new activator object.
-type Config struct {
-	// Dependencies.
-	ServiceCollection servicespec.Collection
-	StorageCollection storagespec.Collection
-}
-
-// DefaultConfig provides a default configuration to create a new activator
-// object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: service.MustNewCollection(),
-		StorageCollection: storage.MustNewCollection(),
-	}
-
-	return newConfig
-}
-
-// New creates a new configured activator object.
-func New(config Config) (systemspec.Activator, error) {
-	newService := &service{
-		Config: config,
-
-		Metadata: map[string]string{
-			"id":   id.MustNewID(),
-			"name": "activator",
-			"type": "service",
-		},
-	}
-
-	if newService.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
-	if newService.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-
-	return newService, nil
-}
-
-// MustNew creates either a new default configured activator object, or panics.
-func MustNew() systemspec.Activator {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new activator service.
+func New() servicespec.Activator {
+	return &service{}
 }
 
 type service struct {
-	Config
+	// Dependencies.
 
-	Metadata map[string]string
+	serviceCollection servicespec.Collection
+	storageCollection storagespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+}
+
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "activator",
+		"type": "service",
+	}
+
+	return nil
 }
 
 func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
@@ -81,11 +54,11 @@ func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.Networ
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	queueKey := key.NewNetworkKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
-	s, err := s.Storage().General().Get(queueKey)
+	str, err := s.Storage().General().Get(queueKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
-	queue, err := stringToQueue(s)
+	queue, err := stringToQueue(str)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -177,7 +150,7 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.Netw
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
-	s, err := s.Storage().General().Get(behaviourIDsKey)
+	str, err := s.Storage().General().Get(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
 		// error. Eventually some other lookup is able to find a sufficient network
@@ -186,7 +159,7 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.Netw
 	} else if err != nil {
 		return nil, maskAny(err)
 	}
-	behaviourIDs := strings.Split(s, ",")
+	behaviourIDs := strings.Split(str, ",")
 	if len(behaviourIDs) == 0 {
 		// No activation configuration of the requested CLG is stored. Thus we
 		// return an error. Eventually some other lookup is able to find a
@@ -234,6 +207,10 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.Netw
 	}
 
 	return newNetworkPayload, nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
 }
 
 func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
@@ -324,4 +301,32 @@ func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (o
 	}
 
 	return newNetworkPayload, nil
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) SetStorageCollection(sc storagespec.Collection) {
+	s.storageCollection = sc
+}
+
+func (s *service) Storage() storagespec.Collection {
+	return s.storageCollection
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	if s.storageCollection == nil {
+		return maskAnyf(invalidConfigError, "storage collection must not be empty")
+	}
+
+	return nil
 }

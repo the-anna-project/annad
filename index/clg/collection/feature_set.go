@@ -1,5 +1,7 @@
 package collection
 
+import "github.com/xh3b4sd/anna/index/clg/collection/featureset"
+
 func (c *collection) GetFeaturesFeatureSet(args ...interface{}) ([]interface{}, error) {
 	fs, err := ArgToFeatureSet(args, 0)
 	if err != nil {

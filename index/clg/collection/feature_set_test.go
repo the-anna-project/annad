@@ -4,7 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/index/clg/collection/featureset"
+	"github.com/xh3b4sd/anna/object/spec"
 )
 
 func testFeatureSet(t *testing.T, ss []string) spec.FeatureSet {

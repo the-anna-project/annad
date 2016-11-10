@@ -1,89 +1,178 @@
 package main
 
 import (
+	"os"
+
 	"github.com/cenk/backoff"
+	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/xh3b4sd/anna/service"
+	"github.com/xh3b4sd/anna/service/activator"
+	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/id"
+	"github.com/xh3b4sd/anna/service/log"
+	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/textinput"
+	"github.com/xh3b4sd/anna/service/textoutput"
+	"github.com/xh3b4sd/anna/service/tracker"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
-func newServiceCollection() (servicespec.Collection, error) {
-	fileSystemService, err := newFileSystemService()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	randomService, err := newRandomService()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	idService, err := newIDService(randomService)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	permutationService, err := newPermutationService()
-	if err != nil {
-		return nil, maskAny(err)
-	}
+func newServiceCollection() servicespec.Collection {
+	var err error
 
-	newCollectionConfig := service.DefaultCollectionConfig()
-	newCollectionConfig.FSService = fileSystemService
-	newCollectionConfig.IDService = idService
-	newCollectionConfig.PermutationService = permutationService
-	newCollectionConfig.RandomService = randomService
-	newCollection, err := service.NewCollection(newCollectionConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	// New.
+	collection := service.NewCollection()
 
-	return newCollection, nil
+	// TODO add other services
+	activatorService := newActivatorService()
+	forwarderService := newForwarderService()
+	fileSystemService := newFileSystemService()
+	idService := newIDService()
+	logService := newLogService()
+	networkService := newNetworkService()
+	permutationService := newPermutationService()
+	randomService := newRandomService()
+	textInputService := newTextInputService()
+	textOutputService := newTextOutputService()
+	trackerService := newTrackerService()
+
+	// Set.
+	collection.SetActivator(activatorService)
+	collection.SetForwarder(forwarderService)
+	collection.SetFS(fileSystemService)
+	collection.SetID(idService)
+	collection.SetLog(logService)
+	collection.SetNetwork(networkService)
+	collection.SetPermutation(permutationService)
+	collection.SetRandom(randomService)
+	collection.SetTextInput(textInputService)
+	collection.SetTextOutput(textOutputService)
+	collection.SetTracker(trackerService)
+
+	activatorService.SetServiceCollection(collection)
+	forwarderService.SetServiceCollection(collection)
+	fileSystemService.SetServiceCollection(collection)
+	idService.SetServiceCollection(collection)
+	logService.SetServiceCollection(collection)
+	networkService.SetServiceCollection(collection)
+	permutationService.SetServiceCollection(collection)
+	randomService.SetServiceCollection(collection)
+	textInputService.SetServiceCollection(collection)
+	textOutputService.SetServiceCollection(collection)
+	trackerService.SetServiceCollection(collection)
+
+	// Validate.
+	err = collection.Validate()
+	panicOnError(err)
+
+	err = activatorService.Validate()
+	panicOnError(err)
+	err = forwarderService.Validate()
+	panicOnError(err)
+	err = fileSystemService.Validate()
+	panicOnError(err)
+	err = idService.Validate()
+	panicOnError(err)
+	err = logService.Validate()
+	panicOnError(err)
+	err = networkService.Validate()
+	panicOnError(err)
+	err = permutationService.Validate()
+	panicOnError(err)
+	err = randomService.Validate()
+	panicOnError(err)
+	err = textInputService.Validate()
+	panicOnError(err)
+	err = textOutputService.Validate()
+	panicOnError(err)
+	err = trackerService.Validate()
+	panicOnError(err)
+
+	// Configure.
+	err = collection.Configure()
+	panicOnError(err)
+
+	err = activatorService.Configure()
+	panicOnError(err)
+	err = forwarderService.Configure()
+	panicOnError(err)
+	err = fileSystemService.Configure()
+	panicOnError(err)
+	err = idService.Configure()
+	panicOnError(err)
+	err = logService.Configure()
+	panicOnError(err)
+	err = networkService.Configure()
+	panicOnError(err)
+	err = permutationService.Configure()
+	panicOnError(err)
+	err = randomService.Configure()
+	panicOnError(err)
+	err = textInputService.Configure()
+	panicOnError(err)
+	err = textOutputService.Configure()
+	panicOnError(err)
+	err = trackerService.Configure()
+	panicOnError(err)
+
+	return collection
+}
+
+func newActivatorService() servicespec.Activator {
+	return activator.New()
+}
+
+func newForwarderService() servicespec.Forwarder {
+	return forwarder.New()
 }
 
 // TODO make mem/os configurable
-func newFileSystemService() (servicespec.FS, error) {
-	newConfig := mem.DefaultConfig()
-	newService, err := mem.New(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newService, nil
+func newFileSystemService() servicespec.FS {
+	return mem.New()
 }
 
-func newIDService(randomService servicespec.Random) (servicespec.ID, error) {
-	newConfig := id.DefaultConfig()
-	newConfig.RandomService = randomService
-	newService, err := id.New(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	return newService, nil
+func newIDService() servicespec.ID {
+	return id.New()
 }
 
-func newPermutationService() (servicespec.Permutation, error) {
-	newConfig := permutation.DefaultConfig()
-	newService, err := permutation.New(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+func newLogService() servicespec.Log {
+	newService := log.New()
+	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
 
-	return newService, nil
+	return newService
 }
 
-func newRandomService() (servicespec.Random, error) {
-	newConfig := random.DefaultConfig()
-	newConfig.BackoffFactory = func() systemspec.Backoff {
+func newNetworkService() servicespec.Network {
+	return network.New()
+}
+
+func newPermutationService() servicespec.Permutation {
+	return permutation.New()
+}
+
+func newRandomService() servicespec.Random {
+	newService := random.New()
+
+	newService.SetBackoffFactory(func() systemspec.Backoff {
 		return backoff.NewExponentialBackOff()
-	}
-	newService, err := random.New(newConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	})
 
-	return newService, nil
+	return newService
+}
+
+func newTextInputService() servicespec.TextInput {
+	return textinput.New()
+}
+
+func newTextOutputService() servicespec.TextOutput {
+	return textoutput.New()
+}
+
+func newTrackerService() servicespec.Tracker {
+	return tracker.New()
 }

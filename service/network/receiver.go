@@ -22,61 +22,60 @@ import (
 
 // logNetworkError logs the given error in a specific way dependening on the
 // given error. If the given error is nil, nothing will be logged.
-func (n *network) logNetworkError(err error) {
+func (s *service) logNetworkError(err error) {
 	if output.IsExpectationNotMet(err) {
-		n.Service().Log().Line("msg", "%#v", maskAny(err))
+		s.Service().Log().Line("msg", "%#v", maskAny(err))
 	} else if err != nil {
-		n.Service().Log().Line("msg", "%#v", maskAny(err))
+		s.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 }
 
 // logWorkerErrors logs all errors that are may be queued by the provided error
 // channel using the configured logger with log level E and verbosity 4.
-func (n *network) logWorkerErrors(errors chan error) {
+func (s *service) logWorkerErrors(errors chan error) {
 	for err := range errors {
 		if IsWorkerCanceled(err) {
 			continue
 		}
 
-		n.Service().Log().Line("msg", "%#v", maskAny(err))
+		s.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 }
 
 // newCLGs returns a list of all CLGs which are configured and ready to be used
 // within the neural network.
-func (n *network) newCLGs() map[string]servicespec.CLG {
+func (s *service) newCLGs() map[string]servicespec.CLG {
 	// TODO this should be initialized with the service collection
 	list := []servicespec.CLG{
-		divide.MustNew(),
-		input.MustNew(),
-		divide.MustNew(),
-		greater.MustNew(),
-		input.MustNew(),
-		isbetween.MustNew(),
-		isgreater.MustNew(),
-		islesser.MustNew(),
-		lesser.MustNew(),
-		multiply.MustNew(),
-		output.MustNew(),
-		pairsyntactic.MustNew(),
-		readinformationid.MustNew(),
-		readseparator.MustNew(),
-		round.MustNew(),
-		splitfeatures.MustNew(),
-		subtract.MustNew(),
-		sum.MustNew(),
+		divide.New(),
+		input.New(),
+		divide.New(),
+		greater.New(),
+		input.New(),
+		isbetween.New(),
+		isgreater.New(),
+		islesser.New(),
+		lesser.New(),
+		multiply.New(),
+		output.New(),
+		pairsyntactic.New(),
+		readinformationid.New(),
+		readseparator.New(),
+		round.New(),
+		splitfeatures.New(),
+		subtract.New(),
+		sum.New(),
 	}
 
 	newCLGs := map[string]servicespec.CLG{}
 
 	for _, CLG := range list {
-		newCLGs[CLG.GetName()] = CLG
+		newCLGs[CLG.Metadata()["name"]] = CLG
 	}
 
 	for name := range newCLGs {
-		newCLGs[name].SetServiceCollection(n.ServiceCollection)
-		newCLGs[name].SetLog(n.Log)
-		newCLGs[name].SetStorageCollection(n.StorageCollection)
+		newCLGs[name].SetServiceCollection(s.serviceCollection)
+		newCLGs[name].SetStorageCollection(s.storageCollection)
 	}
 
 	return newCLGs

@@ -6,14 +6,15 @@ import storagespec "github.com/xh3b4sd/anna/storage/spec"
 // network. Each CLG is registered in the Network. From there signal are
 // dispatched in a dynamic fashion until some useful calculation took place.
 type CLG interface {
-	Provider
+	Configure() error
 
 	// GetCalculate returns the CLG's calculate function which implements its
 	// actual business logic.
 	GetCalculate() interface{}
 
-	// GetMetadata returns the service's metadata.
-	GetMetadata() map[string]string
+	Metadata() map[string]string
+
+	Service() Collection
 
 	// SetServiceCollection configures the CLG's factory collection. This is done
 	// for all CLGs, regardless if a CLG is making use of the factory collection
@@ -25,5 +26,7 @@ type CLG interface {
 	// or not.
 	SetStorageCollection(storageCollection storagespec.Collection)
 
-	storagespec.Provider
+	Storage() storagespec.Collection
+
+	Validate() error
 }

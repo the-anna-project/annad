@@ -8,10 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/network"
-	"github.com/xh3b4sd/anna/server"
-	"github.com/xh3b4sd/anna/service"
-	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -22,82 +18,55 @@ var (
 	version string
 )
 
-// Config represents the configuration used to create a new annad object.
-type Config struct {
-	// Dependencies.
-	Network           systemspec.Network
-	Server            systemspec.Server
-	ServiceCollection servicespec.Collection
-
-	// Settings.
-	Flags   Flags
-	Version string
-}
-
-// DefaultConfig provides a default configuration to create a new annad object
-// by best effort.
-func DefaultConfig() Config {
-	newServer, err := server.New(server.DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newConfig := Config{
-		// Dependencies.
-		Network:           network.MustNew(),
-		Server:            newServer,
-		ServiceCollection: service.MustNewCollection(),
-
-		// Settings.
-		Flags:   Flags{},
-		Version: version,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured annad object.
-func New(config Config) (systemspec.Annad, error) {
-	newAnna := &annad{
-		Config: config,
-
-		BootOnce:     sync.Once{},
-		ID:           id.MustNewID(),
-		ShutdownOnce: sync.Once{},
-		Type:         ObjectType,
-	}
-
-	// Dependencies.
-	if newAnna.Network == nil {
-		return nil, maskAnyf(invalidConfigError, "network must not be empty")
-	}
-	if newAnna.Server == nil {
-		return nil, maskAnyf(invalidConfigError, "server must not be empty")
-	}
-	if newAnna.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return newAnna, nil
+// New creates a new annad service.
+func New() systemspec.Annad {
+	newAnna := &annad{}
 }
 
 type annad struct {
-	Config
+	// Dependencies.
 
-	BootOnce     sync.Once
-	ID           string
-	ShutdownOnce sync.Once
-	Type         string
+	server            systemspec.Server
+	serviceCollection servicespec.Collection
+
+	// Settings.
+
+	bootOnce     sync.Once
+	flags        Flags
+	metadata     map[string]string
+	shutdownOnce sync.Once
+	version      string
 }
 
 func (a *annad) Boot() {
 	a.Service().Log().Line("func", "Boot")
 
-	a.BootOnce.Do(func() {
+	a.bootOnce.Do(func() {
 		go a.listenToSignal()
 
 		a.InitAnnadCmd().Execute()
 	})
+}
+
+func (a *annad) Configure() error {
+	// Settings.
+
+	id, err := a.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	a.metadata = map[string]string{
+		"id":   id,
+		"name": "annad",
+		"type": "service",
+	}
+
+	a.bootOnce = sync.Once{}
+	a.flags = Flags{}
+	a.shutdownOnce = sync.Once{}
+	a.version = version
+
+	return nil
 }
 
 func (a *annad) ForceShutdown() {
@@ -107,8 +76,20 @@ func (a *annad) ForceShutdown() {
 	os.Exit(0)
 }
 
+func (a *annad) Metadata() map[string]string {
+	return a.metadata
+}
+
 func (a *annad) Service() servicespec.Collection {
-	return a.ServiceCollection
+	return a.serviceCollection
+}
+
+func (a *annad) SetServer(s systemspec.Server) {
+	a.server = s
+}
+
+func (a *annad) SetServiceCollection(sc servicespec.Collection) {
+	a.serviceCollection = sc
 }
 
 func (a *annad) Shutdown() {
@@ -126,13 +107,6 @@ func (a *annad) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			a.Service().Log().Line("msg", "shutting down network")
-			a.Network.Shutdown()
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
 			a.Service().Log().Line("msg", "shutting down server")
 			a.Server.Shutdown()
 			wg.Done()
@@ -143,6 +117,18 @@ func (a *annad) Shutdown() {
 		a.Service().Log().Line("msg", "shutting down annad")
 		os.Exit(0)
 	})
+}
+
+func (a *annad) Validate() error {
+	// Dependencies.
+	if a.server == nil {
+		return maskAnyf(invalidConfigError, "server must not be empty")
+	}
+	if a.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	return nil
 }
 
 func init() {

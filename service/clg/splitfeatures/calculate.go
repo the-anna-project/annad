@@ -20,6 +20,7 @@ package splitfeatures
 import (
 	"encoding/json"
 
+	"github.com/xh3b4sd/anna/index/clg/collection/featureset"
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/spec"
 )
@@ -33,7 +34,7 @@ const (
 	FeatureSize int = 4
 )
 
-func (c *clg) calculate(ctx spec.Context, informationSequence, separator string) error {
+func (s *service) calculate(ctx spec.Context, informationSequence, separator string) error {
 	newConfig := featureset.DefaultConfig()
 	newConfig.MaxLength = FeatureSize
 	newConfig.MinLength = FeatureSize
@@ -64,7 +65,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence, separator string)
 		if err != nil {
 			return maskAny(err)
 		}
-		err = c.Storage().Feature().Set(positionKey, string(raw))
+		err = s.Storage().Feature().Set(positionKey, string(raw))
 		if err != nil {
 			return maskAny(err)
 		}

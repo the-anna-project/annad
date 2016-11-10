@@ -9,14 +9,14 @@ import (
 
 // calculate fetches the information sequence stored under a specific
 // information ID. The information ID is provided by the given context.
-func (c *clg) calculate(ctx spec.Context) (string, error) {
+func (s *service) calculate(ctx spec.Context) (string, error) {
 	informationID, ok := ctx.GetInformationID()
 	if !ok {
 		return "", maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 
 	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := c.Storage().General().Get(informationSequenceKey)
+	informationSequence, err := s.Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return "", maskAny(err)
 	}

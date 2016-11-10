@@ -6,84 +6,52 @@ import (
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
 	"github.com/xh3b4sd/anna/storage"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-// Config represents the configuration used to create a new forwarder object.
-type Config struct {
+// New creates a new forwarder service.
+func New() servicespec.Forwarder {
+	return &service{}
+}
+
+type service struct {
 	// Dependencies.
-	ServiceCollection servicespec.Collection
-	StorageCollection storagespec.Collection
+
+	serviceCollection servicespec.Collection
+	storageCollection storagespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
 
 	// Settings.
 
-	// MaxSignals represents the maximum number of signals being forwarded by one
+	// maxSignals represents the maximum number of signals being forwarded by one
 	// CLG. When a requested CLG needs to decide where to forward signals to, it
-	// may will forward up to MaxSignals signals to other CLGs, if any.
-	MaxSignals int
+	// may will forward up to maxSignals signals to other CLGs, if any.
+	maxSignals int
 }
 
-// DefaultConfig provides a default configuration to create a new forwarder
-// object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: nil,
-		StorageCollection: storage.MustNewCollection(),
+func (s *service) Configure() error {
+	// Internals.
 
-		// Settings.
-		MaxSignals: 5,
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
 	}
-
-	return newConfig
-}
-
-// New creates a new configured forwarder object.
-func New(config Config) (systemspec.Forwarder, error) {
-	newService := &forwarder{
-		Config: config,
-
-		Metadata: map[string]string{
-			"id":   id.MustNewID(),
-			"name": "forwarder",
-			"type": "service",
-		},
-	}
-
-	// Dependencies.
-	if newService.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
-	if newService.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "forwarder",
+		"type": "service",
 	}
 
 	// Settings.
-	if newService.MaxSignals == 0 {
-		return nil, maskAnyf(invalidConfigError, "maximum signals must not be empty")
-	}
 
-	return newService, nil
-}
+	s.maxSignals = 5
 
-// MustNew creates either a new default configured forwarder service, or panics.
-func MustNew() systemspec.Forwarder {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
-}
-
-type forwarder struct {
-	Config
-
-	Metadata map[string]string
+	return nil
 }
 
 func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
@@ -133,7 +101,7 @@ func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.Network
 }
 
 func (s *service) GetMaxSignals() int {
-	return s.MaxSignals
+	return s.maxSignals
 }
 
 func (s *service) GetNetworkPayloads(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
@@ -177,6 +145,10 @@ func (s *service) GetNetworkPayloads(CLG servicespec.CLG, networkPayload objects
 	}
 
 	return newNetworkPayloads, nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
 }
 
 func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
@@ -242,4 +214,32 @@ func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPay
 	}
 
 	return newNetworkPayloads, nil
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) SetStorageCollection(sc storagespec.Collection) {
+	s.storageCollection = sc
+}
+
+func (s *service) Storage() storagespec.Collection {
+	return s.storageCollection
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	if s.storageCollection == nil {
+		return maskAnyf(invalidConfigError, "storage collection must not be empty")
+	}
+
+	return nil
 }

@@ -3,6 +3,8 @@ package spec
 // Random creates pseudo random numbers. The service might implement
 // retries using backoff strategies and timeouts.
 type Random interface {
+	Configure() error
+
 	// CreateMax tries to create one new pseudo random number. The generated
 	// number is within the range [0 max), which means that max is exclusive.
 	CreateMax(max int) (int, error)
@@ -13,6 +15,11 @@ type Random interface {
 	// exclusive.
 	CreateNMax(n, max int) ([]int, error)
 
-	// GetMetadata returns the service's metadata.
-	GetMetadata() map[string]string
+	Metadata() map[string]string
+
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 }

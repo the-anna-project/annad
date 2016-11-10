@@ -7,7 +7,7 @@ import (
 )
 
 // calculate checks whether a given number lies between two given numbers.
-func (c *clg) calculate(ctx spec.Context, n, min, max float64) bool {
+func (s *service) calculate(ctx spec.Context, n, min, max float64) bool {
 	if n < min {
 		return false
 	}

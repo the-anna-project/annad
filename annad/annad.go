@@ -29,8 +29,7 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 			panicOnError(err)
 
 			// service collection.
-			a.ServiceCollection, err = newServiceCollection()
-			panicOnError(err)
+			a.ServiceCollection = newServiceCollection()
 
 			// storage collection.
 			newStorageCollection, err := newStorageCollection(a.Log, a.Flags)

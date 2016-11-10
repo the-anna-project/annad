@@ -19,7 +19,7 @@ import (
 
 // TODO there is no CLG to read from the certenty pyramid
 
-func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string) error {
+func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence string) error {
 	// Find the original information sequence using the information ID from the
 	// context.
 	informationID, ok := ctx.GetInformationID()
@@ -27,7 +27,7 @@ func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := c.Storage().General().Get(informationSequenceKey)
+	informationSequence, err := s.Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -39,7 +39,7 @@ func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
 	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
-	inputBehaviourID, err := c.Storage().General().Get(firstBehaviourIDKey)
+	inputBehaviourID, err := s.Storage().General().Get(firstBehaviourIDKey)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -77,7 +77,7 @@ func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string
 	if err != nil {
 		return maskAny(err)
 	}
-	err = c.Storage().General().PushToList(networkPayloadKey, string(b))
+	err = s.Storage().General().PushToList(networkPayloadKey, string(b))
 	if err != nil {
 		return maskAny(err)
 	}
@@ -85,13 +85,13 @@ func (c *clg) forwardNetworkPayload(ctx spec.Context, informationSequence string
 	return nil
 }
 
-func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
+func (s *service) calculate(ctx spec.Context, informationSequence string) error {
 	// Check the calculated output against the provided expectation, if any. In
 	// case there is no expectation provided, we simply go with what we
 	// calculated. This then means we are probably not in a training situation.
 	expectation, ok := ctx.GetExpectation()
 	if !ok {
-		err := c.sendTextOutput(ctx, informationSequence)
+		err := s.sendTextOutput(ctx, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -104,7 +104,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// calculated result, we simply return it.
 	calculatedOutput := expectation.GetOutput()
 	if informationSequence == calculatedOutput {
-		err := c.sendTextOutput(ctx, informationSequence)
+		err := s.sendTextOutput(ctx, informationSequence)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -114,7 +114,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	// need to calculate some new output to match the given expectation. To do so
 	// we create a new network payload and assign the input CLG of the current CLG
 	// tree to it by queueing the new network payload in the underlying storage.
-	err := c.forwardNetworkPayload(ctx, informationSequence)
+	err := s.forwardNetworkPayload(ctx, informationSequence)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -124,7 +124,7 @@ func (c *clg) calculate(ctx spec.Context, informationSequence string) error {
 	return maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
 }
 
-func (c *clg) sendTextOutput(ctx spec.Context, informationSequence string) error {
+func (s *service) sendTextOutput(ctx spec.Context, informationSequence string) error {
 	// Return the calculated output to the requesting client, if the
 	// current CLG is the output CLG.
 	newTextOutputConfig := textoutput.DefaultConfig()
@@ -134,7 +134,7 @@ func (c *clg) sendTextOutput(ctx spec.Context, informationSequence string) error
 		return maskAny(err)
 	}
 
-	c.Service().TextOutput().GetChannel() <- newTextOutput
+	s.Service().TextOutput().Channel() <- newTextOutput
 
 	return nil
 }

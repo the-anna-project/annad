@@ -9,6 +9,8 @@ import (
 // The activator obtains network payloads for every single requested CLG of
 // every possible CLG tree.
 type Activator interface {
+	Configure() error
+
 	// Activate represents the public interface that bundles the following lookup
 	// functions.
 	//
@@ -38,6 +40,8 @@ type Activator interface {
 	// requested CLG can be found, an error is returned.
 	GetNetworkPayload(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
+	Metadata() map[string]string
+
 	// New uses the given queue to find a combination of network
 	// payloads that fulfill the interface of the requested CLG. This creation
 	// process may be random or biased in some way. In case some created
@@ -47,7 +51,13 @@ type Activator interface {
 	// given queue can be found, an error is returned.
 	New(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
 
-	Provider
+	Service() Collection
 
-	storagespec.Provider
+	SetServiceCollection(sc Collection)
+
+	SetStorageCollection(sc storagespec.Collection)
+
+	Storage() storagespec.Collection
+
+	Validate() error
 }

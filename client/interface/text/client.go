@@ -9,64 +9,44 @@ import (
 	"github.com/xh3b4sd/anna/object/networkresponse"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textoutput"
-	"github.com/xh3b4sd/anna/service"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
-// ClientConfig represents the configuration used to create a new text
-// interface object.
-type ClientConfig struct {
-	// Dependencies.
-
-	ServiceCollection servicespec.Collection
-
-	// Settings.
-
-	// GRPCAddr is the host:port representation based on the golang convention
-	// for net.Listen to serve gRPC traffic.
-	GRPCAddr string
-}
-
-// DefaultClientConfig provides a default configuration to create a new text
-// interface object by best effort.
-func DefaultClientConfig() ClientConfig {
-	newConfig := ClientConfig{
-		// Dependencies.
-
-		ServiceCollection: service.MustNewCollection(),
-
-		// Settings.
-
-		GRPCAddr: "127.0.0.1:9119",
-	}
-
-	return newConfig
-}
-
-// NewClient creates a new configured text interface object.
-func NewClient(config ClientConfig) (systemspec.TextInterfaceClient, error) {
-	newClient := &client{
-		ClientConfig: config,
-	}
-
-	// Dependencies.
-
-	if newClient.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	// Settings.
-
-	if newClient.GRPCAddr == "" {
-		return nil, maskAnyf(invalidConfigError, "gRPC address must not be empty")
-	}
-
-	return newClient, nil
+// New creates a new text interface service.
+func New() systemspec.TextInterfaceClient {
+	return &client{}
 }
 
 type client struct {
-	ClientConfig
+	// Dependencies.
+
+	serviceCollection servicespec.Collection
+
+	// Settings.
+
+	// gRPCAddr is the host:port representation based on the golang convention
+	// for net.Listen to serve gRPC traffic.
+	gRPCAddr string
+	metadata map[string]string
+}
+
+func (c *client) Configure() error {
+	// Settings.
+
+	id, err := c.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	c.metadata = map[string]string{
+		"id":   id,
+		"name": "text-interface",
+		"type": "service",
+	}
+
+	c.gRPCAddr = "127.0.0.1:9119"
+
+	return nil
 }
 
 func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objectspec.TextOutput, error) {
@@ -94,11 +74,19 @@ func (c *client) EncodeRequest(textInput objectspec.TextInput) *StreamTextReques
 	return streamTextRequest
 }
 
+func (c *client) Service() servicespec.Collection {
+	return c.serviceCollection
+}
+
+func (c *client) SetServiceCollection(sc servicespec.Collection) {
+	c.serviceCollection = sc
+}
+
 func (c *client) StreamText(ctx context.Context) error {
 	done := make(chan struct{}, 1)
 	fail := make(chan error, 1)
 
-	conn, err := grpc.Dial(c.GRPCAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(c.gRPCAddr, grpc.WithInsecure())
 	if err != nil {
 		return maskAny(err)
 	}
@@ -130,7 +118,7 @@ func (c *client) StreamText(ctx context.Context) error {
 				fail <- maskAny(err)
 				return
 			}
-			c.Service().TextOutput().GetChannel() <- textResponse
+			c.Service().TextOutput().Channel() <- textResponse
 		}
 	}()
 
@@ -140,7 +128,7 @@ func (c *client) StreamText(ctx context.Context) error {
 			select {
 			case <-done:
 				return
-			case textInput := <-c.Service().TextInput().GetChannel():
+			case textInput := <-c.Service().TextInput().Channel():
 				streamTextRequest := c.EncodeRequest(textInput)
 				err := stream.Send(streamTextRequest)
 				if err != nil {
@@ -162,4 +150,13 @@ func (c *client) StreamText(ctx context.Context) error {
 			return maskAny(err)
 		}
 	}
+}
+
+func (c *client) Validate() error {
+	// Dependencies.
+	if c.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	return nil
 }

@@ -9,6 +9,8 @@ import (
 // The forwarder obtains behaviour IDs for every single requested CLG of every
 // possible CLG tree.
 type Forwarder interface {
+	Configure() error
+
 	// Forward represents the public interface that bundles the following lookup
 	// functions.
 	//
@@ -35,7 +37,13 @@ type Forwarder interface {
 	// list is returned.
 	News(CLG CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error)
 
-	Provider
+	Service() Collection
 
-	storagespec.Provider
+	SetServiceCollection(sc Collection)
+
+	SetStorageCollection(sc storagespec.Collection)
+
+	Storage() storagespec.Collection
+
+	Validate() error
 }

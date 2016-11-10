@@ -26,7 +26,7 @@ func Test_CLG_GetCalculate(t *testing.T) {
 
 func Test_CLG_GetName(t *testing.T) {
 	newCLG := MustNew()
-	clgName := newCLG.GetName()
+	clgName := newCLG.Metadata()["name"]
 	if clgName != "input" {
 		t.Fatal("expected", "input", "got", clgName)
 	}

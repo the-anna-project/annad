@@ -11,6 +11,8 @@ import (
 // activity calculates outputs which are streamed through the output channel
 // back to the requestor.
 type Network interface {
+	Configure() error
+
 	// Activate decides if a requested CLG shall be activated. It needs to be
 	// decided if the requested CLG shall be activated. In case the requested CLG
 	// shall be activated it needs to be decided how this activation shall happen.
@@ -100,12 +102,18 @@ type Network interface {
 	// you might want to call it in a separate goroutine.
 	Shutdown()
 
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	SetStorageCollection(sc storagespec.Collection)
+
+	Storage() storagespec.Collection
+
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of
 	// the neural network to act accordingly.
 	Track(CLG CLG, networkPayload objectspec.NetworkPayload) error
 
-	Provider
-
-	storagespec.Provider
+	Validate() error
 }

@@ -2,10 +2,7 @@
 // strings.
 package id
 
-import (
-	"github.com/xh3b4sd/anna/service/random"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
-)
+import servicespec "github.com/xh3b4sd/anna/service/spec"
 
 const (
 	// Hex128 creates a new hexa decimal encoded, pseudo random, 128 bit hash.
@@ -24,96 +21,63 @@ const (
 	Hex4096 int = 512
 )
 
-// Config represents the configuration used to create a new ID service
-// object.
-type Config struct {
-	// Settings.
-
-	// HashChars represents the characters used to create hashes.
-	HashChars string
-
-	// Random represents a service returning random numbers.
-	RandomService servicespec.Random
-
-	ServiceCollection servicespec.Collection
-
-	Type int
-}
-
-// DefaultConfig provides a default configuration to create a new ID service
-// object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Settings.
-		HashChars:         "abcdef0123456789", // hex character set
-		RandomService:     random.MustNew(),
-		ServiceCollection: nil,
-		Type:              Hex128,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured ID service object.
-func New(config Config) (servicespec.ID, error) {
-	newService := &service{
-		Config: config,
-	}
-
-	if newService.HashChars == "" {
-		return nil, maskAnyf(invalidConfigError, "hash characters must not be empty")
-	}
-	if newService.RandomService == nil {
-		return nil, maskAnyf(invalidConfigError, "random service must not be empty")
-	}
-	if newService.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if newService.Type == 0 {
-		return nil, maskAnyf(invalidConfigError, "ID type must not be empty")
-	}
-
-	id, err := newService.Service().ID().New()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newService.Metadata["id"] = id
-	newService.Metadata["name"] = "id"
-	newService.Metadata["type"] = "service"
-
-	return newService, nil
-}
-
-// MustNew creates either a new default configured id service object, or
-// panics.
-func MustNew() servicespec.ID {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new ID service.
+func New() servicespec.ID {
+	return &service{}
 }
 
 // MustNewID returns a new string of type Hex128. In case of any error
 // this method panics.
 func MustNewID() string {
-	newID, err := MustNew().WithType(Hex128)
-	if err != nil {
-		panic(err)
-	}
-
-	return newID
+	// TODO
+	return ""
 }
 
 type service struct {
-	Config
+	// Dependencies.
 
-	Metadata map[string]string
+	// randomService represents a service returning random numbers.
+	randomService     servicespec.Random
+	serviceCollection servicespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+
+	// Settings.
+
+	// hashChars represents the characters used to create hashes.
+	hashChars string
+	idType    int
+}
+
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "id",
+		"type": "service",
+	}
+
+	// Settings.
+
+	s.hashChars = "abcdef0123456789"
+	s.idType = Hex128
+
+	return nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
 }
 
 func (s *service) New() (string, error) {
-	ID, err := s.WithType(s.Type)
+	ID, err := s.WithType(s.idType)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -121,11 +85,19 @@ func (s *service) New() (string, error) {
 	return ID, nil
 }
 
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
 func (s *service) WithType(idType int) (string, error) {
 	n := int(idType)
-	max := len(s.HashChars)
+	max := len(s.hashChars)
 
-	newRandomNumbers, err := s.RandomService.CreateNMax(n, max)
+	newRandomNumbers, err := s.randomService.CreateNMax(n, max)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -133,8 +105,20 @@ func (s *service) WithType(idType int) (string, error) {
 	b := make([]byte, n)
 
 	for i, r := range newRandomNumbers {
-		b[i] = s.HashChars[r]
+		b[i] = s.hashChars[r]
 	}
 
 	return string(b), nil
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.randomService == nil {
+		return maskAnyf(invalidConfigError, "random service must not be empty")
+	}
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+
+	return nil
 }

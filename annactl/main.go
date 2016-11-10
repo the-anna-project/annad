@@ -5,9 +5,7 @@ package main
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/client/interface/text"
-	"github.com/xh3b4sd/anna/service"
-	"github.com/xh3b4sd/anna/service/id"
+	"github.com/spf13/cobra"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 	systemspec "github.com/xh3b4sd/anna/spec"
 )
@@ -18,92 +16,142 @@ var (
 	version string
 )
 
-// Config represents the configuration used to create a new command line
-// object.
-type Config struct {
-	// Dependencies.
-	ServiceCollection servicespec.Collection
-	TextInterface     systemspec.TextInterfaceClient
-
-	// Settings.
-	Flags     Flags
-	SessionID string
-	Version   string
-}
-
-// DefaultConfig provides a default configuration to create a new command line
-// object by best effort.
-func DefaultConfig() Config {
-	newTextInterface, err := text.NewClient(text.DefaultClientConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: service.MustNewCollection(),
-		TextInterface:     newTextInterface,
-
-		// Settings.
-		Flags:     Flags{},
-		SessionID: string(id.MustNewID()),
-		Version:   version,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured command line object.
-func New(config Config) (systemspec.Annactl, error) {
-	// annactl
-	newAnnactl := &annactl{
-		Config: config,
-
-		BootOnce:     sync.Once{},
-		Closer:       make(chan struct{}, 1),
-		ShutdownOnce: sync.Once{},
-	}
-
-	if newAnnactl.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return newAnnactl, nil
+// New creates a new annactl service.
+func New() systemspec.Annactl {
+	return &annactl{}
 }
 
 type annactl struct {
-	Config
+	// Dependencies.
 
-	BootOnce     sync.Once
-	Closer       chan struct{}
-	ShutdownOnce sync.Once
+	serviceCollection servicespec.Collection
+	textInterface     systemspec.TextInterfaceClient
+
+	// Settings.
+
+	bootOnce     sync.Once
+	closer       chan struct{}
+	flags        Flags
+	metadata     map[string]string
+	sessionID    string
+	shutdownOnce sync.Once
+	version      string
 }
 
 func (a *annactl) Boot() {
-	a.Service().Log().Line("func", "Boot")
+	//a.Service().Log().Line("func", "Boot")
 
-	a.BootOnce.Do(func() {
+	a.bootOnce.Do(func() {
 		go a.listenToSignal()
 
 		a.InitAnnactlCmd().Execute()
 	})
 }
 
+func (a *annactl) Configure() error {
+	// Settings.
+
+	id, err := a.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	a.metadata = map[string]string{
+		"id":   id,
+		"name": "annactl",
+		"type": "service",
+	}
+
+	a.bootOnce = sync.Once{}
+	a.closer = make(chan struct{}, 1)
+	a.flags = Flags{}
+
+	sessionID, err := a.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	a.sessionID = sessionID
+
+	a.shutdownOnce = sync.Once{}
+	a.version = version
+
+	return nil
+}
+
+func (a *annactl) ExecAnnactlCmd(cmd *cobra.Command, args []string) {
+	a.Service().Log().Line("func", "ExecAnnactlCmd")
+
+	cmd.HelpFunc()(cmd, nil)
+}
+
+func (a *annactl) InitAnnactlCmd() *cobra.Command {
+	//a.Service().Log().Line("func", "InitAnnactlCmd")
+
+	// Create new command.
+	newCmd := &cobra.Command{
+		Use:   "annactl",
+		Short: "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
+		Long:  "Interact with Anna's network API. For more information see https://github.com/xh3b4sd/anna.",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			var err error
+
+			// Service collection.
+			a.serviceCollection = newServiceCollection()
+
+			// Text interface.
+			a.textInterface, err = newTextInterface(a.serviceCollection, a.flags.GRPCAddr)
+			panicOnError(err)
+		},
+		Run: a.ExecAnnactlCmd,
+	}
+
+	// Add sub commands.
+	newCmd.AddCommand(a.InitAnnactlInterfaceCmd())
+	newCmd.AddCommand(a.InitAnnactlVersionCmd())
+
+	// Define command line flags.
+	newCmd.PersistentFlags().StringVar(&a.flags.GRPCAddr, "grpc-addr", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to")
+	newCmd.PersistentFlags().StringVar(&a.flags.HTTPAddr, "http-addr", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to")
+
+	return newCmd
+}
+
+func (a *annactl) Metadata() map[string]string {
+	return a.metadata
+}
+
 func (a *annactl) Service() servicespec.Collection {
-	return a.ServiceCollection
+	return a.serviceCollection
+}
+
+func (a *annactl) SetServiceCollection(sc servicespec.Collection) {
+	a.serviceCollection = sc
+}
+
+func (a *annactl) SetTextInterface(ti systemspec.TextInterfaceClient) {
+	a.textInterface = ti
 }
 
 func (a *annactl) Shutdown() {
 	a.Service().Log().Line("func", "Shutdown")
 
-	a.ShutdownOnce.Do(func() {
-		close(a.Closer)
+	a.shutdownOnce.Do(func() {
+		close(a.closer)
 	})
 }
 
-func main() {
-	newAnnactl, err := New(DefaultConfig())
-	panicOnError(err)
+func (a *annactl) Validate() error {
+	// Dependencies.
+	if a.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	if a.textInterface == nil {
+		return maskAnyf(invalidConfigError, "text interface must not be empty")
+	}
 
+	return nil
+}
+
+func main() {
+	newAnnactl := New()
 	newAnnactl.Boot()
 }

@@ -103,7 +103,7 @@ func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
 				fail <- maskAny(err)
 				return
 			}
-			s.Service().TextInput().GetChannel() <- textRequest
+			s.Service().TextInput().Channel() <- textRequest
 		}
 	}()
 
@@ -114,7 +114,7 @@ func (s *server) StreamText(stream TextInterface_StreamTextServer) error {
 			select {
 			case <-done:
 				return
-			case textOutput := <-s.Service().TextOutput().GetChannel():
+			case textOutput := <-s.Service().TextOutput().Channel():
 				streamTextResponse := s.DecodeResponse(textOutput)
 				err := stream.Send(streamTextResponse)
 				if err != nil {

@@ -29,10 +29,12 @@ type Annad interface {
 	// InitAnnadVersionCmd initializes the version command.
 	InitAnnadVersionCmd() *cobra.Command
 
+	Service() servicespec.Collection
+
+	SetServiceCollection(sc servicespec.Collection)
+
 	// Shutdown ends all processes of Anna like shutting down a machine. The call
 	// to Shutdown blocks until Anna is completely shut down, so you might want
 	// to call it in a separate goroutine.
 	Shutdown()
-
-	servicespec.Provider
 }

@@ -12,28 +12,34 @@ import (
 	"time"
 
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/network/activator"
-	"github.com/xh3b4sd/anna/network/forwarder"
-	"github.com/xh3b4sd/anna/network/tracker"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
 
 	workerpool "github.com/xh3b4sd/worker-pool"
 )
 
-// Config represents the configuration used to create a new network object.
-type Config struct {
+// New creates a new network service.
+func New() servicespec.Network {
+	return &service{}
+}
+
+type service struct {
 	// Dependencies.
-	Activator         systemspec.Activator
-	ServiceCollection servicespec.Collection
-	Forwarder         systemspec.Forwarder
-	StorageCollection storagespec.Collection
-	Tracker           systemspec.Tracker
+
+	serviceCollection servicespec.Collection
+	storageCollection storagespec.Collection
+
+	// Internals.
+
+	bootOnce sync.Once
+	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
+	clgs         map[string]servicespec.CLG
+	closer       chan struct{}
+	metadata     map[string]string
+	shutdownOnce sync.Once
 
 	// Settings.
 
@@ -46,90 +52,34 @@ type Config struct {
 	//
 	// TODO implement the actual usage of the delay and make it dynamically
 	// configurable on demand like we already do with the log control.
-	Delay time.Duration
+	delay time.Duration
 }
 
-// DefaultConfig provides a default configuration to create a new network
-// object by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		Activator:         activator.MustNew(),
-		ServiceCollection: nil,
-		Forwarder:         forwarder.MustNew(),
-		StorageCollection: storage.MustNewCollection(),
-		Tracker:           tracker.MustNew(),
+func (s *service) Configure() error {
+	// Internals.
 
-		// Settings.
-		Delay: 0,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured network object.
-func New(config Config) (systemspec.Network, error) {
-	newNetwork := &service{
-		Config: config,
-
-		BootOnce: sync.Once{},
-		Closer:   make(chan struct{}, 1),
-		Metadata: map[string]string{
-			"id":   id.MustNewID(),
-			"name": "network",
-			"type": "service",
-		},
-		ShutdownOnce: sync.Once{},
-	}
-
-	if newNetwork.Activator == nil {
-		return nil, maskAnyf(invalidConfigError, "activator must not be empty")
-	}
-	if newNetwork.Forwarder == nil {
-		return nil, maskAnyf(invalidConfigError, "forwarder must not be empty")
-	}
-	if newNetwork.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if newNetwork.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-	if newNetwork.Tracker == nil {
-		return nil, maskAnyf(invalidConfigError, "tracker must not be empty")
-	}
-
-	newNetwork.CLGs = newNetwork.newCLGs()
-
-	return newNetwork, nil
-}
-
-// MustNew creates either a new default configured network object, or panics.
-func MustNew() systemspec.Network {
-	newNetwork, err := New(DefaultConfig())
+	id, err := s.Service().ID().New()
 	if err != nil {
-		panic(err)
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "log",
+		"type": "service",
 	}
 
-	return newNetwork
+	s.clgs = s.newCLGs()
+
+	// Settings.
+	s.delay = 0
+
+	return nil
 }
 
-type service struct {
-	Config
-
-	BootOnce sync.Once
-
-	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
-	CLGs map[string]systemspec.CLG
-
-	Closer       chan struct{}
-	Metadata     map[string]string
-	ShutdownOnce sync.Once
-}
-
-func (s *service) Activate(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Activate")
 
-	networkPayload, err := s.Activator.Activate(CLG, networkPayload)
+	networkPayload, err := s.Service().Activator().Activate(CLG, networkPayload)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -140,13 +90,13 @@ func (s *service) Activate(CLG systemspec.CLG, networkPayload objectspec.Network
 func (s *service) Boot() {
 	s.Service().Log().Line("func", "Boot")
 
-	s.BootOnce.Do(func() {
-		s.CLGs = s.newCLGs()
+	s.bootOnce.Do(func() {
+		s.clgs = s.newCLGs()
 
 		go func() {
 			// Create a new worker pool for the input listener.
 			inputPoolConfig := workerpool.DefaultConfig()
-			inputPoolConfig.Canceler = s.Closer
+			inputPoolConfig.Canceler = s.closer
 			inputPoolConfig.NumWorkers = 1
 			inputPoolConfig.WorkerFunc = s.InputListener
 			inputPool, err := workerpool.New(inputPoolConfig)
@@ -160,7 +110,7 @@ func (s *service) Boot() {
 		go func() {
 			// Create a new worker pool for the event listener.
 			eventPoolConfig := workerpool.DefaultConfig()
-			eventPoolConfig.Canceler = s.Closer
+			eventPoolConfig.Canceler = s.closer
 			eventPoolConfig.NumWorkers = 10
 			eventPoolConfig.WorkerFunc = s.EventListener
 			eventPool, err := workerpool.New(eventPoolConfig)
@@ -173,7 +123,7 @@ func (s *service) Boot() {
 	})
 }
 
-func (s *service) Calculate(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) Calculate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Calculate")
 
 	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetCLGInput()))
@@ -218,7 +168,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		if !ok {
 			return maskAnyf(invalidCLGNameError, "must not be empty")
 		}
-		CLG, ok := s.CLGs[clgName]
+		CLG, ok := s.clgs[clgName]
 		if !ok {
 			return maskAnyf(clgNotFoundError, "name: %s", clgName)
 		}
@@ -245,7 +195,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (s *service) EventHandler(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) EventHandler(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
 	var err error
 
 	// Activate if the CLG's interface is satisfied by the given
@@ -277,10 +227,10 @@ func (s *service) EventHandler(CLG systemspec.CLG, networkPayload objectspec.Net
 	return nil
 }
 
-func (s *service) Forward(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Forward")
 
-	err := s.Forwarder.Forward(CLG, networkPayload)
+	err := s.Service().Forwarder().Forward(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -289,7 +239,7 @@ func (s *service) Forward(CLG systemspec.CLG, networkPayload objectspec.NetworkP
 }
 
 func (s *service) InputListener(canceler <-chan struct{}) error {
-	CLG, ok := s.CLGs["input"]
+	CLG, ok := s.clgs["input"]
 	if !ok {
 		return maskAnyf(clgNotFoundError, "name: %s", "input")
 	}
@@ -298,7 +248,7 @@ func (s *service) InputListener(canceler <-chan struct{}) error {
 		select {
 		case <-canceler:
 			return maskAny(workerCanceledError)
-		case textInput := <-s.Service().TextInput().GetChannel():
+		case textInput := <-s.Service().TextInput().Channel():
 			err := s.InputHandler(CLG, textInput)
 			if err != nil {
 				s.Service().Log().Line("msg", "%#v", maskAny(err))
@@ -307,7 +257,7 @@ func (s *service) InputListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (s *service) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInput) error {
+func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInput) error {
 	// In case the text request defines the echo flag, we overwrite the given CLG
 	// directly to the output CLG. This will cause the created network payload to
 	// be forwarded to the output CLG without indirection. Note that this should
@@ -315,7 +265,7 @@ func (s *service) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInpu
 	// activities to directly respond with the received input.
 	if textInput.GetEcho() {
 		var ok bool
-		CLG, ok = s.CLGs["output"]
+		CLG, ok = s.clgs["output"]
 		if !ok {
 			return maskAnyf(clgNotFoundError, "name: %s", "output")
 		}
@@ -334,7 +284,7 @@ func (s *service) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInpu
 	// Create a new context and adapt it using the information of the current scope.
 	ctx := context.MustNew()
 	ctx.SetBehaviourID(string(behaviourID))
-	ctx.SetCLGName(CLG.GetName())
+	ctx.SetCLGName(CLG.Metadata()["name"])
 	ctx.SetCLGTreeID(string(clgTreeID))
 	ctx.SetExpectation(textInput.GetExpectation())
 	ctx.SetSessionID(textInput.GetSessionID())
@@ -344,8 +294,9 @@ func (s *service) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInpu
 	newNetworkPayloadConfig := networkpayload.DefaultConfig()
 	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textInput.GetInput())}
 	newNetworkPayloadConfig.Context = ctx
+	// TODO destination and sources should be metadata objects
 	newNetworkPayloadConfig.Destination = behaviourID
-	newNetworkPayloadConfig.Sources = []string{s.GetID()}
+	newNetworkPayloadConfig.Sources = []string{s.Metadata()["id"]}
 	newNetworkPayload, err := networkpayload.New(newNetworkPayloadConfig)
 	if err != nil {
 		return maskAny(err)
@@ -373,20 +324,52 @@ func (s *service) InputHandler(CLG systemspec.CLG, textInput objectspec.TextInpu
 	return nil
 }
 
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
 func (s *service) Shutdown() {
 	s.Service().Log().Line("func", "Shutdown")
 
-	s.ShutdownOnce.Do(func() {
-		close(s.Closer)
+	s.shutdownOnce.Do(func() {
+		close(s.closer)
 	})
 }
 
-func (s *service) Track(CLG systemspec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) SetStorageCollection(sc storagespec.Collection) {
+	s.storageCollection = sc
+}
+
+func (s *service) Storage() storagespec.Collection {
+	return s.storageCollection
+}
+
+func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Track")
 
-	err := s.Tracker.Track(CLG, networkPayload)
+	err := s.Service().Tracker().Track(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
+	}
+
+	return nil
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	if s.storageCollection == nil {
+		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

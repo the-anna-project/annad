@@ -6,8 +6,9 @@ import (
 
 // Permutation creates permutations of arbitrary lists as configured.
 type Permutation interface {
-	// GetMetadata returns the service's metadata.
-	GetMetadata() map[string]string
+	Configure() error
+
+	Metadata() map[string]string
 
 	// PermuteBy permutes the configured values by applying the given delta to
 	// the currently configured indizes. Error might indicate that the configured
@@ -36,4 +37,10 @@ type Permutation interface {
 	//         []interface{"a", "a"}
 	//
 	PermuteBy(list objectspec.PermutationList, delta int) error
+
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 }

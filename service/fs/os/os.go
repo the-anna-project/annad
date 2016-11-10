@@ -9,61 +9,40 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-// Config represents the configuration used to create a new OS file system
-// object.
-type Config struct {
-	// Dependencies.
-	ServiceCollection servicespec.Collection
-}
-
-// DefaultConfig provides a default configuration to create a new OS file
-// system object.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: nil,
-	}
-
-	return newConfig
-}
-
-// New creates a new configured OS file system.
-func New(config Config) (servicespec.FS, error) {
-	newService := &service{
-		Config: config,
-	}
-
-	// Dependencies
-	if newService.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	id, err := newService.Service().ID().New()
-	if err != nil {
-		return nil, maskAny(err)
-	}
-	newService.Metadata["id"] = id
-	newService.Metadata["kind"] = "os"
-	newService.Metadata["name"] = "file-system"
-	newService.Metadata["type"] = "service"
-
-	return newService
-}
-
-// MustNew creates either a new default configured id service, or panics.
-func MustNew() servicespec.FS {
-	newService, err := New(DefaultConfig())
-	if err != nil {
-		panic(err)
-	}
-
-	return newService
+// New creates a new OS file system service.
+func New() servicespec.FS {
+	return &service{}
 }
 
 type service struct {
-	Config
+	// Dependencies.
 
-	Metadata map[string]string
+	serviceCollection servicespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
+}
+
+func (s *service) Configure() error {
+	// Internals.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"kind": "os",
+		"name": "file-system",
+		"type": "service",
+	}
+
+	return nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
 }
 
 func (s *service) ReadFile(filename string) ([]byte, error) {
@@ -77,12 +56,29 @@ func (s *service) ReadFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
 func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) error {
 	s.Service().Log().Line("func", "WriteFile")
 
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {
 		return maskAny(err)
+	}
+
+	return nil
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	return nil

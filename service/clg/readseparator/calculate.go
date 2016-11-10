@@ -10,16 +10,16 @@ import (
 	"github.com/xh3b4sd/anna/storage"
 )
 
-func (c *clg) calculate(ctx spec.Context) (string, error) {
+func (s *service) calculate(ctx spec.Context) (string, error) {
 	behaviourID, ok := ctx.GetBehaviourID()
 	if !ok {
 		return "", maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
 	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
-	separator, err := c.Storage().General().Get(behaviourIDKey)
+	separator, err := s.Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
-		randomKey, err := c.Storage().Feature().GetRandom()
+		randomKey, err := s.Storage().Feature().GetRandom()
 		if err != nil {
 			return "", maskAny(err)
 		}
@@ -47,7 +47,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 		// feature is considered 4 characters long and the random factory takes a
 		// max parameter, which is exlusive.
 		feature := randomKey[8:12]
-		featureIndex, err := c.Service().Random().CreateMax(5)
+		featureIndex, err := s.Service().Random().CreateMax(5)
 		if err != nil {
 			return "", maskAny(err)
 		}
@@ -56,7 +56,7 @@ func (c *clg) calculate(ctx spec.Context) (string, error) {
 		// Store the newly created separator using the CLGs own behaviour ID. In case
 		// this CLG is asked again to return its separator, it will lookup its
 		// separator in the general storage.
-		err = c.Storage().General().Set(behaviourIDKey, separator)
+		err = s.Storage().General().Set(behaviourIDKey, separator)
 		if err != nil {
 			return "", maskAny(err)
 		}

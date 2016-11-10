@@ -42,7 +42,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured CLG collection object.
-func New(config Config) (systemspec.CLGCollection, error) {
+func New(config Config) (servicespec.CLGCollection, error) {
 	newCollection := &collection{
 		Config: config,
 

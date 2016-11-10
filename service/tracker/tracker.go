@@ -5,89 +5,60 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service"
-	"github.com/xh3b4sd/anna/service/id"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
-	"github.com/xh3b4sd/anna/storage"
 	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
-// Config represents the configuration used to create a new tracker object.
-type Config struct {
+// New creates a new tracker service.
+func New() servicespec.Tracker {
+	return &service{}
+}
+
+type service struct {
 	// Dependencies.
-	ServiceCollection servicespec.Collection
-	StorageCollection storagespec.Collection
+
+	serviceCollection servicespec.Collection
+	storageCollection storagespec.Collection
+
+	// Internals.
+
+	metadata map[string]string
 }
 
-// DefaultConfig provides a default configuration to create a new tracker object
-// by best effort.
-func DefaultConfig() Config {
-	newConfig := Config{
-		// Dependencies.
-		ServiceCollection: service.MustNewCollection(),
-		StorageCollection: storage.MustNewCollection(),
-	}
+func (s *service) Configure() error {
+	// Internals.
 
-	return newConfig
-}
-
-// New creates a new configured tracker object.
-func New(config Config) (systemspec.Tracker, error) {
-	newTracker := &tracker{
-		Config: config,
-
-		Metadata: map[string]string{
-			"id":   id.MustNewID(),
-			"name": "tracker",
-			"type": "service",
-		},
-	}
-
-	if newTracker.ServiceCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "factory collection must not be empty")
-	}
-	if newTracker.StorageCollection == nil {
-		return nil, maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-
-	return newTracker, nil
-}
-
-// MustNew creates either a new default configured tracker object, or panics.
-func MustNew() systemspec.Tracker {
-	newTracker, err := New(DefaultConfig())
+	id, err := s.Service().ID().New()
 	if err != nil {
-		panic(err)
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "tracker",
+		"type": "service",
 	}
 
-	return newTracker
+	return nil
 }
 
-type tracker struct {
-	Config
-
-	Metadata map[string]string
-}
-
-func (t *tracker) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
 	destinationID := string(networkPayload.GetDestination())
 	sourceIDs := networkPayload.GetSources()
 
 	errors := make(chan error, len(sourceIDs))
 	wg := sync.WaitGroup{}
 
-	for _, s := range sourceIDs {
+	for _, str := range sourceIDs {
 		wg.Add(1)
-		go func(s string) {
+		go func(str string) {
 			// Persist the single CLG ID connections.
-			behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:o:tracker:behaviour-ids", s)
-			err := t.Storage().General().PushToSet(behaviourIDKey, destinationID)
+			behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:o:tracker:behaviour-ids", str)
+			err := s.Storage().General().PushToSet(behaviourIDKey, destinationID)
 			if err != nil {
 				errors <- maskAny(err)
 			}
 			wg.Done()
-		}(string(s))
+		}(str)
 	}
 
 	wg.Wait()
@@ -104,18 +75,18 @@ func (t *tracker) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkP
 	return nil
 }
 
-func (t *tracker) CLGNames(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
-	destinationName := CLG.GetName()
+func (s *service) CLGNames(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+	destinationName := CLG.Metadata()["name"]
 	sourceIDs := networkPayload.GetSources()
 
 	errors := make(chan error, len(sourceIDs))
 	wg := sync.WaitGroup{}
 
-	for _, s := range sourceIDs {
+	for _, str := range sourceIDs {
 		wg.Add(1)
-		go func(s string) {
-			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name", s)
-			name, err := t.Storage().General().Get(behaviourNameKey)
+		go func(str string) {
+			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name", str)
+			name, err := s.Storage().General().Get(behaviourNameKey)
 			if err != nil {
 				errors <- maskAny(err)
 			} else {
@@ -124,14 +95,14 @@ func (t *tracker) CLGNames(CLG servicespec.CLG, networkPayload objectspec.Networ
 				// each source ID. So in case the name lookup was successful, we are
 				// able to actually persist the single CLG name connection.
 				behaviourNameKey := key.NewNetworkKey("behaviour-name:%s:o:tracker:behaviour-names", name)
-				err := t.Storage().General().PushToSet(behaviourNameKey, destinationName)
+				err := s.Storage().General().PushToSet(behaviourNameKey, destinationName)
 				if err != nil {
 					errors <- maskAny(err)
 				}
 			}
 
 			wg.Done()
-		}(string(s))
+		}(str)
 	}
 
 	wg.Wait()
@@ -148,13 +119,33 @@ func (t *tracker) CLGNames(CLG servicespec.CLG, networkPayload objectspec.Networ
 	return nil
 }
 
-func (t *tracker) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
-	t.Service().Log().Line("func", "Track")
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) SetStorageCollection(sc storagespec.Collection) {
+	s.storageCollection = sc
+}
+
+func (s *service) Storage() storagespec.Collection {
+	return s.storageCollection
+}
+
+func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+	s.Service().Log().Line("func", "Track")
 
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error{
-		t.CLGIDs,
-		t.CLGNames,
+		s.CLGIDs,
+		s.CLGNames,
 	}
 
 	// Execute one lookup after another to track connection path patterns.
@@ -164,6 +155,18 @@ func (t *tracker) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPa
 		if err != nil {
 			return maskAny(err)
 		}
+	}
+
+	return nil
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
+	if s.storageCollection == nil {
+		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

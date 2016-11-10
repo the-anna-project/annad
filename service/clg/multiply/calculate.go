@@ -7,6 +7,6 @@ import (
 )
 
 // calculate creates the product of the given float64s.
-func (c *clg) calculate(ctx spec.Context, a, b float64) float64 {
+func (s *service) calculate(ctx spec.Context, a, b float64) float64 {
 	return a * b
 }

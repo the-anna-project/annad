@@ -11,7 +11,7 @@ import (
 )
 
 // TODO there is nothing that reads pairs
-func (c *clg) calculate(ctx spec.Context) error {
+func (s *service) calculate(ctx spec.Context) error {
 	// The counter keeps track of the work already being done. We only increment
 	// the counter in case we were not able to do our job. As soon as some
 	// threshold is reached, we stop trying.
@@ -27,11 +27,11 @@ func (c *clg) calculate(ctx spec.Context) error {
 		//
 		//     feature:%s:positions
 		//
-		key1, err := c.Storage().Feature().GetRandom()
+		key1, err := s.Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
-		key2, err := c.Storage().Feature().GetRandom()
+		key2, err := s.Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
@@ -54,18 +54,18 @@ func (c *clg) calculate(ctx spec.Context) error {
 
 		// Write the new pair into the general storage.
 		pairIDKey := key.NewNetworkKey("pair:syntactic:feature:%s:pair-id", pair)
-		_, err = c.Storage().General().Get(pairIDKey)
+		_, err = s.Storage().General().Get(pairIDKey)
 		if storage.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
 			// we break the outer loop to be done.
-			newID, err := c.Service().ID().New()
+			newID, err := s.Service().ID().New()
 			if err != nil {
 				return maskAny(err)
 			}
 			pairID := string(newID)
 
-			err = c.Storage().General().Set(pairIDKey, pairID)
+			err = s.Storage().General().Set(pairIDKey, pairID)
 			if err != nil {
 				return maskAny(err)
 			}

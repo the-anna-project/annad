@@ -22,7 +22,7 @@ func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
 		Run:   a.ExecAnnactlInterfaceTextReadFileCmd,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			var err error
-			a.SessionID, err = a.GetSessionID()
+			a.sessionID, err = a.GetSessionID()
 			panicOnError(err)
 		},
 	}
@@ -51,10 +51,10 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 		a.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 
-	a.Service().TextInput().GetChannel() <- textRequest
+	a.Service().TextInput().Channel() <- textRequest
 
 	go func() {
-		err = a.TextInterface.StreamText(ctx)
+		err = a.textInterface.StreamText(ctx)
 		if err != nil {
 			a.Service().Log().Line("msg", "%#v", maskAny(err))
 		}
@@ -62,7 +62,7 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 
 	for {
 		select {
-		case textResponse := <-a.Service().TextOutput().GetChannel():
+		case textResponse := <-a.Service().TextOutput().Channel():
 			fmt.Printf("%s\n", textResponse.GetOutput())
 		}
 	}
