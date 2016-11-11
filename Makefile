@@ -26,7 +26,7 @@ annactl: gogenerate
 		github.com/xh3b4sd/anna/annactl
 
 clean:
-	@rm -rf coverage.txt profile.out .workspace/
+	@rm -rf coverage.txt profile.out .workspace/ /tmp/protoc/ /tmp/protoc.zip
 
 dockerimage: all
 	@docker build -t xh3b4sd/anna:${VERSION} .
@@ -46,8 +46,12 @@ goget:
 	@# Setup workspace.
 	@mkdir -p $(PWD)/.workspace/src/github.com/xh3b4sd/
 	@ln -fs $(PWD) $(PWD)/.workspace/src/github.com/xh3b4sd/
-	@# Pin project dependencies.
-	@goget $(PWD)/Gofile
+	@# Fetch dev dependencies.
+	@go get -u github.com/client9/misspell/cmd/misspell
+	@go get -u github.com/fzipp/gocyclo
+	@go get -u github.com/golang/lint/golint
+	@go get -u github.com/golang/protobuf/protoc-gen-go
+	@go get -u github.com/xh3b4sd/clggen
 	@# Fetch the rest of the project dependencies.
 	@go get -d -v ./...
 
@@ -67,6 +71,7 @@ else
 	@exit 1
 endif
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
+	@mkdir -p .workspace/bin/
 	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
 
