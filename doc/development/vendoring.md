@@ -12,7 +12,7 @@ update some package to it simply `go get` the package and move it to the vendor
 directory. Note that `go get` loads packages into `$GOPATH/src/`. The vendor
 directory does not follow this structure. That is why the actual package needs
 to be moved and the `pkg` and `src` directories need to be removed afterwards.
-Once the addition or update is done, the changes need to be comitted. Done.
+Once the addition or update is done, the changes need to be committed. Done.
 ```
 GOPATH=$(pwd)/vendor/ go get -u github.com/alicebob/miniredis
 mv vendor/src/* vendor
