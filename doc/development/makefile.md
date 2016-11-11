@@ -6,14 +6,14 @@ The makefile is used to ease the development of the project. You may want to
 make use of the following targets.
 
 ### all
-This is the best to start with. The target fetches dependencies like `goget`
-and compiles the binaries like `annad` and `annactl`.
+This target starts code generation and compiles binaries like `annad` and
+`annactl`.
 ```
 make all
 ```
 
 The `all` target is the default target. So the following is shorter and also
-valid.
+valid once the project is set up using `make setup`.
 ```
 make
 ```
@@ -139,4 +139,11 @@ golint    succeeded
 misspell  succeeded
 gocyclo   succeeded
 gofmt     succeeded
+```
+
+### setup
+This target is the very first you need to execute when starting with the project
+from scratch. It puts all dependencies in place.
+```
+make setup
 ```
