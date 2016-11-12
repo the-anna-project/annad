@@ -10,15 +10,19 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new pronetheus instrumentor service.
-func New() servicespec.Instrumentor {
+func New() spec.Instrumentor {
 	return &service{}
 }
 
 type service struct {
+	// Dependencies.
+
+	serviceCollection spec.Collection
+
 	// Settings.
 
 	counters   map[string]spec.Counter
@@ -30,13 +34,14 @@ type service struct {
 	// httpHandler represents the HTTP handler used to register the Prometheus
 	// registry in the HTTP server.
 	httpHandler http.Handler
+	metadata    map[string]string
 	mutex       sync.Mutex
-	// Prefixes represents the Instrumentor's ordered prefixes. It is recommended
+	// prefixes represents the Instrumentor's ordered prefixes. It is recommended
 	// to use the following prefixes.
 	//
 	//     []string{"anna", "<prefix>"}
 	//
-	Prefixes []string
+	prefixes []string
 }
 
 func (s *service) Configure() error {
@@ -173,27 +178,28 @@ func (s *service) GetHTTPHandler() http.Handler {
 }
 
 func (s *service) GetPrefixes() []string {
-	return s.Prefixes
+	return s.prefixes
 }
 
 func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) NewKey(s ...string) string {
-	return key.NewPromKey(append(s.Prefixes, s...)...)
+func (s *service) NewKey(str ...string) string {
+	return key.NewPromKey(append(s.prefixes, str...)...)
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() spec.Collection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc spec.Collection) {
 	s.serviceCollection = sc
 }
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

@@ -32,6 +32,8 @@ type Collection interface {
 
 	Server() Server
 
+	Storage() StorageCollection
+
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
@@ -47,6 +49,7 @@ type Collection interface {
 	SetPermutation(p Permutation)
 	SetRandom(r Random)
 	SetServer(s Server)
+	SetStorageCollection(sc StorageCollection)
 	SetTextEndpoint(te TextEndpoint)
 	SetTextInput(ti TextInput)
 	SetTextOutput(to TextOutput)

@@ -3,7 +3,7 @@ package prometheus
 import (
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // HistogramConfig represents the configuration used to create a new prometheus

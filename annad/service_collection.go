@@ -17,31 +17,31 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/service/server"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/storage"
+	"github.com/xh3b4sd/anna/service/storage/memory"
+	"github.com/xh3b4sd/anna/service/storage/redis"
 	"github.com/xh3b4sd/anna/service/textendpoint"
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
 )
 
-func (a *annad) newServiceCollection() servicespec.Collection {
-	var err error
-
+func (a *annad) newServiceCollection() spec.Collection {
 	// Set.
 	collection := service.NewCollection()
-
-	// TODO add other services
 
 	collection.SetActivator(a.newActivatorService())
 	collection.SetForwarder(a.newForwarderService())
 	collection.SetFS(a.newFSService())
 	collection.SetID(a.newIDService())
-	collection.SetID(a.newInstrumentorService())
+	collection.SetInstrumentor(a.newInstrumentorService())
 	collection.SetLog(a.newLogService())
 	collection.SetNetwork(a.newNetworkService())
 	collection.SetPermutation(a.newPermutationService())
 	collection.SetRandom(a.newRandomService())
 	collection.SetServer(a.newServerService())
+	collection.SetStorageCollection(a.newStorageCollection())
 	collection.SetTextEndpoint(a.newTextEndpointService())
 	collection.SetTextInput(a.newTextInputService())
 	collection.SetTextOutput(a.newTextOutputService())
@@ -57,6 +57,9 @@ func (a *annad) newServiceCollection() servicespec.Collection {
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
 	collection.Server().SetServiceCollection(collection)
+	collection.Storage().Connection().SetServiceCollection(collection)
+	collection.Storage().Feature().SetServiceCollection(collection)
+	collection.Storage().General().SetServiceCollection(collection)
 	collection.TextEndpoint().SetServiceCollection(collection)
 	collection.TextInput().SetServiceCollection(collection)
 	collection.TextOutput().SetServiceCollection(collection)
@@ -75,6 +78,10 @@ func (a *annad) newServiceCollection() servicespec.Collection {
 	panicOnError(collection.Permutation().Validate())
 	panicOnError(collection.Random().Validate())
 	panicOnError(collection.Server().Validate())
+	panicOnError(collection.Storage().Validate())
+	panicOnError(collection.Storage().Connection().Validate())
+	panicOnError(collection.Storage().Feature().Validate())
+	panicOnError(collection.Storage().General().Validate())
 	panicOnError(collection.TextEndpoint().Validate())
 	panicOnError(collection.TextInput().Validate())
 	panicOnError(collection.TextOutput().Validate())
@@ -93,6 +100,10 @@ func (a *annad) newServiceCollection() servicespec.Collection {
 	panicOnError(collection.Permutation().Configure())
 	panicOnError(collection.Random().Configure())
 	panicOnError(collection.Server().Configure())
+	panicOnError(collection.Storage().Configure())
+	panicOnError(collection.Storage().Connection().Configure())
+	panicOnError(collection.Storage().Feature().Configure())
+	panicOnError(collection.Storage().General().Configure())
 	panicOnError(collection.TextEndpoint().Configure())
 	panicOnError(collection.TextInput().Configure())
 	panicOnError(collection.TextOutput().Configure())
@@ -101,53 +112,58 @@ func (a *annad) newServiceCollection() servicespec.Collection {
 	return collection
 }
 
-func (a *annad) newActivatorService() servicespec.Activator {
+func (a *annad) newActivatorService() spec.Activator {
 	return activator.New()
 }
 
-func (a *annad) newForwarderService() servicespec.Forwarder {
+func (a *annad) newBackoffFactory() func() spec.Backoff {
+	return func() spec.Backoff {
+		return backoff.NewExponentialBackOff()
+	}
+}
+
+func (a *annad) newForwarderService() spec.Forwarder {
 	return forwarder.New()
 }
 
 // TODO make mem/os configurable
-func (a *annad) newFSService() servicespec.FS {
+func (a *annad) newFSService() spec.FS {
 	return mem.New()
 }
 
-func (a *annad) newIDService() servicespec.ID {
+func (a *annad) newIDService() spec.ID {
 	return id.New()
 }
 
-func (a *annad) newInstrumentorService() servicespec.Instrumentor {
+func (a *annad) newInstrumentorService() spec.Instrumentor {
 	return prometheus.New()
 }
 
-func (a *annad) newLogService() servicespec.Log {
+func (a *annad) newLogService() spec.Log {
 	newService := log.New()
+
 	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
 
 	return newService
 }
 
-func (a *annad) newNetworkService() servicespec.Network {
+func (a *annad) newNetworkService() spec.Network {
 	return network.New()
 }
 
-func (a *annad) newPermutationService() servicespec.Permutation {
+func (a *annad) newPermutationService() spec.Permutation {
 	return permutation.New()
 }
 
-func (a *annad) newRandomService() servicespec.Random {
+func (a *annad) newRandomService() spec.Random {
 	newService := random.New()
 
-	newService.SetBackoffFactory(func() servicespec.Backoff {
-		return backoff.NewExponentialBackOff()
-	})
+	newService.SetBackoffFactory(a.newBackoffFactory())
 
 	return newService
 }
 
-func (a *annad) newServerService() servicespec.Server {
+func (a *annad) newServerService() spec.Server {
 	newService := server.New()
 
 	newService.SetHTTPAddress(a.flags.HTTPAddr)
@@ -155,7 +171,40 @@ func (a *annad) newServerService() servicespec.Server {
 	return newService
 }
 
-func (a *annad) newTextEndpointService() servicespec.TextEndpoint {
+func (a *annad) newStorageCollection() spec.StorageCollection {
+	newCollection := storage.NewCollection()
+
+	switch a.flags.StorageType {
+	case "redis":
+		connectionService := redis.New()
+		connectionService.SetAddress(a.flags.RedisConnectionStorageAddr)
+		connectionService.SetBackoffFactory(a.newBackoffFactory())
+		connectionService.SetPrefix(a.flags.RedisConnectionStoragePrefix)
+		newCollection.SetConnection(connectionService)
+
+		featureService := redis.New()
+		featureService.SetAddress(a.flags.RedisFeatureStorageAddr)
+		featureService.SetBackoffFactory(a.newBackoffFactory())
+		featureService.SetPrefix(a.flags.RedisFeatureStoragePrefix)
+		newCollection.SetConnection(featureService)
+
+		generalService := redis.New()
+		generalService.SetAddress(a.flags.RedisGeneralStorageAddr)
+		generalService.SetBackoffFactory(a.newBackoffFactory())
+		generalService.SetPrefix(a.flags.RedisGeneralStoragePrefix)
+		newCollection.SetConnection(generalService)
+	case "memory":
+		newCollection.SetConnection(memory.New())
+		newCollection.SetFeature(memory.New())
+		newCollection.SetGeneral(memory.New())
+	default:
+		panic(maskAnyf(invalidStorageTypeError, "%s", a.flags.StorageType))
+	}
+
+	return newCollection
+}
+
+func (a *annad) newTextEndpointService() spec.TextEndpoint {
 	newService := textendpoint.New()
 
 	newService.SetGRPCAddress(a.flags.GRPCAddr)
@@ -163,14 +212,14 @@ func (a *annad) newTextEndpointService() servicespec.TextEndpoint {
 	return newService
 }
 
-func (a *annad) newTextInputService() servicespec.TextInput {
+func (a *annad) newTextInputService() spec.TextInput {
 	return textinput.New()
 }
 
-func (a *annad) newTextOutputService() servicespec.TextOutput {
+func (a *annad) newTextOutputService() spec.TextOutput {
 	return textoutput.New()
 }
 
-func (a *annad) newTrackerService() servicespec.Tracker {
+func (a *annad) newTrackerService() spec.Tracker {
 	return tracker.New()
 }

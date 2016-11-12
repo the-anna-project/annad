@@ -7,7 +7,7 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // TODO there is nothing that reads pairs
@@ -27,11 +27,11 @@ func (s *service) calculate(ctx spec.Context) error {
 		//
 		//     feature:%s:positions
 		//
-		key1, err := s.Storage().Feature().GetRandom()
+		key1, err := s.Service().Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
-		key2, err := s.Storage().Feature().GetRandom()
+		key2, err := s.Service().Storage().Feature().GetRandom()
 		if err != nil {
 			return maskAny(err)
 		}
@@ -54,7 +54,7 @@ func (s *service) calculate(ctx spec.Context) error {
 
 		// Write the new pair into the general storage.
 		pairIDKey := key.NewNetworkKey("pair:syntactic:feature:%s:pair-id", pair)
-		_, err = s.Storage().General().Get(pairIDKey)
+		_, err = s.Service().Storage().General().Get(pairIDKey)
 		if storage.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
@@ -65,7 +65,7 @@ func (s *service) calculate(ctx spec.Context) error {
 			}
 			pairID := string(newID)
 
-			err = s.Storage().General().Set(pairIDKey, pairID)
+			err = s.Service().Storage().General().Set(pairIDKey, pairID)
 			if err != nil {
 				return maskAny(err)
 			}

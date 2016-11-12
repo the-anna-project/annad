@@ -1,9 +1,6 @@
 package spec
 
-import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
+import objectspec "github.com/xh3b4sd/anna/object/spec"
 
 // Forwarder represents an management layer to organize CLG forwarding rules.
 // The forwarder obtains behaviour IDs for every single requested CLG of every
@@ -40,10 +37,6 @@ type Forwarder interface {
 	Service() Collection
 
 	SetServiceCollection(sc Collection)
-
-	SetStorageCollection(sc storagespec.Collection)
-
-	Storage() storagespec.Collection
 
 	Validate() error
 }

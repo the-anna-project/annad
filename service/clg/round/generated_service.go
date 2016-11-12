@@ -7,7 +7,6 @@ package round
 
 import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
 )
 
 // New creates a new round CLG service.
@@ -19,7 +18,6 @@ type service struct {
 	// Dependencies.
 
 	serviceCollection servicespec.Collection
-	storageCollection storagespec.Collection
 
 	// Settings.
 
@@ -59,21 +57,11 @@ func (s *service) SetServiceCollection(serviceCollection servicespec.Collection)
 	s.serviceCollection = serviceCollection
 }
 
-func (s *service) SetStorageCollection(storageCollection storagespec.Collection) {
-	s.storageCollection = storageCollection
-}
-
-func (s *service) Storage() storagespec.Collection {
-	return s.storageCollection
-}
-
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if s.storageCollection == nil {
-		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

@@ -48,13 +48,13 @@ type service struct {
 
 	serviceCollection servicespec.Collection
 
-	// Internals.
+	// Settings.
 
 	metadata map[string]string
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {

@@ -65,7 +65,7 @@ func (s *service) calculate(ctx spec.Context, informationSequence, separator str
 		if err != nil {
 			return maskAny(err)
 		}
-		err = s.Storage().Feature().Set(positionKey, string(raw))
+		err = s.Service().Storage().Feature().Set(positionKey, string(raw))
 		if err != nil {
 			return maskAny(err)
 		}

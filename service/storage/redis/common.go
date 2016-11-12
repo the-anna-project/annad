@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func (s *storage) retryErrorLogger(err error, d time.Duration) {
+func (s *service) retryErrorLogger(err error, d time.Duration) {
 	s.Service().Log().Line("msg", "retry error: %#v", maskAny(err))
 }
 
-func (s *storage) withPrefix(keys ...string) string {
-	newKey := s.Prefix
+func (s *service) withPrefix(keys ...string) string {
+	newKey := s.prefix
 
 	for _, k := range keys {
 		newKey += ":" + k

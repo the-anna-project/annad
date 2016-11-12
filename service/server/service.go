@@ -9,7 +9,6 @@ import (
 	"github.com/tylerb/graceful"
 
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 // New creates a new server service.
@@ -20,7 +19,6 @@ func New() servicespec.Server {
 type service struct {
 	// Dependencies.
 
-	instrumentation   systemspec.Instrumentation
 	serviceCollection servicespec.Collection
 
 	// Settings.
@@ -48,8 +46,8 @@ func (s *service) Boot() {
 			Timeout: 3 * time.Second,
 		}
 
-		// Instrumentation.
-		http.Handle(s.instrumentation.GetHTTPEndpoint(), s.instrumentation.GetHTTPHandler())
+		// Instrumentor.
+		http.Handle(s.Service().Instrumentor().GetHTTPEndpoint(), s.Service().Instrumentor().GetHTTPHandler())
 
 		// HTTP server.
 		go func() {
@@ -92,10 +90,6 @@ func (s *service) Service() servicespec.Collection {
 
 func (s *service) SetHTTPAddress(httpAddr string) {
 	s.httpAddr = httpAddr
-}
-
-func (s *service) SetInstrumentation(i systemspec.Instrumentation) {
-	s.instrumentation = i
 }
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {

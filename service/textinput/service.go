@@ -17,7 +17,7 @@ type service struct {
 
 	serviceCollection servicespec.Collection
 
-	// Internals.
+	// Settings.
 
 	metadata map[string]string
 

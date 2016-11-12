@@ -16,7 +16,7 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 	}
 
 	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := s.Storage().General().Get(informationSequenceKey)
+	informationSequence, err := s.Service().Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return "", maskAny(err)
 	}

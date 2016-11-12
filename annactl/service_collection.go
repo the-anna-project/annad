@@ -17,26 +17,22 @@ import (
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/service/server"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/textendpoint"
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
 )
 
-func (a *annactl) newServiceCollection() servicespec.Collection {
-	var err error
-
+func (a *annactl) newServiceCollection() spec.Collection {
 	// Set.
 	collection := service.NewCollection()
-
-	// TODO add other services
 
 	collection.SetActivator(a.newActivatorService())
 	collection.SetForwarder(a.newForwarderService())
 	collection.SetFS(a.newFSService())
 	collection.SetID(a.newIDService())
-	collection.SetID(a.newInstrumentorService())
+	collection.SetInstrumentor(a.newInstrumentorService())
 	collection.SetLog(a.newLogService())
 	collection.SetNetwork(a.newNetworkService())
 	collection.SetPermutation(a.newPermutationService())
@@ -101,53 +97,54 @@ func (a *annactl) newServiceCollection() servicespec.Collection {
 	return collection
 }
 
-func (a *annactl) newActivatorService() servicespec.Activator {
+func (a *annactl) newActivatorService() spec.Activator {
 	return activator.New()
 }
 
-func (a *annactl) newForwarderService() servicespec.Forwarder {
+func (a *annactl) newForwarderService() spec.Forwarder {
 	return forwarder.New()
 }
 
 // TODO make mem/os configurable
-func (a *annactl) newFSService() servicespec.FS {
+func (a *annactl) newFSService() spec.FS {
 	return mem.New()
 }
 
-func (a *annactl) newIDService() servicespec.ID {
+func (a *annactl) newIDService() spec.ID {
 	return id.New()
 }
 
-func (a *annactl) newInstrumentorService() servicespec.Instrumentor {
+func (a *annactl) newInstrumentorService() spec.Instrumentor {
 	return prometheus.New()
 }
 
-func (a *annactl) newLogService() servicespec.Log {
+func (a *annactl) newLogService() spec.Log {
 	newService := log.New()
+
 	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
 
 	return newService
 }
 
-func (a *annactl) newNetworkService() servicespec.Network {
+func (a *annactl) newNetworkService() spec.Network {
 	return network.New()
 }
 
-func (a *annactl) newPermutationService() servicespec.Permutation {
+func (a *annactl) newPermutationService() spec.Permutation {
 	return permutation.New()
 }
 
-func (a *annactl) newRandomService() servicespec.Random {
+func (a *annactl) newRandomService() spec.Random {
 	newService := random.New()
 
-	newService.SetBackoffFactory(func() servicespec.Backoff {
+	newService.SetBackoffFactory(func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
 
 	return newService
 }
 
-func (a *annactl) newServerService() servicespec.Server {
+func (a *annactl) newServerService() spec.Server {
 	newService := server.New()
 
 	newService.SetHTTPAddress(a.flags.HTTPAddr)
@@ -155,7 +152,7 @@ func (a *annactl) newServerService() servicespec.Server {
 	return newService
 }
 
-func (a *annactl) newTextEndpointService() servicespec.TextEndpoint {
+func (a *annactl) newTextEndpointService() spec.TextEndpoint {
 	newService := textendpoint.New()
 
 	newService.SetGRPCAddress(a.flags.GRPCAddr)
@@ -163,14 +160,14 @@ func (a *annactl) newTextEndpointService() servicespec.TextEndpoint {
 	return newService
 }
 
-func (a *annactl) newTextInputService() servicespec.TextInput {
+func (a *annactl) newTextInputService() spec.TextInput {
 	return textinput.New()
 }
 
-func (a *annactl) newTextOutputService() servicespec.TextOutput {
+func (a *annactl) newTextOutputService() spec.TextOutput {
 	return textoutput.New()
 }
 
-func (a *annactl) newTrackerService() servicespec.Tracker {
+func (a *annactl) newTrackerService() spec.Tracker {
 	return tracker.New()
 }

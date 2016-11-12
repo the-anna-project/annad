@@ -5,7 +5,7 @@ import (
 
 	"github.com/juju/errgo"
 
-	"github.com/xh3b4sd/anna/storage/redis"
+	"github.com/xh3b4sd/anna/service/storage/redis"
 )
 
 var (

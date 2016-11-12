@@ -11,7 +11,7 @@ func (s *service) persistQueue(key string, queue []objectspec.NetworkPayload) er
 	if err != nil {
 		return maskAny(err)
 	}
-	err = s.Storage().General().Set(key, string(b))
+	err = s.Service().Storage().General().Set(key, string(b))
 	if err != nil {
 		return maskAny(err)
 	}

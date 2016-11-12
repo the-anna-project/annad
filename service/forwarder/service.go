@@ -7,8 +7,7 @@ import (
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/storage"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
+	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // New creates a new forwarder service.
@@ -20,14 +19,10 @@ type service struct {
 	// Dependencies.
 
 	serviceCollection servicespec.Collection
-	storageCollection storagespec.Collection
-
-	// Internals.
-
-	metadata map[string]string
 
 	// Settings.
 
+	metadata map[string]string
 	// maxSignals represents the maximum number of signals being forwarded by one
 	// CLG. When a requested CLG needs to decide where to forward signals to, it
 	// may will forward up to maxSignals signals to other CLGs, if any.
@@ -35,7 +30,7 @@ type service struct {
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {
@@ -46,8 +41,6 @@ func (s *service) Configure() error {
 		"name": "forwarder",
 		"type": "service",
 	}
-
-	// Settings.
 
 	s.maxSignals = 5
 
@@ -91,7 +84,7 @@ func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.Network
 			return maskAny(err)
 		}
 		// TODO store asynchronuously
-		err = s.Storage().General().PushToSet(networkPayloadKey, string(b))
+		err = s.Service().Storage().General().PushToSet(networkPayloadKey, string(b))
 		if err != nil {
 			return maskAny(err)
 		}
@@ -114,7 +107,7 @@ func (s *service) GetNetworkPayloads(CLG servicespec.CLG, networkPayload objects
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
-	newBehaviourIDs, err := s.Storage().General().GetAllFromSet(behaviourIDsKey)
+	newBehaviourIDs, err := s.Service().Storage().General().GetAllFromSet(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No configuration of behaviour IDs is stored. Thus we return an error.
 		// Eventually some other lookup is able to find sufficient network payloads.
@@ -185,7 +178,7 @@ func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPay
 	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	for _, behaviourID := range newBehaviourIDs {
 		// TODO store asynchronuously
-		err = s.Storage().General().PushToSet(behaviourIDsKey, behaviourID)
+		err = s.Service().Storage().General().PushToSet(behaviourIDsKey, behaviourID)
 		if err != nil {
 			return nil, maskAny(err)
 		}
@@ -224,21 +217,10 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) SetStorageCollection(sc storagespec.Collection) {
-	s.storageCollection = sc
-}
-
-func (s *service) Storage() storagespec.Collection {
-	return s.storageCollection
-}
-
 func (s *service) Validate() error {
 	// Dependencies.
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if s.storageCollection == nil {
-		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

@@ -27,7 +27,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
-	informationSequence, err := s.Storage().General().Get(informationSequenceKey)
+	informationSequence, err := s.Service().Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -39,7 +39,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
 	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
-	inputBehaviourID, err := s.Storage().General().Get(firstBehaviourIDKey)
+	inputBehaviourID, err := s.Service().Storage().General().Get(firstBehaviourIDKey)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -77,7 +77,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 	if err != nil {
 		return maskAny(err)
 	}
-	err = s.Storage().General().PushToList(networkPayloadKey, string(b))
+	err = s.Service().Storage().General().PushToList(networkPayloadKey, string(b))
 	if err != nil {
 		return maskAny(err)
 	}
