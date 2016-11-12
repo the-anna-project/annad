@@ -53,35 +53,3 @@ tools `sed` and `find`.
 ```
 sed -i 's/search/replace/g' $(find . -name *.go)
 ```
-
-### list storage keys
-The following snippet can be used to list all used storage keys. Note that this
-requires the [key package
-interface](https://godoc.org/github.com/xh3b4sd/anna/key) to be aligned with the
-command below.
-```
-ack-grep "key\.NewNetworkKey\(" --nobreak --noheading --no-filename --type=go | sed -u 's/^.*key.NewNetworkKey("\(.*\)".*$/\1/p' | uniq | sort
-```
-
-The generated output will somehow look like this.
-```
-activate:configuration:behaviour-id:%s:behaviour-ids
-activate:queue:behaviour-id:%s:network-payload
-behaviour-id:%s:separator
-clg-tree-id:%s:first-behaviour-id
-clg-tree-id:%s:first-behaviour-id
-event:network-payload
-event:network-payload
-events:network-payload
-events:network-payload
-feature:%s:positions
-forward:configuration:behaviour-id:%s:behaviour-ids
-information-id:%s:information-sequence
-information-id:%s:information-sequence
-information-id:%s:information-sequence
-information-id:%s:information-sequence
-information-sequence:%s:information-id
-information-sequence:%s:information-id
-information-sequence:%s:information-id
-pair:syntactic:feature:%s:pair-id
-```

@@ -1,9 +1,9 @@
 package tracker
 
 import (
+	"fmt"
 	"sync"
 
-	"github.com/xh3b4sd/anna/key"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
@@ -50,7 +50,7 @@ func (s *service) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkP
 		wg.Add(1)
 		go func(str string) {
 			// Persist the single CLG ID connections.
-			behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:o:tracker:behaviour-ids", str)
+			behaviourIDKey := fmt.Sprintf("behaviour-id:%s:o:tracker:behaviour-ids", str)
 			err := s.Service().Storage().General().PushToSet(behaviourIDKey, destinationID)
 			if err != nil {
 				errors <- maskAny(err)
@@ -83,7 +83,7 @@ func (s *service) CLGNames(CLG servicespec.CLG, networkPayload objectspec.Networ
 	for _, str := range sourceIDs {
 		wg.Add(1)
 		go func(str string) {
-			behaviourNameKey := key.NewNetworkKey("behaviour-id:%s:behaviour-name", str)
+			behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", str)
 			name, err := s.Service().Storage().General().Get(behaviourNameKey)
 			if err != nil {
 				errors <- maskAny(err)
@@ -92,7 +92,7 @@ func (s *service) CLGNames(CLG servicespec.CLG, networkPayload objectspec.Networ
 				// ID. The else clause is necessary to queue only one possible error for
 				// each source ID. So in case the name lookup was successful, we are
 				// able to actually persist the single CLG name connection.
-				behaviourNameKey := key.NewNetworkKey("behaviour-name:%s:o:tracker:behaviour-names", name)
+				behaviourNameKey := fmt.Sprintf("behaviour-name:%s:o:tracker:behaviour-names", name)
 				err := s.Service().Storage().General().PushToSet(behaviourNameKey, destinationName)
 				if err != nil {
 					errors <- maskAny(err)

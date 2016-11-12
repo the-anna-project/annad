@@ -3,9 +3,9 @@
 package readseparator
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 )
@@ -16,7 +16,7 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 		return "", maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 
-	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
+	behaviourIDKey := fmt.Sprintf("behaviour-id:%s:separator", behaviourID)
 	separator, err := s.Service().Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
 		randomKey, err := s.Service().Storage().Feature().GetRandom()

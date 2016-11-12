@@ -1,9 +1,9 @@
 package activator
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/permutationlist"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/permutation"
@@ -51,7 +51,7 @@ func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.Networ
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	queueKey := key.NewNetworkKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
+	queueKey := fmt.Sprintf("activate:queue:behaviour-id:%s:network-payload", behaviourID)
 	str, err := s.Service().Storage().General().Get(queueKey)
 	if err != nil {
 		return nil, maskAny(err)
@@ -147,7 +147,7 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.Netw
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := fmt.Sprintf("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	str, err := s.Service().Storage().General().Get(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
@@ -288,7 +288,7 @@ func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (o
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := fmt.Sprintf("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	var behaviourIDs []string
 	for _, behaviourID := range newNetworkPayload.GetSources() {
 		behaviourIDs = append(behaviourIDs, string(behaviourID))

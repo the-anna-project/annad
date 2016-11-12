@@ -3,7 +3,8 @@
 package input
 
 import (
-	"github.com/xh3b4sd/anna/key"
+	"fmt"
+
 	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 )
@@ -14,7 +15,7 @@ import (
 // information sequence. In any case the information ID is added to the given
 // context.
 func (s *service) calculate(ctx spec.Context, informationSequence string) error {
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", informationSequence)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", informationSequence)
 	informationID, err := s.Service().Storage().General().Get(informationIDKey)
 	if storage.IsNotFound(err) {
 		// The given information sequence was never seen before. Thus we register it
@@ -30,7 +31,7 @@ func (s *service) calculate(ctx spec.Context, informationSequence string) error 
 			return maskAny(err)
 		}
 
-		informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
+		informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", informationID)
 		err = s.Service().Storage().General().Set(informationSequenceKey, informationSequence)
 		if err != nil {
 			return maskAny(err)

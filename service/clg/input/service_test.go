@@ -1,13 +1,13 @@
 package input
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	redigo "github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
@@ -136,7 +136,7 @@ func Test_CLG_Input_KnownInputSequence(t *testing.T) {
 	// Create record for the test input.
 	informationID := "123"
 	newInput := "test input"
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", newInput)
 	err := newStorageCollection.General().Set(informationIDKey, informationID)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -211,7 +211,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 		t.Fatal("expected", nil, "got", err)
 	}
 
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", newInput)
 	storedID, err := newStorageCollection.General().Get(informationIDKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -220,7 +220,7 @@ func Test_CLG_Input_DataProperlyStored(t *testing.T) {
 		t.Fatal("expected", newID, "got", storedID)
 	}
 
-	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", newID)
+	informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", newID)
 	storedInput, err := newStorageCollection.General().Get(informationSequenceKey)
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -258,7 +258,7 @@ func Test_CLG_Input_SetInformationIDError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
 	newID, err := newServiceCollection.ID().New()
@@ -289,14 +289,14 @@ func Test_CLG_Input_SetInformationSequenceError(t *testing.T) {
 
 	// Prepare the storage connection to fake a returned error.
 	newInput := "test input"
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", newInput)
 	// Our test ID factory always returns the same ID. That way we are able to
 	// check for the ID being used during the test.
 	newID, err := newServiceCollection.ID().New()
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", newID)
+	informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", newID)
 
 	c := redigomock.NewConn()
 	c.Command("GET", "prefix:"+informationIDKey).ExpectError(redigo.ErrNil)
@@ -320,7 +320,7 @@ func Test_CLG_Input_GetInformationIDError(t *testing.T) {
 	newCtx := context.MustNew()
 
 	newInput := "test input"
-	informationIDKey := key.NewNetworkKey("information-sequence:%s:information-id", newInput)
+	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", newInput)
 
 	// Prepare the storage connection to fake a returned error.
 	c := redigomock.NewConn()

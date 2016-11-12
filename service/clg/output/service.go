@@ -9,9 +9,9 @@ package output
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textoutput"
@@ -26,7 +26,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 	if !ok {
 		return maskAnyf(invalidInformationIDError, "must not be empty")
 	}
-	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
+	informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", informationID)
 	informationSequence, err := s.Service().Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return maskAny(err)
@@ -38,7 +38,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 	if !ok {
 		return maskAnyf(invalidCLGTreeIDError, "must not be empty")
 	}
-	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	firstBehaviourIDKey := fmt.Sprintf("clg-tree-id:%s:first-behaviour-id", clgTreeID)
 	inputBehaviourID, err := s.Service().Storage().General().Get(firstBehaviourIDKey)
 	if err != nil {
 		return maskAny(err)
@@ -72,7 +72,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 	}
 
 	// Write the transformed network payload to the queue.
-	networkPayloadKey := key.NewNetworkKey("events:network-payload")
+	networkPayloadKey := fmt.Sprintf("events:network-payload")
 	b, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)

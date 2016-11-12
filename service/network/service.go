@@ -7,11 +7,11 @@ package network
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
@@ -144,7 +144,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		// network payload was fetched from the queue. As soon as we receive the
 		// network payload, it is removed from the queue automatically, so it is not
 		// handled twice.
-		eventKey := key.NewNetworkKey("event:network-payload")
+		eventKey := fmt.Sprintf("event:network-payload")
 		element, err := s.Service().Storage().General().PopFromList(eventKey)
 		if err != nil {
 			return maskAny(err)
@@ -298,14 +298,14 @@ func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInp
 
 	// Write the new CLG tree ID to reference the input CLG ID and add the CLG
 	// tree ID to the new context.
-	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	firstBehaviourIDKey := fmt.Sprintf("clg-tree-id:%s:first-behaviour-id", clgTreeID)
 	err = s.Service().Storage().General().Set(firstBehaviourIDKey, string(behaviourID))
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Write the transformed network payload to the queue.
-	eventKey := key.NewNetworkKey("event:network-payload")
+	eventKey := fmt.Sprintf("event:network-payload")
 	b, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)

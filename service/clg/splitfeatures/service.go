@@ -19,8 +19,8 @@ package splitfeatures
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/xh3b4sd/anna/key"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/feature"
 )
@@ -54,7 +54,7 @@ func (s *service) calculate(ctx objectspec.Context, informationSequence, separat
 		//
 		//     feature:%s:positions
 		//
-		positionKey := key.NewNetworkKey("feature:%s:positions", f.Sequence())
+		positionKey := fmt.Sprintf("feature:%s:positions", f.Sequence())
 		raw, err := json.Marshal(f.Positions())
 		if err != nil {
 			return maskAny(err)
