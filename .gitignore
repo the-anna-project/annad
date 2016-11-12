@@ -1,7 +1,8 @@
 .annasession
+.workspace
 coverage.txt
 profile.out
-.workspace
-service/clg/*/generated*
 client/interface/text/textendpoint.pb.go
+service/clg/*/generated*
 service/textendpoint/textendpoint.pb.go
+TODO
