@@ -5,7 +5,6 @@ import (
 
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service/id"
 )
 
 // Config represents the configuration used to create a new
@@ -52,7 +51,7 @@ func New(config Config) (spec.NetworkPayload, error) {
 	newObject := &networkPayload{
 		Config: config,
 
-		ID: id.MustNewID(),
+		ID: "",
 	}
 
 	return newObject, nil

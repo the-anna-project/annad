@@ -26,13 +26,6 @@ func New() spec.ID {
 	return &service{}
 }
 
-// MustNewID returns a new string of type Hex128. In case of any error
-// this method panics.
-func MustNewID() string {
-	// TODO
-	return ""
-}
-
 type service struct {
 	// Dependencies.
 

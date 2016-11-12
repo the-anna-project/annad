@@ -9,7 +9,6 @@ import (
 	netcontext "golang.org/x/net/context"
 
 	"github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service/id"
 )
 
 // Config represents the configuration used to create a new context object.
@@ -47,7 +46,7 @@ func New(config Config) (spec.Context, error) {
 	newContext := &context{
 		Config: config,
 
-		ID: string(id.MustNewID()),
+		ID: "",
 	}
 
 	if newContext.Context == nil {
