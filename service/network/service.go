@@ -34,13 +34,8 @@ type service struct {
 
 	bootOnce sync.Once
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
-	clgs         map[string]servicespec.CLG
-	closer       chan struct{}
-	metadata     map[string]string
-	shutdownOnce sync.Once
-
-	// Settings.
-
+	clgs   map[string]servicespec.CLG
+	closer chan struct{}
 	// Delay causes each CLG execution to be delayed. This value represents a
 	// default value. A delay can be used harden the internal synchronization of
 	// the network. For instance some chaos monkey could be implemented to cause
@@ -51,6 +46,9 @@ type service struct {
 	// TODO implement the actual usage of the delay and make it dynamically
 	// configurable on demand like we already do with the log control.
 	delay time.Duration
+
+	metadata     map[string]string
+	shutdownOnce sync.Once
 }
 
 func (s *service) Configure() error {
@@ -67,8 +65,6 @@ func (s *service) Configure() error {
 	}
 
 	s.clgs = s.newCLGs()
-
-	// Settings.
 	s.delay = 0
 
 	return nil
@@ -355,6 +351,7 @@ func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPa
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

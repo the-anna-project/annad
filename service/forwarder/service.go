@@ -219,6 +219,7 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

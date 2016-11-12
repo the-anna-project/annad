@@ -77,6 +77,7 @@ func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) err
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
