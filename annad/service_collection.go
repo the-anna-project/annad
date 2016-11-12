@@ -8,6 +8,7 @@ import (
 
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/activator"
+	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/id"
@@ -32,6 +33,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection := service.NewCollection()
 
 	collection.SetActivator(a.newActivatorService())
+	collection.SetFeature(a.newFeatureService())
 	collection.SetForwarder(a.newForwarderService())
 	collection.SetFS(a.newFSService())
 	collection.SetID(a.newIDService())
@@ -48,6 +50,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection.SetTracker(a.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
+	collection.Feature().SetServiceCollection(collection)
 	collection.Forwarder().SetServiceCollection(collection)
 	collection.FS().SetServiceCollection(collection)
 	collection.ID().SetServiceCollection(collection)
@@ -69,6 +72,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.Validate())
 
 	panicOnError(collection.Activator().Validate())
+	panicOnError(collection.Feature().Validate())
 	panicOnError(collection.Forwarder().Validate())
 	panicOnError(collection.FS().Validate())
 	panicOnError(collection.ID().Validate())
@@ -91,6 +95,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.Configure())
 
 	panicOnError(collection.Activator().Configure())
+	panicOnError(collection.Feature().Configure())
 	panicOnError(collection.Forwarder().Configure())
 	panicOnError(collection.FS().Configure())
 	panicOnError(collection.ID().Configure())
@@ -120,6 +125,10 @@ func (a *annad) newBackoffFactory() func() spec.Backoff {
 	return func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
+}
+
+func (a *annad) newFeatureService() spec.Feature {
+	return feature.New()
 }
 
 func (a *annad) newForwarderService() spec.Forwarder {

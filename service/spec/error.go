@@ -1,4 +1,4 @@
-package featureset
+package spec
 
 import (
 	"fmt"
@@ -27,11 +27,4 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
-}
-
-var invalidPositionError = errgo.New("invalid position")
-
-// IsInvalidPosition asserts invalidPositionError.
-func IsInvalidPosition(err error) bool {
-	return errgo.Cause(err) == invalidPositionError
 }

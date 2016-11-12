@@ -1,11 +1,11 @@
-package collection
+package feature
 
 import (
 	"fmt"
 	"testing"
 )
 
-func Test_CLG_maskAnyf_001(t *testing.T) {
+func Test_PatNet_maskAnyf_001(t *testing.T) {
 	testCases := []struct {
 		InputError  error
 		InputFormat string

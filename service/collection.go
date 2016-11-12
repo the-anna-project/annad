@@ -15,6 +15,7 @@ type collection struct {
 	// Dependencies.
 
 	activator         spec.Activator
+	feature           spec.Feature
 	forwarder         spec.Forwarder
 	fs                spec.FS
 	id                spec.ID
@@ -57,6 +58,10 @@ func (c *collection) Configure() error {
 
 func (c *collection) Activator() spec.Activator {
 	return c.activator
+}
+
+func (c *collection) Feature() spec.Feature {
+	return c.feature
 }
 
 func (c *collection) Forwarder() spec.Forwarder {
@@ -105,6 +110,10 @@ func (c *collection) Storage() spec.StorageCollection {
 
 func (c *collection) SetActivator(a spec.Activator) {
 	c.activator = a
+}
+
+func (c *collection) SetFeature(f spec.Feature) {
+	c.feature = f
 }
 
 func (c *collection) SetForwarder(f spec.Forwarder) {
@@ -206,6 +215,9 @@ func (c *collection) Validate() error {
 
 	if c.activator == nil {
 		return maskAnyf(invalidConfigError, "activator service must not be empty")
+	}
+	if c.feature == nil {
+		return maskAnyf(invalidConfigError, "feature service must not be empty")
 	}
 	if c.forwarder == nil {
 		return maskAnyf(invalidConfigError, "forwarder service must not be empty")

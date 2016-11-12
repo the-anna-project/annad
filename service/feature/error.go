@@ -1,4 +1,4 @@
-package distribution
+package feature
 
 import (
 	"fmt"
@@ -27,11 +27,4 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
-}
-
-var channelsDifferError = errgo.New("channels differ")
-
-// IsChannelsDiffer asserts channelsDifferError.
-func IsChannelsDiffer(err error) bool {
-	return errgo.Cause(err) == channelsDifferError
 }
