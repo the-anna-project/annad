@@ -19,6 +19,8 @@ type Collection interface {
 
 	Instrumentor() Instrumentor
 
+	MetricsEndpoint() MetricsEndpoint
+
 	// Log returns a log service. It is used to print log messages.
 	Log() Log
 
@@ -30,8 +32,6 @@ type Collection interface {
 
 	// Random returns a random service. It is used to create random numbers.
 	Random() Random
-
-	Server() Server
 
 	Storage() StorageCollection
 
@@ -47,10 +47,10 @@ type Collection interface {
 	SetID(id ID)
 	SetInstrumentor(i Instrumentor)
 	SetLog(l Log)
+	SetMetricsEndpoint(s MetricsEndpoint)
 	SetNetwork(n Network)
 	SetPermutation(p Permutation)
 	SetRandom(r Random)
-	SetServer(s Server)
 	SetStorageCollection(sc StorageCollection)
 	SetTextEndpoint(te TextEndpoint)
 	SetTextInput(ti TextInput)

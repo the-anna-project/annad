@@ -21,10 +21,10 @@ type collection struct {
 	id                spec.ID
 	instrumentor      spec.Instrumentor
 	log               spec.Log
+	metricsEndpoint   spec.MetricsEndpoint
 	network           spec.Network
 	permutation       spec.Permutation
 	random            spec.Random
-	server            spec.Server
 	storageCollection spec.StorageCollection
 	textEndpoint      spec.TextEndpoint
 	textInput         spec.TextInput
@@ -84,12 +84,16 @@ func (c *collection) Log() spec.Log {
 	return c.log
 }
 
-func (c *collection) Network() spec.Network {
-	return c.network
-}
-
 func (c *collection) Metadata() map[string]string {
 	return c.metadata
+}
+
+func (c *collection) MetricsEndpoint() spec.MetricsEndpoint {
+	return c.metricsEndpoint
+}
+
+func (c *collection) Network() spec.Network {
+	return c.network
 }
 
 func (c *collection) Permutation() spec.Permutation {
@@ -98,10 +102,6 @@ func (c *collection) Permutation() spec.Permutation {
 
 func (c *collection) Random() spec.Random {
 	return c.random
-}
-
-func (c *collection) Server() spec.Server {
-	return c.server
 }
 
 func (c *collection) Storage() spec.StorageCollection {
@@ -136,6 +136,10 @@ func (c *collection) SetLog(l spec.Log) {
 	c.log = l
 }
 
+func (c *collection) SetMetricsEndpoint(s spec.MetricsEndpoint) {
+	c.metricsEndpoint = s
+}
+
 func (c *collection) SetNetwork(n spec.Network) {
 	c.network = n
 }
@@ -146,10 +150,6 @@ func (c *collection) SetPermutation(p spec.Permutation) {
 
 func (c *collection) SetRandom(r spec.Random) {
 	c.random = r
-}
-
-func (c *collection) SetServer(s spec.Server) {
-	c.server = s
 }
 
 func (c *collection) SetStorageCollection(sc spec.StorageCollection) {
@@ -231,14 +231,14 @@ func (c *collection) Validate() error {
 	if c.log == nil {
 		return maskAnyf(invalidConfigError, "log service must not be empty")
 	}
+	if c.metricsEndpoint == nil {
+		return maskAnyf(invalidConfigError, "metricsEndpoint service must not be empty")
+	}
 	if c.permutation == nil {
 		return maskAnyf(invalidConfigError, "permutation service must not be empty")
 	}
 	if c.random == nil {
 		return maskAnyf(invalidConfigError, "random service must not be empty")
-	}
-	if c.server == nil {
-		return maskAnyf(invalidConfigError, "server service must not be empty")
 	}
 	if c.storageCollection == nil {
 		return maskAnyf(invalidConfigError, "storage collection must not be empty")

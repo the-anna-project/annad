@@ -1,5 +1,6 @@
-// Package server implements a HTTP server to provide Anna's API over network.
-package server
+// Package metricsendpoint implements a HTTP server to provide Anna's metrics
+// over network.
+package metricsendpoint
 
 import (
 	"net/http"
@@ -11,8 +12,8 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-// New creates a new server service.
-func New() servicespec.Server {
+// New creates a new metricsendpoint service.
+func New() servicespec.MetricsEndpoint {
 	return &service{}
 }
 
@@ -69,7 +70,7 @@ func (s *service) Configure() error {
 	}
 	s.metadata = map[string]string{
 		"id":   id,
-		"name": "server",
+		"name": "metricsendpoint",
 		"type": "service",
 	}
 
