@@ -4,14 +4,16 @@ import (
 	"net/http"
 )
 
-// Instrumentation represents an abstraction of instrumentation libraries to
+// Instrumentor represents an abstraction of instrumentation libraries to
 // manage application metrics.
-type Instrumentation interface {
+type Instrumentor interface {
+	Configure() error
+
 	// ExecFunc wraps basic instrumentation around the given action and executes
 	// it.
 	//
 	// The wrapped action causes the following metric's to be emitted. <prefix>
-	// is described by the configured prefix of the current Instrumentation.
+	// is described by the configured prefix of the current Instrumentor.
 	//
 	//     <prefix>_<key>_durations_histogram_milliseconds
 	//
@@ -37,16 +39,18 @@ type Instrumentation interface {
 	// counter exist for the given key, one is created.
 	GetHistogram(key string) (Histogram, error)
 
-	// GetHTTPEndpoint returns the Instrumentation's metric endpoint supposed to
-	// be registered in the HTTP server using the Instrumentation's HTTP handler.
+	// GetHTTPEndpoint returns the Instrumentor's metric endpoint supposed to
+	// be registered in the HTTP server using the Instrumentor's HTTP handler.
 	GetHTTPEndpoint() string
 
-	// GetHTTPHandler returns the Instrumentation's HTTP handler supposed to be
-	// registered in the HTTP server using the Instrumentation's HTTP endpoint.
+	// GetHTTPHandler returns the Instrumentor's HTTP handler supposed to be
+	// registered in the HTTP server using the Instrumentor's HTTP endpoint.
 	GetHTTPHandler() http.Handler
 
-	// GetPrefixes returns the Instrumentation's configured prefix.
+	// GetPrefixes returns the Instrumentor's configured prefix.
 	GetPrefixes() []string
+
+	Metadata() map[string]string
 
 	// NewKey returns a new metrics key having all configured prefixes and all
 	// given parts properly joined. This could happen e.g. using underscores. In
@@ -55,6 +59,12 @@ type Instrumentation interface {
 	//     prefix_prefix_s_s_s_s
 	//
 	NewKey(s ...string) string
+
+	Service() Collection
+
+	SetServiceCollection(sc Collection)
+
+	Validate() error
 
 	// WrapFunc wraps basic instrumentation around the given action. The returned
 	// function can be used as e.g. retry action.

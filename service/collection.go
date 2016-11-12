@@ -14,17 +14,20 @@ func NewCollection() servicespec.Collection {
 type collection struct {
 	// Dependencies.
 
-	activator   servicespec.Activator
-	forwarder   servicespec.Forwarder
-	fs          servicespec.FS
-	id          servicespec.ID
-	log         servicespec.Log
-	network     servicespec.Network
-	permutation servicespec.Permutation
-	random      servicespec.Random
-	textInput   servicespec.TextInput
-	textOutput  servicespec.TextOutput
-	tracker     servicespec.Tracker
+	activator    servicespec.Activator
+	forwarder    servicespec.Forwarder
+	fs           servicespec.FS
+	id           servicespec.ID
+	instrumentor servicespec.Instrumentor
+	log          servicespec.Log
+	network      servicespec.Network
+	permutation  servicespec.Permutation
+	random       servicespec.Random
+	server       servicespec.Server
+	textEndpoint servicespec.TextEndpoint
+	textInput    servicespec.TextInput
+	textOutput   servicespec.TextOutput
+	tracker      servicespec.Tracker
 
 	// Internals.
 
@@ -66,6 +69,10 @@ func (c *collection) ID() servicespec.ID {
 	return c.id
 }
 
+func (c *collection) Instrumentor() servicespec.Instrumentor {
+	return c.instrumentor
+}
+
 func (c *collection) Log() servicespec.Log {
 	return c.log
 }
@@ -84,6 +91,10 @@ func (c *collection) Permutation() servicespec.Permutation {
 
 func (c *collection) Random() servicespec.Random {
 	return c.random
+}
+
+func (c *collection) Server() servicespec.Server {
+	return c.server
 }
 
 func (c *collection) Shutdown() {
@@ -117,6 +128,10 @@ func (c *collection) SetID(id servicespec.ID) {
 	c.id = id
 }
 
+func (c *collection) SetInstrumentor(i servicespec.Instrumentor) {
+	c.instrumentor = i
+}
+
 func (c *collection) SetLog(l servicespec.Log) {
 	c.log = l
 }
@@ -133,6 +148,14 @@ func (c *collection) SetRandom(r servicespec.Random) {
 	c.random = r
 }
 
+func (c *collection) SetServer(s servicespec.Server) {
+	c.server = s
+}
+
+func (c *collection) SetTextEndpoint(te servicespec.TextEndpoint) {
+	c.textEndpoint = te
+}
+
 func (c *collection) SetTextInput(ti servicespec.TextInput) {
 	c.textInput = ti
 }
@@ -143,6 +166,10 @@ func (c *collection) SetTextOutput(to servicespec.TextOutput) {
 
 func (c *collection) SetTracker(t servicespec.Tracker) {
 	c.tracker = t
+}
+
+func (c *collection) TextEndpoint() servicespec.TextEndpoint {
+	return c.textEndpoint
 }
 
 func (c *collection) TextInput() servicespec.TextInput {
@@ -159,6 +186,7 @@ func (c *collection) Tracker() servicespec.Tracker {
 
 func (c *collection) Validate() error {
 	// Dependencies.
+
 	if c.activator == nil {
 		return maskAnyf(invalidConfigError, "activator service must not be empty")
 	}
@@ -168,6 +196,9 @@ func (c *collection) Validate() error {
 	if c.id == nil {
 		return maskAnyf(invalidConfigError, "ID service must not be empty")
 	}
+	if c.instrumentor == nil {
+		return maskAnyf(invalidConfigError, "instrumentor service must not be empty")
+	}
 	if c.log == nil {
 		return maskAnyf(invalidConfigError, "log service must not be empty")
 	}
@@ -176,6 +207,12 @@ func (c *collection) Validate() error {
 	}
 	if c.random == nil {
 		return maskAnyf(invalidConfigError, "random service must not be empty")
+	}
+	if c.server == nil {
+		return maskAnyf(invalidConfigError, "server service must not be empty")
+	}
+	if c.textEndpoint == nil {
+		return maskAnyf(invalidConfigError, "text endpoint service must not be empty")
 	}
 	if c.textInput == nil {
 		return maskAnyf(invalidConfigError, "text input service must not be empty")

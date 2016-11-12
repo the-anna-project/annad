@@ -27,7 +27,7 @@ type service struct {
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {
@@ -39,7 +39,6 @@ func (s *service) Configure() error {
 		"type": "service",
 	}
 
-	// Settings.
 	s.channel = make(chan objectspec.TextInput, 1000)
 
 	return nil
@@ -63,6 +62,7 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

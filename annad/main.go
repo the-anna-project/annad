@@ -26,7 +26,6 @@ func New() systemspec.Annad {
 type annad struct {
 	// Dependencies.
 
-	server            systemspec.Server
 	serviceCollection servicespec.Collection
 
 	// Settings.
@@ -84,10 +83,6 @@ func (a *annad) Service() servicespec.Collection {
 	return a.serviceCollection
 }
 
-func (a *annad) SetServer(s systemspec.Server) {
-	a.server = s
-}
-
 func (a *annad) SetServiceCollection(sc servicespec.Collection) {
 	a.serviceCollection = sc
 }
@@ -108,7 +103,7 @@ func (a *annad) Shutdown() {
 		wg.Add(1)
 		go func() {
 			a.Service().Log().Line("msg", "shutting down server")
-			a.server.Shutdown()
+			a.Service().Server().Shutdown()
 			wg.Done()
 		}()
 
@@ -121,9 +116,7 @@ func (a *annad) Shutdown() {
 
 func (a *annad) Validate() error {
 	// Dependencies.
-	if a.server == nil {
-		return maskAnyf(invalidConfigError, "server must not be empty")
-	}
+
 	if a.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

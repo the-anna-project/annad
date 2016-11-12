@@ -4,8 +4,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/xh3b4sd/anna/server"
 )
 
 func (a *annad) InitAnnadCmd() *cobra.Command {
@@ -18,26 +16,11 @@ func (a *annad) InitAnnadCmd() *cobra.Command {
 		Long:  "Run the anna daemon. For more information see https://github.com/xh3b4sd/anna.",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// service collection.
-			a.serviceCollection = newServiceCollection()
+			a.serviceCollection = a.newServiceCollection()
 
 			// TODO move storage to service collection
 			// storage collection.
 			_, err := newStorageCollection(a.flags)
-			panicOnError(err)
-
-			// text interface.
-			textInterface, err := newTextInterface(a.serviceCollection)
-			panicOnError(err)
-
-			// server.
-			serverConfig := server.DefaultConfig()
-			serverConfig.GRPCAddr = a.flags.GRPCAddr
-			serverConfig.HTTPAddr = a.flags.HTTPAddr
-			serverConfig.Instrumentation, err = newPrometheusInstrumentation([]string{"Server"})
-			panicOnError(err)
-			serverConfig.ServiceCollection = a.serviceCollection
-			serverConfig.TextInterface = textInterface
-			a.server, err = server.New(serverConfig)
 			panicOnError(err)
 		},
 		Run: a.ExecAnnadCmd,
@@ -75,8 +58,12 @@ func (a *annad) ExecAnnadCmd(cmd *cobra.Command, args []string) {
 	a.Service().Log().Line("msg", "booting network")
 	go a.Service().Network().Boot()
 
+	// TODO rename to instrumentation endpoint
 	a.Service().Log().Line("msg", "booting server")
-	go a.server.Boot()
+	go a.Service().Server().Boot()
+
+	a.Service().Log().Line("msg", "booting text endpoint")
+	go a.Service().TextEndpoint().Boot()
 
 	// Block the main goroutine forever. The process is only supposed to be ended
 	// by a call to Shutdown or ForceShutdown.

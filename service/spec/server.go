@@ -8,8 +8,18 @@ type Server interface {
 	// blocks forever.
 	Boot()
 
+	Configure() error
+
+	Service() Collection
+
+	SetHTTPAddress(httpAddr string)
+
+	SetServiceCollection(sc Collection)
+
 	// Shutdown ends all processes of the server like shutting down a machine.
 	// The call to Shutdown blocks until the server is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
+
+	Validate() error
 }
