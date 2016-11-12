@@ -1,9 +1,6 @@
 package spec
 
-import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
+import objectspec "github.com/xh3b4sd/anna/object/spec"
 
 // Activator represents an management layer to organize CLG activation rules.
 // The activator obtains network payloads for every single requested CLG of
@@ -54,10 +51,6 @@ type Activator interface {
 	Service() Collection
 
 	SetServiceCollection(sc Collection)
-
-	SetStorageCollection(sc storagespec.Collection)
-
-	Storage() storagespec.Collection
 
 	Validate() error
 }

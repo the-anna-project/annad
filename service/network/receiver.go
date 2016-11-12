@@ -75,7 +75,6 @@ func (s *service) newCLGs() map[string]servicespec.CLG {
 
 	for name := range newCLGs {
 		newCLGs[name].SetServiceCollection(s.serviceCollection)
-		newCLGs[name].SetStorageCollection(s.storageCollection)
 	}
 
 	return newCLGs

@@ -1,9 +1,6 @@
 package spec
 
-import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
+import objectspec "github.com/xh3b4sd/anna/object/spec"
 
 // Network provides a neural network based on dynamic and self improving CLG
 // execution. The network provides input and output channels. When input is
@@ -105,10 +102,6 @@ type Network interface {
 	Service() Collection
 
 	SetServiceCollection(sc Collection)
-
-	SetStorageCollection(sc storagespec.Collection)
-
-	Storage() storagespec.Collection
 
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of

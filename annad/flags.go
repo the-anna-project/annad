@@ -5,12 +5,15 @@ type Flags struct {
 	GRPCAddr string
 	HTTPAddr string
 
-	ControlLogLevels    string
-	ControlLogObejcts   string
-	ControlLogVerbosity int
+	// TODO better nesting/structuring of storage flags
+	StorageType string
 
-	Storage                 string
-	RedisFeatureStorageAddr string
-	RedisGeneralStorageAddr string
-	RedisStoragePrefix      string
+	RedisConnectionStorageAddr   string
+	RedisConnectionStoragePrefix string
+
+	RedisFeatureStorageAddr   string
+	RedisFeatureStoragePrefix string
+
+	RedisGeneralStorageAddr   string
+	RedisGeneralStoragePrefix string
 }

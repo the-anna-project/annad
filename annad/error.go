@@ -29,9 +29,9 @@ func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
 }
 
-var invalidStorageFlagError = errgo.New("invalid storage flag")
+var invalidStorageTypeError = errgo.New("invalid storage type")
 
-// IsInvalidStorageFlag asserts invalidStorageFlagError.
-func IsInvalidStorageFlag(err error) bool {
-	return errgo.Cause(err) == invalidStorageFlagError
+// IsInvalidStorageType asserts invalidStorageTypeError.
+func IsInvalidStorageType(err error) bool {
+	return errgo.Cause(err) == invalidStorageTypeError
 }

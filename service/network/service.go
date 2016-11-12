@@ -16,7 +16,6 @@ import (
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
 
 	workerpool "github.com/xh3b4sd/worker-pool"
 )
@@ -30,9 +29,8 @@ type service struct {
 	// Dependencies.
 
 	serviceCollection servicespec.Collection
-	storageCollection storagespec.Collection
 
-	// Internals.
+	// Settings.
 
 	bootOnce sync.Once
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
@@ -56,7 +54,7 @@ type service struct {
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {
@@ -151,7 +149,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		// network payload, it is removed from the queue automatically, so it is not
 		// handled twice.
 		eventKey := key.NewNetworkKey("event:network-payload")
-		element, err := s.Storage().General().PopFromList(eventKey)
+		element, err := s.Service().Storage().General().PopFromList(eventKey)
 		if err != nil {
 			return maskAny(err)
 		}
@@ -305,7 +303,7 @@ func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInp
 	// Write the new CLG tree ID to reference the input CLG ID and add the CLG
 	// tree ID to the new context.
 	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
-	err = s.Storage().General().Set(firstBehaviourIDKey, string(behaviourID))
+	err = s.Service().Storage().General().Set(firstBehaviourIDKey, string(behaviourID))
 	if err != nil {
 		return maskAny(err)
 	}
@@ -316,7 +314,7 @@ func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInp
 	if err != nil {
 		return maskAny(err)
 	}
-	err = s.Storage().General().PushToList(eventKey, string(b))
+	err = s.Service().Storage().General().PushToList(eventKey, string(b))
 	if err != nil {
 		return maskAny(err)
 	}
@@ -344,14 +342,6 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) SetStorageCollection(sc storagespec.Collection) {
-	s.storageCollection = sc
-}
-
-func (s *service) Storage() storagespec.Collection {
-	return s.storageCollection
-}
-
 func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Track")
 
@@ -367,9 +357,6 @@ func (s *service) Validate() error {
 	// Dependencies.
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if s.storageCollection == nil {
-		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

@@ -27,6 +27,7 @@ annactl: gogenerate
 
 clean:
 	@rm -rf coverage.txt profile.out .workspace/ /tmp/protoc/ /tmp/protoc.zip
+	@# TODO remove generated code
 
 dockerimage: all
 	@docker build -t xh3b4sd/anna:${VERSION} .
@@ -39,8 +40,8 @@ gofmt:
 
 gogenerate:
 	@go generate ./...
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/text_interface.proto
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:server/interface/text/ spec/text_interface.proto
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/textendpoint.proto
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=textendpoint:service/textendpoint/ spec/textendpoint.proto
 
 goget:
 	@# Setup workspace.

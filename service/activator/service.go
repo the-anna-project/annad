@@ -8,8 +8,7 @@ import (
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/permutation"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/storage"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
+	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // New creates a new activator service.
@@ -21,15 +20,14 @@ type service struct {
 	// Dependencies.
 
 	serviceCollection servicespec.Collection
-	storageCollection storagespec.Collection
 
-	// Internals.
+	// Settings.
 
 	metadata map[string]string
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {
@@ -54,7 +52,7 @@ func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.Networ
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	queueKey := key.NewNetworkKey("activate:queue:behaviour-id:%s:network-payload", behaviourID)
-	str, err := s.Storage().General().Get(queueKey)
+	str, err := s.Service().Storage().General().Get(queueKey)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -150,7 +148,7 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.Netw
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
 	behaviourIDsKey := key.NewNetworkKey("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
-	str, err := s.Storage().General().Get(behaviourIDsKey)
+	str, err := s.Service().Storage().General().Get(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
 		// error. Eventually some other lookup is able to find a sufficient network
@@ -295,7 +293,7 @@ func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (o
 	for _, behaviourID := range newNetworkPayload.GetSources() {
 		behaviourIDs = append(behaviourIDs, string(behaviourID))
 	}
-	err = s.Storage().General().Set(behaviourIDsKey, strings.Join(behaviourIDs, ","))
+	err = s.Service().Storage().General().Set(behaviourIDsKey, strings.Join(behaviourIDs, ","))
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -311,21 +309,11 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) SetStorageCollection(sc storagespec.Collection) {
-	s.storageCollection = sc
-}
-
-func (s *service) Storage() storagespec.Collection {
-	return s.storageCollection
-}
-
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if s.storageCollection == nil {
-		return maskAnyf(invalidConfigError, "storage collection must not be empty")
 	}
 
 	return nil

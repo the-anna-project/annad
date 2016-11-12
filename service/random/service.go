@@ -9,28 +9,25 @@ import (
 
 	"github.com/cenk/backoff"
 
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	"github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new random service.
-func New() servicespec.Random {
+func New() spec.Random {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
-
-	// Internals.
-
-	metadata map[string]string
+	serviceCollection spec.Collection
 
 	// Settings.
 
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	backoffFactory func() servicespec.Backoff
+	backoffFactory func() spec.Backoff
+	metadata       map[string]string
 	// randFactory represents a service returning random values. Here e.g.
 	// crypto/rand.Int can be used.
 	randFactory func(rand io.Reader, max *big.Int) (n *big.Int, err error)
@@ -43,7 +40,7 @@ type service struct {
 }
 
 func (s *service) Configure() error {
-	// Internals.
+	// Settings.
 
 	id, err := s.Service().ID().New()
 	if err != nil {
@@ -55,8 +52,7 @@ func (s *service) Configure() error {
 		"type": "service",
 	}
 
-	// Settings.
-	s.backoffFactory = func() servicespec.Backoff {
+	s.backoffFactory = func() spec.Backoff {
 		return &backoff.StopBackOff{}
 	}
 	s.randFactory = rand.Int
@@ -124,20 +120,21 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() spec.Collection {
 	return s.serviceCollection
 }
 
-func (s *service) SetBackoffFactory(bf func() servicespec.Backoff) {
+func (s *service) SetBackoffFactory(bf func() spec.Backoff) {
 	s.backoffFactory = bf
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc spec.Collection) {
 	s.serviceCollection = sc
 }
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

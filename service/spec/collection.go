@@ -16,6 +16,8 @@ type Collection interface {
 	// ID returns an ID service. It is used to create IDs of a certain type.
 	ID() ID
 
+	Instrumentor() Instrumentor
+
 	// Log returns a log service. It is used to print log messages.
 	Log() Log
 
@@ -28,6 +30,10 @@ type Collection interface {
 	// Random returns a random service. It is used to create random numbers.
 	Random() Random
 
+	Server() Server
+
+	Storage() StorageCollection
+
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
@@ -37,13 +43,19 @@ type Collection interface {
 	SetForwarder(f Forwarder)
 	SetFS(fs FS)
 	SetID(id ID)
+	SetInstrumentor(i Instrumentor)
 	SetLog(l Log)
 	SetNetwork(n Network)
 	SetPermutation(p Permutation)
 	SetRandom(r Random)
+	SetServer(s Server)
+	SetStorageCollection(sc StorageCollection)
+	SetTextEndpoint(te TextEndpoint)
 	SetTextInput(ti TextInput)
 	SetTextOutput(to TextOutput)
 	SetTracker(t Tracker)
+
+	TextEndpoint() TextEndpoint
 
 	// TextInput returns an text output service. It is used to send text
 	// responses back to the client.

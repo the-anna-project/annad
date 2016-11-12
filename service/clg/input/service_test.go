@@ -12,9 +12,8 @@ import (
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
-	"github.com/xh3b4sd/anna/storage"
-	"github.com/xh3b4sd/anna/storage/redis"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
+	"github.com/xh3b4sd/anna/service/storage"
+	"github.com/xh3b4sd/anna/service/storage/redis"
 )
 
 type testErrorIDService struct{}
@@ -84,7 +83,7 @@ func testMustNewServiceCollection(t *testing.T) servicespec.Collection {
 	}
 }
 
-func testMustNewStorageCollection(t *testing.T) storagespec.Collection {
+func testMustNewStorageCollection(t *testing.T) servicespec.StorageCollection {
 	newCollection, err := storage.NewCollection(storage.DefaultCollectionConfig())
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
@@ -93,7 +92,7 @@ func testMustNewStorageCollection(t *testing.T) storagespec.Collection {
 	return newCollection
 }
 
-func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) storagespec.Collection {
+func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) servicespec.StorageCollection {
 	newFeatureStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)

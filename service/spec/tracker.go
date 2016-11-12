@@ -1,9 +1,6 @@
 package spec
 
-import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	storagespec "github.com/xh3b4sd/anna/storage/spec"
-)
+import objectspec "github.com/xh3b4sd/anna/object/spec"
 
 // Tracker represents a management object to track connection path patterns.
 type Tracker interface {
@@ -22,10 +19,6 @@ type Tracker interface {
 	Service() Collection
 
 	SetServiceCollection(sc Collection)
-
-	SetStorageCollection(sc storagespec.Collection)
-
-	Storage() storagespec.Collection
 
 	// Track tracks connection path patterns.
 	Track(CLG CLG, networkPayload objectspec.NetworkPayload) error

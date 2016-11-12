@@ -7,7 +7,7 @@ import (
 
 	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/storage"
+	"github.com/xh3b4sd/anna/service/storage"
 )
 
 func (s *service) calculate(ctx spec.Context) (string, error) {
@@ -17,9 +17,9 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 	}
 
 	behaviourIDKey := key.NewNetworkKey("behaviour-id:%s:separator", behaviourID)
-	separator, err := s.Storage().General().Get(behaviourIDKey)
+	separator, err := s.Service().Storage().General().Get(behaviourIDKey)
 	if storage.IsNotFound(err) {
-		randomKey, err := s.Storage().Feature().GetRandom()
+		randomKey, err := s.Service().Storage().Feature().GetRandom()
 		if err != nil {
 			return "", maskAny(err)
 		}
@@ -56,7 +56,7 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 		// Store the newly created separator using the CLGs own behaviour ID. In case
 		// this CLG is asked again to return its separator, it will lookup its
 		// separator in the general storage.
-		err = s.Storage().General().Set(behaviourIDKey, separator)
+		err = s.Service().Storage().General().Set(behaviourIDKey, separator)
 		if err != nil {
 			return "", maskAny(err)
 		}
