@@ -20,9 +20,9 @@ package splitfeatures
 import (
 	"encoding/json"
 
-	"github.com/xh3b4sd/anna/index/clg/collection/featureset"
 	"github.com/xh3b4sd/anna/key"
-	"github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	"github.com/xh3b4sd/anna/service/feature"
 )
 
 const (
@@ -34,24 +34,18 @@ const (
 	FeatureSize int = 4
 )
 
-func (s *service) calculate(ctx spec.Context, informationSequence, separator string) error {
-	newConfig := featureset.DefaultConfig()
+func (s *service) calculate(ctx objectspec.Context, informationSequence, separator string) error {
+	newConfig := feature.DefaultScanConfig()
 	newConfig.MaxLength = FeatureSize
 	newConfig.MinLength = FeatureSize
 	newConfig.Separator = separator
 	newConfig.Sequences = []string{informationSequence}
-	newFeatureSet, err := featureset.New(newConfig)
+	newFeatures, err := s.Service().Feature().Scan(newConfig)
 	if err != nil {
 		return maskAny(err)
 	}
 
-	err = newFeatureSet.Scan()
-	if err != nil {
-		return maskAny(err)
-	}
-
-	features := newFeatureSet.GetFeatures()
-	for _, f := range features {
+	for _, f := range newFeatures {
 		// Store the detected feature within the feature storage. It is important to
 		// preserve the key structure used here to simply parse the stored features
 		// in other places, like in the pair-syntactic and read-separator CLG.
@@ -60,8 +54,8 @@ func (s *service) calculate(ctx spec.Context, informationSequence, separator str
 		//
 		//     feature:%s:positions
 		//
-		positionKey := key.NewNetworkKey("feature:%s:positions", f.GetSequence())
-		raw, err := json.Marshal(f.GetPositions())
+		positionKey := key.NewNetworkKey("feature:%s:positions", f.Sequence())
+		raw, err := json.Marshal(f.Positions())
 		if err != nil {
 			return maskAny(err)
 		}

@@ -7,6 +7,7 @@ type Collection interface {
 	Configure() error
 
 	Activator() Activator
+	Feature() Feature
 	Forwarder() Forwarder
 
 	// FS returns a file system service. It is used to operate on file system
@@ -40,6 +41,7 @@ type Collection interface {
 	Shutdown()
 
 	SetActivator(a Activator)
+	SetFeature(f Feature)
 	SetForwarder(f Forwarder)
 	SetFS(fs FS)
 	SetID(id ID)

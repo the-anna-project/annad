@@ -1,43 +1,70 @@
 package spec
 
-// FeatureSet simply represents a feature container. This is basically the
-// object created when analysing sequences. Based on the created feature
-// distributions information will be stored.
-type FeatureSet interface {
-	// GetFeatures returns all features detected during scanning of sequences.
-	GetFeatures() []Feature
+import objectspec "github.com/xh3b4sd/anna/object/spec"
 
-	// GetFeaturesByCount returns all features that were found at least count
-	// times.
-	GetFeaturesByCount(count int) []Feature
-
-	// GetFeaturesByLength returns all features which underlying sequences have a
-	// character length between min and max.
-	GetFeaturesByLength(min, max int) []Feature
-
-	// GetFeaturesBySequence returns all features that satisfy the given glob
-	// pattern.
-	GetFeaturesBySequence(sequence string) []Feature
-
-	// GetMaxLength returns the feature set's MaxLength configuration.
-	GetMaxLength() int
-
-	// GetMinLength returns the feature set's MinLength configuration.
-	GetMinLength() int
-
-	// GetMinCount returns the feature set's MinCount configuration.
-	GetMinCount() int
-
-	// GetSeparator returns the feature set's Separator configuration.
-	GetSeparator() string
-
-	// GetSequences simply returns the configured sequences of the current
-	// feature set.
-	GetSequences() []string
+// Feature represents a service being able to scan for features within
+// information sequences.
+type Feature interface {
+	Configure() error
+	Metadata() map[string]string
 
 	// Scan analyses the given sequences to detect patterns. Found patterns are
-	// used to create and attach new features. These features are represented by
-	// their corresponding distribution which is basically used to store, compare
-	// and learn.
-	Scan() error
+	// returned in form of a list of features.
+	Scan(config ScanConfig) ([]objectspec.Feature, error)
+
+	Service() Collection
+	SetServiceCollection(sc Collection)
+	Validate() error
+}
+
+// ScanConfig represents the configuration used to scan for new feature objects.
+type ScanConfig struct {
+	// MaxLength represents the length maximum of a sequence detected as feature.
+	// E.g. MaxLength set to 3 results in sequences having a length not larger
+	// than 3 when detected as features. The value -1 disables any limitiation.
+	MaxLength int
+	// MinLength represents the minimum length of a sequence detected as feature.
+	// E.g. MinLength set to 3 results in sequences having a length not smaller
+	// than 3 when detected as features. The value -1 disables any limitiation.
+	MinLength int
+	// MinCount represents the number of occurrences at least required to be
+	// detected as feature. E.g. MinCount set to 3 requires a feature to be
+	// present within a given input sequence at least 3 times.
+	MinCount int
+	// Separator represents the separator used to split sequences into smaller
+	// parts. By default this is an empty string resulting in a character split.
+	// This can be set to a whitespace to split for words. Note that the concept
+	// of words is a feature known to humans based on contextual information
+	// humans connected to create reasonable sences. This needs to be achieved by
+	// Anna herself. So later this separator needs to be configured by Anna once
+	// she is able to recognize improvements in feature detection, resulting in
+	// even more awareness of contextual information.
+	Separator string
+	// Sequences represents the input sequences being analysed. Out of this
+	// information features are detected, if any.
+	Sequences []string
+}
+
+// Validate checks whether ScanConfig is valid for proper execution in
+// Feature.Scan.
+func (sc *ScanConfig) Validate() error {
+	// Settings.
+
+	if sc.MaxLength < -1 {
+		return maskAnyf(invalidConfigError, "max length must be greater than -2")
+	}
+	if sc.MinLength < 1 {
+		return maskAnyf(invalidConfigError, "max length must be greater than 0")
+	}
+	if sc.MaxLength != -1 && sc.MaxLength < sc.MinLength {
+		return maskAnyf(invalidConfigError, "max length must be equal to or greater than min length")
+	}
+	if sc.MinCount < 0 {
+		return maskAnyf(invalidConfigError, "min count must be greater than -1")
+	}
+	if len(sc.Sequences) == 0 {
+		return maskAnyf(invalidConfigError, "sequences must not be empty")
+	}
+
+	return nil
 }

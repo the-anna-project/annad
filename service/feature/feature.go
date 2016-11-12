@@ -1,117 +1,134 @@
-package featureset
+// Package feature provides feature detection within sequences. A feature is
+// considered a recognized property of a sequence. A sequence can be any string.
+package feature
 
 import (
-	"sync"
+	"strings"
 
-	"github.com/xh3b4sd/anna/index/clg/collection/distribution"
-	"github.com/xh3b4sd/anna/service/id"
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/xh3b4sd/anna/object/feature"
+	objectspec "github.com/xh3b4sd/anna/object/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-const (
-	// ObjectTypeFeature represents the object type of the feature object. This
-	// is used e.g. to register itself to the logger.
-	ObjectTypeFeature string = "feature"
-)
-
-// FeatureConfig represents the configuration used to create a new feature
-// object.
-type FeatureConfig struct {
-	// Positions represents the index locations of a detected feature.
-	Positions [][]float64
-
-	// Sequence represents the input sequence being detected as feature. That
-	// means, the sequence of a feature object is the feature itself.
-	Sequence string
+// New creates a new feature service. The feature service tries to detect all
+// patterns within the configured input sequences.
+func New() servicespec.Feature {
+	return &service{}
 }
 
-// DefaultFeatureConfig provides a default configuration to create a new
-// feature object by best effort.
-func DefaultFeatureConfig() FeatureConfig {
-	newConfig := FeatureConfig{
-		Positions: [][]float64{},
-		Sequence:  "",
+type service struct {
+	// Dependencies.
+
+	serviceCollection servicespec.Collection
+
+	// Settings.
+
+	metadata map[string]string
+}
+
+func (s *service) Configure() error {
+	// Settings.
+
+	id, err := s.Service().ID().New()
+	if err != nil {
+		return maskAny(err)
+	}
+	s.metadata = map[string]string{
+		"id":   id,
+		"name": "feature",
+		"type": "service",
+	}
+
+	return nil
+}
+
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
+// DefaultScanConfig provides a default configuration to scan for new feature
+// objects by best effort.
+func DefaultScanConfig() servicespec.ScanConfig {
+	newConfig := servicespec.ScanConfig{
+		MaxLength: -1,
+		MinLength: 1,
+		MinCount:  1,
+		Separator: "",
+		Sequences: []string{},
 	}
 
 	return newConfig
 }
 
-// NewFeature creates a new configured feature object. A feature represents a
-// differentiable part of a given sequence.
-func NewFeature(config FeatureConfig) (spec.Feature, error) {
-	newFeature := &feature{
-		Distribution:  nil,
-		FeatureConfig: config,
-		ID:            id.MustNewID(),
-		Mutex:         sync.Mutex{},
-		Type:          ObjectTypeFeature,
-	}
-
-	if len(newFeature.Positions) == 0 {
-		return nil, maskAnyf(invalidConfigError, "positions must not be empty")
-	}
-	if newFeature.Sequence == "" {
-		return nil, maskAnyf(invalidConfigError, "sequence must not be empty")
-	}
-
-	newConfig := distribution.DefaultConfig()
-	newConfig.Name = newFeature.Sequence
-	newConfig.Vectors = newFeature.Positions
-	newDistribution, err := distribution.NewDistribution(newConfig)
+func (s *service) Scan(config servicespec.ScanConfig) ([]objectspec.Feature, error) {
+	// Validate.
+	err := config.Validate()
 	if err != nil {
-		return nil, maskAnyf(invalidConfigError, err.Error())
-	}
-	newFeature.Distribution = newDistribution
-
-	return newFeature, nil
-}
-
-type feature struct {
-	FeatureConfig
-
-	Distribution spec.Distribution
-	ID           string
-	Mutex        sync.Mutex
-	Type         string
-}
-
-func (f *feature) AddPosition(position []float64) error {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
-
-	if len(f.Positions) > 0 && len(f.Positions[0]) != len(position) {
-		return maskAnyf(invalidPositionError, "must have length of %d", len(f.Positions))
+		return nil, maskAny(err)
 	}
 
-	f.Positions = append(f.Positions, position)
+	// Prepare sequence combinations.
+	var allSeqs []string
+	for _, sequence := range config.Sequences {
+		for _, seq := range seqCombinations(sequence, config.Separator, config.MinLength, config.MaxLength) {
+			if !containsString(allSeqs, seq) {
+				allSeqs = append(allSeqs, seq)
+			}
+		}
+	}
+
+	// Find sequence positions.
+	positions := map[string][][]float64{}
+	for _, sequence := range config.Sequences {
+		for _, seq := range allSeqs {
+			if strings.Contains(sequence, seq) {
+				if _, ok := positions[seq]; !ok {
+					positions[seq] = [][]float64{}
+				}
+				positions[seq] = append(positions[seq], seqPositions(sequence, seq)...)
+			}
+		}
+	}
+
+	// Create features for each found sequence.
+	var newFeatures []objectspec.Feature
+	for seq, ps := range positions {
+		if len(ps) < config.MinCount {
+			continue
+		}
+
+		newObject := feature.New()
+		newObject.SetPositions(ps)
+		newObject.SetSequence(seq)
+		err := newObject.Validate()
+		if err != nil {
+			return nil, maskAny(err)
+		}
+		err = newObject.Configure()
+		if err != nil {
+			return nil, maskAny(err)
+		}
+
+		newFeatures = append(newFeatures, newObject)
+	}
+
+	return newFeatures, nil
+}
+
+func (s *service) Service() servicespec.Collection {
+	return s.serviceCollection
+}
+
+func (s *service) SetServiceCollection(sc servicespec.Collection) {
+	s.serviceCollection = sc
+}
+
+func (s *service) Validate() error {
+	// Dependencies.
+
+	if s.serviceCollection == nil {
+		return maskAnyf(invalidConfigError, "service collection must not be empty")
+	}
 
 	return nil
-}
-
-func (f *feature) GetCount() int {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
-
-	return len(f.Positions)
-}
-
-func (f *feature) GetDistribution() spec.Distribution {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
-
-	return f.Distribution
-}
-
-func (f *feature) GetPositions() [][]float64 {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
-
-	return f.Positions
-}
-
-func (f *feature) GetSequence() string {
-	f.Mutex.Lock()
-	defer f.Mutex.Unlock()
-
-	return f.Sequence
 }

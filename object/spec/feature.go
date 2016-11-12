@@ -4,23 +4,20 @@ package spec
 // recognition it is tried to detect features. Their distributions describe
 // location patterns within space.
 type Feature interface {
+	Configure() error
 	// AddPosition provides a way to add more positions to the initialized
 	// feature. Note positions are vectors in distribution terms.
 	AddPosition(position []float64) error
-
-	// GetCount returns the number of occurrences within analysed sequences. That
-	// is, how often this feature was found. Technically spoken,
+	// Count returns the number of occurrences within analysed sequences. That is,
+	// how often this feature was found. Technically spoken,
 	// len(feature.Positions).
-	GetCount() int
-
-	// GetDistribution returns the distribution representing this feature. See
-	// documentation about the Distribution object for more information.
-	GetDistribution() Distribution
-
-	// GetPositions returns the feature's configured positions.
-	GetPositions() [][]float64
-
-	// GetSequence returns the sequence that represents this feature. This is the
+	Count() int
+	// Positions returns the feature's configured positions.
+	Positions() [][]float64
+	// Sequence returns the sequence that represents this feature. This is the
 	// sub-sequence, the charactistic detected within analysed sequences.
-	GetSequence() string
+	Sequence() string
+	SetPositions(ps [][]float64)
+	SetSequence(s string)
+	Validate() error
 }
