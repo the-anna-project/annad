@@ -14,10 +14,10 @@ import (
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/instrumentor/prometheus"
 	"github.com/xh3b4sd/anna/service/log"
+	"github.com/xh3b4sd/anna/service/metricsendpoint"
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/server"
 	"github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 	"github.com/xh3b4sd/anna/service/storage/memory"
@@ -39,10 +39,10 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection.SetID(a.newIDService())
 	collection.SetInstrumentor(a.newInstrumentorService())
 	collection.SetLog(a.newLogService())
+	collection.SetMetricsEndpoint(a.newMetricsEndpointService())
 	collection.SetNetwork(a.newNetworkService())
 	collection.SetPermutation(a.newPermutationService())
 	collection.SetRandom(a.newRandomService())
-	collection.SetServer(a.newServerService())
 	collection.SetStorageCollection(a.newStorageCollection())
 	collection.SetTextEndpoint(a.newTextEndpointService())
 	collection.SetTextInput(a.newTextInputService())
@@ -56,10 +56,10 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection.ID().SetServiceCollection(collection)
 	collection.Instrumentor().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
+	collection.MetricsEndpoint().SetServiceCollection(collection)
 	collection.Network().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
-	collection.Server().SetServiceCollection(collection)
 	collection.Storage().Connection().SetServiceCollection(collection)
 	collection.Storage().Feature().SetServiceCollection(collection)
 	collection.Storage().General().SetServiceCollection(collection)
@@ -78,10 +78,10 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.ID().Validate())
 	panicOnError(collection.Instrumentor().Validate())
 	panicOnError(collection.Log().Validate())
+	panicOnError(collection.MetricsEndpoint().Validate())
 	panicOnError(collection.Network().Validate())
 	panicOnError(collection.Permutation().Validate())
 	panicOnError(collection.Random().Validate())
-	panicOnError(collection.Server().Validate())
 	panicOnError(collection.Storage().Validate())
 	panicOnError(collection.Storage().Connection().Validate())
 	panicOnError(collection.Storage().Feature().Validate())
@@ -101,10 +101,10 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.ID().Configure())
 	panicOnError(collection.Instrumentor().Configure())
 	panicOnError(collection.Log().Configure())
+	panicOnError(collection.MetricsEndpoint().Configure())
 	panicOnError(collection.Network().Configure())
 	panicOnError(collection.Permutation().Configure())
 	panicOnError(collection.Random().Configure())
-	panicOnError(collection.Server().Configure())
 	panicOnError(collection.Storage().Configure())
 	panicOnError(collection.Storage().Connection().Configure())
 	panicOnError(collection.Storage().Feature().Configure())
@@ -156,6 +156,14 @@ func (a *annad) newLogService() spec.Log {
 	return newService
 }
 
+func (a *annad) newMetricsEndpointService() spec.MetricsEndpoint {
+	newService := metricsendpoint.New()
+
+	newService.SetHTTPAddress(a.flags.HTTPAddr)
+
+	return newService
+}
+
 func (a *annad) newNetworkService() spec.Network {
 	return network.New()
 }
@@ -168,14 +176,6 @@ func (a *annad) newRandomService() spec.Random {
 	newService := random.New()
 
 	newService.SetBackoffFactory(a.newBackoffFactory())
-
-	return newService
-}
-
-func (a *annad) newServerService() spec.Server {
-	newService := server.New()
-
-	newService.SetHTTPAddress(a.flags.HTTPAddr)
 
 	return newService
 }

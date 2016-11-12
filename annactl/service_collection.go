@@ -16,7 +16,6 @@ import (
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/server"
 	"github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/textendpoint"
 	"github.com/xh3b4sd/anna/service/textinput"
@@ -37,7 +36,6 @@ func (a *annactl) newServiceCollection() spec.Collection {
 	collection.SetNetwork(a.newNetworkService())
 	collection.SetPermutation(a.newPermutationService())
 	collection.SetRandom(a.newRandomService())
-	collection.SetServer(a.newServerService())
 	collection.SetTextEndpoint(a.newTextEndpointService())
 	collection.SetTextInput(a.newTextInputService())
 	collection.SetTextOutput(a.newTextOutputService())
@@ -52,7 +50,6 @@ func (a *annactl) newServiceCollection() spec.Collection {
 	collection.Network().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
-	collection.Server().SetServiceCollection(collection)
 	collection.TextEndpoint().SetServiceCollection(collection)
 	collection.TextInput().SetServiceCollection(collection)
 	collection.TextOutput().SetServiceCollection(collection)
@@ -70,7 +67,6 @@ func (a *annactl) newServiceCollection() spec.Collection {
 	panicOnError(collection.Network().Validate())
 	panicOnError(collection.Permutation().Validate())
 	panicOnError(collection.Random().Validate())
-	panicOnError(collection.Server().Validate())
 	panicOnError(collection.TextEndpoint().Validate())
 	panicOnError(collection.TextInput().Validate())
 	panicOnError(collection.TextOutput().Validate())
@@ -88,7 +84,6 @@ func (a *annactl) newServiceCollection() spec.Collection {
 	panicOnError(collection.Network().Configure())
 	panicOnError(collection.Permutation().Configure())
 	panicOnError(collection.Random().Configure())
-	panicOnError(collection.Server().Configure())
 	panicOnError(collection.TextEndpoint().Configure())
 	panicOnError(collection.TextInput().Configure())
 	panicOnError(collection.TextOutput().Configure())
@@ -140,14 +135,6 @@ func (a *annactl) newRandomService() spec.Random {
 	newService.SetBackoffFactory(func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
-
-	return newService
-}
-
-func (a *annactl) newServerService() spec.Server {
-	newService := server.New()
-
-	newService.SetHTTPAddress(a.flags.HTTPAddr)
 
 	return newService
 }

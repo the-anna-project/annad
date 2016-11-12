@@ -1,4 +1,4 @@
-package server
+package metricsendpoint
 
 import (
 	"fmt"

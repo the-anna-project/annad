@@ -51,9 +51,8 @@ func (a *annad) ExecAnnadCmd(cmd *cobra.Command, args []string) {
 	a.Service().Log().Line("msg", "booting network")
 	go a.Service().Network().Boot()
 
-	// TODO rename to instrumentation endpoint
-	a.Service().Log().Line("msg", "booting server")
-	go a.Service().Server().Boot()
+	a.Service().Log().Line("msg", "booting metrics endpoint")
+	go a.Service().MetricsEndpoint().Boot()
 
 	a.Service().Log().Line("msg", "booting text endpoint")
 	go a.Service().TextEndpoint().Boot()

@@ -102,8 +102,8 @@ func (a *annad) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			a.Service().Log().Line("msg", "shutting down server")
-			a.Service().Server().Shutdown()
+			a.Service().Log().Line("msg", "shutting down metrics endpoint")
+			a.Service().MetricsEndpoint().Shutdown()
 			wg.Done()
 		}()
 
