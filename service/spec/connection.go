@@ -1,5 +1,7 @@
 package spec
 
+import objectspec "github.com/xh3b4sd/anna/object/spec"
+
 // Connection represents a service being able to manage connections within the
 // connection space.
 //
@@ -26,6 +28,11 @@ package spec
 //         Position is a point within the connection space. It is described by
 //         one coordinate for each dimension of the connection space.
 //
+//     Weight
+//
+//         Weight is the score applied to a connection expressing its
+//         importance.
+//
 // Following is an example of a possible storage key structure, to illustrate
 // persisted connections.
 //
@@ -34,8 +41,8 @@ package spec
 //         peer:sum
 //
 //             created     1478992355
+//             kind        behaviour
 //             position    432.8,4342,54.334
-//             type        behaviour
 //             updated     1478992355
 //
 //     Storage key of the peer "number" and its corresponding hash map value.
@@ -43,14 +50,14 @@ package spec
 //         peer:number
 //
 //             created     1478992355
+//             kind        information
 //             position    432.8,4342,54.334
-//             type        information
 //             updated     1478992355
 //
 //     Storage key of the connection between the peer "sum" and "number" and its
 //     corresponding hash map value. The two given peers being used to create
 //     the connection key are ordered alpha numerically beforehand, regardless
-//     of their type.
+//     of their kind.
 //
 //         peer:number:peer:sum
 //
@@ -72,7 +79,7 @@ type Connection interface {
 	//     if not exist
 	//     ensure transaction
 	//
-	Create(a, b string) error
+	Create(a, b objectspec.Peer) error
 	Metadata() map[string]string
 	Service() Collection
 	SetServiceCollection(sc Collection)
