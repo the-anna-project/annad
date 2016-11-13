@@ -4,12 +4,12 @@ package prometheus
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/service/spec"
 )
 
@@ -186,7 +186,7 @@ func (s *service) Metadata() map[string]string {
 }
 
 func (s *service) NewKey(str ...string) string {
-	return key.NewPromKey(append(s.prefixes, str...)...)
+	return strings.Join(append(s.prefixes, str...), "_")
 }
 
 func (s *service) Service() spec.Collection {

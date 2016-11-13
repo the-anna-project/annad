@@ -59,6 +59,7 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.rootLogger == nil {
 		return maskAnyf(invalidConfigError, "root logger must not be empty")
 	}

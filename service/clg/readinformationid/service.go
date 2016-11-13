@@ -3,7 +3,8 @@
 package readinformationid
 
 import (
-	"github.com/xh3b4sd/anna/key"
+	"fmt"
+
 	"github.com/xh3b4sd/anna/object/spec"
 )
 
@@ -15,7 +16,7 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 		return "", maskAnyf(invalidInformationIDError, "must not be empty")
 	}
 
-	informationSequenceKey := key.NewNetworkKey("information-id:%s:information-sequence", informationID)
+	informationSequenceKey := fmt.Sprintf("information-id:%s:information-sequence", informationID)
 	informationSequence, err := s.Service().Storage().General().Get(informationSequenceKey)
 	if err != nil {
 		return "", maskAny(err)

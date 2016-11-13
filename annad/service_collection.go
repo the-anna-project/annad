@@ -8,6 +8,7 @@ import (
 
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/activator"
+	"github.com/xh3b4sd/anna/service/connection"
 	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/fs/mem"
@@ -33,6 +34,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection := service.NewCollection()
 
 	collection.SetActivator(a.newActivatorService())
+	collection.SetConnection(a.newConnectionService())
 	collection.SetFeature(a.newFeatureService())
 	collection.SetForwarder(a.newForwarderService())
 	collection.SetFS(a.newFSService())
@@ -50,6 +52,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	collection.SetTracker(a.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
+	collection.Connection().SetServiceCollection(collection)
 	collection.Feature().SetServiceCollection(collection)
 	collection.Forwarder().SetServiceCollection(collection)
 	collection.FS().SetServiceCollection(collection)
@@ -72,6 +75,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.Validate())
 
 	panicOnError(collection.Activator().Validate())
+	panicOnError(collection.Connection().Validate())
 	panicOnError(collection.Feature().Validate())
 	panicOnError(collection.Forwarder().Validate())
 	panicOnError(collection.FS().Validate())
@@ -95,6 +99,7 @@ func (a *annad) newServiceCollection() spec.Collection {
 	panicOnError(collection.Configure())
 
 	panicOnError(collection.Activator().Configure())
+	panicOnError(collection.Connection().Configure())
 	panicOnError(collection.Feature().Configure())
 	panicOnError(collection.Forwarder().Configure())
 	panicOnError(collection.FS().Configure())
@@ -119,6 +124,10 @@ func (a *annad) newServiceCollection() spec.Collection {
 
 func (a *annad) newActivatorService() spec.Activator {
 	return activator.New()
+}
+
+func (a *annad) newConnectionService() spec.Connection {
+	return connection.New()
 }
 
 func (a *annad) newBackoffFactory() func() spec.Backoff {

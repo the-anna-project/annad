@@ -52,8 +52,6 @@ func (s *service) Configure() error {
 		"type": "service",
 	}
 
-	// Settings.
-
 	s.hashChars = "abcdef0123456789"
 	s.idType = Hex128
 
@@ -101,6 +99,7 @@ func (s *service) WithType(idType int) (string, error) {
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

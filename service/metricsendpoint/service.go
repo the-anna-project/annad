@@ -38,7 +38,6 @@ func (s *service) Boot() {
 	s.Service().Log().Line("func", "Boot")
 
 	s.bootOnce.Do(func() {
-		// Servers.
 		s.httpServer = &graceful.Server{
 			NoSignalHandling: true,
 			Server: &http.Server{
@@ -47,10 +46,8 @@ func (s *service) Boot() {
 			Timeout: 3 * time.Second,
 		}
 
-		// Instrumentor.
 		http.Handle(s.Service().Instrumentor().GetHTTPEndpoint(), s.Service().Instrumentor().GetHTTPHandler())
 
-		// HTTP server.
 		go func() {
 			s.Service().Log().Line("msg", "HTTP server starts to listen on '%s'", s.httpAddr)
 			err := s.httpServer.ListenAndServe()

@@ -7,11 +7,11 @@ package network
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
@@ -34,13 +34,8 @@ type service struct {
 
 	bootOnce sync.Once
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
-	clgs         map[string]servicespec.CLG
-	closer       chan struct{}
-	metadata     map[string]string
-	shutdownOnce sync.Once
-
-	// Settings.
-
+	clgs   map[string]servicespec.CLG
+	closer chan struct{}
 	// Delay causes each CLG execution to be delayed. This value represents a
 	// default value. A delay can be used harden the internal synchronization of
 	// the network. For instance some chaos monkey could be implemented to cause
@@ -51,6 +46,9 @@ type service struct {
 	// TODO implement the actual usage of the delay and make it dynamically
 	// configurable on demand like we already do with the log control.
 	delay time.Duration
+
+	metadata     map[string]string
+	shutdownOnce sync.Once
 }
 
 func (s *service) Configure() error {
@@ -67,8 +65,6 @@ func (s *service) Configure() error {
 	}
 
 	s.clgs = s.newCLGs()
-
-	// Settings.
 	s.delay = 0
 
 	return nil
@@ -148,7 +144,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		// network payload was fetched from the queue. As soon as we receive the
 		// network payload, it is removed from the queue automatically, so it is not
 		// handled twice.
-		eventKey := key.NewNetworkKey("event:network-payload")
+		eventKey := fmt.Sprintf("event:network-payload")
 		element, err := s.Service().Storage().General().PopFromList(eventKey)
 		if err != nil {
 			return maskAny(err)
@@ -302,14 +298,14 @@ func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInp
 
 	// Write the new CLG tree ID to reference the input CLG ID and add the CLG
 	// tree ID to the new context.
-	firstBehaviourIDKey := key.NewNetworkKey("clg-tree-id:%s:first-behaviour-id", clgTreeID)
+	firstBehaviourIDKey := fmt.Sprintf("clg-tree-id:%s:first-behaviour-id", clgTreeID)
 	err = s.Service().Storage().General().Set(firstBehaviourIDKey, string(behaviourID))
 	if err != nil {
 		return maskAny(err)
 	}
 
 	// Write the transformed network payload to the queue.
-	eventKey := key.NewNetworkKey("event:network-payload")
+	eventKey := fmt.Sprintf("event:network-payload")
 	b, err := json.Marshal(newNetworkPayload)
 	if err != nil {
 		return maskAny(err)
@@ -355,6 +351,7 @@ func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPa
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}

@@ -19,11 +19,8 @@ type service struct {
 
 	// Settings.
 
+	channel  chan objectspec.TextOutput
 	metadata map[string]string
-
-	// Settings.
-
-	channel chan objectspec.TextOutput
 }
 
 func (s *service) Configure() error {

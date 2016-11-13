@@ -3,9 +3,9 @@
 package pairsyntactic
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 )
@@ -53,7 +53,7 @@ func (s *service) calculate(ctx spec.Context) error {
 		pair := key1[8:12] + key2[8:12]
 
 		// Write the new pair into the general storage.
-		pairIDKey := key.NewNetworkKey("pair:syntactic:feature:%s:pair-id", pair)
+		pairIDKey := fmt.Sprintf("pair:syntactic:feature:%s:pair-id", pair)
 		_, err = s.Service().Storage().General().Get(pairIDKey)
 		if storage.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means

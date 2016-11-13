@@ -2,8 +2,8 @@ package forwarder
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/xh3b4sd/anna/key"
 	"github.com/xh3b4sd/anna/object/networkpayload"
 	objectspec "github.com/xh3b4sd/anna/object/spec"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
@@ -78,7 +78,7 @@ func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.Network
 	// Forward the found network payloads to other CLGs by adding them to the
 	// queue so other processes can fetch them.
 	for _, np := range newNetworkPayloads {
-		networkPayloadKey := key.NewNetworkKey("events:network-payload")
+		networkPayloadKey := fmt.Sprintf("events:network-payload")
 		b, err := json.Marshal(np)
 		if err != nil {
 			return maskAny(err)
@@ -106,7 +106,7 @@ func (s *service) GetNetworkPayloads(CLG servicespec.CLG, networkPayload objects
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := fmt.Sprintf("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	newBehaviourIDs, err := s.Service().Storage().General().GetAllFromSet(behaviourIDsKey)
 	if storage.IsNotFound(err) {
 		// No configuration of behaviour IDs is stored. Thus we return an error.
@@ -175,7 +175,7 @@ func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPay
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
-	behaviourIDsKey := key.NewNetworkKey("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
+	behaviourIDsKey := fmt.Sprintf("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	for _, behaviourID := range newBehaviourIDs {
 		// TODO store asynchronuously
 		err = s.Service().Storage().General().PushToSet(behaviourIDsKey, behaviourID)
@@ -219,6 +219,7 @@ func (s *service) SetServiceCollection(sc servicespec.Collection) {
 
 func (s *service) Validate() error {
 	// Dependencies.
+
 	if s.serviceCollection == nil {
 		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
