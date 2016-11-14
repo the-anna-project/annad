@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package api;
-
 service TextInterface {
   rpc StreamText(stream StreamTextRequest) returns (stream StreamTextResponse) {}
 }

@@ -7,7 +7,7 @@ export GOPATH := $(PWD)/.workspace
 export PATH := $(PATH):$(PWD)/.workspace/bin:$(PWD)/bin
 
 
-PROJECT_VERSION := $(shell git rev-parse --short HEAD)
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
 
 
 
@@ -16,13 +16,13 @@ all: annactl annad
 annad: gogenerate
 	@go build \
 		-o .workspace/bin/annad \
-		-ldflags "-X main.projectVersion=${PROJECT_VERSION}" \
+		-ldflags "-X main.gitCommit=${GIT_COMMIT}" \
 		github.com/xh3b4sd/anna
 
 annactl: gogenerate
 	@go build \
 		-o .workspace/bin/annactl \
-		-ldflags "-X main.projectVersion=${PROJECT_VERSION}" \
+		-ldflags "-X main.gitCommit=${GIT_COMMIT}" \
 		github.com/xh3b4sd/anna/annactl
 
 clean:
@@ -30,18 +30,18 @@ clean:
 	@# TODO remove generated code
 
 dockerimage: all
-	@docker build -t xh3b4sd/anna:${PROJECT_VERSION} .
+	@docker build -t xh3b4sd/anna:${GIT_COMMIT} .
 
 dockerpush:
-	docker push xh3b4sd/anna:${PROJECT_VERSION}
+	docker push xh3b4sd/anna:${GIT_COMMIT}
 
 gofmt:
 	@go fmt ./...
 
 gogenerate:
 	@go generate ./...
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/textendpoint.proto
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=textendpoint:service/textendpoint/ spec/textendpoint.proto
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/text_endpoint.proto
+	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:service/endpoint/text/ spec/text_endpoint.proto
 
 goget:
 	@# Setup workspace.

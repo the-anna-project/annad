@@ -3,7 +3,7 @@ package feature
 // New creates a new feature object. It provides configuration for the feature
 // storage.
 func New() *Object {
-	return &object{}
+	return &Object{}
 }
 
 type Object struct {
@@ -16,12 +16,6 @@ type Object struct {
 
 func (o *Object) Address() string {
 	return o.address
-}
-
-func (o *Object) Configure() error {
-	// Settings.
-
-	return nil
 }
 
 func (o *Object) Kind() string {
@@ -42,22 +36,4 @@ func (o *Object) SetKind(kind string) {
 
 func (o *Object) SetPrefix(prefix string) {
 	o.prefix = prefix
-}
-
-func (o *Object) Validate() error {
-	// Settings.
-
-	// TODO more precise validation for address
-	if len(o.address) == "" {
-		return maskAnyf(invalidConfigError, "address must not be empty")
-	}
-	// TODO more precise validation for kind
-	if len(o.kind) == "" {
-		return maskAnyf(invalidConfigError, "kind must not be empty")
-	}
-	if len(o.prefix) == "" {
-		return maskAnyf(invalidConfigError, "prefix must not be empty")
-	}
-
-	return nil
 }

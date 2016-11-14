@@ -1,7 +1,7 @@
-// Package textendpoint TODO implements spec.TextInterface and provides a way to feed neural
+// Package text TODO implements spec.TextInterface and provides a way to feed neural
 // networks with text input. To make Anna consume text, there is the text
 // interface implemented through the network API.
-package textendpoint
+package text
 
 import (
 	"io"
@@ -18,7 +18,7 @@ import (
 )
 
 // New creates a new text endpoint service.
-func New() servicespec.TextEndpoint {
+func New() servicespec.Endpoint {
 	return &service{}
 }
 
@@ -29,11 +29,11 @@ type service struct {
 
 	// Settings.
 
-	bootOnce sync.Once
-	closer   chan struct{}
-	// gRPCAddr is the host:port representation based on the golang convention
+	// address is the host:port representation based on the golang convention
 	// for net.Listen to serve gRPC traffic.
-	gRPCAddr     string
+	address      string
+	bootOnce     sync.Once
+	closer       chan struct{}
 	gRPCServer   *grpc.Server
 	metadata     map[string]string
 	shutdownOnce sync.Once
@@ -61,8 +61,8 @@ func (s *service) Boot() {
 			}
 		}()
 
-		s.Service().Log().Line("msg", "gRPC server listens on '%s'", s.gRPCAddr)
-		listener, err := net.Listen("tcp", s.gRPCAddr)
+		s.Service().Log().Line("msg", "gRPC server listens on '%s'", s.address)
+		listener, err := net.Listen("tcp", s.address)
 		if err != nil {
 			s.Service().Log().Line("error", maskAny(err))
 		}
@@ -82,7 +82,8 @@ func (s *service) Configure() error {
 	}
 	s.metadata = map[string]string{
 		"id":   id,
-		"name": "text-endpoint",
+		"kind": "text",
+		"name": "endpoint",
 		"type": "service",
 	}
 
@@ -127,8 +128,8 @@ func (s *service) Service() servicespec.Collection {
 	return s.serviceCollection
 }
 
-func (s *service) SetGRPCAddress(gRPCAddr string) {
-	s.gRPCAddr = gRPCAddr
+func (s *service) SetAddress(address string) {
+	s.address = address
 }
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
@@ -215,20 +216,4 @@ func (s *service) StreamText(stream TextInterface_StreamTextServer) error {
 			return maskAny(err)
 		}
 	}
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	// Settings.
-
-	if s.gRPCAddr == "" {
-		return maskAnyf(invalidConfigError, "gRPC address must not be empty")
-	}
-
-	return nil
 }

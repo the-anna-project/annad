@@ -22,9 +22,9 @@ import (
 )
 
 var (
-	// projectVersion is the project version. It is given via buildflags that
-	// inject the commit hash.
-	projectVersion string
+	// gitCommit is the git commit the project is build with. It is given via
+	// build flags that inject the git commit hash.
+	gitCommit string
 )
 
 func init() {
@@ -57,8 +57,8 @@ func main() {
 
 	//
 	bootCommand.SetConfigCollection(configCollection)
-	bootCommand.SetProjectVersion(projectVersion)
-	versionCommand.SetProjectVersion(projectVersion)
+	bootCommand.SetGitCommit(gitCommit)
+	versionCommand.SetGitCommit(gitCommit)
 
 	//
 	annadCommand.SetBootCommand(bootCommand)

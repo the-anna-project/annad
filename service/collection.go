@@ -15,7 +15,6 @@ type collection struct {
 	// Dependencies.
 
 	activator          spec.Activator
-	config             spec.Config
 	connection         spec.Connection
 	endpointCollection spec.EndpointCollection
 	feature            spec.Feature
@@ -43,7 +42,6 @@ func (c *collection) Activator() spec.Activator {
 
 func (c *collection) Boot() {
 	go c.Activator().Boot()
-	go c.Config().Boot()
 	go c.Connection().Boot()
 	go c.Endpoint().Boot()
 	go c.Feature().Boot()
@@ -59,10 +57,6 @@ func (c *collection) Boot() {
 	go c.TextInput().Boot()
 	go c.TextOutput().Boot()
 	go c.Tracker().Boot()
-}
-
-func (c *collection) Config() spec.Config {
-	return c.config
 }
 
 func (c *collection) Connection() spec.Connection {
@@ -111,10 +105,6 @@ func (c *collection) Random() spec.Random {
 
 func (c *collection) SetActivator(a spec.Activator) {
 	c.activator = a
-}
-
-func (c *collection) SetConfig(config spec.Config) {
-	c.config = config
 }
 
 func (c *collection) SetConnection(conn spec.Connection) {

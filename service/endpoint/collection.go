@@ -39,12 +39,8 @@ func (c *collection) SetMetric(metric spec.Endpoint) {
 	c.metric = metric
 }
 
-func (c *collection) SetFeature(f spec.Storage) {
-	c.feature = f
-}
-
-func (c *collection) SetGeneral(g spec.Storage) {
-	c.general = g
+func (c *collection) SetText(text spec.Endpoint) {
+	c.text = text
 }
 
 func (c *collection) Shutdown() {
@@ -53,19 +49,13 @@ func (c *collection) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			c.Connection().Shutdown()
+			c.Metric().Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			c.Feature().Shutdown()
-			wg.Done()
-		}()
-
-		wg.Add(1)
-		go func() {
-			c.General().Shutdown()
+			c.Text().Shutdown()
 			wg.Done()
 		}()
 

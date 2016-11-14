@@ -6,7 +6,6 @@ package spec
 type Collection interface {
 	Activator() Activator
 	Boot()
-	Config() Config
 	Connection() Connection
 	Endpoint() EndpointCollection
 	Feature() Feature
@@ -25,22 +24,22 @@ type Collection interface {
 	Permutation() Permutation
 	// Random returns a random service. It is used to create random numbers.
 	Random() Random
-	SetActivator(a Activator)
-	SetConnection(c Connection)
-	SetFeature(f Feature)
-	SetForwarder(f Forwarder)
-	SetFS(fs FS)
-	SetID(id ID)
-	SetInstrumentor(i Instrumentor)
-	SetLog(l Log)
-	SetMetricsEndpoint(s MetricsEndpoint)
-	SetNetwork(n Network)
-	SetPermutation(p Permutation)
-	SetRandom(r Random)
-	SetStorageCollection(sc StorageCollection)
-	SetTextInput(ti TextInput)
-	SetTextOutput(to TextOutput)
-	SetTracker(t Tracker)
+	SetActivator(activator Activator)
+	SetConnection(connection Connection)
+	SetEndpointCollection(endpointCollection EndpointCollection)
+	SetFeature(feature Feature)
+	SetForwarder(forwarder Forwarder)
+	SetFS(FS FS)
+	SetID(ID ID)
+	SetInstrumentor(instrumentor Instrumentor)
+	SetLog(log Log)
+	SetNetwork(network Network)
+	SetPermutation(permutation Permutation)
+	SetRandom(random Random)
+	SetStorageCollection(storageCollection StorageCollection)
+	SetTextInput(textInput TextInput)
+	SetTextOutput(textOutput TextOutput)
+	SetTracker(tracker Tracker)
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.

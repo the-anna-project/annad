@@ -20,6 +20,8 @@ type Endpoint interface {
 // different endpoint implementations in a simple container, which can easily be
 // passed around.
 type EndpointCollection interface {
+	Boot()
 	Metric() Endpoint
 	Text() Endpoint
+	Shutdown()
 }

@@ -24,7 +24,7 @@ type Command struct {
 
 	bootOnce       sync.Once
 	flags          Flags
-	projectVersion string
+	gitCommit string
 	shutdownOnce   sync.Once
 	version        string
 }
@@ -98,8 +98,8 @@ func (c *Command) SetConfigCollection(cc *config.Config) {
 	c.configCollection = cc
 }
 
-func (c *Command) SetProjectVersion(projectVersion string) {
-	c.projectVersion = projectVersion
+func (c *Command) SetGitCommit(gitCommit string) {
+	c.gitCommit = gitCommit
 }
 
 func (c *Command) Shutdown() {

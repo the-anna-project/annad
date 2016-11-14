@@ -1,4 +1,4 @@
-package textendpoint
+package text
 
 import (
 	"fmt"
@@ -20,11 +20,4 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	newErr.(*errgo.Err).SetLocation(1)
 
 	return newErr
-}
-
-var invalidConfigError = errgo.New("invalid config")
-
-// IsInvalidConfig asserts invalidConfigError.
-func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError
 }

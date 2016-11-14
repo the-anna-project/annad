@@ -6,22 +6,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func (a *annad) InitAnnadVersionCmd() *cobra.Command {
-	a.Service().Log().Line("func", "InitAnnadVersionCmd")
+func New() *Command {
+	return &Command{}
+}
 
-	// Create new command.
+type Command struct {
+	// Settings.
+
+	gitCommit string
+}
+
+func (c *Command) Execute(cmd *cobra.Command, args []string) {
+	fmt.Printf("Git Commit: %s\n", a.gitCommit)
+}
+
+func (a *annad) New() *cobra.Command {
 	newCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Show current version of the binary.",
-		Long:  "Show current version of the binary.",
-		Run:   a.ExecAnnadVersionCmd,
+		Short: "Show version information of the project.",
+		Long:  "Show version information of the project.",
+		Run:   a.Execute,
 	}
 
 	return newCmd
 }
 
-func (a *annad) ExecAnnadVersionCmd(cmd *cobra.Command, args []string) {
-	a.Service().Log().Line("func", "ExecAnnadVersionCmd")
-
-	fmt.Printf("%s\n", a.version)
+func (c *Command) SetGitCommit(gitCommit string) {
+	c.gitCommit = gitCommit
 }

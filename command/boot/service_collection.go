@@ -9,15 +9,15 @@ import (
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/activator"
 	"github.com/xh3b4sd/anna/service/connection"
+	"github.com/xh3b4sd/anna/service/endpoint"
+	"github.com/xh3b4sd/anna/service/endpoint/metric"
+	"github.com/xh3b4sd/anna/service/endpoint/text"
 	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/instrumentor/prometheus"
 	"github.com/xh3b4sd/anna/service/log"
-	"github.com/xh3b4sd/anna/service/endpoint"
-	"github.com/xh3b4sd/anna/service/endpoint/metric"
-	"github.com/xh3b4sd/anna/service/endpoint/text"
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
@@ -25,7 +25,6 @@ import (
 	"github.com/xh3b4sd/anna/service/storage"
 	"github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"
-	"github.com/xh3b4sd/anna/service/textendpoint"
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
@@ -89,6 +88,21 @@ func (a *annad) newBackoffFactory() func() spec.Backoff {
 	}
 }
 
+func (a *annad) newEndpointCollection() spec.EndpointCollection {
+	newCollection := endpoint.NewCollection()
+
+	metricService := metric.New()
+	metricService.SetAddress(a.configCollection.Endpoint().Metric().Address())
+
+	textService := text.New()
+	textService.SetAddress(a.configCollection.Endpoint().Text().Address())
+
+	newCollection.SetMetric(metricService)
+	newCollection.SetText(textService)
+
+	return newCollection
+}
+
 func (a *annad) newFeatureService() spec.Feature {
 	return feature.New()
 }
@@ -118,17 +132,6 @@ func (a *annad) newLogService() spec.Log {
 	return newService
 }
 
-func (a *annad) newEndpointCollection() spec.EndpointCollection {
-	newCollection := endpoint.NewCollection()
-
-	metricService := metric.New()
-	metricService.SetAddress(a.configCollection.Endpoint().)
-
-	newService.SetAddress(a.flags.HTTPAddr)
-
-	return newService
-}
-
 func (a *annad) newNetworkService() spec.Network {
 	return network.New()
 }
@@ -148,42 +151,49 @@ func (a *annad) newRandomService() spec.Random {
 func (a *annad) newStorageCollection() spec.StorageCollection {
 	newCollection := storage.NewCollection()
 
-	switch a.flags.StorageType {
+	// Connection.
+	switch a.configCollection.Storage().Connection().Kind() {
 	case "redis":
-		connectionService := redis.New()
-		connectionService.SetAddress(a.flags.RedisConnectionStorageAddr)
-		connectionService.SetBackoffFactory(a.newBackoffFactory())
-		connectionService.SetPrefix(a.flags.RedisConnectionStoragePrefix)
-		newCollection.SetConnection(connectionService)
-
-		featureService := redis.New()
-		featureService.SetAddress(a.flags.RedisFeatureStorageAddr)
-		featureService.SetBackoffFactory(a.newBackoffFactory())
-		featureService.SetPrefix(a.flags.RedisFeatureStoragePrefix)
-		newCollection.SetConnection(featureService)
-
-		generalService := redis.New()
-		generalService.SetAddress(a.flags.RedisGeneralStorageAddr)
-		generalService.SetBackoffFactory(a.newBackoffFactory())
-		generalService.SetPrefix(a.flags.RedisGeneralStoragePrefix)
-		newCollection.SetConnection(generalService)
+		newService := redis.New()
+		newService.SetAddress(a.configCollection.Storage().Connection().Address())
+		newService.SetBackoffFactory(a.newBackoffFactory())
+		newService.SetPrefix(a.configCollection.Storage().Connection().Prefix())
+		newCollection.SetConnection(newService)
 	case "memory":
 		newCollection.SetConnection(memory.New())
+	default:
+		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().Connection().Kind()))
+	}
+
+	// Feature.
+	switch a.configCollection.Storage().Feature().Kind() {
+	case "redis":
+		newService := redis.New()
+		newService.SetAddress(a.configCollection.Storage().Feature().Address())
+		newService.SetBackoffFactory(a.newBackoffFactory())
+		newService.SetPrefix(a.configCollection.Storage().Feature().Prefix())
+		newCollection.SetConnection(newService)
+	case "memory":
 		newCollection.SetFeature(memory.New())
+	default:
+		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().Feature().Kind()))
+	}
+
+	// General.
+	switch a.configCollection.Storage().General().Kind() {
+	case "redis":
+		newService := redis.New()
+		newService.SetAddress(a.configCollection.Storage().General().Address())
+		newService.SetBackoffFactory(a.newBackoffFactory())
+		newService.SetPrefix(a.configCollection.Storage().General().Prefix())
+		newCollection.SetConnection(newService)
+	case "memory":
 		newCollection.SetGeneral(memory.New())
 	default:
-		panic(maskAnyf(invalidStorageTypeError, "%s", a.flags.StorageType))
+		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().General().Kind()))
 	}
 
 	return newCollection
-}
-
-func (a *annad) newTextEndpointService() spec.TextEndpoint {
-	newService := textendpoint.New()
-
-	newService.SetGRPCAddress(a.flags.GRPCAddr)
-
-	return newService
 }
 
 func (a *annad) newTextInputService() spec.TextInput {

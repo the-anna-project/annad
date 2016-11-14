@@ -3,7 +3,7 @@ package dimension
 // New creates a new dimension object. It provides configuration for space
 // dimensions.
 func New() *Object {
-	return &object{}
+	return &Object{}
 }
 
 type Object struct {
@@ -26,29 +26,10 @@ func (o *Object) Depth() int {
 	return o.depth
 }
 
-func (o *Object) Configure() error {
-	// Settings.
-
-	return nil
-}
-
 func (o *Object) SetCount(count int) {
 	o.count = count
 }
 
 func (o *Object) SetDepth(depth int) {
 	o.depth = depth
-}
-
-func (o *Object) Validate() error {
-	// Settings.
-
-	if len(o.count) <= 0 {
-		return maskAnyf(invalidConfigError, "count must not be empty")
-	}
-	if len(o.depth) <= 0 {
-		return maskAnyf(invalidConfigError, "depth must not be empty")
-	}
-
-	return nil
 }
