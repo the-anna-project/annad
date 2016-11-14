@@ -27,12 +27,10 @@ type service struct {
 	storage map[string][]byte
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -43,8 +41,6 @@ func (s *service) Configure() error {
 
 	s.mutex = sync.Mutex{}
 	s.storage = map[string][]byte{}
-
-	return nil
 }
 
 func (s *service) Metadata() map[string]string {
@@ -79,15 +75,5 @@ func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) err
 	s.Service().Log().Line("func", "WriteFile")
 
 	s.storage[filename] = bytes
-	return nil
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
 	return nil
 }

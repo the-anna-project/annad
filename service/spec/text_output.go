@@ -7,17 +7,11 @@ import (
 // TextOutput provides a communication channel to send information sequences
 // back to the client.
 type TextOutput interface {
-	Configure() error
-
+	Boot()
 	// Channel returns a channel which is used to send text responses back to the
 	// client.
 	Channel() chan objectspec.TextOutput
-
 	Metadata() map[string]string
-
 	Service() Collection
-
 	SetServiceCollection(serviceCollection Collection)
-
-
 }

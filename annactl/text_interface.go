@@ -12,11 +12,5 @@ func newTextInterface(newServiceCollection servicespec.Collection, gRPCAddr stri
 	newClient.SetGRPCAddress(gRPCAddr)
 	newClient.SetServiceCollection(newServiceCollection)
 
-	err := newClient.Validate()
-	panicOnError(err)
-
-	err = newClient.Configure()
-	panicOnError(err)
-
 	return newClient
 }

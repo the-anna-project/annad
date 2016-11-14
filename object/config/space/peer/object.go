@@ -6,6 +6,7 @@ func New() *Object {
 	return &Object{}
 }
 
+// Object represents the space peer config object.
 type Object struct {
 	// Settings.
 
@@ -14,10 +15,12 @@ type Object struct {
 	position string
 }
 
+// Position returns the position of the peer config.
 func (o *Object) Position() string {
 	return o.position
 }
 
-func (o *Object) SetPosition(position string) {
-	o.position = position
+// SetPosition sets the position for the peer config.
+func (o *Object) SetPosition(position *string) {
+	o.position = *position
 }

@@ -150,19 +150,3 @@ func (cp *connectionPath) String() (string, error) {
 
 	return string(b), nil
 }
-
-func (cp *connectionPath) Validate() error {
-	if len(cp.GetCoordinates()) == 0 {
-		return maskAnyf(invalidConnectionPathError, "vectors must not be empty")
-	}
-
-	if len(cp.GetCoordinates()[0]) == 0 {
-		return maskAnyf(invalidConnectionPathError, "coordinates must not be empty")
-	}
-
-	if !equalDimensionLength(cp.GetCoordinates()) {
-		return maskAnyf(invalidConnectionPathError, "coordinates must have equal vector lengths")
-	}
-
-	return nil
-}

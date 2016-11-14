@@ -8,7 +8,7 @@ import (
 
 // TextInterfaceClient provides a way to feed neural networks with text input.
 type TextInterfaceClient interface {
-	Configure() error
+	Boot()
 
 	Service() servicespec.Collection
 
@@ -20,6 +20,4 @@ type TextInterfaceClient interface {
 	// and forwards the text response to the client. StreamText blocks until the
 	// given context is canceled.
 	StreamText(ctx context.Context) error
-
-
 }

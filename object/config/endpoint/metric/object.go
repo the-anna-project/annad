@@ -6,16 +6,19 @@ func New() *Object {
 	return &Object{}
 }
 
+// Object represents the metric endpoint config object.
 type Object struct {
 	// Settings.
 
 	address string
 }
 
+// Address returns the address of the endpoint config.
 func (o *Object) Address() string {
 	return o.address
 }
 
-func (o *Object) SetAddress(address string) {
-	o.address = address
+// SetAddress sets the address for the endpoint config.
+func (o *Object) SetAddress(address *string) {
+	o.address = *address
 }

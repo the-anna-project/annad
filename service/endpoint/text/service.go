@@ -43,7 +43,21 @@ func (s *service) Boot() {
 	s.Service().Log().Line("func", "Boot")
 
 	s.bootOnce.Do(func() {
+		id, err := s.Service().ID().New()
+		if err != nil {
+			panic(err)
+		}
+		s.metadata = map[string]string{
+			"id":   id,
+			"kind": "text",
+			"name": "endpoint",
+			"type": "service",
+		}
+
+		s.bootOnce = sync.Once{}
+		s.closer = make(chan struct{}, 1)
 		s.gRPCServer = grpc.NewServer()
+		s.shutdownOnce = sync.Once{}
 
 		RegisterTextInterfaceServer(s.gRPCServer, s)
 
@@ -71,27 +85,6 @@ func (s *service) Boot() {
 			fail <- maskAny(err)
 		}
 	})
-}
-
-func (s *service) Configure() error {
-	// Settings.
-
-	id, err := s.Service().ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	s.metadata = map[string]string{
-		"id":   id,
-		"kind": "text",
-		"name": "endpoint",
-		"type": "service",
-	}
-
-	s.bootOnce = sync.Once{}
-	s.closer = make(chan struct{}, 1)
-	s.shutdownOnce = sync.Once{}
-
-	return nil
 }
 
 func (s *service) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextResponse {

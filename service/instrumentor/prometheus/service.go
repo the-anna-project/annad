@@ -44,12 +44,10 @@ type service struct {
 	prefixes []string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -65,8 +63,6 @@ func (s *service) Configure() error {
 	s.httpHandler = prometheus.Handler()
 	s.mutex = sync.Mutex{}
 	s.prefixes = []string{"anna"}
-
-	return nil
 }
 
 func (s *service) ExecFunc(key string, action func() error) error {
@@ -195,16 +191,6 @@ func (s *service) Service() spec.Collection {
 
 func (s *service) SetServiceCollection(sc spec.Collection) {
 	s.serviceCollection = sc
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }
 
 func (s *service) WrapFunc(key string, action func() error) func() error {

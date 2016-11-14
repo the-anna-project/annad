@@ -35,9 +35,20 @@ type service struct {
 }
 
 func (s *service) Boot() {
-	s.Service().Log().Line("func", "Boot")
-
 	s.bootOnce.Do(func() {
+		id, err := s.Service().ID().New()
+		if err != nil {
+			panic(err)
+		}
+		s.metadata = map[string]string{
+			"id":   id,
+			"kind": "metric",
+			"name": "endpoint",
+			"type": "service",
+		}
+
+		s.bootOnce = sync.Once{}
+		s.closer = make(chan struct{}, 1)
 		s.httpServer = &graceful.Server{
 			NoSignalHandling: true,
 			Server: &http.Server{
@@ -45,6 +56,7 @@ func (s *service) Boot() {
 			},
 			Timeout: 3 * time.Second,
 		}
+		s.shutdownOnce = sync.Once{}
 
 		http.Handle(s.Service().Instrumentor().GetHTTPEndpoint(), s.Service().Instrumentor().GetHTTPHandler())
 
@@ -56,27 +68,6 @@ func (s *service) Boot() {
 			}
 		}()
 	})
-}
-
-func (s *service) Configure() error {
-	// Settings.
-
-	id, err := s.Service().ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	s.metadata = map[string]string{
-		"id":   id,
-		"kind": "metric",
-		"name": "endpoint",
-		"type": "service",
-	}
-
-	s.bootOnce = sync.Once{}
-	s.closer = make(chan struct{}, 1)
-	s.shutdownOnce = sync.Once{}
-
-	return nil
 }
 
 func (s *service) Metadata() map[string]string {

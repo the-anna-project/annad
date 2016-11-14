@@ -22,19 +22,6 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-func panicOnError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-var invalidConfigError = errgo.New("invalid config")
-
-// IsInvalidConfig asserts invalidConfigError.
-func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError
-}
-
 var invalidStorageKindError = errgo.New("invalid storage kind")
 
 // IsInvalidStorageKind asserts invalidStorageKindError.

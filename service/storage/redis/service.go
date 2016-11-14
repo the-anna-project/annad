@@ -32,12 +32,10 @@ type service struct {
 	shutdownOnce   sync.Once
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -57,8 +55,6 @@ func (s *service) Configure() error {
 	s.pool = NewPool(newPoolConfig)
 	s.prefix = "prefix"
 	s.shutdownOnce = sync.Once{}
-
-	return nil
 }
 
 func (s *service) Get(key string) (string, error) {
@@ -483,25 +479,6 @@ func (s *service) Shutdown() {
 	s.shutdownOnce.Do(func() {
 		s.pool.Close()
 	})
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	// Settings.
-
-	if s.backoffFactory == nil {
-		return maskAnyf(invalidConfigError, "backoff factory must not be empty")
-	}
-	if s.prefix == "" {
-		return maskAnyf(invalidConfigError, "prefix must not be empty")
-	}
-
-	return nil
 }
 
 func (s *service) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {

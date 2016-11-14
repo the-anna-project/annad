@@ -24,12 +24,10 @@ type service struct {
 	metadata map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -37,8 +35,6 @@ func (s *service) Configure() error {
 		"name": "file-system",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) Metadata() map[string]string {
@@ -70,16 +66,6 @@ func (s *service) WriteFile(filename string, bytes []byte, perm os.FileMode) err
 	err := ioutil.WriteFile(filename, bytes, perm)
 	if err != nil {
 		return maskAny(err)
-	}
-
-	return nil
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	return nil

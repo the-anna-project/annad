@@ -6,6 +6,7 @@ func New() *Object {
 	return &Object{}
 }
 
+// Object represents the connection space config object.
 type Object struct {
 	// Settings.
 
@@ -14,10 +15,12 @@ type Object struct {
 	weight int
 }
 
+// Weight returns the weight of the connection config.
 func (o *Object) Weight() int {
 	return o.weight
 }
 
-func (o *Object) SetWeight(weight int) {
-	o.weight = weight
+// SetWeight sets the weight for the connection config.
+func (o *Object) SetWeight(weight *int) {
+	o.weight = *weight
 }

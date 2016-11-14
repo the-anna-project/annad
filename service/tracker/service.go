@@ -23,20 +23,16 @@ type service struct {
 	metadata map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
 		"name": "tracker",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
@@ -145,15 +141,6 @@ func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPa
 		if err != nil {
 			return maskAny(err)
 		}
-	}
-
-	return nil
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	return nil

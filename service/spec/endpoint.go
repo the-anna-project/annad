@@ -23,5 +23,7 @@ type EndpointCollection interface {
 	Boot()
 	Metric() Endpoint
 	Text() Endpoint
+	SetMetric(metricEndpoint Endpoint)
+	SetText(textEndpoint Endpoint)
 	Shutdown()
 }

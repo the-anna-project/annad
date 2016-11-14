@@ -23,23 +23,22 @@ type service struct {
 
 	// Settings.
 
-	metadata map[string]string
+	metadata       map[string]string
+	dimensionCount int
+	dimensionDepth int
+	weight         int
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
 		"name": "connection",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) Create(a, b objectspec.Peer) error {
@@ -71,7 +70,7 @@ func (s *service) CreateConnection(a, b objectspec.Peer) error {
 	if len(res) == 0 {
 		// The connection does not exist. Therefore we create a new one.
 		seconds := s.newUnixSeconds()
-		weight := strconv.Itoa(s.Service().Config().Space().Connection().Weight())
+		weight := strconv.Itoa(s.weight)
 		val := map[string]string{
 			"created": seconds,
 			"updated": seconds,
@@ -118,14 +117,8 @@ func (s *service) CreatePeer(p objectspec.Peer) error {
 	return nil
 }
 
-func (s *service) Metadata() map[string]string {
-	return s.metadata
-}
-
 func (s *service) CreatePosition() (string, error) {
-	count := s.Service().Config().Space().Dimension().Count()
-	depth := s.Service().Config().Space().Dimension().Depth()
-	nums, err := s.Service().Random().CreateNMax(count, depth)
+	nums, err := s.Service().Random().CreateNMax(s.dimensionCount, s.dimensionDepth)
 	if err != nil {
 		return "", maskAny(err)
 	}
@@ -139,20 +132,26 @@ func (s *service) CreatePosition() (string, error) {
 	return position, nil
 }
 
+func (s *service) Metadata() map[string]string {
+	return s.metadata
+}
+
 func (s *service) Service() servicespec.Collection {
 	return s.serviceCollection
+}
+
+func (s *service) SetDimensionCount(dimensionCount int) {
+	s.dimensionCount = dimensionCount
+}
+
+func (s *service) SetDimensionDepth(dimensionDepth int) {
+	s.dimensionDepth = dimensionDepth
 }
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
+func (s *service) SetWeight(weight int) {
+	s.weight = weight
 }

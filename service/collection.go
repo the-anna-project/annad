@@ -173,19 +173,19 @@ func (c *collection) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			c.Service().Endpoint().Shutdown()
+			c.Endpoint().Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			c.Network().Shutdown()
+			c.Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			c.Storage().Shutdown()
+			c.Shutdown()
 			wg.Done()
 		}()
 

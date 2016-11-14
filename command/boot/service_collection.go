@@ -30,26 +30,26 @@ import (
 	"github.com/xh3b4sd/anna/service/tracker"
 )
 
-func (a *annad) newServiceCollection() spec.Collection {
+func (c *Command) newServiceCollection() spec.Collection {
 	// Set.
 	collection := service.NewCollection()
 
-	collection.SetActivator(a.newActivatorService())
-	collection.SetConnection(a.newConnectionService())
-	collection.SetEndpointCollection(a.newEndpointCollection())
-	collection.SetFeature(a.newFeatureService())
-	collection.SetForwarder(a.newForwarderService())
-	collection.SetFS(a.newFSService())
-	collection.SetID(a.newIDService())
-	collection.SetInstrumentor(a.newInstrumentorService())
-	collection.SetLog(a.newLogService())
-	collection.SetNetwork(a.newNetworkService())
-	collection.SetPermutation(a.newPermutationService())
-	collection.SetRandom(a.newRandomService())
-	collection.SetStorageCollection(a.newStorageCollection())
-	collection.SetTextInput(a.newTextInputService())
-	collection.SetTextOutput(a.newTextOutputService())
-	collection.SetTracker(a.newTrackerService())
+	collection.SetActivator(c.newActivatorService())
+	collection.SetConnection(c.newConnectionService())
+	collection.SetEndpointCollection(c.newEndpointCollection())
+	collection.SetFeature(c.newFeatureService())
+	collection.SetForwarder(c.newForwarderService())
+	collection.SetFS(c.newFSService())
+	collection.SetID(c.newIDService())
+	collection.SetInstrumentor(c.newInstrumentorService())
+	collection.SetLog(c.newLogService())
+	collection.SetNetwork(c.newNetworkService())
+	collection.SetPermutation(c.newPermutationService())
+	collection.SetRandom(c.newRandomService())
+	collection.SetStorageCollection(c.newStorageCollection())
+	collection.SetTextInput(c.newTextInputService())
+	collection.SetTextOutput(c.newTextOutputService())
+	collection.SetTracker(c.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
 	collection.Connection().SetServiceCollection(collection)
@@ -74,28 +74,34 @@ func (a *annad) newServiceCollection() spec.Collection {
 	return collection
 }
 
-func (a *annad) newActivatorService() spec.Activator {
+func (c *Command) newActivatorService() spec.Activator {
 	return activator.New()
 }
 
-func (a *annad) newConnectionService() spec.Connection {
-	return connection.New()
+func (c *Command) newConnectionService() spec.Connection {
+	newService := connection.New()
+
+	newService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
+	newService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
+	newService.SetWeight(c.configCollection.Space().Connection().Weight())
+
+	return newService
 }
 
-func (a *annad) newBackoffFactory() func() spec.Backoff {
+func (c *Command) newBackoffFactory() func() spec.Backoff {
 	return func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 }
 
-func (a *annad) newEndpointCollection() spec.EndpointCollection {
+func (c *Command) newEndpointCollection() spec.EndpointCollection {
 	newCollection := endpoint.NewCollection()
 
 	metricService := metric.New()
-	metricService.SetAddress(a.configCollection.Endpoint().Metric().Address())
+	metricService.SetAddress(c.configCollection.Endpoint().Metric().Address())
 
 	textService := text.New()
-	textService.SetAddress(a.configCollection.Endpoint().Text().Address())
+	textService.SetAddress(c.configCollection.Endpoint().Text().Address())
 
 	newCollection.SetMetric(metricService)
 	newCollection.SetText(textService)
@@ -103,28 +109,28 @@ func (a *annad) newEndpointCollection() spec.EndpointCollection {
 	return newCollection
 }
 
-func (a *annad) newFeatureService() spec.Feature {
+func (c *Command) newFeatureService() spec.Feature {
 	return feature.New()
 }
 
-func (a *annad) newForwarderService() spec.Forwarder {
+func (c *Command) newForwarderService() spec.Forwarder {
 	return forwarder.New()
 }
 
 // TODO make mem/os configurable
-func (a *annad) newFSService() spec.FS {
+func (c *Command) newFSService() spec.FS {
 	return mem.New()
 }
 
-func (a *annad) newIDService() spec.ID {
+func (c *Command) newIDService() spec.ID {
 	return id.New()
 }
 
-func (a *annad) newInstrumentorService() spec.Instrumentor {
+func (c *Command) newInstrumentorService() spec.Instrumentor {
 	return prometheus.New()
 }
 
-func (a *annad) newLogService() spec.Log {
+func (c *Command) newLogService() spec.Log {
 	newService := log.New()
 
 	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
@@ -132,78 +138,78 @@ func (a *annad) newLogService() spec.Log {
 	return newService
 }
 
-func (a *annad) newNetworkService() spec.Network {
+func (c *Command) newNetworkService() spec.Network {
 	return network.New()
 }
 
-func (a *annad) newPermutationService() spec.Permutation {
+func (c *Command) newPermutationService() spec.Permutation {
 	return permutation.New()
 }
 
-func (a *annad) newRandomService() spec.Random {
+func (c *Command) newRandomService() spec.Random {
 	newService := random.New()
 
-	newService.SetBackoffFactory(a.newBackoffFactory())
+	newService.SetBackoffFactory(c.newBackoffFactory())
 
 	return newService
 }
 
-func (a *annad) newStorageCollection() spec.StorageCollection {
+func (c *Command) newStorageCollection() spec.StorageCollection {
 	newCollection := storage.NewCollection()
 
 	// Connection.
-	switch a.configCollection.Storage().Connection().Kind() {
+	switch c.configCollection.Storage().Connection().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(a.configCollection.Storage().Connection().Address())
-		newService.SetBackoffFactory(a.newBackoffFactory())
-		newService.SetPrefix(a.configCollection.Storage().Connection().Prefix())
+		newService.SetAddress(c.configCollection.Storage().Connection().Address())
+		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
 		newCollection.SetConnection(memory.New())
 	default:
-		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().Connection().Kind()))
+		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Connection().Kind()))
 	}
 
 	// Feature.
-	switch a.configCollection.Storage().Feature().Kind() {
+	switch c.configCollection.Storage().Feature().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(a.configCollection.Storage().Feature().Address())
-		newService.SetBackoffFactory(a.newBackoffFactory())
-		newService.SetPrefix(a.configCollection.Storage().Feature().Prefix())
+		newService.SetAddress(c.configCollection.Storage().Feature().Address())
+		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
 		newCollection.SetFeature(memory.New())
 	default:
-		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().Feature().Kind()))
+		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Feature().Kind()))
 	}
 
 	// General.
-	switch a.configCollection.Storage().General().Kind() {
+	switch c.configCollection.Storage().General().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(a.configCollection.Storage().General().Address())
-		newService.SetBackoffFactory(a.newBackoffFactory())
-		newService.SetPrefix(a.configCollection.Storage().General().Prefix())
+		newService.SetAddress(c.configCollection.Storage().General().Address())
+		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
 		newCollection.SetGeneral(memory.New())
 	default:
-		panic(maskAnyf(invalidStorageKindError, "%s", a.configCollection.Storage().General().Kind()))
+		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().General().Kind()))
 	}
 
 	return newCollection
 }
 
-func (a *annad) newTextInputService() spec.TextInput {
+func (c *Command) newTextInputService() spec.TextInput {
 	return textinput.New()
 }
 
-func (a *annad) newTextOutputService() spec.TextOutput {
+func (c *Command) newTextOutputService() spec.TextOutput {
 	return textoutput.New()
 }
 
-func (a *annad) newTrackerService() spec.Tracker {
+func (c *Command) newTrackerService() spec.Tracker {
 	return tracker.New()
 }

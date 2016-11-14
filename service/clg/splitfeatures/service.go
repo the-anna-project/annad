@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	objectspec "github.com/xh3b4sd/anna/object/spec"
-	"github.com/xh3b4sd/anna/service/feature"
 )
 
 const (
@@ -35,7 +34,7 @@ const (
 )
 
 func (s *service) calculate(ctx objectspec.Context, informationSequence, separator string) error {
-	newConfig := feature.DefaultScanConfig()
+	newConfig := s.Service().Feature().ScanConfig()
 	newConfig.MaxLength = FeatureSize
 	newConfig.MinLength = FeatureSize
 	newConfig.Separator = separator

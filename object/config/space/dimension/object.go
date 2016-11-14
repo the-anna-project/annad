@@ -6,6 +6,7 @@ func New() *Object {
 	return &Object{}
 }
 
+// Object represents the space dimension config object.
 type Object struct {
 	// Settings.
 
@@ -18,18 +19,22 @@ type Object struct {
 	depth int
 }
 
+// Count returns the count of the dimension config.
 func (o *Object) Count() int {
 	return o.count
 }
 
+// Depth returns the depth of the dimension config.
 func (o *Object) Depth() int {
 	return o.depth
 }
 
-func (o *Object) SetCount(count int) {
-	o.count = count
+// SetCount sets the count for the dimension config.
+func (o *Object) SetCount(count *int) {
+	o.count = *count
 }
 
-func (o *Object) SetDepth(depth int) {
-	o.depth = depth
+// SetDepth sets the depth for the dimension config.
+func (o *Object) SetDepth(depth *int) {
+	o.depth = *depth
 }

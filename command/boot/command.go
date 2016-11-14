@@ -6,6 +6,8 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
+
+	"github.com/xh3b4sd/anna/object/config"
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
@@ -14,21 +16,22 @@ func New() *Command {
 	return &Command{}
 }
 
+// Command represents the boot command.
 type Command struct {
 	// Dependencies.
 
-	configCollection  *config.Config
+	configCollection  *config.Collection
 	serviceCollection servicespec.Collection
 
 	// Settings.
 
-	bootOnce       sync.Once
-	flags          Flags
-	gitCommit string
-	shutdownOnce   sync.Once
-	version        string
+	bootOnce     sync.Once
+	gitCommit    string
+	shutdownOnce sync.Once
+	version      string
 }
 
+// Boot makes the neural network boot and run.
 func (c *Command) Boot() {
 	c.serviceCollection = c.newServiceCollection()
 	go c.serviceCollection.Boot()
@@ -40,14 +43,17 @@ func (c *Command) Boot() {
 	select {}
 }
 
+// Execute represents the cobra run method.
 func (c *Command) Execute(cmd *cobra.Command, args []string) {
-	s.Boot()
+	c.Boot()
 }
 
+// ForceShutdown forces the process to stop immediately.
 func (c *Command) ForceShutdown() {
 	os.Exit(0)
 }
 
+// New creates a new cobra command for the boot command.
 func (c *Command) New() *cobra.Command {
 	newCmd := &cobra.Command{
 		Use:   "boot",
@@ -56,8 +62,8 @@ func (c *Command) New() *cobra.Command {
 		Run:   c.Execute,
 	}
 
-	c.configCollection.Endpoint().Text().SetAddress(newCmd.PersistentFlags().String("endpoint.text.address", "127.0.0.1:9119", "host:port to bind Anna's gRPC server to"))
-	c.configCollection.Endpoint().Metric().SetAddress(newCmd.PersistentFlags().String("endpoint.metric.address", "127.0.0.1:9120", "host:port to bind Anna's HTTP server to"))
+	c.configCollection.Endpoint().Text().SetAddress(newCmd.PersistentFlags().String("endpoint.text.address", "127.0.0.1:9119", "host:port to bind the text endpoint to"))
+	c.configCollection.Endpoint().Metric().SetAddress(newCmd.PersistentFlags().String("endpoint.metric.address", "127.0.0.1:9120", "host:port to bind the metric endpoint to"))
 
 	c.configCollection.Space().Connection().SetWeight(newCmd.PersistentFlags().Int("space.connection.weight", 0, "default weight of new connections within the connection space"))
 
@@ -81,6 +87,7 @@ func (c *Command) New() *cobra.Command {
 	return newCmd
 }
 
+// ListenToSignal listens to OS signals to be catched and processed if desired.
 func (c *Command) ListenToSignal() {
 	listener := make(chan os.Signal, 2)
 	signal.Notify(listener, os.Interrupt, os.Kill)
@@ -94,14 +101,18 @@ func (c *Command) ListenToSignal() {
 	c.ForceShutdown()
 }
 
-func (c *Command) SetConfigCollection(cc *config.Config) {
-	c.configCollection = cc
+// SetConfigCollection sets the config collection for the boot command to
+// configure the neural network.
+func (c *Command) SetConfigCollection(configCollection *config.Collection) {
+	c.configCollection = configCollection
 }
 
+// SetGitCommit sets the git commit for the version command to be displayed.
 func (c *Command) SetGitCommit(gitCommit string) {
 	c.gitCommit = gitCommit
 }
 
+// Shutdown initializes the shutdown of the neural network.
 func (c *Command) Shutdown() {
 	c.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
