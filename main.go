@@ -22,9 +22,11 @@ import (
 )
 
 var (
-	// gitCommit is the git commit the project is build with. It is given via
-	// build flags that inject the git commit hash.
-	gitCommit string
+	gitCommit      string
+	goArch         string
+	goOS           string
+	goVersion      string
+	projectVersion string
 )
 
 func init() {
@@ -51,7 +53,15 @@ func main() {
 
 	bootCommand.SetConfigCollection(configCollection)
 	bootCommand.SetGitCommit(gitCommit)
+	bootCommand.SetGoArch(goArch)
+	bootCommand.SetGoOS(goOS)
+	bootCommand.SetGoVersion(goVersion)
+	bootCommand.SetProjectVersion(projectVersion)
 	versionCommand.SetGitCommit(gitCommit)
+	versionCommand.SetGoArch(goArch)
+	versionCommand.SetGoOS(goOS)
+	versionCommand.SetGoVersion(goVersion)
+	versionCommand.SetProjectVersion(projectVersion)
 
 	annadCommand.SetBootCommand(bootCommand)
 	annadCommand.SetVersionCommand(versionCommand)

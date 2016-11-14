@@ -25,10 +25,13 @@ type Command struct {
 
 	// Settings.
 
-	bootOnce     sync.Once
-	gitCommit    string
-	shutdownOnce sync.Once
-	version      string
+	bootOnce       sync.Once
+	gitCommit      string
+	goArch         string
+	goOS           string
+	goVersion      string
+	projectVersion string
+	shutdownOnce   sync.Once
 }
 
 // Boot makes the neural network boot and run.
@@ -110,6 +113,26 @@ func (c *Command) SetConfigCollection(configCollection *config.Collection) {
 // SetGitCommit sets the git commit for the version command to be displayed.
 func (c *Command) SetGitCommit(gitCommit string) {
 	c.gitCommit = gitCommit
+}
+
+// SetGoArch sets the go architecture for the version command to be displayed.
+func (c *Command) SetGoArch(goArch string) {
+	c.goArch = goArch
+}
+
+// SetGoOS sets the go OS for the version command to be displayed.
+func (c *Command) SetGoOS(goOS string) {
+	c.goOS = goOS
+}
+
+// SetGoVersion sets the go version for the version command to be displayed.
+func (c *Command) SetGoVersion(goVersion string) {
+	c.goVersion = goVersion
+}
+
+// SetProjectVersion sets the project version for the version command to be displayed.
+func (c *Command) SetProjectVersion(projectVersion string) {
+	c.projectVersion = projectVersion
 }
 
 // Shutdown initializes the shutdown of the neural network.
