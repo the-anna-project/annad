@@ -39,12 +39,10 @@ type service struct {
 	timeout time.Duration
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -58,8 +56,6 @@ func (s *service) Configure() error {
 	s.randFactory = rand.Int
 	s.randReader = rand.Reader
 	s.timeout = 1 * time.Second
-
-	return nil
 }
 
 func (s *service) CreateMax(max int) (int, error) {
@@ -130,14 +126,4 @@ func (s *service) SetBackoffFactory(bf func() spec.Backoff) {
 
 func (s *service) SetServiceCollection(sc spec.Collection) {
 	s.serviceCollection = sc
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

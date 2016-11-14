@@ -23,14 +23,6 @@ type object struct {
 	mutex    sync.Mutex
 }
 
-func (o *object) Configure() error {
-	// Settings.
-
-	o.mutex = sync.Mutex{}
-
-	return nil
-}
-
 func (o *object) AddPosition(position []float64) error {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
@@ -71,17 +63,4 @@ func (o *object) SetPositions(ps [][]float64) {
 
 func (o *object) SetSequence(s string) {
 	o.sequence = s
-}
-
-func (o *object) Validate() error {
-	// Settings.
-
-	if len(o.positions) == 0 {
-		return maskAnyf(invalidConfigError, "positions must not be empty")
-	}
-	if o.sequence == "" {
-		return maskAnyf(invalidConfigError, "sequence must not be empty")
-	}
-
-	return nil
 }

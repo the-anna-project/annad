@@ -31,12 +31,10 @@ type service struct {
 	shutdownOnce sync.Once
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -71,20 +69,10 @@ func (s *service) Configure() error {
 	newRedisStorage.SetBackoffFactory(func() spec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
-	err = newRedisStorage.Validate()
-	if err != nil {
-		return maskAny(err)
-	}
-	err = newRedisStorage.Configure()
-	if err != nil {
-		return maskAny(err)
-	}
 
 	s.closer = closer
 	s.redisStorage = newRedisStorage
 	s.shutdownOnce = sync.Once{}
-
-	return nil
 }
 
 func (s *service) Get(key string) (string, error) {
@@ -279,16 +267,6 @@ func (s *service) Shutdown() {
 	s.shutdownOnce.Do(func() {
 		close(s.closer)
 	})
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }
 
 func (s *service) WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error {

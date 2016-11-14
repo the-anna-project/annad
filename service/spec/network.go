@@ -8,8 +8,6 @@ import objectspec "github.com/xh3b4sd/anna/object/spec"
 // activity calculates outputs which are streamed through the output channel
 // back to the requestor.
 type Network interface {
-	Configure() error
-
 	// Activate decides if a requested CLG shall be activated. It needs to be
 	// decided if the requested CLG shall be activated. In case the requested CLG
 	// shall be activated it needs to be decided how this activation shall happen.
@@ -30,7 +28,6 @@ type Network interface {
 	//                             |-----|
 	//
 	Activate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
-
 	// Boot initializes and starts the whole network like booting a machine. The
 	// call to Boot blocks until the network is completely initialized, so you
 	// might want to call it in a separate goroutine.
@@ -41,12 +38,10 @@ type Network interface {
 	// back again. Errors during processing of the neural network will be logged
 	// to the provided logger.
 	Boot()
-
 	// Calculate executes the activated CLG and invokes its actual implemented
 	// behaviour. This behaviour can be anything. It is up to the CLG what it
 	// does with the provided NetworkPayload.
 	Calculate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
-
 	// EventListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network events. A network event is qualified by
 	// a network payload being queued and waiting to be processed. A network event
@@ -56,11 +51,9 @@ type Network interface {
 	// Therefore EventListener should respect canceler by implementing a clean
 	// shutdown behaviour. EventListener calls EventHandler.
 	EventListener(canceler <-chan struct{}) error
-
 	// EventHandler effectively executes a network event associated to a CLG and
 	// the corresponding network payload. EventHandler is called by EventListener.
 	EventHandler(CLG CLG, networkPayload objectspec.NetworkPayload) error
-
 	// Forward is triggered after the CLGs calculation. Here will be decided what
 	// to do next. Like Activate, it is up to the CLG if it forwards signals to
 	// further CLGs. E.g. a CLG may or may not forward its calculated results to
@@ -82,31 +75,23 @@ type Network interface {
 	//     |-----|     |-----|     |-----|     |-----|     |-----|
 	//
 	Forward(CLG CLG, networkPayload objectspec.NetworkPayload) error
-
 	// InputListener is a worker pool function which is executed multiple times
 	// concurrently to listen for network inputs. A network input is qualified by
 	// information sequences sent by clients who request some calculation from the
 	// network. InputListener also calls InputHandler.
 	InputListener(canceler <-chan struct{}) error
-
 	// InputHandler effectively executes the network input by invoking the input
 	// CLG using the incoming text request. InputHandler is called by
 	// InputListener.
 	InputHandler(CLG CLG, textInput objectspec.TextInput) error
-
 	// Shutdown ends all processes of the network like shutting down a machine.
 	// The call to Shutdown blocks until the network is completely shut down, so
 	// you might want to call it in a separate goroutine.
 	Shutdown()
-
 	Service() Collection
-
-	SetServiceCollection(sc Collection)
-
+	SetServiceCollection(serviceCollection Collection)
 	// Track tracks connections being created to learn from connection path
 	// patterns. Various data structures are stored to observe the behaviour of
 	// the neural network to act accordingly.
 	Track(CLG CLG, networkPayload objectspec.NetworkPayload) error
-
-	Validate() error
 }

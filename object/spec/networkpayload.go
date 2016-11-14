@@ -47,5 +47,5 @@ type NetworkPayload interface {
 	// Validate throws an error if the current network payload is not valid. An
 	// network payload is not valid if it does ot have any context, destination or
 	// sources defined.
-	Validate() error
+
 }

@@ -7,8 +7,7 @@ import (
 // Instrumentor represents an abstraction of instrumentation libraries to
 // manage application metrics.
 type Instrumentor interface {
-	Configure() error
-
+	Boot()
 	// ExecFunc wraps basic instrumentation around the given action and executes
 	// it.
 	//
@@ -26,32 +25,24 @@ type Instrumentor interface {
 	//         error returned by the given action.
 	//
 	ExecFunc(key string, action func() error) error
-
 	// GetCounter provides a Counter for the given key. In case there does no
 	// counter exist for the given key, one is created.
 	GetCounter(key string) (Counter, error)
-
 	// GetGauge provides a Gauge for the given key. In case there does no
 	// counter exist for the given key, one is created.
 	GetGauge(key string) (Gauge, error)
-
 	// GetGauge provides a Gauge for the given key. In case there does no
 	// counter exist for the given key, one is created.
 	GetHistogram(key string) (Histogram, error)
-
 	// GetHTTPEndpoint returns the Instrumentor's metric endpoint supposed to
 	// be registered in the HTTP server using the Instrumentor's HTTP handler.
 	GetHTTPEndpoint() string
-
 	// GetHTTPHandler returns the Instrumentor's HTTP handler supposed to be
 	// registered in the HTTP server using the Instrumentor's HTTP endpoint.
 	GetHTTPHandler() http.Handler
-
 	// GetPrefixes returns the Instrumentor's configured prefix.
 	GetPrefixes() []string
-
 	Metadata() map[string]string
-
 	// NewKey returns a new metrics key having all configured prefixes and all
 	// given parts properly joined. This could happen e.g. using underscores. In
 	// this case it would look as follows.
@@ -59,13 +50,8 @@ type Instrumentor interface {
 	//     prefix_prefix_s_s_s_s
 	//
 	NewKey(s ...string) string
-
 	Service() Collection
-
-	SetServiceCollection(sc Collection)
-
-	Validate() error
-
+	SetServiceCollection(serviceCollection Collection)
 	// WrapFunc wraps basic instrumentation around the given action. The returned
 	// function can be used as e.g. retry action.
 	//
@@ -83,7 +69,6 @@ type Counter interface {
 type Gauge interface {
 	// DecrBy decrements the current gauge by the given delta.
 	DecrBy(delta float64)
-
 	// IncrBy increments the current gauge by the given delta.
 	IncrBy(delta float64)
 }

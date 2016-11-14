@@ -31,20 +31,16 @@ type client struct {
 	metadata map[string]string
 }
 
-func (c *client) Configure() error {
-	// Settings.
-
+func (c *client) Boot() {
 	id, err := c.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	c.metadata = map[string]string{
 		"id":   id,
 		"name": "text-interface",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objectspec.TextOutput, error) {
@@ -152,17 +148,4 @@ func (c *client) StreamText(ctx context.Context) error {
 			return maskAny(err)
 		}
 	}
-}
-
-func (c *client) Validate() error {
-	// Dependencies.
-	if c.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	// Settings.
-	if c.gRPCAddr == "" {
-		return maskAnyf(invalidConfigError, "gRPC address must not be empty")
-	}
-
-	return nil
 }

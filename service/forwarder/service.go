@@ -29,12 +29,10 @@ type service struct {
 	maxSignals int
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -43,8 +41,6 @@ func (s *service) Configure() error {
 	}
 
 	s.maxSignals = 5
-
-	return nil
 }
 
 func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
@@ -215,14 +211,4 @@ func (s *service) Service() servicespec.Collection {
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

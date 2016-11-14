@@ -6,8 +6,6 @@ import objectspec "github.com/xh3b4sd/anna/object/spec"
 // The activator obtains network payloads for every single requested CLG of
 // every possible CLG tree.
 type Activator interface {
-	Configure() error
-
 	// Activate represents the public interface that bundles the following lookup
 	// functions.
 	//
@@ -22,7 +20,7 @@ type Activator interface {
 	// returned. The modifications of the updated queue are also persisted.
 	// TODO the CLG is a service, it should not be provided as arguments, all information are provided by networkPayload
 	Activate(CLG CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
-
+	Boot()
 	// GetNetworkPayload compares the given queue against the stored configuration
 	// of the requested CLG. This configuration is a combination of behaviour IDs
 	// that are known to be successful. We know that this configuration was
@@ -36,9 +34,7 @@ type Activator interface {
 	// stored, or no match using the stored configuration associated with the
 	// requested CLG can be found, an error is returned.
 	GetNetworkPayload(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
-
 	Metadata() map[string]string
-
 	// New uses the given queue to find a combination of network
 	// payloads that fulfill the interface of the requested CLG. This creation
 	// process may be random or biased in some way. In case some created
@@ -47,10 +43,6 @@ type Activator interface {
 	// requested CLG. In case no match using the permuted network payloads of the
 	// given queue can be found, an error is returned.
 	New(CLG CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error)
-
 	Service() Collection
-
-	SetServiceCollection(sc Collection)
-
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
 }

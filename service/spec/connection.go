@@ -70,7 +70,7 @@ import objectspec "github.com/xh3b4sd/anna/object/spec"
 //         position:432.8,4342,54.334    peer,peer
 //
 type Connection interface {
-	Configure() error
+	Boot()
 	// Create manages the creation of a connection.
 	//
 	//     peer
@@ -82,6 +82,8 @@ type Connection interface {
 	Create(a, b objectspec.Peer) error
 	Metadata() map[string]string
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetDimensionCount(dimensionCount int)
+	SetDimensionDepth(dimensionDepth int)
+	SetServiceCollection(serviceCollection Collection)
+	SetWeight(weight int)
 }

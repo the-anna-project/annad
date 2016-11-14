@@ -26,38 +26,20 @@ type service struct {
 	metadata map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
 		"name": "feature",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) Metadata() map[string]string {
 	return s.metadata
-}
-
-// DefaultScanConfig provides a default configuration to scan for new feature
-// objects by best effort.
-func DefaultScanConfig() servicespec.ScanConfig {
-	newConfig := servicespec.ScanConfig{
-		MaxLength: -1,
-		MinLength: 1,
-		MinCount:  1,
-		Separator: "",
-		Sequences: []string{},
-	}
-
-	return newConfig
 }
 
 func (s *service) Scan(config servicespec.ScanConfig) ([]objectspec.Feature, error) {
@@ -100,19 +82,23 @@ func (s *service) Scan(config servicespec.ScanConfig) ([]objectspec.Feature, err
 		newObject := feature.New()
 		newObject.SetPositions(ps)
 		newObject.SetSequence(seq)
-		err := newObject.Validate()
-		if err != nil {
-			return nil, maskAny(err)
-		}
-		err = newObject.Configure()
-		if err != nil {
-			return nil, maskAny(err)
-		}
 
 		newFeatures = append(newFeatures, newObject)
 	}
 
 	return newFeatures, nil
+}
+
+func (s *service) ScanConfig() servicespec.ScanConfig {
+	newConfig := servicespec.ScanConfig{
+		MaxLength: -1,
+		MinLength: 1,
+		MinCount:  1,
+		Separator: "",
+		Sequences: []string{},
+	}
+
+	return newConfig
 }
 
 func (s *service) Service() servicespec.Collection {
@@ -121,14 +107,4 @@ func (s *service) Service() servicespec.Collection {
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

@@ -51,25 +51,6 @@ type service struct {
 	shutdownOnce sync.Once
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
-	id, err := s.Service().ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	s.metadata = map[string]string{
-		"id":   id,
-		"name": "log",
-		"type": "service",
-	}
-
-	s.clgs = s.newCLGs()
-	s.delay = 0
-
-	return nil
-}
-
 func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Activate")
 
@@ -85,7 +66,18 @@ func (s *service) Boot() {
 	s.Service().Log().Line("func", "Boot")
 
 	s.bootOnce.Do(func() {
+		id, err := s.Service().ID().New()
+		if err != nil {
+			panic(err)
+		}
+		s.metadata = map[string]string{
+			"id":   id,
+			"name": "log",
+			"type": "service",
+		}
+
 		s.clgs = s.newCLGs()
+		s.delay = 0
 
 		go func() {
 			// Create a new worker pool for the input listener.
@@ -344,16 +336,6 @@ func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPa
 	err := s.Service().Tracker().Track(CLG, networkPayload)
 	if err != nil {
 		return maskAny(err)
-	}
-
-	return nil
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
 	}
 
 	return nil

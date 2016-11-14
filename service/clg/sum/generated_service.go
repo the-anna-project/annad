@@ -24,21 +24,17 @@ type service struct {
 	metadata map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
 		"kind": "sum",
-		"name": "activator",
+		"name": "clg",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) GetCalculate() interface{} {
@@ -55,14 +51,4 @@ func (s *service) Service() servicespec.Collection {
 
 func (s *service) SetServiceCollection(serviceCollection servicespec.Collection) {
 	s.serviceCollection = serviceCollection
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

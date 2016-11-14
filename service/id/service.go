@@ -39,12 +39,10 @@ type service struct {
 	metadata  map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
@@ -54,8 +52,6 @@ func (s *service) Configure() error {
 
 	s.hashChars = "abcdef0123456789"
 	s.idType = Hex128
-
-	return nil
 }
 
 func (s *service) Metadata() map[string]string {
@@ -95,14 +91,4 @@ func (s *service) WithType(idType int) (string, error) {
 	}
 
 	return string(b), nil
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

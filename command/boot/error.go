@@ -1,4 +1,4 @@
-package metricsendpoint
+package boot
 
 import (
 	"fmt"
@@ -22,9 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var invalidConfigError = errgo.New("invalid config")
+var invalidStorageKindError = errgo.New("invalid storage kind")
 
-// IsInvalidConfig asserts invalidConfigError.
-func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError
+// IsInvalidStorageKind asserts invalidStorageKindError.
+func IsInvalidStorageKind(err error) bool {
+	return errgo.Cause(err) == invalidStorageKindError
 }

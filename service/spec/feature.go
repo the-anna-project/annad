@@ -5,16 +5,15 @@ import objectspec "github.com/xh3b4sd/anna/object/spec"
 // Feature represents a service being able to scan for features within
 // information sequences.
 type Feature interface {
-	Configure() error
+	Boot()
 	Metadata() map[string]string
-
 	// Scan analyses the given sequences to detect patterns. Found patterns are
 	// returned in form of a list of features.
 	Scan(config ScanConfig) ([]objectspec.Feature, error)
-
+	// ScanConfig returns a default scan config configured by best effort.
+	ScanConfig() ScanConfig
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
 }
 
 // ScanConfig represents the configuration used to scan for new feature objects.

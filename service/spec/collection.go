@@ -5,8 +5,9 @@ package spec
 // around.
 type Collection interface {
 	Activator() Activator
+	Boot()
 	Connection() Connection
-	Configure() error
+	Endpoint() EndpointCollection
 	Feature() Feature
 	Forwarder() Forwarder
 	// FS returns a file system service. It is used to operate on file system
@@ -15,7 +16,6 @@ type Collection interface {
 	// ID returns an ID service. It is used to create IDs of a certain type.
 	ID() ID
 	Instrumentor() Instrumentor
-	MetricsEndpoint() MetricsEndpoint
 	// Log returns a log service. It is used to print log messages.
 	Log() Log
 	Network() Network
@@ -24,29 +24,27 @@ type Collection interface {
 	Permutation() Permutation
 	// Random returns a random service. It is used to create random numbers.
 	Random() Random
-	SetActivator(a Activator)
-	SetConnection(c Connection)
-	SetFeature(f Feature)
-	SetForwarder(f Forwarder)
-	SetFS(fs FS)
-	SetID(id ID)
-	SetInstrumentor(i Instrumentor)
-	SetLog(l Log)
-	SetMetricsEndpoint(s MetricsEndpoint)
-	SetNetwork(n Network)
-	SetPermutation(p Permutation)
-	SetRandom(r Random)
-	SetStorageCollection(sc StorageCollection)
-	SetTextEndpoint(te TextEndpoint)
-	SetTextInput(ti TextInput)
-	SetTextOutput(to TextOutput)
-	SetTracker(t Tracker)
+	SetActivator(activator Activator)
+	SetConnection(connection Connection)
+	SetEndpointCollection(endpointCollection EndpointCollection)
+	SetFeature(feature Feature)
+	SetForwarder(forwarder Forwarder)
+	SetFS(FS FS)
+	SetID(ID ID)
+	SetInstrumentor(instrumentor Instrumentor)
+	SetLog(log Log)
+	SetNetwork(network Network)
+	SetPermutation(permutation Permutation)
+	SetRandom(random Random)
+	SetStorageCollection(storageCollection StorageCollection)
+	SetTextInput(textInput TextInput)
+	SetTextOutput(textOutput TextOutput)
+	SetTracker(tracker Tracker)
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
-	TextEndpoint() TextEndpoint
 	// TextInput returns an text output service. It is used to send text
 	// responses back to the client.
 	TextInput() TextInput
@@ -54,5 +52,4 @@ type Collection interface {
 	// responses back to the client.
 	TextOutput() TextOutput
 	Tracker() Tracker
-	Validate() error
 }

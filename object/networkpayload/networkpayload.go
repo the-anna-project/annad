@@ -111,17 +111,3 @@ func (np *networkPayload) String() string {
 
 	return s
 }
-
-func (np *networkPayload) Validate() error {
-	if np.GetContext() == nil {
-		return maskAnyf(invalidConfigError, "context must not be empty")
-	}
-	if np.GetDestination() == "" {
-		return maskAnyf(invalidConfigError, "destination must not be empty")
-	}
-	if len(np.GetSources()) < 1 {
-		return maskAnyf(invalidConfigError, "sources must not be empty")
-	}
-
-	return nil
-}

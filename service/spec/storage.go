@@ -10,7 +10,7 @@ package spec
 //     }
 //
 type Storage interface {
-	Configure() error
+	Boot()
 
 	//
 	// List.
@@ -97,7 +97,6 @@ type Storage interface {
 	GetStringMap(key string) (map[string]string, error)
 	// SetStringMap stores the given stringMap under the given key.
 	SetStringMap(key string, stringMap map[string]string) error
-
 	// Shutdown ends all processes of the storage like shutting down a machine.
 	// The call to Shutdown blocks until the storage is completely shut down, so
 	// you might want to call it in a separate goroutine.
@@ -128,20 +127,18 @@ type Storage interface {
 	// is walked completely. The given closer can be used to end the walk
 	// immediately.
 	WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error
-
 	SetAddress(a string)
 	SetBackoffFactory(bf func() Backoff)
 	SetPrefix(p string)
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
 }
 
 // StorageCollection represents a collection of storage instances. This scopes
 // different storage implementations in a simple container, which can easily be
 // passed around.
 type StorageCollection interface {
-	Configure() error
+	Boot()
 	Connection() Storage
 	// Feature represents a feature storage. It is used to store features of
 	// information sequences separately. Because of the used key structures and
@@ -154,14 +151,11 @@ type StorageCollection interface {
 	// General represents a general storage. It is used to store general data
 	// which is not stored in specialized storage instances.
 	General() Storage
-	Service() Collection
 	SetConnection(c Storage)
 	SetFeature(c Storage)
 	SetGeneral(c Storage)
-	SetServiceCollection(sc Collection)
 	// Shutdown ends all processes of the storage collection like shutting down a
 	// machine. The call to Shutdown blocks until the storage collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
-	Validate() error
 }

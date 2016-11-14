@@ -18,8 +18,7 @@ func New() spec.Instrumentor {
 type service struct {
 }
 
-func (s *service) Configure() error {
-	return nil
+func (s *service) Boot() {
 }
 
 func (s *service) ExecFunc(key string, action func() error) error {
@@ -86,10 +85,6 @@ func (s *service) Service() servicespec.Collection {
 }
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
-}
-
-func (s *service) Validate() error {
-	return nil
 }
 
 func (s *service) WrapFunc(key string, action func() error) func() error {

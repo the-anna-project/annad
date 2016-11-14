@@ -21,20 +21,16 @@ type service struct {
 	metadata map[string]string
 }
 
-func (s *service) Configure() error {
-	// Settings.
-
+func (s *service) Boot() {
 	id, err := s.Service().ID().New()
 	if err != nil {
-		return maskAny(err)
+		panic(err)
 	}
 	s.metadata = map[string]string{
 		"id":   id,
 		"name": "log",
 		"type": "service",
 	}
-
-	return nil
 }
 
 func (s *service) Line(v ...interface{}) {
@@ -55,17 +51,4 @@ func (s *service) SetRootLogger(rl servicespec.RootLogger) {
 
 func (s *service) SetServiceCollection(sc servicespec.Collection) {
 	s.serviceCollection = sc
-}
-
-func (s *service) Validate() error {
-	// Dependencies.
-
-	if s.rootLogger == nil {
-		return maskAnyf(invalidConfigError, "root logger must not be empty")
-	}
-	if s.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-
-	return nil
 }

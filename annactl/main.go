@@ -39,42 +39,32 @@ type annactl struct {
 }
 
 func (a *annactl) Boot() {
-	//a.Service().Log().Line("func", "Boot")
-
 	a.bootOnce.Do(func() {
+		id, err := a.Service().ID().New()
+		if err != nil {
+			panic(err)
+		}
+		a.metadata = map[string]string{
+			"id":   id,
+			"name": "annactl",
+			"type": "service",
+		}
+
+		a.bootOnce = sync.Once{}
+		a.closer = make(chan struct{}, 1)
+		a.flags = Flags{}
+
+		sessionID, err := a.Service().ID().New()
+		if err != nil {
+			panic(err)
+		}
+		a.sessionID = sessionID
+
+		a.shutdownOnce = sync.Once{}
+		a.version = version
+
 		go a.listenToSignal()
-
-		a.InitAnnactlCmd().Execute()
 	})
-}
-
-func (a *annactl) Configure() error {
-	// Settings.
-
-	id, err := a.Service().ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	a.metadata = map[string]string{
-		"id":   id,
-		"name": "annactl",
-		"type": "service",
-	}
-
-	a.bootOnce = sync.Once{}
-	a.closer = make(chan struct{}, 1)
-	a.flags = Flags{}
-
-	sessionID, err := a.Service().ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	a.sessionID = sessionID
-
-	a.shutdownOnce = sync.Once{}
-	a.version = version
-
-	return nil
 }
 
 func (a *annactl) ExecAnnactlCmd(cmd *cobra.Command, args []string) {
@@ -134,18 +124,6 @@ func (a *annactl) Shutdown() {
 	a.shutdownOnce.Do(func() {
 		close(a.closer)
 	})
-}
-
-func (a *annactl) Validate() error {
-	// Dependencies.
-	if a.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if a.textInterface == nil {
-		return maskAnyf(invalidConfigError, "text interface must not be empty")
-	}
-
-	return nil
 }
 
 func main() {

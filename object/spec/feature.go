@@ -4,7 +4,6 @@ package spec
 // recognition it is tried to detect features. Their distributions describe
 // location patterns within space.
 type Feature interface {
-	Configure() error
 	// AddPosition provides a way to add more positions to the initialized
 	// feature. Note positions are vectors in distribution terms.
 	AddPosition(position []float64) error
@@ -19,5 +18,4 @@ type Feature interface {
 	Sequence() string
 	SetPositions(ps [][]float64)
 	SetSequence(s string)
-	Validate() error
 }

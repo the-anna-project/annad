@@ -2,7 +2,7 @@
 .workspace
 coverage.txt
 profile.out
-client/interface/text/textendpoint.pb.go
+client/interface/text/text_endpoint.pb.go
 service/clg/*/generated*
-service/textendpoint/textendpoint.pb.go
+service/endpoint/text/text_endpoint.pb.go
 TODO
