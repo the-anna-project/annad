@@ -136,18 +136,6 @@ func (a *annactl) Shutdown() {
 	})
 }
 
-func (a *annactl) Validate() error {
-	// Dependencies.
-	if a.serviceCollection == nil {
-		return maskAnyf(invalidConfigError, "service collection must not be empty")
-	}
-	if a.textInterface == nil {
-		return maskAnyf(invalidConfigError, "text interface must not be empty")
-	}
-
-	return nil
-}
-
 func main() {
 	newAnnactl := New()
 	newAnnactl.Boot()

@@ -7,7 +7,7 @@ export GOPATH := $(PWD)/.workspace
 export PATH := $(PATH):$(PWD)/.workspace/bin:$(PWD)/bin
 
 
-VERSION := $(shell git rev-parse --short HEAD)
+PROJECT_VERSION := $(shell git rev-parse --short HEAD)
 
 
 
@@ -16,13 +16,13 @@ all: annactl annad
 annad: gogenerate
 	@go build \
 		-o .workspace/bin/annad \
-		-ldflags "-X main.version=${VERSION}" \
-		github.com/xh3b4sd/anna/annad
+		-ldflags "-X main.projectVersion=${PROJECT_VERSION}" \
+		github.com/xh3b4sd/anna
 
 annactl: gogenerate
 	@go build \
 		-o .workspace/bin/annactl \
-		-ldflags "-X main.version=${VERSION}" \
+		-ldflags "-X main.projectVersion=${PROJECT_VERSION}" \
 		github.com/xh3b4sd/anna/annactl
 
 clean:
@@ -30,10 +30,10 @@ clean:
 	@# TODO remove generated code
 
 dockerimage: all
-	@docker build -t xh3b4sd/anna:${VERSION} .
+	@docker build -t xh3b4sd/anna:${PROJECT_VERSION} .
 
 dockerpush:
-	docker push xh3b4sd/anna:${VERSION}
+	docker push xh3b4sd/anna:${PROJECT_VERSION}
 
 gofmt:
 	@go fmt ./...

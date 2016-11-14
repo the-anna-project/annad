@@ -13,8 +13,8 @@ type Feature interface {
 	Scan(config ScanConfig) ([]objectspec.Feature, error)
 
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
+
 }
 
 // ScanConfig represents the configuration used to scan for new feature objects.

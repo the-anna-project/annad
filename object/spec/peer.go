@@ -6,6 +6,6 @@ type Peer interface {
 	Configure() error
 	Kind() string
 	SetValue(value string)
-	Validate() error
+
 	Value() string
 }

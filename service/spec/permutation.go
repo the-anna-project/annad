@@ -40,7 +40,7 @@ type Permutation interface {
 
 	Service() Collection
 
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
-	Validate() error
+
 }

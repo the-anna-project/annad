@@ -21,5 +21,5 @@ type TextInterfaceClient interface {
 	// given context is canceled.
 	StreamText(ctx context.Context) error
 
-	Validate() error
+
 }

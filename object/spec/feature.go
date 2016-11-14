@@ -19,5 +19,5 @@ type Feature interface {
 	Sequence() string
 	SetPositions(ps [][]float64)
 	SetSequence(s string)
-	Validate() error
+
 }

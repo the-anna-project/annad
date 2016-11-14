@@ -12,11 +12,11 @@ type ID interface {
 
 	Service() Collection
 
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
 	// WithType tries to create a new object ID using the given ID type. The
 	// returned error might be caused by timeouts reached during the ID creation.
 	WithType(idType int) (string, error)
 
-	Validate() error
+
 }

@@ -14,55 +14,63 @@ func NewCollection() spec.Collection {
 type collection struct {
 	// Dependencies.
 
-	activator         spec.Activator
-	connection        spec.Connection
-	feature           spec.Feature
-	forwarder         spec.Forwarder
-	fs                spec.FS
-	id                spec.ID
-	instrumentor      spec.Instrumentor
-	log               spec.Log
-	metricsEndpoint   spec.MetricsEndpoint
-	network           spec.Network
-	permutation       spec.Permutation
-	random            spec.Random
-	storageCollection spec.StorageCollection
-	textEndpoint      spec.TextEndpoint
-	textInput         spec.TextInput
-	textOutput        spec.TextOutput
-	tracker           spec.Tracker
+	activator          spec.Activator
+	config             spec.Config
+	connection         spec.Connection
+	endpointCollection spec.EndpointCollection
+	feature            spec.Feature
+	forwarder          spec.Forwarder
+	fs                 spec.FS
+	id                 spec.ID
+	instrumentor       spec.Instrumentor
+	log                spec.Log
+	network            spec.Network
+	permutation        spec.Permutation
+	random             spec.Random
+	storageCollection  spec.StorageCollection
+	textInput          spec.TextInput
+	textOutput         spec.TextOutput
+	tracker            spec.Tracker
 
 	// Settings.
 
-	metadata     map[string]string
 	shutdownOnce sync.Once
-}
-
-func (c *collection) Configure() error {
-	// Settings.
-
-	id, err := c.ID().New()
-	if err != nil {
-		return maskAny(err)
-	}
-	c.metadata = map[string]string{
-		"id":   id,
-		"kind": "service",
-		"name": "collection",
-		"type": "service",
-	}
-
-	c.shutdownOnce = sync.Once{}
-
-	return nil
 }
 
 func (c *collection) Activator() spec.Activator {
 	return c.activator
 }
 
+func (c *collection) Boot() {
+	go c.Activator().Boot()
+	go c.Config().Boot()
+	go c.Connection().Boot()
+	go c.Endpoint().Boot()
+	go c.Feature().Boot()
+	go c.Forwarder().Boot()
+	go c.FS().Boot()
+	go c.ID().Boot()
+	go c.Instrumentor().Boot()
+	go c.Log().Boot()
+	go c.Network().Boot()
+	go c.Permutation().Boot()
+	go c.Random().Boot()
+	go c.Storage().Boot()
+	go c.TextInput().Boot()
+	go c.TextOutput().Boot()
+	go c.Tracker().Boot()
+}
+
+func (c *collection) Config() spec.Config {
+	return c.config
+}
+
 func (c *collection) Connection() spec.Connection {
 	return c.connection
+}
+
+func (c *collection) Endpoint() spec.EndpointCollection {
+	return c.endpointCollection
 }
 
 func (c *collection) Feature() spec.Feature {
@@ -89,14 +97,6 @@ func (c *collection) Log() spec.Log {
 	return c.log
 }
 
-func (c *collection) Metadata() map[string]string {
-	return c.metadata
-}
-
-func (c *collection) MetricsEndpoint() spec.MetricsEndpoint {
-	return c.metricsEndpoint
-}
-
 func (c *collection) Network() spec.Network {
 	return c.network
 }
@@ -113,8 +113,16 @@ func (c *collection) SetActivator(a spec.Activator) {
 	c.activator = a
 }
 
+func (c *collection) SetConfig(config spec.Config) {
+	c.config = config
+}
+
 func (c *collection) SetConnection(conn spec.Connection) {
 	c.connection = conn
+}
+
+func (c *collection) SetEndpointCollection(endpointCollection spec.EndpointCollection) {
+	c.endpointCollection = endpointCollection
 }
 
 func (c *collection) SetFeature(f spec.Feature) {
@@ -141,10 +149,6 @@ func (c *collection) SetLog(l spec.Log) {
 	c.log = l
 }
 
-func (c *collection) SetMetricsEndpoint(s spec.MetricsEndpoint) {
-	c.metricsEndpoint = s
-}
-
 func (c *collection) SetNetwork(n spec.Network) {
 	c.network = n
 }
@@ -159,10 +163,6 @@ func (c *collection) SetRandom(r spec.Random) {
 
 func (c *collection) SetStorageCollection(sc spec.StorageCollection) {
 	c.storageCollection = sc
-}
-
-func (c *collection) SetTextEndpoint(te spec.TextEndpoint) {
-	c.textEndpoint = te
 }
 
 func (c *collection) SetTextInput(ti spec.TextInput) {
@@ -183,14 +183,18 @@ func (c *collection) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			c.Log().Line("msg", "shutting down network")
+			c.Service().Endpoint().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
 			c.Network().Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			c.Log().Line("msg", "shutting down storage collection")
 			c.Storage().Shutdown()
 			wg.Done()
 		}()
@@ -203,10 +207,6 @@ func (c *collection) Storage() spec.StorageCollection {
 	return c.storageCollection
 }
 
-func (c *collection) TextEndpoint() spec.TextEndpoint {
-	return c.textEndpoint
-}
-
 func (c *collection) TextInput() spec.TextInput {
 	return c.textInput
 }
@@ -217,56 +217,4 @@ func (c *collection) TextOutput() spec.TextOutput {
 
 func (c *collection) Tracker() spec.Tracker {
 	return c.tracker
-}
-
-func (c *collection) Validate() error {
-	// Dependencies.
-
-	if c.activator == nil {
-		return maskAnyf(invalidConfigError, "activator service must not be empty")
-	}
-	if c.connection == nil {
-		return maskAnyf(invalidConfigError, "connection service must not be empty")
-	}
-	if c.feature == nil {
-		return maskAnyf(invalidConfigError, "feature service must not be empty")
-	}
-	if c.forwarder == nil {
-		return maskAnyf(invalidConfigError, "forwarder service must not be empty")
-	}
-	if c.id == nil {
-		return maskAnyf(invalidConfigError, "ID service must not be empty")
-	}
-	if c.instrumentor == nil {
-		return maskAnyf(invalidConfigError, "instrumentor service must not be empty")
-	}
-	if c.log == nil {
-		return maskAnyf(invalidConfigError, "log service must not be empty")
-	}
-	if c.metricsEndpoint == nil {
-		return maskAnyf(invalidConfigError, "metricsEndpoint service must not be empty")
-	}
-	if c.permutation == nil {
-		return maskAnyf(invalidConfigError, "permutation service must not be empty")
-	}
-	if c.random == nil {
-		return maskAnyf(invalidConfigError, "random service must not be empty")
-	}
-	if c.storageCollection == nil {
-		return maskAnyf(invalidConfigError, "storage collection must not be empty")
-	}
-	if c.textEndpoint == nil {
-		return maskAnyf(invalidConfigError, "text endpoint service must not be empty")
-	}
-	if c.textInput == nil {
-		return maskAnyf(invalidConfigError, "text input service must not be empty")
-	}
-	if c.textOutput == nil {
-		return maskAnyf(invalidConfigError, "text output service must not be empty")
-	}
-	if c.tracker == nil {
-		return maskAnyf(invalidConfigError, "tracker service must not be empty")
-	}
-
-	return nil
 }

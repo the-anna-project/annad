@@ -82,6 +82,6 @@ type Connection interface {
 	Create(a, b objectspec.Peer) error
 	Metadata() map[string]string
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
+
 }

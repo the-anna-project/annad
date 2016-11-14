@@ -18,10 +18,10 @@ type Tracker interface {
 
 	Service() Collection
 
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
 	// Track tracks connection path patterns.
 	Track(CLG CLG, networkPayload objectspec.NetworkPayload) error
 
-	Validate() error
+
 }

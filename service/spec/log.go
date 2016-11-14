@@ -12,9 +12,9 @@ type Log interface {
 	Service() Collection
 
 	SetRootLogger(rl RootLogger)
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
-	Validate() error
+
 }
 
 // RootLogger is the underlying logger actually printing log messages.

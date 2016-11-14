@@ -1,4 +1,4 @@
-package main
+package boot
 
 import (
 	"os"
@@ -15,7 +15,9 @@ import (
 	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/instrumentor/prometheus"
 	"github.com/xh3b4sd/anna/service/log"
-	"github.com/xh3b4sd/anna/service/metricsendpoint"
+	"github.com/xh3b4sd/anna/service/endpoint"
+	"github.com/xh3b4sd/anna/service/endpoint/metric"
+	"github.com/xh3b4sd/anna/service/endpoint/text"
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
@@ -35,89 +37,40 @@ func (a *annad) newServiceCollection() spec.Collection {
 
 	collection.SetActivator(a.newActivatorService())
 	collection.SetConnection(a.newConnectionService())
+	collection.SetEndpointCollection(a.newEndpointCollection())
 	collection.SetFeature(a.newFeatureService())
 	collection.SetForwarder(a.newForwarderService())
 	collection.SetFS(a.newFSService())
 	collection.SetID(a.newIDService())
 	collection.SetInstrumentor(a.newInstrumentorService())
 	collection.SetLog(a.newLogService())
-	collection.SetMetricsEndpoint(a.newMetricsEndpointService())
 	collection.SetNetwork(a.newNetworkService())
 	collection.SetPermutation(a.newPermutationService())
 	collection.SetRandom(a.newRandomService())
 	collection.SetStorageCollection(a.newStorageCollection())
-	collection.SetTextEndpoint(a.newTextEndpointService())
 	collection.SetTextInput(a.newTextInputService())
 	collection.SetTextOutput(a.newTextOutputService())
 	collection.SetTracker(a.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
 	collection.Connection().SetServiceCollection(collection)
+	collection.Endpoint().Metric().SetServiceCollection(collection)
+	collection.Endpoint().Text().SetServiceCollection(collection)
 	collection.Feature().SetServiceCollection(collection)
 	collection.Forwarder().SetServiceCollection(collection)
 	collection.FS().SetServiceCollection(collection)
 	collection.ID().SetServiceCollection(collection)
 	collection.Instrumentor().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
-	collection.MetricsEndpoint().SetServiceCollection(collection)
 	collection.Network().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
 	collection.Storage().Connection().SetServiceCollection(collection)
 	collection.Storage().Feature().SetServiceCollection(collection)
 	collection.Storage().General().SetServiceCollection(collection)
-	collection.TextEndpoint().SetServiceCollection(collection)
 	collection.TextInput().SetServiceCollection(collection)
 	collection.TextOutput().SetServiceCollection(collection)
 	collection.Tracker().SetServiceCollection(collection)
-
-	// Validate.
-	panicOnError(collection.Validate())
-
-	panicOnError(collection.Activator().Validate())
-	panicOnError(collection.Connection().Validate())
-	panicOnError(collection.Feature().Validate())
-	panicOnError(collection.Forwarder().Validate())
-	panicOnError(collection.FS().Validate())
-	panicOnError(collection.ID().Validate())
-	panicOnError(collection.Instrumentor().Validate())
-	panicOnError(collection.Log().Validate())
-	panicOnError(collection.MetricsEndpoint().Validate())
-	panicOnError(collection.Network().Validate())
-	panicOnError(collection.Permutation().Validate())
-	panicOnError(collection.Random().Validate())
-	panicOnError(collection.Storage().Validate())
-	panicOnError(collection.Storage().Connection().Validate())
-	panicOnError(collection.Storage().Feature().Validate())
-	panicOnError(collection.Storage().General().Validate())
-	panicOnError(collection.TextEndpoint().Validate())
-	panicOnError(collection.TextInput().Validate())
-	panicOnError(collection.TextOutput().Validate())
-	panicOnError(collection.Tracker().Validate())
-
-	// Configure.
-	panicOnError(collection.Configure())
-
-	panicOnError(collection.Activator().Configure())
-	panicOnError(collection.Connection().Configure())
-	panicOnError(collection.Feature().Configure())
-	panicOnError(collection.Forwarder().Configure())
-	panicOnError(collection.FS().Configure())
-	panicOnError(collection.ID().Configure())
-	panicOnError(collection.Instrumentor().Configure())
-	panicOnError(collection.Log().Configure())
-	panicOnError(collection.MetricsEndpoint().Configure())
-	panicOnError(collection.Network().Configure())
-	panicOnError(collection.Permutation().Configure())
-	panicOnError(collection.Random().Configure())
-	panicOnError(collection.Storage().Configure())
-	panicOnError(collection.Storage().Connection().Configure())
-	panicOnError(collection.Storage().Feature().Configure())
-	panicOnError(collection.Storage().General().Configure())
-	panicOnError(collection.TextEndpoint().Configure())
-	panicOnError(collection.TextInput().Configure())
-	panicOnError(collection.TextOutput().Configure())
-	panicOnError(collection.Tracker().Configure())
 
 	return collection
 }
@@ -165,10 +118,13 @@ func (a *annad) newLogService() spec.Log {
 	return newService
 }
 
-func (a *annad) newMetricsEndpointService() spec.MetricsEndpoint {
-	newService := metricsendpoint.New()
+func (a *annad) newEndpointCollection() spec.EndpointCollection {
+	newCollection := endpoint.NewCollection()
 
-	newService.SetHTTPAddress(a.flags.HTTPAddr)
+	metricService := metric.New()
+	metricService.SetAddress(a.configCollection.Endpoint().)
+
+	newService.SetAddress(a.flags.HTTPAddr)
 
 	return newService
 }

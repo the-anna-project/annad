@@ -38,7 +38,7 @@ type ConnectionPath interface {
 	// path is considered invalid in case at least one dimension is provided
 	// within it's coordinates and all vectors have the same amount of
 	// dimensions.
-	Validate() error
+
 }
 
 // CLGTree TODO
@@ -47,7 +47,7 @@ type CLGTree interface {
 	GetValues() []CLGTree
 
 	//
-	Validate() error
+
 }
 
 // InputTree TODO
@@ -56,5 +56,5 @@ type InputTree interface {
 	GetValues() [][]string
 
 	//
-	Validate() error
+
 }

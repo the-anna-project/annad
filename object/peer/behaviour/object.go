@@ -16,6 +16,7 @@ func New() objectspec.Peer {
 type object struct {
 	// Settings.
 
+	kind  string
 	mutex sync.Mutex
 	value string
 }
@@ -23,22 +24,14 @@ type object struct {
 func (o *object) Configure() error {
 	// Settings.
 
-	o.metadata = map[string]string{
-		"kind": "behaviour",
-		"name": "peer",
-		"type": "object",
-	}
+	o.kind = "behaviour"
 	o.mutex = sync.Mutex{}
 
 	return nil
 }
 
 func (o *object) Kind() string {
-	return o.metadata["kind"]
-}
-
-func (o *object) Metadata() map[string]string {
-	return o.metadata
+	return o.kind
 }
 
 func (o *object) SetValue(value string) {

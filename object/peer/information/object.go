@@ -23,18 +23,14 @@ type object struct {
 func (o *object) Configure() error {
 	// Settings.
 
-	o.metadata = map[string]string{
-		"kind": "information",
-		"name": "peer",
-		"type": "object",
-	}
+	o.kind = "information"
 	o.mutex = sync.Mutex{}
 
 	return nil
 }
 
 func (o *object) Kind() string {
-	return o.metadata["kind"]
+	return o.kind
 }
 
 func (o *object) SetValue(value string) {

@@ -1,4 +1,4 @@
-package main
+package endpoint
 
 import (
 	"fmt"
@@ -27,11 +27,4 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
-}
-
-var invalidStorageTypeError = errgo.New("invalid storage type")
-
-// IsInvalidStorageType asserts invalidStorageTypeError.
-func IsInvalidStorageType(err error) bool {
-	return errgo.Cause(err) == invalidStorageTypeError
 }

@@ -5,8 +5,10 @@ package spec
 // around.
 type Collection interface {
 	Activator() Activator
+	Boot()
+	Config() Config
 	Connection() Connection
-	Configure() error
+	Endpoint() EndpointCollection
 	Feature() Feature
 	Forwarder() Forwarder
 	// FS returns a file system service. It is used to operate on file system
@@ -15,7 +17,6 @@ type Collection interface {
 	// ID returns an ID service. It is used to create IDs of a certain type.
 	ID() ID
 	Instrumentor() Instrumentor
-	MetricsEndpoint() MetricsEndpoint
 	// Log returns a log service. It is used to print log messages.
 	Log() Log
 	Network() Network
@@ -37,7 +38,6 @@ type Collection interface {
 	SetPermutation(p Permutation)
 	SetRandom(r Random)
 	SetStorageCollection(sc StorageCollection)
-	SetTextEndpoint(te TextEndpoint)
 	SetTextInput(ti TextInput)
 	SetTextOutput(to TextOutput)
 	SetTracker(t Tracker)
@@ -46,7 +46,6 @@ type Collection interface {
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
-	TextEndpoint() TextEndpoint
 	// TextInput returns an text output service. It is used to send text
 	// responses back to the client.
 	TextInput() TextInput
@@ -54,5 +53,4 @@ type Collection interface {
 	// responses back to the client.
 	TextOutput() TextOutput
 	Tracker() Tracker
-	Validate() error
 }

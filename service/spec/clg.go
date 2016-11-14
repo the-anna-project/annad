@@ -19,5 +19,5 @@ type CLG interface {
 	// or not.
 	SetServiceCollection(serviceCollection Collection)
 
-	Validate() error
+
 }

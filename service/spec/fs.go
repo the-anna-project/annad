@@ -16,10 +16,10 @@ type FS interface {
 
 	Service() Collection
 
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
 	// WriteFile is aligned to ioutil.WriteFile.
 	WriteFile(filename string, bytes []byte, perm os.FileMode) error
 
-	Validate() error
+
 }

@@ -11,19 +11,6 @@ import (
 	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
-const (
-	// Depth is the default size of each directional coordinate within the
-	// connection space. E.g. using a Depth of 3, the resulting volume being taken
-	// by a 3 dimensional space would be 9.
-	Depth int = 1000000
-	// Dimensions is the default number of directional coordinates within the
-	// connection space. E.g. a dice has 3 dimensions.
-	Dimensions int = 3
-	// Weight is the default score applied to a connection expressing its
-	// importance.
-	Weight int = 0
-)
-
 // New creates a new connection service.
 func New() servicespec.Connection {
 	return &service{}
@@ -84,7 +71,7 @@ func (s *service) CreateConnection(a, b objectspec.Peer) error {
 	if len(res) == 0 {
 		// The connection does not exist. Therefore we create a new one.
 		seconds := s.newUnixSeconds()
-		weight := strconv.Itoa(Weight)
+		weight := strconv.Itoa(s.Service().Config().Space().Connection().Weight())
 		val := map[string]string{
 			"created": seconds,
 			"updated": seconds,
@@ -136,7 +123,9 @@ func (s *service) Metadata() map[string]string {
 }
 
 func (s *service) CreatePosition() (string, error) {
-	nums, err := s.Service().Random().CreateNMax(Dimensions, Depth)
+	count := s.Service().Config().Space().Dimension().Count()
+	depth := s.Service().Config().Space().Dimension().Depth()
+	nums, err := s.Service().Random().CreateNMax(count, depth)
 	if err != nil {
 		return "", maskAny(err)
 	}

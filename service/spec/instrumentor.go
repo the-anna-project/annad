@@ -62,9 +62,9 @@ type Instrumentor interface {
 
 	Service() Collection
 
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 
-	Validate() error
+
 
 	// WrapFunc wraps basic instrumentation around the given action. The returned
 	// function can be used as e.g. retry action.

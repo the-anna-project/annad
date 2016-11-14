@@ -133,8 +133,8 @@ type Storage interface {
 	SetBackoffFactory(bf func() Backoff)
 	SetPrefix(p string)
 	Service() Collection
-	SetServiceCollection(sc Collection)
-	Validate() error
+	SetServiceCollection(serviceCollection Collection)
+
 }
 
 // StorageCollection represents a collection of storage instances. This scopes
@@ -158,10 +158,10 @@ type StorageCollection interface {
 	SetConnection(c Storage)
 	SetFeature(c Storage)
 	SetGeneral(c Storage)
-	SetServiceCollection(sc Collection)
+	SetServiceCollection(serviceCollection Collection)
 	// Shutdown ends all processes of the storage collection like shutting down a
 	// machine. The call to Shutdown blocks until the storage collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
-	Validate() error
+
 }
