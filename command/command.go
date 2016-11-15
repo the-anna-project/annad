@@ -9,7 +9,12 @@ import (
 
 // New creates a new annad command.
 func New() *Command {
-	return &Command{}
+	command := &Command{}
+
+	command.SetBootCommand(boot.New())
+	command.SetVersionCommand(version.New())
+
+	return command
 }
 
 // Command represents the annad command.
@@ -40,6 +45,11 @@ func (c *Command) New() *cobra.Command {
 	return newCommand
 }
 
+// BootCommand returns the boot subcommand of the annad command.
+func (c *Command) BootCommand() *boot.Command {
+	return c.bootCommand
+}
+
 // SetBootCommand sets the boot subcommand for the annad command.
 func (c *Command) SetBootCommand(command *boot.Command) {
 	c.bootCommand = command
@@ -48,4 +58,9 @@ func (c *Command) SetBootCommand(command *boot.Command) {
 // SetVersionCommand sets the version subcommand for the annad command.
 func (c *Command) SetVersionCommand(command *version.Command) {
 	c.versionCommand = command
+}
+
+// VersionCommand returns the version subcommand of the annad command.
+func (c *Command) VersionCommand() *version.Command {
+	return c.versionCommand
 }
