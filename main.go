@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/xh3b4sd/anna/command"
-	"github.com/xh3b4sd/anna/object/config"
 )
 
 var (
@@ -23,7 +22,6 @@ func init() {
 func main() {
 	annadCommand := command.New()
 
-	annadCommand.BootCommand().SetConfigCollection(config.NewCollection())
 	annadCommand.BootCommand().SetGitCommit(gitCommit)
 	annadCommand.BootCommand().SetGoArch(goArch)
 	annadCommand.BootCommand().SetGoOS(goOS)

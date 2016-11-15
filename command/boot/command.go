@@ -13,7 +13,11 @@ import (
 
 // New creates a new boot command.
 func New() *Command {
-	return &Command{}
+	command := &Command{}
+
+	command.SetConfigCollection(config.NewCollection())
+
+	return command
 }
 
 // Command represents the boot command.
