@@ -9,24 +9,33 @@ import (
 
 	"github.com/cenk/backoff"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new random service.
-func New() spec.Random {
-	return &service{}
+func New() servicespec.Random {
+	newService := &service{}
+
+	newService.backoffFactory = func() servicespec.Backoff {
+		return &backoff.StopBackOff{}
+	}
+	newService.randFactory = rand.Int
+	newService.randReader = rand.Reader
+	newService.timeout = 1 * time.Second
+
+	return newService
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection spec.Collection
+	serviceCollection servicespec.Collection
 
 	// Settings.
 
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	backoffFactory func() spec.Backoff
+	backoffFactory func() servicespec.Backoff
 	metadata       map[string]string
 	// randFactory represents a service returning random values. Here e.g.
 	// crypto/rand.Int can be used.
@@ -49,13 +58,6 @@ func (s *service) Boot() {
 		"name": "random",
 		"type": "service",
 	}
-
-	s.backoffFactory = func() spec.Backoff {
-		return &backoff.StopBackOff{}
-	}
-	s.randFactory = rand.Int
-	s.randReader = rand.Reader
-	s.timeout = 1 * time.Second
 }
 
 func (s *service) CreateMax(max int) (int, error) {
@@ -116,14 +118,22 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() spec.Collection {
+func (s *service) Service() servicespec.Collection {
 	return s.serviceCollection
 }
 
-func (s *service) SetBackoffFactory(bf func() spec.Backoff) {
-	s.backoffFactory = bf
+func (s *service) SetBackoffFactory(backoffFactory func() servicespec.Backoff) {
+	s.backoffFactory = backoffFactory
 }
 
-func (s *service) SetServiceCollection(sc spec.Collection) {
-	s.serviceCollection = sc
+func (s *service) SetRandFactory(randFactory func(randReader io.Reader, max *big.Int) (n *big.Int, err error)) {
+	s.randFactory = randFactory
+}
+
+func (s *service) SetServiceCollection(serviceCollection servicespec.Collection) {
+	s.serviceCollection = serviceCollection
+}
+
+func (s *service) SetTimeout(timeout time.Duration) {
+	s.timeout = timeout
 }
