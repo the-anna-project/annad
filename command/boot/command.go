@@ -65,14 +65,15 @@ func (c *Command) New() *cobra.Command {
 		Run:   c.Execute,
 	}
 
+	c.configCollection.Config().SetDir(newCmd.PersistentFlags().String("config.dir", ".", "directory where to find the config file"))
+	c.configCollection.Config().SetName(newCmd.PersistentFlags().String("config.name", "config", "name of the config file without extension"))
+
 	c.configCollection.Endpoint().Text().SetAddress(newCmd.PersistentFlags().String("endpoint.text.address", "127.0.0.1:9119", "host:port to bind the text endpoint to"))
 	c.configCollection.Endpoint().Metric().SetAddress(newCmd.PersistentFlags().String("endpoint.metric.address", "127.0.0.1:9120", "host:port to bind the metric endpoint to"))
 
 	c.configCollection.Space().Connection().SetWeight(newCmd.PersistentFlags().Int("space.connection.weight", 0, "default weight of new connections within the connection space"))
-
 	c.configCollection.Space().Dimension().SetCount(newCmd.PersistentFlags().Int("space.dimension.count", 3, "default number of directional coordinates within the connection space"))
 	c.configCollection.Space().Dimension().SetDepth(newCmd.PersistentFlags().Int("space.dimension.depth", 1000000, "default size of each directional coordinate within the connection space"))
-
 	c.configCollection.Space().Peer().SetPosition(newCmd.PersistentFlags().String("space.peer.position", "0,0,0", "default position of new peers within the connection space"))
 
 	c.configCollection.Storage().Connection().SetAddress(newCmd.PersistentFlags().String("storage.connection.address", "127.0.0.1:6379", "host:port to connect to connection storage"))
