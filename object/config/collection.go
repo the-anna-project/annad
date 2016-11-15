@@ -64,7 +64,7 @@ func (c *Collection) Merge(flagSet *pflag.FlagSet) error {
 
 	flagSet.VisitAll(func(flag *pflag.Flag) {
 		if flag.Changed {
-			// The current flag was set via the command line. We definitly want to use
+			// The current flag was set via the command line. We definitely want to use
 			// the set value. Therefore we do not merge anything into it.
 			return
 		}
