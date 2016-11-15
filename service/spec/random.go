@@ -1,5 +1,11 @@
 package spec
 
+import (
+	"io"
+	"math/big"
+	"time"
+)
+
 // Random creates pseudo random numbers. The service might implement
 // retries using backoff strategies and timeouts.
 type Random interface {
@@ -14,6 +20,8 @@ type Random interface {
 	CreateNMax(n, max int) ([]int, error)
 	Metadata() map[string]string
 	Service() Collection
-	SetBackoffFactory(bf func() Backoff)
+	SetBackoffFactory(backoffFactory func() Backoff)
+	SetRandFactory(randFactory func(randReader io.Reader, max *big.Int) (n *big.Int, err error))
 	SetServiceCollection(serviceCollection Collection)
+	SetTimeout(timeout time.Duration)
 }
