@@ -8,14 +8,37 @@ import (
 
 	"github.com/xh3b4sd/anna/object/config/config"
 	"github.com/xh3b4sd/anna/object/config/endpoint"
+	"github.com/xh3b4sd/anna/object/config/endpoint/metric"
+	"github.com/xh3b4sd/anna/object/config/endpoint/text"
 	"github.com/xh3b4sd/anna/object/config/space"
+	spaceconnection "github.com/xh3b4sd/anna/object/config/space/connection"
+	"github.com/xh3b4sd/anna/object/config/space/dimension"
+	"github.com/xh3b4sd/anna/object/config/space/peer"
 	"github.com/xh3b4sd/anna/object/config/storage"
+	storageconnection "github.com/xh3b4sd/anna/object/config/storage/connection"
+	"github.com/xh3b4sd/anna/object/config/storage/feature"
+	"github.com/xh3b4sd/anna/object/config/storage/general"
 )
 
 // NewCollection creates a new config collection. It provides configuration for
 // the whole neural network.
 func NewCollection() *Collection {
-	return &Collection{}
+	collection := &Collection{}
+
+	collection.SetConfig(config.New())
+	collection.SetEndpointCollection(endpoint.NewCollection())
+	collection.SetSpaceCollection(space.NewCollection())
+	collection.SetStorageCollection(storage.NewCollection())
+	collection.Endpoint().SetMetric(metric.New())
+	collection.Endpoint().SetText(text.New())
+	collection.Space().SetConnection(spaceconnection.New())
+	collection.Space().SetDimension(dimension.New())
+	collection.Space().SetPeer(peer.New())
+	collection.Storage().SetConnection(storageconnection.New())
+	collection.Storage().SetFeature(feature.New())
+	collection.Storage().SetGeneral(general.New())
+
+	return collection
 }
 
 // Collection represents the config collection.
