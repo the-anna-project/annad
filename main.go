@@ -8,15 +8,16 @@ import (
 	"github.com/xh3b4sd/anna/command/boot"
 	"github.com/xh3b4sd/anna/command/version"
 	"github.com/xh3b4sd/anna/object/config"
+	configconfig "github.com/xh3b4sd/anna/object/config/config"
 	"github.com/xh3b4sd/anna/object/config/endpoint"
 	"github.com/xh3b4sd/anna/object/config/endpoint/metric"
 	"github.com/xh3b4sd/anna/object/config/endpoint/text"
 	"github.com/xh3b4sd/anna/object/config/space"
-	connectionspace "github.com/xh3b4sd/anna/object/config/space/connection"
+	spaceconnection "github.com/xh3b4sd/anna/object/config/space/connection"
 	"github.com/xh3b4sd/anna/object/config/space/dimension"
 	"github.com/xh3b4sd/anna/object/config/space/peer"
 	"github.com/xh3b4sd/anna/object/config/storage"
-	connectionstorage "github.com/xh3b4sd/anna/object/config/storage/connection"
+	storageconnection "github.com/xh3b4sd/anna/object/config/storage/connection"
 	"github.com/xh3b4sd/anna/object/config/storage/feature"
 	"github.com/xh3b4sd/anna/object/config/storage/general"
 )
@@ -39,15 +40,16 @@ func main() {
 	versionCommand := version.New()
 
 	configCollection := config.NewCollection()
+	configCollection.SetConfig(configconfig.New())
 	configCollection.SetEndpointCollection(endpoint.NewCollection())
 	configCollection.SetSpaceCollection(space.NewCollection())
 	configCollection.SetStorageCollection(storage.NewCollection())
 	configCollection.Endpoint().SetMetric(metric.New())
 	configCollection.Endpoint().SetText(text.New())
-	configCollection.Space().SetConnection(connectionspace.New())
+	configCollection.Space().SetConnection(spaceconnection.New())
 	configCollection.Space().SetDimension(dimension.New())
 	configCollection.Space().SetPeer(peer.New())
-	configCollection.Storage().SetConnection(connectionstorage.New())
+	configCollection.Storage().SetConnection(storageconnection.New())
 	configCollection.Storage().SetFeature(feature.New())
 	configCollection.Storage().SetGeneral(general.New())
 
