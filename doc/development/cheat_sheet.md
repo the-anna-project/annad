@@ -53,3 +53,22 @@ tools `sed` and `find`.
 ```
 sed -i 's/search/replace/g' $(find . -name *.go)
 ```
+
+### list package dependencies
+Sometimes it can be helpful to know which packages are imported within a
+specific go package. `go list` is your friend. Note that there are also other
+interesting information within the provided JSON output besides `Imports`. Try
+e.g. `Deps`.
+```
+$ go list -json ./service/random | jq .Imports
+[
+  "crypto/rand",
+  "fmt",
+  "github.com/cenk/backoff",
+  "github.com/juju/errgo",
+  "github.com/xh3b4sd/anna/service/spec",
+  "io",
+  "math/big",
+  "time"
+]
+```
