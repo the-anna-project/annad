@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/xh3b4sd/anna/service/random"
+	"github.com/the-anna-project/random"
 )
 
 func Test_IDService_NewService_Error_HashChars(t *testing.T) {

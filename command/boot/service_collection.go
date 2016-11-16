@@ -6,6 +6,7 @@ import (
 	"github.com/cenk/backoff"
 	kitlog "github.com/go-kit/kit/log"
 
+	"github.com/the-anna-project/random"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service"
@@ -22,7 +23,6 @@ import (
 	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
-	"github.com/xh3b4sd/anna/service/random"
 	"github.com/xh3b4sd/anna/service/storage"
 	"github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"
