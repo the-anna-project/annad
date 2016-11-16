@@ -3,20 +3,20 @@ package storage
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // NewCollection creates a new storage collection.
-func NewCollection() spec.StorageCollection {
+func NewCollection() servicespec.StorageCollection {
 	return &collection{}
 }
 
 type collection struct {
 	// Dependencies.
 
-	connection spec.Storage
-	feature    spec.Storage
-	general    spec.Storage
+	connection servicespec.StorageService
+	feature    servicespec.StorageService
+	general    servicespec.StorageService
 
 	// Settings.
 
@@ -29,27 +29,27 @@ func (c *collection) Boot() {
 	go c.General().Boot()
 }
 
-func (c *collection) Connection() spec.Storage {
+func (c *collection) Connection() servicespec.StorageService {
 	return c.connection
 }
 
-func (c *collection) Feature() spec.Storage {
+func (c *collection) Feature() servicespec.StorageService {
 	return c.feature
 }
 
-func (c *collection) General() spec.Storage {
+func (c *collection) General() servicespec.StorageService {
 	return c.general
 }
 
-func (c *collection) SetConnection(conn spec.Storage) {
+func (c *collection) SetConnection(conn servicespec.StorageService) {
 	c.connection = conn
 }
 
-func (c *collection) SetFeature(f spec.Storage) {
+func (c *collection) SetFeature(f servicespec.StorageService) {
 	c.feature = f
 }
 
-func (c *collection) SetGeneral(g spec.Storage) {
+func (c *collection) SetGeneral(g servicespec.StorageService) {
 	c.general = g
 }
 

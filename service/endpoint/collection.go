@@ -3,19 +3,19 @@ package endpoint
 import (
 	"sync"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // NewCollection creates a new endpoint collection.
-func NewCollection() spec.EndpointCollection {
+func NewCollection() servicespec.EndpointCollection {
 	return &collection{}
 }
 
 type collection struct {
 	// Dependencies.
 
-	metric spec.Endpoint
-	text   spec.Endpoint
+	metric servicespec.EndpointService
+	text   servicespec.EndpointService
 
 	// Settings.
 
@@ -27,19 +27,19 @@ func (c *collection) Boot() {
 	go c.Text().Boot()
 }
 
-func (c *collection) Metric() spec.Endpoint {
+func (c *collection) Metric() servicespec.EndpointService {
 	return c.metric
 }
 
-func (c *collection) Text() spec.Endpoint {
+func (c *collection) Text() servicespec.EndpointService {
 	return c.text
 }
 
-func (c *collection) SetMetric(metric spec.Endpoint) {
+func (c *collection) SetMetric(metric servicespec.EndpointService) {
 	c.metric = metric
 }
 
-func (c *collection) SetText(text spec.Endpoint) {
+func (c *collection) SetText(text servicespec.EndpointService) {
 	c.text = text
 }
 

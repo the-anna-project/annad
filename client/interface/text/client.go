@@ -6,11 +6,11 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	systemspec "github.com/the-anna-project/spec/legacy"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/networkresponse"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textoutput"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
 )
 
 // New creates a new text interface service.
@@ -21,7 +21,7 @@ func New() systemspec.TextInterfaceClient {
 type client struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -68,7 +68,7 @@ func (c *client) EncodeRequest(textInput objectspec.TextInput) *StreamTextReques
 	return streamTextRequest
 }
 
-func (c *client) Service() servicespec.Collection {
+func (c *client) Service() servicespec.ServiceCollection {
 	return c.serviceCollection
 }
 
@@ -76,7 +76,7 @@ func (c *client) SetGRPCAddress(gRPCAddr string) {
 	c.gRPCAddr = gRPCAddr
 }
 
-func (c *client) SetServiceCollection(sc servicespec.Collection) {
+func (c *client) SetServiceCollection(sc servicespec.ServiceCollection) {
 	c.serviceCollection = sc
 }
 

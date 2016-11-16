@@ -1,4 +1,4 @@
-// Package network implements spec.Network to provide a neural network based on
+// Package network implements spec.NetworkService to provide a neural network based on
 // dynamic and self improving CLG execution. The network provides input and
 // output channels. When input is received it is injected into the neural
 // communication. The following neural activity calculates output which is
@@ -12,29 +12,29 @@ import (
 	"sync"
 	"time"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 
 	workerpool "github.com/xh3b4sd/worker-pool"
 )
 
 // New creates a new network service.
-func New() servicespec.Network {
+func New() servicespec.NetworkService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
 	bootOnce sync.Once
 	// CLGIDs provides a mapping of CLG names pointing to their corresponding CLG.
-	clgs   map[string]servicespec.CLG
+	clgs   map[string]servicespec.CLGService
 	closer chan struct{}
 	// Delay causes each CLG execution to be delayed. This value represents a
 	// default value. A delay can be used harden the internal synchronization of
@@ -51,7 +51,7 @@ type service struct {
 	shutdownOnce sync.Once
 }
 
-func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) Activate(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Activate")
 
 	networkPayload, err := s.Service().Activator().Activate(CLG, networkPayload)
@@ -109,7 +109,7 @@ func (s *service) Boot() {
 	})
 }
 
-func (s *service) Calculate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) Calculate(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Calculate")
 
 	outputs, err := filterError(reflect.ValueOf(CLG.GetCalculate()).Call(networkPayload.GetCLGInput()))
@@ -181,7 +181,7 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (s *service) EventHandler(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) EventHandler(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	var err error
 
 	// Activate if the CLG's interface is satisfied by the given
@@ -213,7 +213,7 @@ func (s *service) EventHandler(CLG servicespec.CLG, networkPayload objectspec.Ne
 	return nil
 }
 
-func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Forward")
 
 	err := s.Service().Forwarder().Forward(CLG, networkPayload)
@@ -243,7 +243,7 @@ func (s *service) InputListener(canceler <-chan struct{}) error {
 	}
 }
 
-func (s *service) InputHandler(CLG servicespec.CLG, textInput objectspec.TextInput) error {
+func (s *service) InputHandler(CLG servicespec.CLGService, textInput objectspec.TextInput) error {
 	// In case the text request defines the echo flag, we overwrite the given CLG
 	// directly to the output CLG. This will cause the created network payload to
 	// be forwarded to the output CLG without indirection. Note that this should
@@ -322,15 +322,15 @@ func (s *service) Shutdown() {
 	})
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Track(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Track")
 
 	err := s.Service().Tracker().Track(CLG, networkPayload)

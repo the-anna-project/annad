@@ -61,8 +61,8 @@ gofmt:
 
 gogenerate:
 	@go generate ./...
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:client/interface/text/ spec/text_endpoint.proto
-	@protoc --proto_path=spec --go_out=plugins=grpc,import_path=text:service/endpoint/text/ spec/text_endpoint.proto
+	@protoc --proto_path=vendor/github.com/the-anna-project/spec/legacy --go_out=plugins=grpc,import_path=text:client/interface/text/ vendor/github.com/the-anna-project/spec/legacy/text_endpoint.proto
+	@protoc --proto_path=vendor/github.com/the-anna-project/spec/legacy --go_out=plugins=grpc,import_path=text:service/endpoint/text/ vendor/github.com/the-anna-project/spec/legacy/text_endpoint.proto
 
 goget:
 	@# Setup workspace.

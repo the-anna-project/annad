@@ -1,7 +1,7 @@
 package permutationlist
 
 import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 func permuteValues(list objectspec.PermutationList) []interface{} {

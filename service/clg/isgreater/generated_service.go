@@ -6,18 +6,18 @@ package isgreater
 // the clg package. There is the go generate statement placed to invoke clggen.
 
 import (
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new isgreater CLG service.
-func New() servicespec.CLG {
+func New() servicespec.CLGService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -45,10 +45,10 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(serviceCollection servicespec.Collection) {
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
 	s.serviceCollection = serviceCollection
 }

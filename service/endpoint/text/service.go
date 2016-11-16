@@ -1,5 +1,5 @@
-// Package text implements spec.Endpoint and provides a way to feed neural
-// networks with text input. To make Anna consume text, there is the text
+// Package text implements spec.EndpointService and provides a way to feed
+// neural networks with text input. To make Anna consume text, there is the text
 // endpoint implemented through the network API.
 package text
 
@@ -11,21 +11,21 @@ import (
 
 	"google.golang.org/grpc"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/networkresponse"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textinput"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new text endpoint service.
-func New() servicespec.Endpoint {
+func New() servicespec.EndpointService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -117,7 +117,7 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
@@ -125,7 +125,7 @@ func (s *service) SetAddress(address string) {
 	s.address = address
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

@@ -1,4 +1,4 @@
-// Package os implements spec.FS and provides a real OS
+// Package os implements spec.FSService and provides a real OS
 // bound file system implementation.
 package os
 
@@ -6,18 +6,18 @@ import (
 	"io/ioutil"
 	"os"
 
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new OS file system service.
-func New() servicespec.FS {
+func New() servicespec.FSService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -52,11 +52,11 @@ func (s *service) ReadFile(filename string) ([]byte, error) {
 	return bytes, nil
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

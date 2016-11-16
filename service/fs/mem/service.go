@@ -1,4 +1,4 @@
-// Package mem implements spec.FS and provides an in-memory file system
+// Package mem implements spec.FSService and provides an in-memory file system
 // implementation for abstraction and testing reasons.
 package mem
 
@@ -6,18 +6,18 @@ import (
 	"os"
 	"sync"
 
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new memory file system service.
-func New() servicespec.FS {
+func New() servicespec.FSService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -63,11 +63,11 @@ func (s *service) ReadFile(filename string) ([]byte, error) {
 	return nil, maskAny(pathErr)
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

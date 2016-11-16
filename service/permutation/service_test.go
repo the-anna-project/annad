@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	objectspec "github.com/the-anna-project/spec/object"
 	"github.com/xh3b4sd/anna/object/permutationlist"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
 )
 
 func testMaybeNewList(t *testing.T, values []interface{}) objectspec.PermutationList {

@@ -3,7 +3,7 @@
 package isbetween
 
 import (
-	"github.com/xh3b4sd/anna/object/spec"
+	"github.com/the-anna-project/spec/object"
 )
 
 // calculate checks whether a given number lies between two given numbers.

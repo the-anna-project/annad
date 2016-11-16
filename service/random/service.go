@@ -9,14 +9,15 @@ import (
 
 	"github.com/cenk/backoff"
 
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new random service.
-func New() servicespec.Random {
+func New() servicespec.RandomService {
 	newService := &service{}
 
-	newService.backoffFactory = func() servicespec.Backoff {
+	newService.backoffFactory = func() objectspec.Backoff {
 		return &backoff.StopBackOff{}
 	}
 	newService.randFactory = rand.Int
@@ -29,13 +30,13 @@ func New() servicespec.Random {
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	backoffFactory func() servicespec.Backoff
+	backoffFactory func() objectspec.Backoff
 	metadata       map[string]string
 	// randFactory represents a service returning random values. Here e.g.
 	// crypto/rand.Int can be used.
@@ -118,11 +119,11 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetBackoffFactory(backoffFactory func() servicespec.Backoff) {
+func (s *service) SetBackoffFactory(backoffFactory func() objectspec.Backoff) {
 	s.backoffFactory = backoffFactory
 }
 
@@ -130,7 +131,7 @@ func (s *service) SetRandFactory(randFactory func(randReader io.Reader, max *big
 	s.randFactory = randFactory
 }
 
-func (s *service) SetServiceCollection(serviceCollection servicespec.Collection) {
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
 	s.serviceCollection = serviceCollection
 }
 

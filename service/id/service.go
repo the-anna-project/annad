@@ -2,7 +2,7 @@
 // strings.
 package id
 
-import "github.com/xh3b4sd/anna/service/spec"
+import "github.com/the-anna-project/spec/service"
 
 const (
 	// Hex128 creates a new hexa decimal encoded, pseudo random, 128 bit hash.
@@ -22,14 +22,14 @@ const (
 )
 
 // New creates a new ID service.
-func New() spec.ID {
+func New() spec.IDService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection spec.Collection
+	serviceCollection spec.ServiceCollection
 
 	// Settings.
 
@@ -67,11 +67,11 @@ func (s *service) New() (string, error) {
 	return ID, nil
 }
 
-func (s *service) Service() spec.Collection {
+func (s *service) Service() spec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc spec.Collection) {
+func (s *service) SetServiceCollection(sc spec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

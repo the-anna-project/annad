@@ -3,7 +3,7 @@ package prometheus
 import (
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // GaugeConfig represents the configuration used to create a new prometheus
@@ -33,7 +33,7 @@ func DefaultGaugeConfig() GaugeConfig {
 }
 
 // NewGauge creates a new configured prometheus gauge object.
-func NewGauge(config GaugeConfig) (spec.Gauge, error) {
+func NewGauge(config GaugeConfig) (servicespec.InstrumentorGauge, error) {
 	newGauge := &gauge{
 		GaugeConfig: config,
 	}

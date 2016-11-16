@@ -6,7 +6,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	"github.com/the-anna-project/spec/service"
 )
 
 func testMustNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {

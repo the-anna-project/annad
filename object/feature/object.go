@@ -3,7 +3,7 @@ package feature
 import (
 	"sync"
 
-	objectspec "github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // New creates a new feature object. A feature represents a differentiable part

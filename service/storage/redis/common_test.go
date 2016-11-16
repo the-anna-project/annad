@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/the-anna-project/spec/legacy"
 	"github.com/xh3b4sd/anna/service/log"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 // rootLogger implements spec.RootLogger and is used to capture log messages.

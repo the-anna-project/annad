@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"math"
 
+	"github.com/the-anna-project/spec/legacy"
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/spec"
 )
 
 // Config represents the configuration used to create a new connection path

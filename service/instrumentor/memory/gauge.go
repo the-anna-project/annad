@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // GaugeConfig represents the configuration used to create a new memory gauge
@@ -18,7 +18,7 @@ func DefaultGaugeConfig() GaugeConfig {
 }
 
 // NewGauge creates a new configured memory gauge object.
-func NewGauge(config GaugeConfig) (spec.Gauge, error) {
+func NewGauge(config GaugeConfig) (servicespec.InstrumentorGauge, error) {
 	newGauge := &gauge{
 		GaugeConfig: config,
 	}
