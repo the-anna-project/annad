@@ -3,7 +3,7 @@
 package lesser
 
 import (
-	"github.com/xh3b4sd/anna/object/spec"
+	"github.com/the-anna-project/spec/object"
 )
 
 // calculate returns the number that is lesser than the other.

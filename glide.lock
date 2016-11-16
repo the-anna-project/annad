@@ -1,0 +1,12 @@
+hash: f0d3fb8d968d87a4dcb25adbadb1f03355755ef1f712b00db63167596ba941ba
+updated: 2016-11-16T15:15:38.048959517+01:00
+imports:
+- name: github.com/alicebob/miniredis
+  version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
+- name: github.com/bsm/redeo
+  version: 1ce09fc76693fb3c1ca9b529c66f38920beb6fb8
+  subpackages:
+  - info
+- name: github.com/the-anna-project/spec
+  version: e396e1a44aef51cc90466fccbdf965c3dc40cf2d
+testImports: []

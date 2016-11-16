@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	objectspec "github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 const (

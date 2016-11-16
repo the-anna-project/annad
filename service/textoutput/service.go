@@ -3,19 +3,19 @@
 package textoutput
 
 import (
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new text output service.
-func New() servicespec.TextOutput {
+func New() servicespec.TextOutputService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -46,10 +46,10 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }

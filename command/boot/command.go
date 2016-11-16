@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/config"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new boot command.
@@ -25,7 +25,7 @@ type Command struct {
 	// Dependencies.
 
 	configCollection  *config.Collection
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 

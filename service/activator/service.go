@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"strings"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/permutationlist"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/service/permutation"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // New creates a new activator service.
-func New() servicespec.Activator {
+func New() servicespec.ActivatorService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -38,7 +38,7 @@ func (s *service) Boot() {
 	}
 }
 
-func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) Activate(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	s.Service().Log().Line("func", "Activate")
 
 	// Fetch the queued network payloads. queue is s string of comma separated
@@ -79,7 +79,7 @@ func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.Networ
 	}
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error){
+	lookups := []func(CLG servicespec.CLGService, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error){
 		s.GetNetworkPayload,
 		s.New,
 	}
@@ -134,7 +134,7 @@ func (s *service) Activate(CLG servicespec.CLG, networkPayload objectspec.Networ
 	return newNetworkPayload, nil
 }
 
-func (s *service) GetNetworkPayload(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) GetNetworkPayload(CLG servicespec.CLGService, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	// Fetch the combination of successful behaviour IDs which are known to be
 	// useful for the activation of the requested CLG. The network payloads sent
 	// by the CLGs being fetched here are known to be useful because they have
@@ -207,7 +207,7 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
+func (s *service) New(CLG servicespec.CLGService, queue []objectspec.NetworkPayload) (objectspec.NetworkPayload, error) {
 	// Track the input types of the requested CLG as string slice to have
 	// something that is easily comparable and efficient. By convention the first
 	// input argument of each CLG is a context. We remove the first argument here,
@@ -297,10 +297,10 @@ func (s *service) New(CLG servicespec.CLG, queue []objectspec.NetworkPayload) (o
 	return newNetworkPayload, nil
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }

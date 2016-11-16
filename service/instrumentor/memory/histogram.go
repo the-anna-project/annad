@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // HistogramConfig represents the configuration used to create a new memory
@@ -18,7 +18,7 @@ func DefaultHistogramConfig() HistogramConfig {
 }
 
 // NewHistogram creates a new configured memory histogram object.
-func NewHistogram(config HistogramConfig) (spec.Histogram, error) {
+func NewHistogram(config HistogramConfig) (servicespec.InstrumentorHistogram, error) {
 	newHistogram := &histogram{
 		HistogramConfig: config,
 	}

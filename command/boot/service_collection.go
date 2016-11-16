@@ -6,6 +6,8 @@ import (
 	"github.com/cenk/backoff"
 	kitlog "github.com/go-kit/kit/log"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/activator"
 	"github.com/xh3b4sd/anna/service/connection"
@@ -21,7 +23,6 @@ import (
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/random"
-	"github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 	"github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"
@@ -30,26 +31,26 @@ import (
 	"github.com/xh3b4sd/anna/service/tracker"
 )
 
-func (c *Command) newServiceCollection() spec.Collection {
+func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	// Set.
 	collection := service.NewCollection()
 
-	collection.SetActivator(c.newActivatorService())
-	collection.SetConnection(c.newConnectionService())
+	collection.SetActivatorService(c.newActivatorService())
+	collection.SetConnectionService(c.newConnectionService())
 	collection.SetEndpointCollection(c.newEndpointCollection())
-	collection.SetFeature(c.newFeatureService())
-	collection.SetForwarder(c.newForwarderService())
-	collection.SetFS(c.newFSService())
-	collection.SetID(c.newIDService())
-	collection.SetInstrumentor(c.newInstrumentorService())
-	collection.SetLog(c.newLogService())
-	collection.SetNetwork(c.newNetworkService())
-	collection.SetPermutation(c.newPermutationService())
-	collection.SetRandom(c.newRandomService())
+	collection.SetFeatureService(c.newFeatureService())
+	collection.SetForwarderService(c.newForwarderService())
+	collection.SetFSService(c.newFSService())
+	collection.SetIDService(c.newIDService())
+	collection.SetInstrumentorService(c.newInstrumentorService())
+	collection.SetLogService(c.newLogService())
+	collection.SetNetworkService(c.newNetworkService())
+	collection.SetPermutationService(c.newPermutationService())
+	collection.SetRandomService(c.newRandomService())
 	collection.SetStorageCollection(c.newStorageCollection())
-	collection.SetTextInput(c.newTextInputService())
-	collection.SetTextOutput(c.newTextOutputService())
-	collection.SetTracker(c.newTrackerService())
+	collection.SetTextInputService(c.newTextInputService())
+	collection.SetTextOutputService(c.newTextOutputService())
+	collection.SetTrackerService(c.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
 	collection.Connection().SetServiceCollection(collection)
@@ -74,11 +75,11 @@ func (c *Command) newServiceCollection() spec.Collection {
 	return collection
 }
 
-func (c *Command) newActivatorService() spec.Activator {
+func (c *Command) newActivatorService() servicespec.ActivatorService {
 	return activator.New()
 }
 
-func (c *Command) newConnectionService() spec.Connection {
+func (c *Command) newConnectionService() servicespec.ConnectionService {
 	newService := connection.New()
 
 	newService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
@@ -88,13 +89,13 @@ func (c *Command) newConnectionService() spec.Connection {
 	return newService
 }
 
-func (c *Command) newBackoffFactory() func() spec.Backoff {
-	return func() spec.Backoff {
+func (c *Command) newBackoffFactory() func() objectspec.Backoff {
+	return func() objectspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	}
 }
 
-func (c *Command) newEndpointCollection() spec.EndpointCollection {
+func (c *Command) newEndpointCollection() servicespec.EndpointCollection {
 	newCollection := endpoint.NewCollection()
 
 	metricService := metric.New()
@@ -109,28 +110,28 @@ func (c *Command) newEndpointCollection() spec.EndpointCollection {
 	return newCollection
 }
 
-func (c *Command) newFeatureService() spec.Feature {
+func (c *Command) newFeatureService() servicespec.FeatureService {
 	return feature.New()
 }
 
-func (c *Command) newForwarderService() spec.Forwarder {
+func (c *Command) newForwarderService() servicespec.ForwarderService {
 	return forwarder.New()
 }
 
 // TODO make mem/os configurable
-func (c *Command) newFSService() spec.FS {
+func (c *Command) newFSService() servicespec.FSService {
 	return mem.New()
 }
 
-func (c *Command) newIDService() spec.ID {
+func (c *Command) newIDService() servicespec.IDService {
 	return id.New()
 }
 
-func (c *Command) newInstrumentorService() spec.Instrumentor {
+func (c *Command) newInstrumentorService() servicespec.InstrumentorService {
 	return prometheus.New()
 }
 
-func (c *Command) newLogService() spec.Log {
+func (c *Command) newLogService() servicespec.LogService {
 	newService := log.New()
 
 	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
@@ -138,15 +139,15 @@ func (c *Command) newLogService() spec.Log {
 	return newService
 }
 
-func (c *Command) newNetworkService() spec.Network {
+func (c *Command) newNetworkService() servicespec.NetworkService {
 	return network.New()
 }
 
-func (c *Command) newPermutationService() spec.Permutation {
+func (c *Command) newPermutationService() servicespec.PermutationService {
 	return permutation.New()
 }
 
-func (c *Command) newRandomService() spec.Random {
+func (c *Command) newRandomService() servicespec.RandomService {
 	newService := random.New()
 
 	newService.SetBackoffFactory(c.newBackoffFactory())
@@ -154,7 +155,7 @@ func (c *Command) newRandomService() spec.Random {
 	return newService
 }
 
-func (c *Command) newStorageCollection() spec.StorageCollection {
+func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	newCollection := storage.NewCollection()
 
 	// Connection.
@@ -202,14 +203,14 @@ func (c *Command) newStorageCollection() spec.StorageCollection {
 	return newCollection
 }
 
-func (c *Command) newTextInputService() spec.TextInput {
+func (c *Command) newTextInputService() servicespec.TextInputService {
 	return textinput.New()
 }
 
-func (c *Command) newTextOutputService() spec.TextOutput {
+func (c *Command) newTextOutputService() servicespec.TextOutputService {
 	return textoutput.New()
 }
 
-func (c *Command) newTrackerService() spec.Tracker {
+func (c *Command) newTrackerService() servicespec.TrackerService {
 	return tracker.New()
 }

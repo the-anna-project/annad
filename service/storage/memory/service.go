@@ -7,27 +7,28 @@ import (
 	"github.com/alicebob/miniredis"
 	"github.com/cenk/backoff"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service/storage/redis"
 )
 
 // New creates a new memory storage service. Therefore it manages an in-memory
 // redis instance which can be shut down using the configured closer. This is
 // used for local development.
-func New() spec.Storage {
+func New() servicespec.StorageService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection spec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
 	closer       chan struct{}
 	metadata     map[string]string
-	redisStorage spec.Storage
+	redisStorage servicespec.StorageService
 	shutdownOnce sync.Once
 }
 
@@ -66,7 +67,7 @@ func (s *service) Boot() {
 
 	newRedisStorage := redis.New()
 	newRedisStorage.SetAddress(redisAddr)
-	newRedisStorage.SetBackoffFactory(func() spec.Backoff {
+	newRedisStorage.SetBackoffFactory(func() objectspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
 
@@ -211,7 +212,7 @@ func (s *service) RemoveScoredElement(key string, element string) error {
 	return nil
 }
 
-func (s *service) Service() spec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
@@ -229,7 +230,7 @@ func (s *service) Set(key, value string) error {
 func (s *service) SetAddress(a string) {
 }
 
-func (s *service) SetBackoffFactory(bf func() spec.Backoff) {
+func (s *service) SetBackoffFactory(bf func() objectspec.Backoff) {
 }
 
 func (s *service) SetElementByScore(key, element string, score float64) error {
@@ -246,7 +247,7 @@ func (s *service) SetElementByScore(key, element string, score float64) error {
 func (s *service) SetPrefix(p string) {
 }
 
-func (s *service) SetServiceCollection(sc spec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

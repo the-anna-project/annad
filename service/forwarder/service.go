@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // New creates a new forwarder service.
-func New() servicespec.Forwarder {
+func New() servicespec.ForwarderService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -43,11 +43,11 @@ func (s *service) Boot() {
 	s.maxSignals = 5
 }
 
-func (s *service) Forward(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Forward")
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error){
+	lookups := []func(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error){
 		s.GetNetworkPayloads,
 		s.News,
 	}
@@ -93,7 +93,7 @@ func (s *service) GetMaxSignals() int {
 	return s.maxSignals
 }
 
-func (s *service) GetNetworkPayloads(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
+func (s *service) GetNetworkPayloads(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Check if there are behaviour IDs known that we can use to forward the
@@ -140,7 +140,7 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
+func (s *service) News(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Decide how many new behaviour IDs should be created. This defines the
@@ -205,10 +205,10 @@ func (s *service) News(CLG servicespec.CLG, networkPayload objectspec.NetworkPay
 	return newNetworkPayloads, nil
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }

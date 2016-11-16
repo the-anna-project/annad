@@ -1,4 +1,4 @@
-// Package memory mocks spec.Instrumentor and does effectively nothing. It
+// Package memory mocks spec.InstrumentorService and does effectively nothing. It
 // is only used for default configurations that require a satisfied
 // instrumentation implementation. This should then be overwritten with a valid
 // implementation if required.
@@ -7,11 +7,11 @@ package memory
 import (
 	"net/http"
 
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new memory instrumentation service.
-func New() spec.Instrumentor {
+func New() servicespec.InstrumentorService {
 	return &service{}
 }
 
@@ -30,7 +30,7 @@ func (s *service) ExecFunc(key string, action func() error) error {
 	return nil
 }
 
-func (s *service) GetCounter(key string) (spec.Counter, error) {
+func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error) {
 	newConfig := DefaultCounterConfig()
 	newCounter, err := NewCounter(newConfig)
 	if err != nil {
@@ -40,7 +40,7 @@ func (s *service) GetCounter(key string) (spec.Counter, error) {
 	return newCounter, nil
 }
 
-func (s *service) GetGauge(key string) (spec.Gauge, error) {
+func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
 	newConfig := DefaultGaugeConfig()
 	newGauge, err := NewGauge(newConfig)
 	if err != nil {
@@ -50,7 +50,7 @@ func (s *service) GetGauge(key string) (spec.Gauge, error) {
 	return newGauge, nil
 }
 
-func (s *service) GetHistogram(key string) (spec.Histogram, error) {
+func (s *service) GetHistogram(key string) (servicespec.InstrumentorHistogram, error) {
 	newConfig := DefaultHistogramConfig()
 	newHistogram, err := NewHistogram(newConfig)
 	if err != nil {
@@ -80,11 +80,11 @@ func (s *service) NewKey(s ...string) string {
 	return ""
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return nil
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 }
 
 func (s *service) WrapFunc(key string, action func() error) func() error {

@@ -3,7 +3,7 @@ package activator
 import (
 	"encoding/json"
 
-	objectspec "github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 func (s *service) persistQueue(key string, queue []objectspec.NetworkPayload) error {

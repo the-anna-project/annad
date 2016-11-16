@@ -8,7 +8,7 @@ import (
 
 	netcontext "golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/object/spec"
+	"github.com/the-anna-project/spec/object"
 )
 
 // Config represents the configuration used to create a new context object.

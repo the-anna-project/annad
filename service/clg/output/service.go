@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/the-anna-project/spec/object"
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	"github.com/xh3b4sd/anna/object/spec"
 	"github.com/xh3b4sd/anna/object/textoutput"
 )
 

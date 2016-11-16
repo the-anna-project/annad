@@ -1,4 +1,4 @@
-// Package prometheus implements spec.Instrumentor and provides instrumentation
+// Package prometheus implements spec.InstrumentorService and provides instrumentation
 // primitives to manage application metrics.
 package prometheus
 
@@ -10,24 +10,24 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new pronetheus instrumentor service.
-func New() spec.Instrumentor {
+func New() servicespec.InstrumentorService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection spec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
-	counters   map[string]spec.Counter
-	gauges     map[string]spec.Gauge
-	histograms map[string]spec.Histogram
+	counters   map[string]servicespec.InstrumentorCounter
+	gauges     map[string]servicespec.InstrumentorGauge
+	histograms map[string]servicespec.InstrumentorHistogram
 	// httpEndpoint represents the HTTP endpoint used to register the
 	// httpHandler. In the context of Prometheus this is usually /metrics.
 	httpEndpoint string
@@ -56,9 +56,9 @@ func (s *service) Boot() {
 		"type": "service",
 	}
 
-	s.counters = map[string]spec.Counter{}
-	s.gauges = map[string]spec.Gauge{}
-	s.histograms = map[string]spec.Histogram{}
+	s.counters = map[string]servicespec.InstrumentorCounter{}
+	s.gauges = map[string]servicespec.InstrumentorGauge{}
+	s.histograms = map[string]servicespec.InstrumentorHistogram{}
 	s.httpEndpoint = "/metrics"
 	s.httpHandler = prometheus.Handler()
 	s.mutex = sync.Mutex{}
@@ -90,7 +90,7 @@ func (s *service) ExecFunc(key string, action func() error) error {
 	return nil
 }
 
-func (s *service) GetCounter(key string) (spec.Counter, error) {
+func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -115,7 +115,7 @@ func (s *service) GetCounter(key string) (spec.Counter, error) {
 	return newCounter, nil
 }
 
-func (s *service) GetGauge(key string) (spec.Gauge, error) {
+func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -140,7 +140,7 @@ func (s *service) GetGauge(key string) (spec.Gauge, error) {
 	return newGauge, nil
 }
 
-func (s *service) GetHistogram(key string) (spec.Histogram, error) {
+func (s *service) GetHistogram(key string) (servicespec.InstrumentorHistogram, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -185,11 +185,11 @@ func (s *service) NewKey(str ...string) string {
 	return strings.Join(append(s.prefixes, str...), "_")
 }
 
-func (s *service) Service() spec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc spec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

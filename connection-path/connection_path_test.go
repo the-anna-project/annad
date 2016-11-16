@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/xh3b4sd/anna/spec"
+	"github.com/the-anna-project/spec/legacy"
 )
 
 func testMaybeNewConnectionPath(t *testing.T, coordinates [][]float64) spec.ConnectionPath {

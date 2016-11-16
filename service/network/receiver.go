@@ -1,6 +1,7 @@
 package network
 
 import (
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service/clg/divide"
 	"github.com/xh3b4sd/anna/service/clg/greater"
 	"github.com/xh3b4sd/anna/service/clg/input"
@@ -17,7 +18,6 @@ import (
 	"github.com/xh3b4sd/anna/service/clg/splitfeatures"
 	"github.com/xh3b4sd/anna/service/clg/subtract"
 	"github.com/xh3b4sd/anna/service/clg/sum"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // logNetworkError logs the given error in a specific way dependening on the
@@ -44,9 +44,9 @@ func (s *service) logWorkerErrors(errors chan error) {
 
 // newCLGs returns a list of all CLGs which are configured and ready to be used
 // within the neural network.
-func (s *service) newCLGs() map[string]servicespec.CLG {
+func (s *service) newCLGs() map[string]servicespec.CLGService {
 	// TODO this should be initialized with the service collection
-	list := []servicespec.CLG{
+	list := []servicespec.CLGService{
 		divide.New(),
 		input.New(),
 		divide.New(),
@@ -67,7 +67,7 @@ func (s *service) newCLGs() map[string]servicespec.CLG {
 		sum.New(),
 	}
 
-	newCLGs := map[string]servicespec.CLG{}
+	newCLGs := map[string]servicespec.CLGService{}
 
 	for _, CLG := range list {
 		newCLGs[CLG.Metadata()["name"]] = CLG

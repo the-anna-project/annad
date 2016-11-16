@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"sync"
 
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new tracker service.
-func New() servicespec.Tracker {
+func New() servicespec.TrackerService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -35,7 +35,7 @@ func (s *service) Boot() {
 	}
 }
 
-func (s *service) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) CLGIDs(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	destinationID := string(networkPayload.GetDestination())
 	sourceIDs := networkPayload.GetSources()
 
@@ -69,7 +69,7 @@ func (s *service) CLGIDs(CLG servicespec.CLG, networkPayload objectspec.NetworkP
 	return nil
 }
 
-func (s *service) CLGNames(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) CLGNames(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	destinationName := CLG.Metadata()["name"]
 	sourceIDs := networkPayload.GetSources()
 
@@ -117,19 +117,19 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 
-func (s *service) Track(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error {
+func (s *service) Track(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error {
 	s.Service().Log().Line("func", "Track")
 
 	// This is the list of lookup functions which is executed seuqentially.
-	lookups := []func(CLG servicespec.CLG, networkPayload objectspec.NetworkPayload) error{
+	lookups := []func(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) error{
 		s.CLGIDs,
 		s.CLGNames,
 	}

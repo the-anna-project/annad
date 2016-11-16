@@ -3,7 +3,7 @@ package prometheus
 import (
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // HistogramConfig represents the configuration used to create a new prometheus
@@ -45,7 +45,7 @@ func DefaultHistogramConfig() HistogramConfig {
 }
 
 // NewHistogram creates a new configured prometheus histogram object.
-func NewHistogram(config HistogramConfig) (spec.Histogram, error) {
+func NewHistogram(config HistogramConfig) (servicespec.InstrumentorHistogram, error) {
 	newHistogram := &histogram{
 		HistogramConfig: config,
 	}

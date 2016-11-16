@@ -6,16 +6,24 @@ google `golang vendoring`. [There are also loads of
 approaches](https://github.com/golang/go/wiki/PackageManagementTools) that try
 to do it. All of them are not what you probably want.
 
-So this is how I am doing it right now, because everything else I tried to far
-was even worse. In the Anna project we use the `vendor` directory. To add or
-update some package to it simply `go get` the package and move it to the vendor
-directory. Note that `go get` loads packages into `$GOPATH/src/`. The vendor
-directory does not follow this structure. That is why the actual package needs
-to be moved and the `pkg` and `src` directories need to be removed afterwards.
-Once the addition or update is done, the changes need to be committed. Done.
+So this is how I am doing it right now, because everything else I tried so far
+was even worse. In the Anna project we use the `vendor` directory. To manage
+dependencies we use https://github.com/Masterminds/glide. When you want to add a
+dependency do the following.
 ```
-GOPATH=$(pwd)/vendor/ go get -u github.com/alicebob/miniredis
-mv vendor/src/* vendor
-rm -rf vendor/pkg
-rm -rf vendor/src
+GOPATH=$(pwd)/.workspace/ glide get github.com/alicebob/miniredis
 ```
+
+When you want to fetch a specific dependency, e.g. using a commit hash, do the
+following.
+```
+GOPATH=$(pwd)/.workspace/ glide get github.com/alicebob/miniredis#10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
+```
+
+When you want to install dependencies listed in the `glide.lock` file into the
+`vendor/` directory, do the following.
+```
+GOPATH=$(pwd)/.workspace/ glide install
+```
+
+If the vendored dependencies are prepared we commit the changes and are done.

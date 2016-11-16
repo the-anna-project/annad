@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
-	systemspec "github.com/xh3b4sd/anna/spec"
+	systemspec "github.com/the-anna-project/spec/legacy"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 var (
@@ -24,7 +24,7 @@ func New() systemspec.Annactl {
 type annactl struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 	textInterface     systemspec.TextInterfaceClient
 
 	// Settings.
@@ -106,11 +106,11 @@ func (a *annactl) Metadata() map[string]string {
 	return a.metadata
 }
 
-func (a *annactl) Service() servicespec.Collection {
+func (a *annactl) Service() servicespec.ServiceCollection {
 	return a.serviceCollection
 }
 
-func (a *annactl) SetServiceCollection(sc servicespec.Collection) {
+func (a *annactl) SetServiceCollection(sc servicespec.ServiceCollection) {
 	a.serviceCollection = sc
 }
 

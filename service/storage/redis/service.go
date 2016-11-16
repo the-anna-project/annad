@@ -7,25 +7,26 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
 
-	"github.com/xh3b4sd/anna/service/spec"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new redis storage service.
-func New() spec.Storage {
+func New() servicespec.StorageService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection spec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
 	address string
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
-	backoffFactory func() spec.Backoff
+	backoffFactory func() objectspec.Backoff
 	metadata       map[string]string
 	pool           *redis.Pool
 	prefix         string
@@ -44,7 +45,7 @@ func (s *service) Boot() {
 		"type": "service",
 	}
 
-	s.backoffFactory = func() spec.Backoff {
+	s.backoffFactory = func() objectspec.Backoff {
 		return &backoff.StopBackOff{}
 	}
 	// pool
@@ -376,7 +377,7 @@ func (s *service) RemoveScoredElement(key string, element string) error {
 	return nil
 }
 
-func (s *service) Service() spec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
@@ -411,7 +412,7 @@ func (s *service) SetAddress(a string) {
 	s.address = a
 }
 
-func (s *service) SetBackoffFactory(bf func() spec.Backoff) {
+func (s *service) SetBackoffFactory(bf func() objectspec.Backoff) {
 	s.backoffFactory = bf
 }
 
@@ -442,7 +443,7 @@ func (s *service) SetPrefix(p string) {
 	s.prefix = p
 }
 
-func (s *service) SetServiceCollection(sc spec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }
 

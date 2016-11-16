@@ -5,21 +5,21 @@ package feature
 import (
 	"strings"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/feature"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 )
 
 // New creates a new feature service. The feature service tries to detect all
 // patterns within the configured input sequences.
-func New() servicespec.Feature {
+func New() servicespec.FeatureService {
 	return &service{}
 }
 
 type service struct {
 	// Dependencies.
 
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -101,10 +101,10 @@ func (s *service) ScanConfig() servicespec.ScanConfig {
 	return newConfig
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }

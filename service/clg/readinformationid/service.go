@@ -5,7 +5,7 @@ package readinformationid
 import (
 	"fmt"
 
-	"github.com/xh3b4sd/anna/object/spec"
+	"github.com/the-anna-project/spec/object"
 )
 
 // calculate fetches the information sequence stored under a specific

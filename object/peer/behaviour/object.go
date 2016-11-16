@@ -3,7 +3,7 @@ package behaviour
 import (
 	"sync"
 
-	objectspec "github.com/xh3b4sd/anna/object/spec"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // New creates a new peer object having type behaviour. A behaviour peer

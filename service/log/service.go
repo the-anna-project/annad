@@ -2,10 +2,10 @@
 // output to gather runtime information.
 package log
 
-import servicespec "github.com/xh3b4sd/anna/service/spec"
+import servicespec "github.com/the-anna-project/spec/service"
 
 // New creates a new log service.
-func New() servicespec.Log {
+func New() servicespec.LogService {
 	return &service{}
 }
 
@@ -14,7 +14,7 @@ type service struct {
 
 	// rootLogger is the underlying logger actually logging messages.
 	rootLogger        servicespec.RootLogger
-	serviceCollection servicespec.Collection
+	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
 
@@ -41,7 +41,7 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) Service() servicespec.Collection {
+func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
@@ -49,6 +49,6 @@ func (s *service) SetRootLogger(rl servicespec.RootLogger) {
 	s.rootLogger = rl
 }
 
-func (s *service) SetServiceCollection(sc servicespec.Collection) {
+func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
 }

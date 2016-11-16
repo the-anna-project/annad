@@ -8,17 +8,17 @@ import (
 	redigo "github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/object/context"
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	objectspec "github.com/xh3b4sd/anna/object/spec"
-	servicespec "github.com/xh3b4sd/anna/service/spec"
 	"github.com/xh3b4sd/anna/service/storage"
 	"github.com/xh3b4sd/anna/service/storage/redis"
 )
 
 type testErrorIDService struct{}
 
-// New is only a test implementation of servicespec.ID to do nothing but
+// New is only a test implementation of servicespec.IDService to do nothing but
 // returning some error we can check against.
 func (f *testErrorIDService) New() (string, error) {
 	return "", maskAny(invalidConfigError)
@@ -30,7 +30,7 @@ func (f *testErrorIDService) WithType(idType servicespec.IDType) (string, error)
 
 type testIDService struct{}
 
-// New is only a test implementation of servicespec.ID to do nothing but
+// New is only a test implementation of servicespec.IDService to do nothing but
 // returning some error we can check against.
 func (f *testIDService) New() (string, error) {
 	return "new-ID", nil
@@ -44,40 +44,40 @@ type testServiceCollection struct {
 	IDService servicespec.ID
 }
 
-func (c *testServiceCollection) FS() servicespec.FS {
+func (c *testServiceCollection) FS() servicespec.FSService {
 	return nil
 }
 
-func (c *testServiceCollection) ID() servicespec.ID {
+func (c *testServiceCollection) ID() servicespec.IDService {
 	return c.IDService
 }
 
-func (c *testServiceCollection) Permutation() servicespec.Permutation {
+func (c *testServiceCollection) Permutation() servicespec.PermutationService {
 	return nil
 }
 
-func (c *testServiceCollection) Random() servicespec.Random {
+func (c *testServiceCollection) Random() servicespec.RandomService {
 	return nil
 }
 
 func (c *testServiceCollection) Shutdown() {
 }
 
-func (c *testServiceCollection) TextInput() servicespec.TextInput {
+func (c *testServiceCollection) TextInput() servicespec.TextInputService {
 	return nil
 }
 
-func (c *testServiceCollection) TextOutput() servicespec.TextOutput {
+func (c *testServiceCollection) TextOutput() servicespec.TextOutputService {
 	return nil
 }
 
-func testMustNewErrorServiceCollection(t *testing.T) servicespec.Collection {
+func testMustNewErrorServiceCollection(t *testing.T) servicespec.ServiceCollection {
 	return &testServiceCollection{
 		IDService: &testErrorIDService{},
 	}
 }
 
-func testMustNewServiceCollection(t *testing.T) servicespec.Collection {
+func testMustNewServiceCollection(t *testing.T) servicespec.ServiceCollection {
 	return &testServiceCollection{
 		IDService: &testIDService{},
 	}

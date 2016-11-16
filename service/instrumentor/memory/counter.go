@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"github.com/xh3b4sd/anna/spec"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // CounterConfig represents the configuration used to create a new memory
@@ -18,7 +18,7 @@ func DefaultCounterConfig() CounterConfig {
 }
 
 // NewCounter creates a new configured memory counter object.
-func NewCounter(config CounterConfig) (spec.Counter, error) {
+func NewCounter(config CounterConfig) (servicespec.InstrumentorCounter, error) {
 	newCounter := &counter{
 		CounterConfig: config,
 	}
