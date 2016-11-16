@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+service TextInterface {
+  rpc StreamText(stream StreamTextRequest) returns (stream StreamTextResponse) {}
+}
+
+message StreamTextRequest {
+  bool Echo = 1;
+  string Input = 2;
+  string SessionID = 3;
+}
+
+message StreamTextResponse {
+  string Code = 1;
+  StreamTextResponseData Data = 2;
+  string Text = 3;
+}
+
+message StreamTextResponseData {
+  string Output = 1;
+}
