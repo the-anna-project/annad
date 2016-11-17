@@ -3,6 +3,7 @@
 
 
 export SHELL := /bin/bash
+export PATH := ${PATH}:${GOPATH}/bin
 
 
 
@@ -22,7 +23,7 @@ all: annactl annad
 
 annad: gogenerate
 	@go build \
-		-o annad \
+		-o ${GOPATH}/bin/annad \
 		-ldflags " \
 			-X main.gitCommit=${GIT_COMMIT} \
 			-X main.goArch=${GOARCH} \
@@ -34,7 +35,7 @@ annad: gogenerate
 
 annactl: gogenerate
 	@go build \
-		-o annactl-bin \
+		-o ${GOPATH}/bin/annactl \
 		-ldflags " \
 			-X main.gitCommit=${GIT_COMMIT} \
 			-X main.goArch=${GOARCH} \
@@ -86,7 +87,7 @@ else
 	@exit 1
 endif
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
-	@mv /tmp/protoc/bin/protoc /usr/local/bin/protoc
+	@mv /tmp/protoc/bin/protoc ${GOPATH}/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
 
 setup: devdeps protoc
