@@ -72,10 +72,10 @@ gogenerate:
 	@protoc --proto_path=vendor/github.com/the-anna-project/spec/legacy --go_out=plugins=grpc,import_path=text:service/endpoint/text/ vendor/github.com/the-anna-project/spec/legacy/text_endpoint.proto
 
 gotest: gogenerate
-	@gotest
+	@./bin/gotest
 
 projectcheck:
-	@projectcheck
+	@./bin/projectcheck
 
 protoc:
 ifeq ($(shell go env GOOS),linux)
