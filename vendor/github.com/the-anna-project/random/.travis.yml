@@ -1,0 +1,23 @@
+language: go
+
+sudo: false
+
+go:
+- 1.7
+
+install:
+  - make setup
+  - make all
+
+script:
+- make gotest
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
