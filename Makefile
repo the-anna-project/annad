@@ -1,10 +1,8 @@
-.PHONY: all annad annactl clean dockerimage dockerpush gofmt gogenerate goget gotest projectcheck protoc setup
+.PHONY: all annad annactl clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck protoc setup
 
 
 
 export SHELL := /bin/bash
-export GOPATH := $(PWD)/.workspace
-export PATH := $(PATH):$(PWD)/.workspace/bin:$(PWD)/bin
 
 
 
@@ -24,7 +22,7 @@ all: annactl annad
 
 annad: gogenerate
 	@go build \
-		-o .workspace/bin/annad \
+		-o annad \
 		-ldflags " \
 			-X main.gitCommit=${GIT_COMMIT} \
 			-X main.goArch=${GOARCH} \
@@ -32,11 +30,11 @@ annad: gogenerate
 			-X main.goVersion=${GO_VERSION} \
 			-X main.projectVersion=${PROJECT_VERSION} \
 		" \
-		github.com/xh3b4sd/anna
+		.
 
 annactl: gogenerate
 	@go build \
-		-o .workspace/bin/annactl \
+		-o annactl-bin \
 		-ldflags " \
 			-X main.gitCommit=${GIT_COMMIT} \
 			-X main.goArch=${GOARCH} \
@@ -44,11 +42,19 @@ annactl: gogenerate
 			-X main.goVersion=${GO_VERSION} \
 			-X main.projectVersion=${PROJECT_VERSION} \
 		" \
-		github.com/xh3b4sd/anna/annactl
+		./annactl
 
 clean:
-	@rm -rf coverage.txt profile.out .workspace/ /tmp/protoc/ /tmp/protoc.zip
+	@rm -rf coverage.txt profile.out /tmp/protoc/ /tmp/protoc.zip
 	@# TODO remove generated code
+
+devdeps:
+	@# Fetch dev dependencies.
+	@go get -u -v github.com/client9/misspell/cmd/misspell
+	@go get -u -v github.com/fzipp/gocyclo
+	@go get -u -v github.com/golang/lint/golint
+	@go get -u -v github.com/golang/protobuf/protoc-gen-go
+	@go get -u -v github.com/xh3b4sd/clggen
 
 dockerimage: all
 	@docker build -t xh3b4sd/anna:${GIT_COMMIT} .
@@ -60,22 +66,9 @@ gofmt:
 	@go fmt ./...
 
 gogenerate:
-	@go generate ./...
+	@go generate ./service/clg
 	@protoc --proto_path=vendor/github.com/the-anna-project/spec/legacy --go_out=plugins=grpc,import_path=text:client/interface/text/ vendor/github.com/the-anna-project/spec/legacy/text_endpoint.proto
 	@protoc --proto_path=vendor/github.com/the-anna-project/spec/legacy --go_out=plugins=grpc,import_path=text:service/endpoint/text/ vendor/github.com/the-anna-project/spec/legacy/text_endpoint.proto
-
-goget:
-	@# Setup workspace.
-	@mkdir -p $(PWD)/.workspace/src/github.com/xh3b4sd/
-	@ln -fs $(PWD) $(PWD)/.workspace/src/github.com/xh3b4sd/
-	@# Fetch dev dependencies.
-	@go get -u github.com/client9/misspell/cmd/misspell
-	@go get -u github.com/fzipp/gocyclo
-	@go get -u github.com/golang/lint/golint
-	@go get -u github.com/golang/protobuf/protoc-gen-go
-	@go get -u github.com/xh3b4sd/clggen
-	@# Fetch the rest of the project dependencies.
-	@go get -d -v ./...
 
 gotest: gogenerate
 	@gotest
@@ -93,8 +86,7 @@ else
 	@exit 1
 endif
 	@unzip /tmp/protoc.zip -d /tmp/protoc/
-	@mkdir -p .workspace/bin/
-	@mv /tmp/protoc/bin/protoc .workspace/bin/protoc
+	@mv /tmp/protoc/bin/protoc /usr/local/bin/protoc
 	@rm -rf /tmp/protoc/ /tmp/protoc.zip
 
-setup: goget protoc
+setup: devdeps protoc
