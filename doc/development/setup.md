@@ -1,40 +1,16 @@
 # setup
 In https://golang.org the project structure is something you need to deal with.
-When you ask 5 people how to do it, you probably get six answers. Here I simply
-describe my personal workflow and how the project is set up using the
-[makefile](makefile.md). Setup the project as you like so it fits your
-workflow. Anyway, this is how I am doing it.
-
-In golang the `GOPATH` assumes that there is something like
-`src/github.com/xh3b4sd/anna/` within your workspace. See
-https://golang.org/doc/code.html. I am using the [makefile](makefile.md) to
-execute all go commands. Note how the `GOPATH` is set in the makefile.
+See also https://golang.org/doc/code.html. So it is best to have one single
+`$GOPATH` in which all your projects live in. To more easily manage a complex
+project like this one here we are using the [makefile](makefile.md) to execute
+all go commands. In my `.zshrc` I set the `$GOPATH` like this.
 ```
-GOPATH := ${PWD}/.workspace/
-export GOPATH
+export GOPATH=~/gopath/
 ```
 
-This takes care that the workspace is properly set up for the dependencies that
-`go get` fetches and that `GOPATH` itself is properly set. So the result after
-the setup will be similar to this.
+The Anna project is then located here.
 ```
-~/projects/private/anna    # holds the project's source code
-├── ...
-└── .workspace             # represents the GOPATH holding the project's dependencies
-    └── ...
-```
-
-### clone repository
-To setup the project I am creating the working directory and go into it. It
-holds the source code of the Anna project.
-```
-mkdir -p ~/projects/private/anna/
-cd ~/projects/private/anna/
-```
-
-Then, I clone the repository. Note the `.` at the end of the command.
-```
-git clone git@github.com:xh3b4sd/anna.git .
+~/gopath/src/github.com/xh3b4sd/anna    
 ```
 
 ### prerequisites
@@ -60,5 +36,5 @@ sudo ldconfig
 I am building the project using the [makefile](makefile.md). See its
 documentation for more information on how to use it.
 ```
-make
+make all
 ```
