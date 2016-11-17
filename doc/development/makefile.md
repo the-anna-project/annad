@@ -54,19 +54,18 @@ This removes the `.workspace/` directory and other files maybe flying around.
 make clean
 ```
 
+### devdeps
+This fetches all dependencies required for the development process.
+```
+make devdeps
+```
+
 ### gofmt
 This is for manual code formatting. There is probably no need to use this
 target on a regular basis in case there already is some automated formatting
 integrated into your text editor.
 ```
 make gofmt
-```
-
-### goget
-This fetches all dependencies required for the projects source code and the
-development process.
-```
-make goget
 ```
 
 Now what happened? Because of our directory structure and `Makefile` magic the

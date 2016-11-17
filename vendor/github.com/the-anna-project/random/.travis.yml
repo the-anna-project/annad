@@ -6,11 +6,11 @@ go:
 - 1.7
 
 install:
-  - make setup
-  - make all
+  - go get -d -v .
+  - go build .
 
 script:
-- make gotest
+- go test -race -covermode=atomic -coverprofile=coverage.txt
 
 notifications:
   email: false

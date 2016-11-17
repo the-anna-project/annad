@@ -1,5 +1,4 @@
 .annasession
-.workspace
 coverage.txt
 profile.out
 client/interface/text/text_endpoint.pb.go
