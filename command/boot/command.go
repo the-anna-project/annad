@@ -40,10 +40,10 @@ type Command struct {
 
 // Boot makes the neural network boot and run.
 func (c *Command) Boot() {
+	go c.ListenToSignal()
+
 	c.serviceCollection = c.newServiceCollection()
 	go c.serviceCollection.Boot()
-
-	go c.ListenToSignal()
 
 	// Block the main goroutine forever. The process is only supposed to be ended
 	// by a call to Shutdown or ForceShutdown.

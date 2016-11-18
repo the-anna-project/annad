@@ -6,10 +6,11 @@ import (
 	"github.com/cenk/backoff"
 	kitlog "github.com/go-kit/kit/log"
 
+	"github.com/the-anna-project/collection"
+	"github.com/the-anna-project/id"
 	"github.com/the-anna-project/random"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service"
 	"github.com/xh3b4sd/anna/service/activator"
 	"github.com/xh3b4sd/anna/service/connection"
 	"github.com/xh3b4sd/anna/service/endpoint"
@@ -18,7 +19,6 @@ import (
 	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/fs/mem"
-	"github.com/xh3b4sd/anna/service/id"
 	"github.com/xh3b4sd/anna/service/instrumentor/prometheus"
 	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/network"
@@ -33,7 +33,7 @@ import (
 
 func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	// Set.
-	collection := service.NewCollection()
+	collection := collection.New()
 
 	collection.SetActivatorService(c.newActivatorService())
 	collection.SetConnectionService(c.newConnectionService())

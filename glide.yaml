@@ -1,6 +1,5 @@
 package: github.com/xh3b4sd/anna
 import:
-- package: github.com/alicebob/miniredis
 - package: github.com/cenk/backoff
   version: ~1.0.0
 - package: github.com/garyburd/redigo
@@ -11,27 +10,13 @@ import:
   version: ~0.3.0
   subpackages:
   - log
-- package: github.com/juju/errgo
 - package: github.com/prometheus/client_golang
   version: ~0.8.0
   subpackages:
   - prometheus
 - package: github.com/rafaeljusto/redigomock
   version: ~2.0.0
-- package: github.com/spf13/cobra
-- package: github.com/spf13/pflag
-- package: github.com/spf13/viper
-- package: github.com/the-anna-project/random
-- package: github.com/the-anna-project/spec
-  subpackages:
-  - legacy
-  - object
-  - service
 - package: github.com/tylerb/graceful
   version: ~1.2.13
-- package: github.com/xh3b4sd/worker-pool
-- package: golang.org/x/net
-  subpackages:
-  - context
 - package: google.golang.org/grpc
   version: ~1.0.4

@@ -1,4 +1,4 @@
-package service
+package collection
 
 import (
 	"sync"
@@ -6,8 +6,8 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-// NewCollection creates a new service collection.
-func NewCollection() servicespec.ServiceCollection {
+// New creates a new service collection.
+func New() servicespec.ServiceCollection {
 	return &collection{}
 }
 
@@ -179,13 +179,13 @@ func (c *collection) Shutdown() {
 
 		wg.Add(1)
 		go func() {
-			c.Shutdown()
+			c.Network().Shutdown()
 			wg.Done()
 		}()
 
 		wg.Add(1)
 		go func() {
-			c.Shutdown()
+			c.Storage().Shutdown()
 			wg.Done()
 		}()
 

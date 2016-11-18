@@ -1,5 +1,5 @@
 hash: e79fd7a96371bb671f0eb5188c1ff36ccfd5ef97a10e2151ff153d9a343a04f0
-updated: 2016-11-17T03:17:09.802910949+01:00
+updated: 2016-11-18T01:40:38.515273868+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -29,7 +29,7 @@ imports:
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/golang/protobuf
-  version: 224aaba33b1ac32a92a165f27489409fb8133d08
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
   - proto
 - name: github.com/hashicorp/hcl
@@ -93,10 +93,14 @@ imports:
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
+- name: github.com/the-anna-project/collection
+  version: 7ea64a13a2feb7ee060072a70032739c7511f2f8
+- name: github.com/the-anna-project/id
+  version: e8ff55d1647f0c831ecba7de923cf012a0657eb8
 - name: github.com/the-anna-project/random
-  version: 74ad53d3197dcda28ec353b2dd40c0284940c208
+  version: 42f4d618208d5ea5cee839263966c1a838edc214
 - name: github.com/the-anna-project/spec
-  version: e396e1a44aef51cc90466fccbdf965c3dc40cf2d
+  version: fb3125a28ddaa078ee3610c9dbd93596e92c74a0
   subpackages:
   - legacy
   - object
