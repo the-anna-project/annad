@@ -5,10 +5,10 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/collection"
-	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/the-anna-project/id"
+	servicespec "github.com/the-anna-project/spec/service"
+	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/textinput"
