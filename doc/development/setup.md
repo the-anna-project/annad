@@ -5,7 +5,7 @@ See also https://golang.org/doc/code.html. So it is best to have one single
 project like this one here we are using the [makefile](makefile.md) to execute
 all go commands. In my `.zshrc` I set the `$GOPATH` like this.
 ```
-export GOPATH=~/gopath/
+export GOPATH=~/gopath
 ```
 
 The Anna project is then located here.

@@ -1,5 +1,5 @@
-hash: e79fd7a96371bb671f0eb5188c1ff36ccfd5ef97a10e2151ff153d9a343a04f0
-updated: 2016-11-18T01:40:38.515273868+01:00
+hash: 3d657f0f24ae18573699d4f0ae7cceae37ba42bd4228f1b28f753e9cbca1233f
+updated: 2016-11-19T00:36:29.614182197+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -95,6 +95,10 @@ imports:
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/the-anna-project/collection
   version: 7ea64a13a2feb7ee060072a70032739c7511f2f8
+- name: github.com/the-anna-project/fs
+  version: 48be206e218d2e382b9104bae2638136b98b4e95
+  subpackages:
+  - memory
 - name: github.com/the-anna-project/id
   version: e8ff55d1647f0c831ecba7de923cf012a0657eb8
 - name: github.com/the-anna-project/random

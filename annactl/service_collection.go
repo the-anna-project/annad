@@ -6,9 +6,9 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/the-anna-project/collection"
+	"github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/textinput"
@@ -38,7 +38,7 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 
 // TODO make mem/os configurable
 func (a *annactl) newFSService() servicespec.FSService {
-	return mem.New()
+	return memory.New()
 }
 
 func (a *annactl) newIDService() servicespec.IDService {

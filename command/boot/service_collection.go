@@ -7,6 +7,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/the-anna-project/collection"
+	memoryfs "github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
 	"github.com/the-anna-project/random"
 	objectspec "github.com/the-anna-project/spec/object"
@@ -18,13 +19,12 @@ import (
 	"github.com/xh3b4sd/anna/service/endpoint/text"
 	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
-	"github.com/xh3b4sd/anna/service/fs/mem"
 	"github.com/xh3b4sd/anna/service/instrumentor/prometheus"
 	"github.com/xh3b4sd/anna/service/log"
 	"github.com/xh3b4sd/anna/service/network"
 	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/storage"
-	"github.com/xh3b4sd/anna/service/storage/memory"
+	memorystorage "github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"
 	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
@@ -120,7 +120,7 @@ func (c *Command) newForwarderService() servicespec.ForwarderService {
 
 // TODO make mem/os configurable
 func (c *Command) newFSService() servicespec.FSService {
-	return mem.New()
+	return memoryfs.New()
 }
 
 func (c *Command) newIDService() servicespec.IDService {
@@ -167,7 +167,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
-		newCollection.SetConnection(memory.New())
+		newCollection.SetConnection(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Connection().Kind()))
 	}
@@ -181,7 +181,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
-		newCollection.SetFeature(memory.New())
+		newCollection.SetFeature(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Feature().Kind()))
 	}
@@ -195,7 +195,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
-		newCollection.SetGeneral(memory.New())
+		newCollection.SetGeneral(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().General().Kind()))
 	}

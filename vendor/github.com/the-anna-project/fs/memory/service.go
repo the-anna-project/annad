@@ -1,6 +1,6 @@
-// Package mem implements spec.FSService and provides an in-memory file system
-// implementation for abstraction and testing reasons.
-package mem
+// Package memory implements spec.FSService and provides an in-memory file
+// system implementation for abstraction and testing reasons.
+package memory
 
 import (
 	"os"
