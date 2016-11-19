@@ -6,8 +6,8 @@ package spec
 type EndpointCollection interface {
 	Boot()
 	Metric() EndpointService
-	Text() EndpointService
 	SetMetric(metricEndpoint EndpointService)
 	SetText(textEndpoint EndpointService)
 	Shutdown()
+	Text() EndpointService
 }

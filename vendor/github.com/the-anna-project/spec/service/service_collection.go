@@ -16,6 +16,7 @@ type ServiceCollection interface {
 	// IDService returns an ID service. It is used to create IDs of a certain
 	// type.
 	ID() IDService
+	Input() InputCollection
 	Instrumentor() InstrumentorService
 	// Log returns a log service. It is used to print log messages.
 	Log() LogService
@@ -32,6 +33,7 @@ type ServiceCollection interface {
 	SetForwarderService(forwarderService ForwarderService)
 	SetFSService(fsService FSService)
 	SetIDService(idService IDService)
+	SetInputCollection(textCollection InputCollection)
 	SetInstrumentorService(instrumentorService InstrumentorService)
 	SetLogService(logService LogService)
 	SetNetworkService(networkService NetworkService)
@@ -39,7 +41,6 @@ type ServiceCollection interface {
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)
 	// TODO move to InputCollection/OutputCollection => InputService/OutputService
-	SetTextInputService(textInputService TextInputService)
 	SetTextOutputService(textOutputService TextOutputService)
 	SetTrackerService(trackerService TrackerService)
 	// Shutdown ends all processes of the service collection like shutting down a
@@ -47,9 +48,6 @@ type ServiceCollection interface {
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
-	// TextInput returns an text output service. It is used to send text
-	// responses back to the client.
-	TextInput() TextInputService
 	// TextOutput returns an text output service. It is used to send text
 	// responses back to the client.
 	TextOutput() TextOutputService
