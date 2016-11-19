@@ -21,6 +21,7 @@ type ServiceCollection interface {
 	// Log returns a log service. It is used to print log messages.
 	Log() LogService
 	Network() NetworkService
+	Output() OutputCollection
 	// Permutation returns a permutation service. It is used to permute instances
 	// of type PermutationList.
 	Permutation() PermutationService
@@ -33,23 +34,19 @@ type ServiceCollection interface {
 	SetForwarderService(forwarderService ForwarderService)
 	SetFSService(fsService FSService)
 	SetIDService(idService IDService)
-	SetInputCollection(textCollection InputCollection)
+	SetInputCollection(inputCollection InputCollection)
 	SetInstrumentorService(instrumentorService InstrumentorService)
 	SetLogService(logService LogService)
 	SetNetworkService(networkService NetworkService)
+	SetOutputCollection(outputCollection OutputCollection)
 	SetPermutationService(permutationService PermutationService)
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)
-	// TODO move to InputCollection/OutputCollection => InputService/OutputService
-	SetTextOutputService(textOutputService TextOutputService)
 	SetTrackerService(trackerService TrackerService)
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
-	// TextOutput returns an text output service. It is used to send text
-	// responses back to the client.
-	TextOutput() TextOutputService
 	Tracker() TrackerService
 }
