@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/object/textinput"
+	textinputobject "github.com/the-anna-project/input/object/text"
 )
 
 func (a *annactl) InitAnnactlInterfaceTextReadPlainCmd() *cobra.Command {
@@ -44,18 +44,14 @@ func (a *annactl) ExecAnnactlInterfaceTextReadPlainCmd(cmd *cobra.Command, args 
 
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			newTextInputConfig := textinput.DefaultConfig()
-			newTextInputConfig.Echo = a.flags.InterfaceTextReadPlain.Echo
-			newTextInputConfig.Input = scanner.Text()
-			newTextInputConfig.SessionID = a.sessionID
-			newTextInput, err := textinput.New(newTextInputConfig)
-			if err != nil {
-				a.Service().Log().Line("msg", "%#v", maskAny(err))
-			}
+			textInputObject := textinputobject.New()
+			textInputObject.SetEcho(a.flags.InterfaceTextReadPlain.Echo)
+			textInputObject.SetInput(scanner.Text())
+			textInputObject.SetSessionID(a.sessionID)
 
-			a.Service().TextInput().Channel() <- newTextInput
+			a.Service().Input().Text().Channel() <- textInputObject
 
-			err = scanner.Err()
+			err := scanner.Err()
 			if err != nil {
 				a.Service().Log().Line("msg", "%#v", maskAny(err))
 			}

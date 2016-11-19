@@ -126,7 +126,7 @@ func (c *client) StreamText(ctx context.Context) error {
 			select {
 			case <-done:
 				return
-			case textInput := <-c.Service().TextInput().Channel():
+			case textInput := <-c.Service().Input().Text().Channel():
 				streamTextRequest := c.EncodeRequest(textInput)
 				err := stream.Send(streamTextRequest)
 				if err != nil {

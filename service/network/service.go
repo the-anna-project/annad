@@ -234,7 +234,7 @@ func (s *service) InputListener(canceler <-chan struct{}) error {
 		select {
 		case <-canceler:
 			return maskAny(workerCanceledError)
-		case textInput := <-s.Service().TextInput().Channel():
+		case textInput := <-s.Service().Input().Text().Channel():
 			err := s.InputHandler(CLG, textInput)
 			if err != nil {
 				s.Service().Log().Line("msg", "%#v", maskAny(err))

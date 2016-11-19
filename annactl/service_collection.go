@@ -8,10 +8,11 @@ import (
 	"github.com/the-anna-project/collection"
 	"github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
+	inputcollection "github.com/the-anna-project/input/collection"
+	textinputservice "github.com/the-anna-project/input/service/text"
 	"github.com/the-anna-project/log"
 	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service/permutation"
-	"github.com/xh3b4sd/anna/service/textinput"
 	"github.com/xh3b4sd/anna/service/textoutput"
 )
 
@@ -21,16 +22,16 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 
 	collection.SetFSService(a.newFSService())
 	collection.SetIDService(a.newIDService())
+	collection.SetInputCollection(a.newInputCollection())
 	collection.SetLogService(a.newLogService())
 	collection.SetPermutationService(a.newPermutationService())
-	collection.SetTextInputService(a.newTextInputService())
 	collection.SetTextOutputService(a.newTextOutputService())
 
 	collection.FS().SetServiceCollection(collection)
 	collection.ID().SetServiceCollection(collection)
+	collection.Input().Text().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
-	collection.TextInput().SetServiceCollection(collection)
 	collection.TextOutput().SetServiceCollection(collection)
 
 	return collection
@@ -45,6 +46,14 @@ func (a *annactl) newIDService() servicespec.IDService {
 	return id.New()
 }
 
+func (a *annactl) newInputCollection() servicespec.InputCollection {
+	newCollection := inputcollection.New()
+
+	newCollection.SetTextService(textinputservice.New())
+
+	return newCollection
+}
+
 func (a *annactl) newLogService() servicespec.LogService {
 	newService := log.New()
 
@@ -55,10 +64,6 @@ func (a *annactl) newLogService() servicespec.LogService {
 
 func (a *annactl) newPermutationService() servicespec.PermutationService {
 	return permutation.New()
-}
-
-func (a *annactl) newTextInputService() servicespec.TextInputService {
-	return textinput.New()
 }
 
 func (a *annactl) newTextOutputService() servicespec.TextOutputService {

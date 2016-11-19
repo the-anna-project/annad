@@ -31,10 +31,6 @@ func (c *collection) Metric() servicespec.EndpointService {
 	return c.metric
 }
 
-func (c *collection) Text() servicespec.EndpointService {
-	return c.text
-}
-
 func (c *collection) SetMetric(metric servicespec.EndpointService) {
 	c.metric = metric
 }
@@ -61,4 +57,8 @@ func (c *collection) Shutdown() {
 
 		wg.Wait()
 	})
+}
+
+func (c *collection) Text() servicespec.EndpointService {
+	return c.text
 }

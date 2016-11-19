@@ -11,10 +11,10 @@ import (
 
 	"google.golang.org/grpc"
 
+	textinputobject "github.com/the-anna-project/input/object/text"
 	apispec "github.com/the-anna-project/spec/api"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/textinput"
 )
 
 // New creates a new text endpoint service.
@@ -100,17 +100,13 @@ func (s *service) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextRe
 }
 
 func (s *service) EncodeRequest(streamTextRequest *StreamTextRequest) (objectspec.TextInput, error) {
-	textInputConfig := textinput.DefaultConfig()
-	textInputConfig.Echo = streamTextRequest.Echo
-	//textInputConfig.Expectation = streamTextRequest.Expectation
-	textInputConfig.Input = streamTextRequest.Input
-	textInputConfig.SessionID = streamTextRequest.SessionID
-	textInput, err := textinput.New(textInputConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	textInputObject := textinputobject.New()
+	textInputObject.SetEcho(streamTextRequest.Echo)
+	//textInputObject.SetExpectation(streamTextRequest.Expectation)
+	textInputObject.SetInput(streamTextRequest.Input)
+	textInputObject.SetSessionID(streamTextRequest.SessionID)
 
-	return textInput, nil
+	return textInputObject, nil
 }
 
 func (s *service) Metadata() map[string]string {
@@ -176,7 +172,7 @@ func (s *service) StreamText(stream TextEndpoint_StreamTextServer) error {
 				fail <- maskAny(err)
 				return
 			}
-			s.Service().TextInput().Channel() <- textRequest
+			s.Service().Input().Text().Channel() <- textRequest
 		}
 	}()
 
