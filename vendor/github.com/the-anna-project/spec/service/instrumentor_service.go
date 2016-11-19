@@ -2,30 +2,9 @@ package spec
 
 import (
 	"net/http"
+
+	objectspec "github.com/the-anna-project/spec/object"
 )
-
-// TODO move to object collection
-// InstrumentorCounter is a metric that can be arbitrarily incremented.
-type InstrumentorCounter interface {
-	// IncrBy increments the current counter by the given delta.
-	IncrBy(delta float64)
-}
-
-// InstrumentorGauge is a metric that can be arbitrarily incremented or
-// decremented.
-type InstrumentorGauge interface {
-	// DecrBy decrements the current gauge by the given delta.
-	DecrBy(delta float64)
-	// IncrBy increments the current gauge by the given delta.
-	IncrBy(delta float64)
-}
-
-// InstrumentorHistogram is a metric to observe samples over time.
-type InstrumentorHistogram interface {
-	// Observe tracks the given sample used for aggregation of the current
-	// histogramm.
-	Observe(sample float64)
-}
 
 // InstrumentorService represents an abstraction of instrumentation libraries to
 // manage application metrics.
@@ -50,13 +29,13 @@ type InstrumentorService interface {
 	ExecFunc(key string, action func() error) error
 	// GetCounter provides a Counter for the given key. In case there does no
 	// counter exist for the given key, one is created.
-	GetCounter(key string) (InstrumentorCounter, error)
+	GetCounter(key string) (objectspec.InstrumentorCounter, error)
 	// GetGauge provides a Gauge for the given key. In case there does no
 	// counter exist for the given key, one is created.
-	GetGauge(key string) (InstrumentorGauge, error)
+	GetGauge(key string) (objectspec.InstrumentorGauge, error)
 	// GetGauge provides a Gauge for the given key. In case there does no
 	// counter exist for the given key, one is created.
-	GetHistogram(key string) (InstrumentorHistogram, error)
+	GetHistogram(key string) (objectspec.InstrumentorHistogram, error)
 	// GetHTTPEndpoint returns the instrumentor's metric endpoint supposed to
 	// be registered in the HTTP server using the instrumentor's HTTP handler.
 	GetHTTPEndpoint() string
