@@ -249,7 +249,7 @@ func (s *service) InputHandler(CLG servicespec.CLGService, textInput objectspec.
 	// be forwarded to the output CLG without indirection. Note that this should
 	// only be used for testing purposes to bypass more complex neural network
 	// activities to directly respond with the received input.
-	if textInput.GetEcho() {
+	if textInput.Echo() {
 		var ok bool
 		CLG, ok = s.clgs["output"]
 		if !ok {
@@ -272,13 +272,13 @@ func (s *service) InputHandler(CLG servicespec.CLGService, textInput objectspec.
 	ctx.SetBehaviourID(string(behaviourID))
 	ctx.SetCLGName(CLG.Metadata()["name"])
 	ctx.SetCLGTreeID(string(clgTreeID))
-	ctx.SetExpectation(textInput.GetExpectation())
-	ctx.SetSessionID(textInput.GetSessionID())
+	ctx.SetExpectation(textInput.Expectation())
+	ctx.SetSessionID(textInput.SessionID())
 
 	// We transform the received text request to a network payload to have a
 	// conventional data structure within the neural network.
 	newNetworkPayloadConfig := networkpayload.DefaultConfig()
-	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textInput.GetInput())}
+	newNetworkPayloadConfig.Args = []reflect.Value{reflect.ValueOf(textInput.Input())}
 	newNetworkPayloadConfig.Context = ctx
 	// TODO destination and sources should be metadata objects
 	newNetworkPayloadConfig.Destination = behaviourID

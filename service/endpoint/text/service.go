@@ -91,7 +91,7 @@ func (s *service) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextRe
 	streamTextResponse := &StreamTextResponse{
 		Code: apispec.CodeData,
 		Data: &StreamTextResponseData{
-			Output: textOutput.GetOutput(),
+			Output: textOutput.Output(),
 		},
 		Text: apispec.TextData,
 	}
@@ -183,7 +183,7 @@ func (s *service) StreamText(stream TextEndpoint_StreamTextServer) error {
 			select {
 			case <-done:
 				return
-			case textOutput := <-s.Service().TextOutput().Channel():
+			case textOutput := <-s.Service().Output().Text().Channel():
 				streamTextResponse := s.DecodeResponse(textOutput)
 				err := stream.Send(streamTextResponse)
 				if err != nil {

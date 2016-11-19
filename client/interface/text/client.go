@@ -6,11 +6,11 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	textoutputobject "github.com/the-anna-project/output/object/text"
 	apispec "github.com/the-anna-project/spec/api"
 	systemspec "github.com/the-anna-project/spec/legacy"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/textoutput"
 )
 
 // New creates a new text interface service.
@@ -48,21 +48,17 @@ func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objects
 		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", apispec.CodeData)
 	}
 
-	textOutputConfig := textoutput.DefaultConfig()
-	textOutputConfig.Output = streamTextResponse.Data.Output
-	textResponse, err := textoutput.New(textOutputConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	textOutputObject := textoutputobject.New()
+	textOutputObject.SetOutput(streamTextResponse.Data.Output)
 
-	return textResponse, nil
+	return textOutputObject, nil
 }
 
 func (c *client) EncodeRequest(textInput objectspec.TextInput) *StreamTextRequest {
 	streamTextRequest := &StreamTextRequest{
-		Echo:      textInput.GetEcho(),
-		Input:     textInput.GetInput(),
-		SessionID: textInput.GetSessionID(),
+		Echo:      textInput.Echo(),
+		Input:     textInput.Input(),
+		SessionID: textInput.SessionID(),
 	}
 
 	return streamTextRequest
@@ -116,7 +112,7 @@ func (c *client) StreamText(ctx context.Context) error {
 				fail <- maskAny(err)
 				return
 			}
-			c.Service().TextOutput().Channel() <- textResponse
+			c.Service().Output().Text().Channel() <- textResponse
 		}
 	}()
 
