@@ -21,13 +21,13 @@ type collection struct {
 	forwarderService    servicespec.ForwarderService
 	fsService           servicespec.FSService
 	idService           servicespec.IDService
+	inputCollection     servicespec.InputCollection
 	instrumentorService servicespec.InstrumentorService
 	logService          servicespec.LogService
 	networkService      servicespec.NetworkService
 	permutationService  servicespec.PermutationService
 	randomService       servicespec.RandomService
 	storageCollection   servicespec.StorageCollection
-	textInputService    servicespec.TextInputService
 	textOutputService   servicespec.TextOutputService
 	trackerService      servicespec.TrackerService
 
@@ -48,13 +48,13 @@ func (c *collection) Boot() {
 	go c.Forwarder().Boot()
 	go c.FS().Boot()
 	go c.ID().Boot()
+	go c.Input().Boot()
 	go c.Instrumentor().Boot()
 	go c.Log().Boot()
 	go c.Network().Boot()
 	go c.Permutation().Boot()
 	go c.Random().Boot()
 	go c.Storage().Boot()
-	go c.TextInput().Boot()
 	go c.TextOutput().Boot()
 	go c.Tracker().Boot()
 }
@@ -81,6 +81,10 @@ func (c *collection) FS() servicespec.FSService {
 
 func (c *collection) ID() servicespec.IDService {
 	return c.idService
+}
+
+func (c *collection) Input() servicespec.InputCollection {
+	return c.inputCollection
 }
 
 func (c *collection) Instrumentor() servicespec.InstrumentorService {
@@ -131,6 +135,10 @@ func (c *collection) SetIDService(idService servicespec.IDService) {
 	c.idService = idService
 }
 
+func (c *collection) SetInputCollection(inputCollection servicespec.InputCollection) {
+	c.inputCollection = inputCollection
+}
+
 func (c *collection) SetInstrumentorService(instrumentorService servicespec.InstrumentorService) {
 	c.instrumentorService = instrumentorService
 }
@@ -153,10 +161,6 @@ func (c *collection) SetRandomService(randomService servicespec.RandomService) {
 
 func (c *collection) SetStorageCollection(storageCollection servicespec.StorageCollection) {
 	c.storageCollection = storageCollection
-}
-
-func (c *collection) SetTextInputService(textInputService servicespec.TextInputService) {
-	c.textInputService = textInputService
 }
 
 func (c *collection) SetTextOutputService(textOutputService servicespec.TextOutputService) {
@@ -195,10 +199,6 @@ func (c *collection) Shutdown() {
 
 func (c *collection) Storage() servicespec.StorageCollection {
 	return c.storageCollection
-}
-
-func (c *collection) TextInput() servicespec.TextInputService {
-	return c.textInputService
 }
 
 func (c *collection) TextOutput() servicespec.TextOutputService {
