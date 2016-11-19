@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-service TextInterface {
+service TextEndpoint {
   rpc StreamText(stream StreamTextRequest) returns (stream StreamTextResponse) {}
 }
 
