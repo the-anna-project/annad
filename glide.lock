@@ -1,5 +1,5 @@
 hash: 3d657f0f24ae18573699d4f0ae7cceae37ba42bd4228f1b28f753e9cbca1233f
-updated: 2016-11-19T01:16:21.120330003+01:00
+updated: 2016-11-19T02:05:07.789809038+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -106,8 +106,9 @@ imports:
 - name: github.com/the-anna-project/random
   version: 42f4d618208d5ea5cee839263966c1a838edc214
 - name: github.com/the-anna-project/spec
-  version: fb3125a28ddaa078ee3610c9dbd93596e92c74a0
+  version: 4c8d2bbfc702c366fee99fd70a4c4134e8947593
   subpackages:
+  - api
   - legacy
   - object
   - service
