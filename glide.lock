@@ -1,5 +1,5 @@
 hash: 3d657f0f24ae18573699d4f0ae7cceae37ba42bd4228f1b28f753e9cbca1233f
-updated: 2016-11-19T02:48:17.276242554+01:00
+updated: 2016-11-19T18:31:41.6870489+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -94,13 +94,19 @@ imports:
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/the-anna-project/collection
-  version: c84fa033dbab2fc169922b147cba587ff82b20c4
+  version: f3df172a1bee4d27b2a8b9217c038829c44017a5
 - name: github.com/the-anna-project/fs
   version: 48be206e218d2e382b9104bae2638136b98b4e95
   subpackages:
   - memory
 - name: github.com/the-anna-project/id
   version: fac33f443db8dab563de0d9469d4baf956457949
+- name: github.com/the-anna-project/input
+  version: 50173d2bfcc75ade7cf7879ce9027a4a2afe4003
+  subpackages:
+  - collection
+  - object/text
+  - service/text
 - name: github.com/the-anna-project/instrumentor
   version: 86e80bb7a6dfb5af8bbf44be3d74f5b7438d3525
   subpackages:
@@ -110,7 +116,7 @@ imports:
 - name: github.com/the-anna-project/random
   version: 42f4d618208d5ea5cee839263966c1a838edc214
 - name: github.com/the-anna-project/spec
-  version: 3681c6b60b301ce2c9597f613dbf1b3de5617677
+  version: 1047e00d23f4d98c4c6a208a3a6d3988d0aac3aa
   subpackages:
   - api
   - legacy

@@ -8,7 +8,7 @@ import (
 )
 
 // New creates a new text input service.
-func New() servicespec.TextInputService {
+func New() servicespec.InputService {
 	return &service{}
 }
 
@@ -30,7 +30,8 @@ func (s *service) Boot() {
 	}
 	s.metadata = map[string]string{
 		"id":   id,
-		"name": "text-input",
+		"kind": "text",
+		"name": "input",
 		"type": "service",
 	}
 
@@ -49,6 +50,6 @@ func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
-	s.serviceCollection = sc
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
+	s.serviceCollection = serviceCollection
 }

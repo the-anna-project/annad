@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 
-	"github.com/xh3b4sd/anna/object/textinput"
+	textinputobject "github.com/the-anna-project/input/object/text"
 )
 
 func (a *annactl) InitAnnactlInterfaceTextReadFileCmd() *cobra.Command {
@@ -45,13 +45,13 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 		a.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 
-	textRequest := textinput.MustNew()
-	err = json.Unmarshal(b, &textRequest)
+	textInputObject := textinputobject.New()
+	err = json.Unmarshal(b, &textInputObject)
 	if err != nil {
 		a.Service().Log().Line("msg", "%#v", maskAny(err))
 	}
 
-	a.Service().TextInput().Channel() <- textRequest
+	a.Service().Input().Text().Channel() <- textInputObject
 
 	go func() {
 		err = a.textInterface.StreamText(ctx)

@@ -6,13 +6,14 @@ package spec
 type TextInput interface {
 	// GetEcho returns the echo flag of the current text request.
 	GetEcho() bool
-
 	// GetExpectation returns the expectation of the current text request.
 	GetExpectation() Expectation
-
 	// GetInput returns the input of the current text request.
 	GetInput() string
-
 	// GetSessionID returns the session ID of the current text request.
 	GetSessionID() string
+	SetEcho(echo bool)
+	SetExpectation(expectation Expectation)
+	SetInput(input string)
+	SetSessionID(sessionID string)
 }
