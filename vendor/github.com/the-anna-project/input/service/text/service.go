@@ -1,6 +1,5 @@
-// Package textinput provides a simple service for receiving text input
-// requests.
-package textinput
+// Package text provides a simple service for receiving text input.
+package text
 
 import (
 	objectspec "github.com/the-anna-project/spec/object"

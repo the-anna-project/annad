@@ -4,14 +4,14 @@ package spec
 // This is basically good for requesting calculations from the neural network
 // by providing text input and an optional expectation object.
 type TextInput interface {
-	// GetEcho returns the echo flag of the current text request.
-	GetEcho() bool
-	// GetExpectation returns the expectation of the current text request.
-	GetExpectation() Expectation
-	// GetInput returns the input of the current text request.
-	GetInput() string
-	// GetSessionID returns the session ID of the current text request.
-	GetSessionID() string
+	// Echo returns the echo flag of the current text request.
+	Echo() bool
+	// Expectation returns the expectation of the current text request.
+	Expectation() Expectation
+	// Input returns the input of the current text request.
+	Input() string
+	// SessionID returns the session ID of the current text request.
+	SessionID() string
 	SetEcho(echo bool)
 	SetExpectation(expectation Expectation)
 	SetInput(input string)

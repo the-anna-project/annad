@@ -13,6 +13,8 @@ import (
 	textinputservice "github.com/the-anna-project/input/service/text"
 	"github.com/the-anna-project/instrumentor/prometheus"
 	"github.com/the-anna-project/log"
+	outputcollection "github.com/the-anna-project/output/collection"
+	textoutputservice "github.com/the-anna-project/output/service/text"
 	"github.com/the-anna-project/random"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
@@ -28,7 +30,6 @@ import (
 	"github.com/xh3b4sd/anna/service/storage"
 	memorystorage "github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"
-	"github.com/xh3b4sd/anna/service/textoutput"
 	"github.com/xh3b4sd/anna/service/tracker"
 )
 
@@ -47,10 +48,10 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetInstrumentorService(c.newInstrumentorService())
 	collection.SetLogService(c.newLogService())
 	collection.SetNetworkService(c.newNetworkService())
+	collection.SetOutputCollection(c.newOutputCollection())
 	collection.SetPermutationService(c.newPermutationService())
 	collection.SetRandomService(c.newRandomService())
 	collection.SetStorageCollection(c.newStorageCollection())
-	collection.SetTextOutputService(c.newTextOutputService())
 	collection.SetTrackerService(c.newTrackerService())
 
 	collection.Activator().SetServiceCollection(collection)
@@ -65,12 +66,12 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.Instrumentor().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
 	collection.Network().SetServiceCollection(collection)
+	collection.Output().Text().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
 	collection.Storage().Connection().SetServiceCollection(collection)
 	collection.Storage().Feature().SetServiceCollection(collection)
 	collection.Storage().General().SetServiceCollection(collection)
-	collection.TextOutput().SetServiceCollection(collection)
 	collection.Tracker().SetServiceCollection(collection)
 
 	return collection
@@ -152,6 +153,14 @@ func (c *Command) newNetworkService() servicespec.NetworkService {
 	return network.New()
 }
 
+func (c *Command) newOutputCollection() servicespec.OutputCollection {
+	newCollection := outputcollection.New()
+
+	newCollection.SetTextService(textoutputservice.New())
+
+	return newCollection
+}
+
 func (c *Command) newPermutationService() servicespec.PermutationService {
 	return permutation.New()
 }
@@ -210,10 +219,6 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	}
 
 	return newCollection
-}
-
-func (c *Command) newTextOutputService() servicespec.TextOutputService {
-	return textoutput.New()
 }
 
 func (c *Command) newTrackerService() servicespec.TrackerService {

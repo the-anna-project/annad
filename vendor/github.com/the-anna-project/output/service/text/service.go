@@ -1,6 +1,5 @@
-// Package textoutput provides a simple service for sending text output
-// responses.
-package textoutput
+// Package text provides a simple service for receiving text output.
+package text
 
 import (
 	objectspec "github.com/the-anna-project/spec/object"
@@ -8,7 +7,7 @@ import (
 )
 
 // New creates a new text output service.
-func New() servicespec.TextOutputService {
+func New() servicespec.OutputService {
 	return &service{}
 }
 
@@ -30,11 +29,11 @@ func (s *service) Boot() {
 	}
 	s.metadata = map[string]string{
 		"id":   id,
-		"name": "text-output",
+		"kind": "text",
+		"name": "output",
 		"type": "service",
 	}
 
-	// Settings.
 	s.channel = make(chan objectspec.TextOutput, 1000)
 }
 
@@ -50,6 +49,6 @@ func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
-	s.serviceCollection = sc
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
+	s.serviceCollection = serviceCollection
 }

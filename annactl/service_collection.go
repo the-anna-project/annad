@@ -11,9 +11,10 @@ import (
 	inputcollection "github.com/the-anna-project/input/collection"
 	textinputservice "github.com/the-anna-project/input/service/text"
 	"github.com/the-anna-project/log"
+	outputcollection "github.com/the-anna-project/output/collection"
+	textoutputservice "github.com/the-anna-project/output/service/text"
 	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/xh3b4sd/anna/service/permutation"
-	"github.com/xh3b4sd/anna/service/textoutput"
 )
 
 func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
@@ -24,15 +25,15 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetIDService(a.newIDService())
 	collection.SetInputCollection(a.newInputCollection())
 	collection.SetLogService(a.newLogService())
+	collection.SetOutputCollection(a.newOutputCollection())
 	collection.SetPermutationService(a.newPermutationService())
-	collection.SetTextOutputService(a.newTextOutputService())
 
 	collection.FS().SetServiceCollection(collection)
 	collection.ID().SetServiceCollection(collection)
 	collection.Input().Text().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
+	collection.Output().Text().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
-	collection.TextOutput().SetServiceCollection(collection)
 
 	return collection
 }
@@ -62,10 +63,14 @@ func (a *annactl) newLogService() servicespec.LogService {
 	return newService
 }
 
-func (a *annactl) newPermutationService() servicespec.PermutationService {
-	return permutation.New()
+func (a *annactl) newOutputCollection() servicespec.OutputCollection {
+	newCollection := outputcollection.New()
+
+	newCollection.SetTextService(textoutputservice.New())
+
+	return newCollection
 }
 
-func (a *annactl) newTextOutputService() servicespec.TextOutputService {
-	return textoutput.New()
+func (a *annactl) newPermutationService() servicespec.PermutationService {
+	return permutation.New()
 }

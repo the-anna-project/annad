@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"reflect"
 
+	textoutputobject "github.com/the-anna-project/output/object/text"
 	"github.com/the-anna-project/spec/object"
 	"github.com/xh3b4sd/anna/object/networkpayload"
-	"github.com/xh3b4sd/anna/object/textoutput"
 )
 
 // TODO there is no CLG to read from the certenty pyramid
@@ -127,14 +127,10 @@ func (s *service) calculate(ctx spec.Context, informationSequence string) error 
 func (s *service) sendTextOutput(ctx spec.Context, informationSequence string) error {
 	// Return the calculated output to the requesting client, if the
 	// current CLG is the output CLG.
-	newTextOutputConfig := textoutput.DefaultConfig()
-	newTextOutputConfig.Output = informationSequence
-	newTextOutput, err := textoutput.New(newTextOutputConfig)
-	if err != nil {
-		return maskAny(err)
-	}
+	textOutputObject := textoutputobject.New()
+	textOutputObject.SetOutput(informationSequence)
 
-	s.Service().TextOutput().Channel() <- newTextOutput
+	s.Service().Output().Text().Channel() <- textOutputObject
 
 	return nil
 }

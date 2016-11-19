@@ -62,8 +62,8 @@ func (a *annactl) ExecAnnactlInterfaceTextReadFileCmd(cmd *cobra.Command, args [
 
 	for {
 		select {
-		case textResponse := <-a.Service().TextOutput().Channel():
-			fmt.Printf("%s\n", textResponse.GetOutput())
+		case textResponse := <-a.Service().Output().Text().Channel():
+			fmt.Printf("%s\n", textResponse.Output())
 		}
 	}
 }
