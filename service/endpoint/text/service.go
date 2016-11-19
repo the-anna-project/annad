@@ -11,9 +11,9 @@ import (
 
 	"google.golang.org/grpc"
 
+	apispec "github.com/the-anna-project/spec/api"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/networkresponse"
 	"github.com/xh3b4sd/anna/object/textinput"
 )
 
@@ -59,7 +59,7 @@ func (s *service) Boot() {
 		s.gRPCServer = grpc.NewServer()
 		s.shutdownOnce = sync.Once{}
 
-		RegisterTextInterfaceServer(s.gRPCServer, s)
+		RegisterTextEndpointServer(s.gRPCServer, s)
 
 		// Create the gRPC server. The Serve method below is returning listener
 		// errors, if any. In case net.Listener.Accept is called and waits for
@@ -89,11 +89,11 @@ func (s *service) Boot() {
 
 func (s *service) DecodeResponse(textOutput objectspec.TextOutput) *StreamTextResponse {
 	streamTextResponse := &StreamTextResponse{
-		Code: networkresponse.CodeData,
+		Code: apispec.CodeData,
 		Data: &StreamTextResponseData{
 			Output: textOutput.GetOutput(),
 		},
-		Text: networkresponse.TextData,
+		Text: apispec.TextData,
 	}
 
 	return streamTextResponse
@@ -151,7 +151,7 @@ func (s *service) Shutdown() {
 	})
 }
 
-func (s *service) StreamText(stream TextInterface_StreamTextServer) error {
+func (s *service) StreamText(stream TextEndpoint_StreamTextServer) error {
 	s.Service().Log().Line("func", "StreamText")
 
 	done := make(chan struct{}, 1)

@@ -6,10 +6,10 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	apispec "github.com/the-anna-project/spec/api"
 	systemspec "github.com/the-anna-project/spec/legacy"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/networkresponse"
 	"github.com/xh3b4sd/anna/object/textoutput"
 )
 
@@ -44,8 +44,8 @@ func (c *client) Boot() {
 }
 
 func (c *client) DecodeResponse(streamTextResponse *StreamTextResponse) (objectspec.TextOutput, error) {
-	if streamTextResponse.Code != networkresponse.CodeData {
-		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", networkresponse.CodeData)
+	if streamTextResponse.Code != apispec.CodeData {
+		return nil, maskAnyf(invalidAPIResponseError, "API response code must be %d", apispec.CodeData)
 	}
 
 	textOutputConfig := textoutput.DefaultConfig()
@@ -90,7 +90,7 @@ func (c *client) StreamText(ctx context.Context) error {
 	}
 	defer conn.Close()
 
-	client := NewTextInterfaceClient(conn)
+	client := NewTextEndpointClient(conn)
 	stream, err := client.StreamText(ctx)
 	if err != nil {
 		return maskAny(err)
