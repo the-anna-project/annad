@@ -7,6 +7,7 @@ package memory
 import (
 	"net/http"
 
+	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
@@ -30,7 +31,7 @@ func (s *service) ExecFunc(key string, action func() error) error {
 	return nil
 }
 
-func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error) {
+func (s *service) GetCounter(key string) (objectspec.InstrumentorCounter, error) {
 	newConfig := DefaultCounterConfig()
 	newCounter, err := NewCounter(newConfig)
 	if err != nil {
@@ -40,7 +41,7 @@ func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error
 	return newCounter, nil
 }
 
-func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
+func (s *service) GetGauge(key string) (objectspec.InstrumentorGauge, error) {
 	newConfig := DefaultGaugeConfig()
 	newGauge, err := NewGauge(newConfig)
 	if err != nil {
@@ -50,7 +51,7 @@ func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
 	return newGauge, nil
 }
 
-func (s *service) GetHistogram(key string) (servicespec.InstrumentorHistogram, error) {
+func (s *service) GetHistogram(key string) (objectspec.InstrumentorHistogram, error) {
 	newConfig := DefaultHistogramConfig()
 	newHistogram, err := NewHistogram(newConfig)
 	if err != nil {
@@ -76,7 +77,7 @@ func (s *service) Metadata() map[string]string {
 	return nil
 }
 
-func (s *service) NewKey(s ...string) string {
+func (s *service) NewKey(str ...string) string {
 	return ""
 }
 

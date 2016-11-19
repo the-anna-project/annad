@@ -3,7 +3,7 @@ package prometheus
 import (
 	prometheusclient "github.com/prometheus/client_golang/prometheus"
 
-	servicespec "github.com/the-anna-project/spec/service"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // CounterConfig represents the configuration used to create a new prometheus
@@ -33,7 +33,7 @@ func DefaultCounterConfig() CounterConfig {
 }
 
 // NewCounter creates a new configured prometheus counter object.
-func NewCounter(config CounterConfig) (servicespec.InstrumentorCounter, error) {
+func NewCounter(config CounterConfig) (objectspec.InstrumentorCounter, error) {
 	newCounter := &counter{
 		CounterConfig: config,
 	}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
+	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
@@ -25,9 +26,9 @@ type service struct {
 
 	// Settings.
 
-	counters   map[string]servicespec.InstrumentorCounter
-	gauges     map[string]servicespec.InstrumentorGauge
-	histograms map[string]servicespec.InstrumentorHistogram
+	counters   map[string]objectspec.InstrumentorCounter
+	gauges     map[string]objectspec.InstrumentorGauge
+	histograms map[string]objectspec.InstrumentorHistogram
 	// httpEndpoint represents the HTTP endpoint used to register the
 	// httpHandler. In the context of Prometheus this is usually /metrics.
 	httpEndpoint string
@@ -56,9 +57,9 @@ func (s *service) Boot() {
 		"type": "service",
 	}
 
-	s.counters = map[string]servicespec.InstrumentorCounter{}
-	s.gauges = map[string]servicespec.InstrumentorGauge{}
-	s.histograms = map[string]servicespec.InstrumentorHistogram{}
+	s.counters = map[string]objectspec.InstrumentorCounter{}
+	s.gauges = map[string]objectspec.InstrumentorGauge{}
+	s.histograms = map[string]objectspec.InstrumentorHistogram{}
 	s.httpEndpoint = "/metrics"
 	s.httpHandler = prometheus.Handler()
 	s.mutex = sync.Mutex{}
@@ -90,7 +91,7 @@ func (s *service) ExecFunc(key string, action func() error) error {
 	return nil
 }
 
-func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error) {
+func (s *service) GetCounter(key string) (objectspec.InstrumentorCounter, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -115,7 +116,7 @@ func (s *service) GetCounter(key string) (servicespec.InstrumentorCounter, error
 	return newCounter, nil
 }
 
-func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
+func (s *service) GetGauge(key string) (objectspec.InstrumentorGauge, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -140,7 +141,7 @@ func (s *service) GetGauge(key string) (servicespec.InstrumentorGauge, error) {
 	return newGauge, nil
 }
 
-func (s *service) GetHistogram(key string) (servicespec.InstrumentorHistogram, error) {
+func (s *service) GetHistogram(key string) (objectspec.InstrumentorHistogram, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
