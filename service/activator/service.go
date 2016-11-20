@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	permutationlist "github.com/the-anna-project/permutation/object/list"
+	"github.com/the-anna-project/permutation/service"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/permutationlist"
-	"github.com/xh3b4sd/anna/service/permutation"
 	"github.com/xh3b4sd/anna/service/storage"
 )
 
@@ -219,13 +219,9 @@ func (s *service) New(CLG servicespec.CLGService, queue []objectspec.NetworkPayl
 
 	// Prepare the permutation list to find out which combination of payloads
 	// satisfies the requested CLG's interface.
-	newPermutationListConfig := permutationlist.DefaultConfig()
-	newPermutationListConfig.MaxGrowth = len(clgTypes)
-	newPermutationListConfig.RawValues = queueToValues(queue)
-	newPermutationList, err := permutationlist.New(newPermutationListConfig)
-	if err != nil {
-		return nil, maskAny(err)
-	}
+	permutationList := permutationlist.New()
+	permutationList.SetMaxGrowth(len(clgTypes))
+	permutationList.SetRawValues(queueToValues(queue))
 
 	// Permute the permutation list of the queued network payloads until we found
 	// all the matching combinations.
@@ -237,7 +233,7 @@ func (s *service) New(CLG servicespec.CLGService, queue []objectspec.NetworkPayl
 		// there does a combination of network payloads match the interface of the
 		// requested CLG, we capture the found combination and try to find more
 		// combinations in the upcoming loops.
-		permutedValues := newPermutationList.GetPermutedValues()
+		permutedValues := permutationList.PermutedValues()
 		valueTypes := typesToStrings(valuesToTypes(permutedValues))
 		if equalStrings(clgTypes, valueTypes) {
 			possibleMatches = append(possibleMatches, valuesToQueue(permutedValues))
@@ -247,7 +243,7 @@ func (s *service) New(CLG servicespec.CLGService, queue []objectspec.NetworkPayl
 		// permutation step within the current iteration. As soon as the permutation
 		// list cannot be permuted anymore, we stop the permutation loop to choose
 		// one random combination of the tracked list in the next step below.
-		err = s.Service().Permutation().PermuteBy(newPermutationList, 1)
+		err := s.Service().Permutation().PermuteBy(permutationList, 1)
 		if permutation.IsMaxGrowthReached(err) {
 			break
 		} else if err != nil {

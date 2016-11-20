@@ -88,6 +88,6 @@ func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
 }
 
-func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
-	s.serviceCollection = sc
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
+	s.serviceCollection = serviceCollection
 }

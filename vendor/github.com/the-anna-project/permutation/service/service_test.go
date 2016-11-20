@@ -4,40 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	objectspec "github.com/the-anna-project/spec/object"
-	"github.com/xh3b4sd/anna/object/permutationlist"
+	permutationlist "github.com/the-anna-project/permutation/object/list"
 )
-
-func testMaybeNewList(t *testing.T, values []interface{}) objectspec.PermutationList {
-	newConfig := permutationlist.DefaultConfig()
-	newConfig.MaxGrowth = 3
-	newConfig.RawValues = values
-
-	newList, err := permutationlist.New(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	return newList
-}
 
 // Test_Permutation_Service_PermuteBy_AbsoluteDelta tests permutations by
 // providing deltas always to a new Service. That we we need to provide
 // absolute deltas.
 func Test_Permutation_Service_PermuteBy_AbsoluteDelta(t *testing.T) {
-	testMaybeNewList := func(t *testing.T) objectspec.PermutationList {
-		newConfig := permutationlist.DefaultConfig()
-		newConfig.MaxGrowth = 3
-		newConfig.RawValues = []interface{}{"a", "b"}
-
-		newList, err := permutationlist.New(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		return newList
-	}
-
 	testCases := []struct {
 		Input        int
 		Expected     []interface{}
@@ -135,18 +108,20 @@ func Test_Permutation_Service_PermuteBy_AbsoluteDelta(t *testing.T) {
 		},
 	}
 
-	newService := MustNew()
+	newService := New()
 
 	for i, testCase := range testCases {
 		// Note we use list service for all test cases.
-		newList := testMaybeNewList(t)
+		newList := permutationlist.New()
+		newList.SetMaxGrowth(3)
+		newList.SetRawValues([]interface{}{"a", "b"})
 
 		err := newService.PermuteBy(newList, testCase.Input)
 		if (err != nil && testCase.ErrorMatcher == nil) || (testCase.ErrorMatcher != nil && !testCase.ErrorMatcher(err)) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 
-		output := newList.GetPermutedValues()
+		output := newList.PermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {
@@ -159,19 +134,6 @@ func Test_Permutation_Service_PermuteBy_AbsoluteDelta(t *testing.T) {
 // Test_Permutation_Service_PermuteBy_Increment tests if increments by 1 always
 // work.
 func Test_Permutation_Service_PermuteBy_Increment(t *testing.T) {
-	testMaybeNewList := func(t *testing.T) objectspec.PermutationList {
-		newConfig := permutationlist.DefaultConfig()
-		newConfig.MaxGrowth = 3
-		newConfig.RawValues = []interface{}{"a", "b"}
-
-		newList, err := permutationlist.New(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		return newList
-	}
-
 	testCases := []struct {
 		Input        int
 		Expected     []interface{}
@@ -195,8 +157,10 @@ func Test_Permutation_Service_PermuteBy_Increment(t *testing.T) {
 	}
 
 	// Note we use the same service for all test cases.
-	newService := MustNew()
-	newList := testMaybeNewList(t)
+	newService := New()
+	newList := permutationlist.New()
+	newList.SetMaxGrowth(3)
+	newList.SetRawValues([]interface{}{"a", "b"})
 
 	for i, testCase := range testCases {
 		err := newService.PermuteBy(newList, testCase.Input)
@@ -204,7 +168,7 @@ func Test_Permutation_Service_PermuteBy_Increment(t *testing.T) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 
-		output := newList.GetPermutedValues()
+		output := newList.PermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {
@@ -218,19 +182,6 @@ func Test_Permutation_Service_PermuteBy_Increment(t *testing.T) {
 // providing deltas always to an already existing Service. That we we need to
 // provide relative deltas.
 func Test_Permutation_Service_PermuteBy_RelativeDelta(t *testing.T) {
-	testMaybeNewList := func(t *testing.T) objectspec.PermutationList {
-		newConfig := permutationlist.DefaultConfig()
-		newConfig.MaxGrowth = 3
-		newConfig.RawValues = []interface{}{"a", "b"}
-
-		newList, err := permutationlist.New(newConfig)
-		if err != nil {
-			t.Fatal("expected", nil, "got", err)
-		}
-
-		return newList
-	}
-
 	testCases := []struct {
 		Input        int
 		Expected     []interface{}
@@ -274,8 +225,10 @@ func Test_Permutation_Service_PermuteBy_RelativeDelta(t *testing.T) {
 	}
 
 	// Note we use the same service for all test cases.
-	newService := MustNew()
-	newList := testMaybeNewList(t)
+	newService := New()
+	newList := permutationlist.New()
+	newList.SetMaxGrowth(3)
+	newList.SetRawValues([]interface{}{"a", "b"})
 
 	for i, testCase := range testCases {
 		err := newService.PermuteBy(newList, testCase.Input)
@@ -283,7 +236,7 @@ func Test_Permutation_Service_PermuteBy_RelativeDelta(t *testing.T) {
 			t.Fatal("case", i+1, "expected", true, "got", false)
 		}
 
-		output := newList.GetPermutedValues()
+		output := newList.PermutedValues()
 
 		if testCase.ErrorMatcher == nil {
 			if !reflect.DeepEqual(output, testCase.Expected) {
@@ -293,14 +246,16 @@ func Test_Permutation_Service_PermuteBy_RelativeDelta(t *testing.T) {
 	}
 }
 
-func Test_Permutation_List_GetIndizes(t *testing.T) {
+func Test_Permutation_List_Indizes(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	newService := MustNew()
-	newList := testMaybeNewList(t, testValues)
+	newService := New()
+	newList := permutationlist.New()
+	newList.SetMaxGrowth(3)
+	newList.SetRawValues(testValues)
 
 	// Make sure the initial index is empty.
-	newIndizes := newList.GetIndizes()
+	newIndizes := newList.Indizes()
 	if len(newIndizes) != 0 {
 		t.Fatal("expected", 0, "got", newIndizes)
 	}
@@ -313,7 +268,7 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newIndizes = newList.GetIndizes()
+	newIndizes = newList.Indizes()
 	if !reflect.DeepEqual(newIndizes, []int{0, 1}) {
 		t.Fatal("expected", []int{1, 1}, "got", newIndizes)
 	}
@@ -324,20 +279,22 @@ func Test_Permutation_List_GetIndizes(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newIndizes = newList.GetIndizes()
+	newIndizes = newList.Indizes()
 	if !reflect.DeepEqual(newIndizes, []int{1, 0, 1}) {
 		t.Fatal("expected", []int{1, 0, 1}, "got", newIndizes)
 	}
 }
 
-func Test_Permutation_List_GetRawValues(t *testing.T) {
+func Test_Permutation_List_RawValues(t *testing.T) {
 	testValues := []interface{}{"a", "b"}
 
-	newService := MustNew()
-	newList := testMaybeNewList(t, testValues)
+	newService := New()
+	newList := permutationlist.New()
+	newList.SetMaxGrowth(3)
+	newList.SetRawValues(testValues)
 
 	// Make sure the initial values are still obtained on the fresh Service.
-	newValues := newList.GetRawValues()
+	newValues := newList.RawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}
@@ -348,7 +305,7 @@ func Test_Permutation_List_GetRawValues(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newValues = newList.GetRawValues()
+	newValues = newList.RawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}
@@ -357,7 +314,7 @@ func Test_Permutation_List_GetRawValues(t *testing.T) {
 	if err != nil {
 		t.Fatal("expected", nil, "got", err)
 	}
-	newValues = newList.GetRawValues()
+	newValues = newList.RawValues()
 	if !reflect.DeepEqual(testValues, newValues) {
 		t.Fatal("expected", newValues, "got", testValues)
 	}

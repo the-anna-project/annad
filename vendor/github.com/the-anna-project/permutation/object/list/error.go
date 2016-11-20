@@ -1,4 +1,4 @@
-package connectionpath
+package list
 
 import (
 	"fmt"
@@ -27,11 +27,4 @@ var invalidConfigError = errgo.New("invalid config")
 // IsInvalidConfig asserts invalidConfigError.
 func IsInvalidConfig(err error) bool {
 	return errgo.Cause(err) == invalidConfigError
-}
-
-var invalidConnectionPathError = errgo.New("invalid connection path")
-
-// IsInvalidConnectionPath asserts invalidConnectionPathError.
-func IsInvalidConnectionPath(err error) bool {
-	return errgo.Cause(err) == invalidConnectionPathError
 }

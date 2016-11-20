@@ -6,8 +6,8 @@ import (
 
 func createIndizesWithDelta(list objectspec.PermutationList, delta int) ([]int, error) {
 	// Initialize scope variables.
-	base := len(list.GetRawValues())
-	newIndizes := list.GetIndizes()
+	base := len(list.RawValues())
+	newIndizes := list.Indizes()
 	operation := 0
 
 	// Check for the initial situation. This is special and the only exception
@@ -39,7 +39,7 @@ func createIndizesWithDelta(list objectspec.PermutationList, delta int) ([]int, 
 		newIndizes, msdShifted = shiftIndizes(newIndizes, base)
 		if msdShifted {
 			// Make sure the permutation does not growth more than allowed.
-			if len(newIndizes)+1 > list.GetMaxGrowth() {
+			if len(newIndizes)+1 > list.MaxGrowth() {
 				return nil, maskAny(maxGrowthReachedError)
 			}
 
