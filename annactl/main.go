@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
-	systemspec "github.com/the-anna-project/spec/legacy"
+	legacyspec "github.com/the-anna-project/spec/legacy"
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
@@ -17,7 +17,7 @@ var (
 )
 
 // New creates a new annactl service.
-func New() systemspec.Annactl {
+func New() legacyspec.Annactl {
 	return &annactl{}
 }
 
@@ -25,7 +25,6 @@ type annactl struct {
 	// Dependencies.
 
 	serviceCollection servicespec.ServiceCollection
-	textInterface     systemspec.TextInterfaceClient
 
 	// Settings.
 
@@ -84,9 +83,6 @@ func (a *annactl) InitAnnactlCmd() *cobra.Command {
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// Service collection.
 			a.serviceCollection = a.newServiceCollection()
-
-			// Text interface.
-			a.textInterface = newTextInterface(a.serviceCollection, a.flags.GRPCAddr)
 		},
 		Run: a.ExecAnnactlCmd,
 	}
@@ -112,10 +108,6 @@ func (a *annactl) Service() servicespec.ServiceCollection {
 
 func (a *annactl) SetServiceCollection(sc servicespec.ServiceCollection) {
 	a.serviceCollection = sc
-}
-
-func (a *annactl) SetTextInterface(ti systemspec.TextInterfaceClient) {
-	a.textInterface = ti
 }
 
 func (a *annactl) Shutdown() {

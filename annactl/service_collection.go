@@ -5,6 +5,8 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 
+	endpointcollection "github.com/the-anna-project/client/collection"
+	textendpoint "github.com/the-anna-project/client/service/text"
 	"github.com/the-anna-project/collection"
 	"github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
@@ -18,9 +20,9 @@ import (
 )
 
 func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
-	// Set.
 	collection := collection.New()
 
+	collection.SetEndpointCollection(a.newFSService())
 	collection.SetFSService(a.newFSService())
 	collection.SetIDService(a.newIDService())
 	collection.SetInputCollection(a.newInputCollection())
@@ -28,6 +30,7 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetOutputCollection(a.newOutputCollection())
 	collection.SetPermutationService(a.newPermutationService())
 
+	collection.Endpoint().Text().SetServiceCollection(collection)
 	collection.FS().SetServiceCollection(collection)
 	collection.ID().SetServiceCollection(collection)
 	collection.Input().Text().SetServiceCollection(collection)
@@ -36,6 +39,18 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 	collection.Permutation().SetServiceCollection(collection)
 
 	return collection
+}
+
+// TODO config and shit
+func (a *annactl) newEndpointCollection() servicespec.EndpointCollection {
+	newCollection := endpointcollection.New()
+
+	textService := textendpoint.New()
+	textService.SetAddress(a.Config().Endpoint().Text().Address())
+
+	newCollection.SetText(textService)
+
+	return newCollection
 }
 
 // TODO make mem/os configurable

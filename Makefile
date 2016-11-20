@@ -68,7 +68,6 @@ gofmt:
 
 gogenerate:
 	@go generate ./service/clg
-	@protoc --proto_path=vendor/github.com/the-anna-project/spec/api --go_out=plugins=grpc,import_path=text:client/interface/text/ vendor/github.com/the-anna-project/spec/api/text_endpoint.proto
 	@protoc --proto_path=vendor/github.com/the-anna-project/spec/api --go_out=plugins=grpc,import_path=text:service/endpoint/text/ vendor/github.com/the-anna-project/spec/api/text_endpoint.proto
 
 gotest: gogenerate
