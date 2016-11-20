@@ -1,5 +1,5 @@
 hash: 3d657f0f24ae18573699d4f0ae7cceae37ba42bd4228f1b28f753e9cbca1233f
-updated: 2016-11-19T23:41:22.059792278+01:00
+updated: 2016-11-20T03:20:33.559855584+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -119,10 +119,15 @@ imports:
   - collection
   - object/text
   - service/text
+- name: github.com/the-anna-project/permutation
+  version: adef95fff01e7c05187c944b5855abf9c301b7a8
+  subpackages:
+  - object/list
+  - service
 - name: github.com/the-anna-project/random
   version: 42f4d618208d5ea5cee839263966c1a838edc214
 - name: github.com/the-anna-project/spec
-  version: 77429631e9956626fce9647eb006e55ce9db0303
+  version: 0b86181d2b7b970ca72d847decfaac4a15578040
   subpackages:
   - api
   - legacy
