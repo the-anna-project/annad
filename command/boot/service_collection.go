@@ -26,7 +26,7 @@ import (
 	"github.com/xh3b4sd/anna/service/feature"
 	"github.com/xh3b4sd/anna/service/forwarder"
 	"github.com/xh3b4sd/anna/service/network"
-	"github.com/xh3b4sd/anna/service/permutation"
+	"github.com/the-anna-project/permutation/service"
 	"github.com/xh3b4sd/anna/service/storage"
 	memorystorage "github.com/xh3b4sd/anna/service/storage/memory"
 	"github.com/xh3b4sd/anna/service/storage/redis"

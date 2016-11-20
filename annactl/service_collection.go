@@ -14,7 +14,7 @@ import (
 	outputcollection "github.com/the-anna-project/output/collection"
 	textoutputservice "github.com/the-anna-project/output/service/text"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service/permutation"
+	"github.com/the-anna-project/permutation/service"
 )
 
 func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
