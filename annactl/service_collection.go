@@ -13,8 +13,8 @@ import (
 	"github.com/the-anna-project/log"
 	outputcollection "github.com/the-anna-project/output/collection"
 	textoutputservice "github.com/the-anna-project/output/service/text"
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/permutation/service"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
