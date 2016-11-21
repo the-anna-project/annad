@@ -106,8 +106,8 @@ func (c *Command) newEndpointCollection() servicespec.EndpointCollection {
 	textService := text.New()
 	textService.SetAddress(c.configCollection.Endpoint().Text().Address())
 
-	newCollection.SetMetric(metricService)
-	newCollection.SetText(textService)
+	newCollection.SetMetricService(metricService)
+	newCollection.SetTextService(textService)
 
 	return newCollection
 }

@@ -1,4 +1,4 @@
-package main
+package text
 
 import (
 	"os"
@@ -19,16 +19,16 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
+func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection := collection.New()
 
-	collection.SetEndpointCollection(a.newFSService())
-	collection.SetFSService(a.newFSService())
-	collection.SetIDService(a.newIDService())
-	collection.SetInputCollection(a.newInputCollection())
-	collection.SetLogService(a.newLogService())
-	collection.SetOutputCollection(a.newOutputCollection())
-	collection.SetPermutationService(a.newPermutationService())
+	collection.SetEndpointCollection(c.newEndpointCollection())
+	collection.SetFSService(c.newFSService())
+	collection.SetIDService(c.newIDService())
+	collection.SetInputCollection(c.newInputCollection())
+	collection.SetLogService(c.newLogService())
+	collection.SetOutputCollection(c.newOutputCollection())
+	collection.SetPermutationService(c.newPermutationService())
 
 	collection.Endpoint().Text().SetServiceCollection(collection)
 	collection.FS().SetServiceCollection(collection)
@@ -42,27 +42,27 @@ func (a *annactl) newServiceCollection() servicespec.ServiceCollection {
 }
 
 // TODO config and shit
-func (a *annactl) newEndpointCollection() servicespec.EndpointCollection {
+func (c *Command) newEndpointCollection() servicespec.EndpointCollection {
 	newCollection := endpointcollection.New()
 
 	textService := textendpoint.New()
-	textService.SetAddress(a.Config().Endpoint().Text().Address())
+	textService.SetAddress(c.configCollection.Endpoint().Text().Address())
 
-	newCollection.SetText(textService)
+	newCollection.SetTextService(textService)
 
 	return newCollection
 }
 
 // TODO make mem/os configurable
-func (a *annactl) newFSService() servicespec.FSService {
+func (c *Command) newFSService() servicespec.FSService {
 	return memory.New()
 }
 
-func (a *annactl) newIDService() servicespec.IDService {
+func (c *Command) newIDService() servicespec.IDService {
 	return id.New()
 }
 
-func (a *annactl) newInputCollection() servicespec.InputCollection {
+func (c *Command) newInputCollection() servicespec.InputCollection {
 	newCollection := inputcollection.New()
 
 	newCollection.SetTextService(textinputservice.New())
@@ -70,7 +70,7 @@ func (a *annactl) newInputCollection() servicespec.InputCollection {
 	return newCollection
 }
 
-func (a *annactl) newLogService() servicespec.LogService {
+func (c *Command) newLogService() servicespec.LogService {
 	newService := log.New()
 
 	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
@@ -78,7 +78,7 @@ func (a *annactl) newLogService() servicespec.LogService {
 	return newService
 }
 
-func (a *annactl) newOutputCollection() servicespec.OutputCollection {
+func (c *Command) newOutputCollection() servicespec.OutputCollection {
 	newCollection := outputcollection.New()
 
 	newCollection.SetTextService(textoutputservice.New())
@@ -86,6 +86,6 @@ func (a *annactl) newOutputCollection() servicespec.OutputCollection {
 	return newCollection
 }
 
-func (a *annactl) newPermutationService() servicespec.PermutationService {
+func (c *Command) newPermutationService() servicespec.PermutationService {
 	return permutation.New()
 }

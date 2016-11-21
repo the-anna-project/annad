@@ -34,8 +34,8 @@ func (c *Command) Execute(cmd *cobra.Command, args []string) {
 func (c *Command) New() *cobra.Command {
 	newCommand := &cobra.Command{
 		Use:   "annad",
-		Short: "Manage the daemon of the anna project. For more information see https://github.com/xh3b4sd/anna.",
-		Long:  "Manage the daemon of the anna project. For more information see https://github.com/xh3b4sd/anna.",
+		Short: "Manage the daemon of the anna project. For more information see https://github.com/the-anna-project/annad.",
+		Long:  "Manage the daemon of the anna project. For more information see https://github.com/the-anna-project/annad.",
 		Run:   c.Execute,
 	}
 
