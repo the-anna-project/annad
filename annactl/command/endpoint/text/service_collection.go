@@ -41,7 +41,6 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	return collection
 }
 
-// TODO config and shit
 func (c *Command) newEndpointCollection() servicespec.EndpointCollection {
 	newCollection := endpointcollection.New()
 
