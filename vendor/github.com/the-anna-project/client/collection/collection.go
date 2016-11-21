@@ -1,4 +1,4 @@
-package endpoint
+package collection
 
 import (
 	"sync"
@@ -6,8 +6,8 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-// NewCollection creates a new endpoint collection.
-func NewCollection() servicespec.EndpointCollection {
+// New creates a new endpoint collection.
+func New() servicespec.EndpointCollection {
 	return &collection{}
 }
 
@@ -23,7 +23,7 @@ type collection struct {
 }
 
 func (c *collection) Boot() {
-	go c.Metric().Boot()
+	//go c.Metric().Boot()
 	go c.Text().Boot()
 }
 
@@ -43,11 +43,11 @@ func (c *collection) Shutdown() {
 	c.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
 
-		wg.Add(1)
-		go func() {
-			c.Metric().Shutdown()
-			wg.Done()
-		}()
+		//wg.Add(1)
+		//go func() {
+		//	c.Metric().Shutdown()
+		//	wg.Done()
+		//}()
 
 		wg.Add(1)
 		go func() {
