@@ -14,8 +14,8 @@ func NewCollection() servicespec.EndpointCollection {
 type collection struct {
 	// Dependencies.
 
-	metric servicespec.EndpointService
-	text   servicespec.EndpointService
+	metricService servicespec.EndpointService
+	textService   servicespec.EndpointService
 
 	// Settings.
 
@@ -28,15 +28,15 @@ func (c *collection) Boot() {
 }
 
 func (c *collection) Metric() servicespec.EndpointService {
-	return c.metric
+	return c.metricService
 }
 
-func (c *collection) SetMetric(metric servicespec.EndpointService) {
-	c.metric = metric
+func (c *collection) SetMetricService(metricService servicespec.EndpointService) {
+	c.metricService = metricService
 }
 
-func (c *collection) SetText(text servicespec.EndpointService) {
-	c.text = text
+func (c *collection) SetTextService(textService servicespec.EndpointService) {
+	c.textService = textService
 }
 
 func (c *collection) Shutdown() {
@@ -60,5 +60,5 @@ func (c *collection) Shutdown() {
 }
 
 func (c *collection) Text() servicespec.EndpointService {
-	return c.text
+	return c.textService
 }
