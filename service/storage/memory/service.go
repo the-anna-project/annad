@@ -9,7 +9,7 @@ import (
 
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service/storage/redis"
+	"github.com/the-anna-project/annad/service/storage/redis"
 )
 
 // New creates a new memory storage service. Therefore it manages an in-memory

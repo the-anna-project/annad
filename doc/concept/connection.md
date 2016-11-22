@@ -76,7 +76,7 @@ within the connection space.
 
 1. *Bias* is some manually provided hint, intended to guide some CLG tree into a
    certain direction. Read more on this in this issue:
-   https://github.com/xh3b4sd/anna/issues/44.
+   https://github.com/the-anna-project/annad/issues/44.
 
 2. *Intuition* is some sort of vague feeling that points into a certain
    direction. Drawing distantly related connections across multiple levels can

@@ -52,5 +52,5 @@ This is how the Nth factory permutation looks like.
 
 See the following code documentation for more information.
 
-- https://godoc.org/github.com/xh3b4sd/anna/service/permutation
-- https://godoc.org/github.com/xh3b4sd/anna/spec#PermutationFactory
+- https://godoc.org/github.com/the-anna-project/annad/service/permutation
+- https://godoc.org/github.com/the-anna-project/annad/spec#PermutationFactory

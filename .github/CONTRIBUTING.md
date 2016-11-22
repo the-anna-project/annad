@@ -21,8 +21,8 @@ done via the Github web interface when merging a PR.
 ### docs
 Pull requests are only accepted and merged when there is proper documentation.
 
-- Conceptual documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/concept.
-- Process documentation needs to be provided here: https://github.com/xh3b4sd/anna/tree/master/doc/diary.
+- Conceptual documentation needs to be provided here: https://github.com/the-anna-project/annad/tree/master/doc/concept.
+- Process documentation needs to be provided here: https://github.com/the-anna-project/annad/tree/master/doc/diary.
 - Code documentation needs to be provided within the code: http://blog.golang.org/godoc-documenting-go-code.
 
 ### tests
@@ -34,6 +34,6 @@ tests.
 
 ### branches
 When collaborating and creating branches within the core repository
-https://github.com/xh3b4sd/anna branches should be deleted ones they are merged.
+https://github.com/the-anna-project/annad branches should be deleted ones they are merged.
 This prevents loosing the overview and keeps the repository in a clean state
 branch wise.

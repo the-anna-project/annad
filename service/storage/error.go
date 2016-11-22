@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/xh3b4sd/anna/service/storage/redis"
+	"github.com/the-anna-project/annad/service/storage/redis"
 )
 
 // IsNotFound combines IsNotFound error matchers of all storage

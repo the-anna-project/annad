@@ -8,7 +8,7 @@ import (
 	"github.com/the-anna-project/permutation/service"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service/storage"
+	"github.com/the-anna-project/annad/service/storage"
 )
 
 // New creates a new activator service.

@@ -2,7 +2,7 @@
 A distribution is a calculation object that describes the distribution of
 vectors within space. This vectors can be of arbitrary dimensions. That way
 characteristics of features and their location in space can be represented and
-alanysed. See https://godoc.org/github.com/xh3b4sd/anna/spec#Distribution for
+alanysed. See https://godoc.org/github.com/the-anna-project/annad/spec#Distribution for
 implementation details.
 
 ### balance system

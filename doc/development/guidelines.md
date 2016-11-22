@@ -25,7 +25,7 @@ place. It is hard to come up with decent integration tests. Here we need to
 find ways to create integration tests that do not hurt, that are beautiful and
 in best case even fast. The last point is in most cases contradictionary.
 Anyway [make gotest](makefile.md#gotest) is your friend. Further code coverage
-is tracked at https://codecov.io/github/xh3b4sd/anna.
+is tracked at https://codecov.io/gh/the-anna-project/annad.
 
 ### data format
 Data formats depend on the use case. E.g. for simplicity of some network API,

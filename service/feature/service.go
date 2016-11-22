@@ -7,7 +7,7 @@ import (
 
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/feature"
+	"github.com/the-anna-project/annad/object/feature"
 )
 
 // New creates a new feature service. The feature service tries to detect all
