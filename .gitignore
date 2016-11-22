@@ -1,7 +1,5 @@
-.annasession
 coverage.txt
 profile.out
-client/interface/text/text_endpoint.pb.go
 service/clg/*/generated*
 service/endpoint/text/text_endpoint.pb.go
 TODO

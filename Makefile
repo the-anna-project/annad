@@ -1,4 +1,4 @@
-.PHONY: all annad annactl clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck protoc setup
+.PHONY: all annad clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck protoc setup
 
 
 
@@ -19,7 +19,7 @@ PROJECT_VERSION=$(shell cat VERSION)
 
 
 
-all: annactl annad
+all: annad
 
 annad: gogenerate
 	@go build \
@@ -32,18 +32,6 @@ annad: gogenerate
 			-X main.projectVersion=${PROJECT_VERSION} \
 		" \
 		.
-
-annactl: gogenerate
-	@go build \
-		-o ${GOPATH}/bin/annactl \
-		-ldflags " \
-			-X main.gitCommit=${GIT_COMMIT} \
-			-X main.goArch=${GOARCH} \
-			-X main.goOS=${GOOS} \
-			-X main.goVersion=${GO_VERSION} \
-			-X main.projectVersion=${PROJECT_VERSION} \
-		" \
-		./annactl
 
 clean:
 	@rm -rf coverage.txt profile.out /tmp/protoc/ /tmp/protoc.zip
