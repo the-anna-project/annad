@@ -1,4 +1,5 @@
-.workspace
-.annasession
+service/
+vendor/
 coverage.txt
 profile.out
+TODO
