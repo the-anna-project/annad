@@ -8,9 +8,6 @@ import (
 
 	"github.com/the-anna-project/annad/service/activator"
 	"github.com/the-anna-project/annad/service/connection"
-	"github.com/the-anna-project/annad/service/endpoint"
-	"github.com/the-anna-project/annad/service/endpoint/metric"
-	"github.com/the-anna-project/annad/service/endpoint/text"
 	"github.com/the-anna-project/annad/service/feature"
 	"github.com/the-anna-project/annad/service/forwarder"
 	"github.com/the-anna-project/annad/service/network"
@@ -18,7 +15,7 @@ import (
 	memorystorage "github.com/the-anna-project/annad/service/storage/memory"
 	"github.com/the-anna-project/annad/service/storage/redis"
 	"github.com/the-anna-project/annad/service/tracker"
-	"github.com/the-anna-project/collection"
+	servicecollection "github.com/the-anna-project/collection"
 	memoryfs "github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
 	inputcollection "github.com/the-anna-project/input/collection"
@@ -29,13 +26,16 @@ import (
 	textoutputservice "github.com/the-anna-project/output/service/text"
 	"github.com/the-anna-project/permutation/service"
 	"github.com/the-anna-project/random"
+	endpointcollection "github.com/the-anna-project/server/collection"
+	metricendpoint "github.com/the-anna-project/server/service/metric"
+	textendpoint "github.com/the-anna-project/server/service/text"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
 func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	// Set.
-	collection := collection.New()
+	collection := servicecollection.New()
 
 	collection.SetActivatorService(c.newActivatorService())
 	collection.SetConnectionService(c.newConnectionService())
@@ -98,12 +98,12 @@ func (c *Command) newBackoffFactory() func() objectspec.Backoff {
 }
 
 func (c *Command) newEndpointCollection() servicespec.EndpointCollection {
-	newCollection := endpoint.NewCollection()
+	newCollection := endpointcollection.New()
 
-	metricService := metric.New()
+	metricService := metricendpoint.New()
 	metricService.SetAddress(c.configCollection.Endpoint().Metric().Address())
 
-	textService := text.New()
+	textService := textendpoint.New()
 	textService.SetAddress(c.configCollection.Endpoint().Text().Address())
 
 	newCollection.SetMetricService(metricService)

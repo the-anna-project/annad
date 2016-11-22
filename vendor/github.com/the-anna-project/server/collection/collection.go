@@ -1,4 +1,4 @@
-package endpoint
+package collection
 
 import (
 	"sync"
@@ -6,8 +6,8 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-// NewCollection creates a new endpoint collection.
-func NewCollection() servicespec.EndpointCollection {
+// New creates a new endpoint collection.
+func New() servicespec.EndpointCollection {
 	return &collection{}
 }
 

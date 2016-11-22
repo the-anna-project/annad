@@ -126,6 +126,12 @@ imports:
   - service
 - name: github.com/the-anna-project/random
   version: 42f4d618208d5ea5cee839263966c1a838edc214
+- name: github.com/the-anna-project/server
+  version: b9329ec4dd3eff80cb46af1d7d25bafa9026fb67
+  subpackages:
+  - collection
+  - service/metric
+  - service/text
 - name: github.com/the-anna-project/spec
   version: e4664ca4dc8d9d23e29c41eede681c9e83382878
   subpackages:
