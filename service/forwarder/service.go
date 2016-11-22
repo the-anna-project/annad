@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	objectspec "github.com/the-anna-project/spec/object"
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/annad/object/networkpayload"
 	"github.com/the-anna-project/annad/service/storage"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new forwarder service.

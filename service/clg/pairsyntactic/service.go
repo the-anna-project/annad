@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/the-anna-project/spec/object"
 	"github.com/the-anna-project/annad/service/storage"
+	"github.com/the-anna-project/spec/object"
 )
 
 // TODO there is nothing that reads pairs

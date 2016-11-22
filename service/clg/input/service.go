@@ -5,8 +5,8 @@ package input
 import (
 	"fmt"
 
-	"github.com/the-anna-project/spec/object"
 	"github.com/the-anna-project/annad/service/storage"
+	"github.com/the-anna-project/spec/object"
 )
 
 // calculate fetches the information ID associated with the given information

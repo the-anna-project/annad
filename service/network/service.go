@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	objectspec "github.com/the-anna-project/spec/object"
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/annad/object/context"
 	"github.com/the-anna-project/annad/object/networkpayload"
+	objectspec "github.com/the-anna-project/spec/object"
+	servicespec "github.com/the-anna-project/spec/service"
 
 	workerpool "github.com/xh3b4sd/worker-pool"
 )

@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/annad/object/config"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // New creates a new boot command.

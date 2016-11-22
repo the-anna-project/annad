@@ -3,8 +3,8 @@ package networkpayload
 import (
 	"reflect"
 
-	"github.com/the-anna-project/spec/object"
 	"github.com/the-anna-project/annad/object/context"
+	"github.com/the-anna-project/spec/object"
 )
 
 // Config represents the configuration used to create a new

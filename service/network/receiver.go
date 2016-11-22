@@ -1,7 +1,6 @@
 package network
 
 import (
-	servicespec "github.com/the-anna-project/spec/service"
 	"github.com/the-anna-project/annad/service/clg/divide"
 	"github.com/the-anna-project/annad/service/clg/greater"
 	"github.com/the-anna-project/annad/service/clg/input"
@@ -18,6 +17,7 @@ import (
 	"github.com/the-anna-project/annad/service/clg/splitfeatures"
 	"github.com/the-anna-project/annad/service/clg/subtract"
 	"github.com/the-anna-project/annad/service/clg/sum"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // logNetworkError logs the given error in a specific way dependening on the

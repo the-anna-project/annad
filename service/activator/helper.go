@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"strings"
 
-	objectspec "github.com/the-anna-project/spec/object"
 	"github.com/the-anna-project/annad/object/networkpayload"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 func equalStrings(a, b []string) bool {
