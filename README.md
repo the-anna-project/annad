@@ -1,8 +1,9 @@
-[![maturity](https://img.shields.io/badge/status-alpha-red.svg)](https://github.com/xh3b4sd/anna) [![build status](https://travis-ci.org/xh3b4sd/anna.svg?branch=master)](https://travis-ci.org/xh3b4sd/anna) [![code coverage](https://codecov.io/github/xh3b4sd/anna/coverage.svg?branch=master)](https://codecov.io/github/xh3b4sd/anna?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/xh3b4sd/anna)](https://goreportcard.com/report/github.com/xh3b4sd/anna) [![motivation](https://img.shields.io/badge/made%20with-%E2%99%A1-ff69b4.svg)](https://github.com/xh3b4sd/anna) [![GoDoc](https://godoc.org/github.com/xh3b4sd/anna?status.svg)](http://godoc.org/github.com/xh3b4sd/anna)
+[![maturity](https://img.shields.io/badge/status-alpha-red.svg)](https://github.com/the-anna-project/annad) [![build status](https://travis-ci.org/the-anna-project/annad.svg?branch=master)](https://travis-ci.org/the-anna-project/annad) [![code coverage](https://codecov.io/gh/the-anna-project/annad/coverage.svg?branch=master)](https://codecov.io/gh/the-anna-project/annad?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/the-anna-project/annad)](https://goreportcard.com/report/github.com/the-anna-project/annad) [![motivation](https://img.shields.io/badge/made%20with-%E2%99%A1-ff69b4.svg)](https://github.com/the-anna-project/annad) [![GoDoc](https://godoc.org/github.com/the-anna-project/annad?status.svg)](http://godoc.org/github.com/the-anna-project/annad)
 
-# anna
-Anna, Artificial Neural Network Aspiration, aims to be self-learning and
-self-improving software.
+# annad
+The annad package implements a command line tool to run the neural network of
+the anna project. Anna, Artificial Neural Network Aspiration, aims to be
+self-learning and self-improving software.
 
 # abstract
 > AI is the last invention humanity will ever need to make.
@@ -33,7 +34,7 @@ way.
 # documentation
 All documentation is done using markdown file within the [doc/](doc) directory.
 Code documentation can also be found at
-[godoc](https://godoc.org/github.com/xh3b4sd/anna).
+[godoc](https://godoc.org/github.com/the-anna-project/annad).
 
 - [api](doc/api)
 - [concept](doc/concept)

@@ -66,7 +66,7 @@ $ go list -json ./service/random | jq .Imports
   "fmt",
   "github.com/cenk/backoff",
   "github.com/juju/errgo",
-  "github.com/xh3b4sd/anna/service/spec",
+  "github.com/the-anna-project/annad/service/spec",
   "io",
   "math/big",
   "time"

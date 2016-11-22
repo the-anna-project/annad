@@ -3,8 +3,8 @@ package command
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/xh3b4sd/anna/command/boot"
-	"github.com/xh3b4sd/anna/command/version"
+	"github.com/the-anna-project/annad/command/boot"
+	"github.com/the-anna-project/annad/command/version"
 )
 
 // New creates a new annad command.

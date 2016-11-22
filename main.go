@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/xh3b4sd/anna/command"
+	"github.com/the-anna-project/annad/command"
 )
 
 var (

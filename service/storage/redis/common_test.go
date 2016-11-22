@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/the-anna-project/log"
-	"github.com/the-anna-project/spec/legacy"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
 // rootLogger implements spec.RootLogger and is used to capture log messages.
@@ -31,7 +31,7 @@ func (rl *rootLogger) ResetArgs() {
 	rl.Args = []interface{}{}
 }
 
-func testMustNewRootLogger(t *testing.T) spec.RootLogger {
+func testMustNewRootLogger(t *testing.T) servicespec.RootLogger {
 	return &rootLogger{Args: []interface{}{}}
 }
 

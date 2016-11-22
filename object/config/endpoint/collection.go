@@ -1,8 +1,8 @@
 package endpoint
 
 import (
-	"github.com/xh3b4sd/anna/object/config/endpoint/metric"
-	"github.com/xh3b4sd/anna/object/config/endpoint/text"
+	"github.com/the-anna-project/annad/object/config/endpoint/metric"
+	"github.com/the-anna-project/annad/object/config/endpoint/text"
 )
 
 // NewCollection creates a new endpoint object. It provides configuration for

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/the-anna-project/annad/service/storage"
 	permutationlist "github.com/the-anna-project/permutation/object/list"
 	"github.com/the-anna-project/permutation/service"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/service/storage"
 )
 
 // New creates a new activator service.

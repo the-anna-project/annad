@@ -10,7 +10,7 @@ export GOPATH=~/gopath
 
 The Anna project is then located here.
 ```
-~/gopath/src/github.com/xh3b4sd/anna    
+~/gopath/src/github.com/the-anna-project/annad    
 ```
 
 ### prerequisites

@@ -8,12 +8,12 @@ import (
 	redigo "github.com/garyburd/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
 
+	"github.com/the-anna-project/annad/object/context"
+	"github.com/the-anna-project/annad/object/networkpayload"
+	"github.com/the-anna-project/annad/service/storage"
+	"github.com/the-anna-project/annad/service/storage/redis"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-	"github.com/xh3b4sd/anna/object/context"
-	"github.com/xh3b4sd/anna/object/networkpayload"
-	"github.com/xh3b4sd/anna/service/storage"
-	"github.com/xh3b4sd/anna/service/storage/redis"
 )
 
 type testErrorIDService struct{}

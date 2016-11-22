@@ -1,9 +1,9 @@
 package storage
 
 import (
-	"github.com/xh3b4sd/anna/object/config/storage/connection"
-	"github.com/xh3b4sd/anna/object/config/storage/feature"
-	"github.com/xh3b4sd/anna/object/config/storage/general"
+	"github.com/the-anna-project/annad/object/config/storage/connection"
+	"github.com/the-anna-project/annad/object/config/storage/feature"
+	"github.com/the-anna-project/annad/object/config/storage/general"
 )
 
 // NewCollection creates a new storage object. It provides configuration for the

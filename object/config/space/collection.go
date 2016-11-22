@@ -1,9 +1,9 @@
 package space
 
 import (
-	"github.com/xh3b4sd/anna/object/config/space/connection"
-	"github.com/xh3b4sd/anna/object/config/space/dimension"
-	"github.com/xh3b4sd/anna/object/config/space/peer"
+	"github.com/the-anna-project/annad/object/config/space/connection"
+	"github.com/the-anna-project/annad/object/config/space/dimension"
+	"github.com/the-anna-project/annad/object/config/space/peer"
 )
 
 // NewCollection creates a new space object. It provides configuration for the

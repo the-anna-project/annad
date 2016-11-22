@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/the-anna-project/annad/object/networkpayload"
 	textoutputobject "github.com/the-anna-project/output/object/text"
 	"github.com/the-anna-project/spec/object"
-	"github.com/xh3b4sd/anna/object/networkpayload"
 )
 
 // TODO there is no CLG to read from the certenty pyramid

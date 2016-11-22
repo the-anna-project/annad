@@ -1,28 +1,48 @@
-hash: 3d657f0f24ae18573699d4f0ae7cceae37ba42bd4228f1b28f753e9cbca1233f
-updated: 2016-11-20T03:20:33.559855584+01:00
+hash: 78714d5ced42b35fef5f7549088415e25f925d095274cab1e1060f0153120d70
+updated: 2016-11-23T00:08:23.791976682+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  subpackages:
+  - quantile
 - name: github.com/bsm/redeo
   version: 1ce09fc76693fb3c1ca9b529c66f38920beb6fb8
+  subpackages:
+  - info
 - name: github.com/cenk/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
+  subpackages:
+  - internal
+  - redis
 - name: github.com/go-kit/kit
   version: f66b0e13579bfc5a48b9e2a94b1209c107ea1f41
+  subpackages:
+  - log
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  subpackages:
+  - proto
 - name: github.com/hashicorp/hcl
-  version: c3e054bfd4dcf77b9965ed2b79b22afa2f41d4eb
+  version: 7cb7455c285ca3bf3362aa4ba6a06a6d6f5c3ba0
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/juju/errgo
@@ -33,6 +53,8 @@ imports:
   version: 0723e352fa358f9322c938cc2dadda874e9151a9
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/mitchellh/mapstructure
   version: f3009df150dadf309fdee4a54ed65c124afad715
 - name: github.com/pelletier/go-buffruneio
@@ -41,16 +63,26 @@ imports:
   version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
+  subpackages:
+  - prometheus
 - name: github.com/prometheus/client_model
   version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
+  subpackages:
+  - go
 - name: github.com/prometheus/common
   version: 0d5de9d6d8629cb8bee6d4674da4127cd8b615a3
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
 - name: github.com/prometheus/procfs
   version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
 - name: github.com/rafaeljusto/redigomock
   version: ca49a8af34fc0c903a37409317576da14b3f1cbd
 - name: github.com/spf13/afero
   version: 06b7e5f50606ecd49148a01a6008942d9b669217
+  subpackages:
+  - mem
 - name: github.com/spf13/cast
   version: 24b6558033ffe202bf42f0f3b870dcc798dd2ba8
 - name: github.com/spf13/cobra
@@ -61,40 +93,81 @@ imports:
   version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
-- name: github.com/the-anna-project/client
-  version: 120bb7546ad2ee19d4dae0f3e9dec87f14e52254
 - name: github.com/the-anna-project/collection
   version: 00966e288654f98bd2eb71e9c0b41b5f08b536ec
 - name: github.com/the-anna-project/fs
   version: 48be206e218d2e382b9104bae2638136b98b4e95
+  subpackages:
+  - memory
 - name: github.com/the-anna-project/id
   version: fac33f443db8dab563de0d9469d4baf956457949
 - name: github.com/the-anna-project/input
   version: 7f3d529108ce0a7ce16d8da1ccc6f7124ea23ded
+  subpackages:
+  - collection
+  - object/text
+  - service/text
 - name: github.com/the-anna-project/instrumentor
   version: 86e80bb7a6dfb5af8bbf44be3d74f5b7438d3525
+  subpackages:
+  - prometheus
 - name: github.com/the-anna-project/log
   version: 4cc7887ec1a8538ad8ee1dc81aa1a3899fceba7b
 - name: github.com/the-anna-project/output
   version: 4b56e3427dd408a90d5903a892da6ce0fa6494b5
+  subpackages:
+  - collection
+  - object/text
+  - service/text
 - name: github.com/the-anna-project/permutation
   version: adef95fff01e7c05187c944b5855abf9c301b7a8
+  subpackages:
+  - object/list
+  - service
 - name: github.com/the-anna-project/random
   version: 42f4d618208d5ea5cee839263966c1a838edc214
 - name: github.com/the-anna-project/spec
   version: e4664ca4dc8d9d23e29c41eede681c9e83382878
+  subpackages:
+  - api
+  - object
+  - service
 - name: github.com/tylerb/graceful
   version: 50a48b6e73fcc75b45e22c05b79629a67c79e938
 - name: github.com/xh3b4sd/worker-pool
   version: 10e09858097d478ec9994d8ef0113456d1f226db
+  subpackages:
+  - spec
 - name: golang.org/x/net
   version: 4971afdc2f162e82d185353533d3cf16188a9f4e
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - lex/httplex
+  - trace
 - name: golang.org/x/sys
-  version: b699b7032584f0953262cb2788a0ca19bb494703
+  version: 30237cf4eefd639b184d1f2cb77a581ea0be8947
+  subpackages:
+  - unix
 - name: golang.org/x/text
   version: a263ba8db058568bb9beba166777d9c9dbe75d68
+  subpackages:
+  - transform
+  - unicode/norm
 - name: google.golang.org/grpc
   version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []

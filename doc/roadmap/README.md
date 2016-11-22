@@ -34,7 +34,7 @@ about patterns within input sequences. This goes into the direction of problem
 analysis and solving. The best solution would be to identify a pattern for
 pattern recognition. Thus Anna could find new patterns on her own and make
 reasonable decisions about when to use what pattern and why. See the [pattern
-network](https://godoc.org/github.com/xh3b4sd/anna/net/pat).
+network](https://godoc.org/github.com/the-anna-project/annad/net/pat).
 
 ---
 
