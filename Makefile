@@ -1,4 +1,4 @@
-.PHONY: all annad clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck protoc setup
+.PHONY: all annad clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck setup
 
 
 
@@ -34,7 +34,7 @@ annad: gogenerate
 		.
 
 clean:
-	@rm -rf coverage.txt profile.out /tmp/protoc/ /tmp/protoc.zip
+	@rm -rf coverage.txt profile.out
 	@# TODO remove generated code
 
 devdeps:
@@ -42,7 +42,6 @@ devdeps:
 	@go get -u -v github.com/client9/misspell/cmd/misspell
 	@go get -u -v github.com/fzipp/gocyclo
 	@go get -u -v github.com/golang/lint/golint
-	@go get -u -v github.com/golang/protobuf/protoc-gen-go
 	@go get -u -v github.com/xh3b4sd/clggen
 
 dockerimage: all
@@ -56,7 +55,6 @@ gofmt:
 
 gogenerate:
 	@go generate ./service/clg
-	@protoc --proto_path=vendor/github.com/the-anna-project/spec/api --go_out=plugins=grpc,import_path=text:service/endpoint/text/ vendor/github.com/the-anna-project/spec/api/text_endpoint.proto
 
 gotest: gogenerate
 	@./bin/gotest
@@ -64,17 +62,4 @@ gotest: gogenerate
 projectcheck:
 	@./bin/projectcheck
 
-protoc:
-ifeq ($(shell go env GOOS),linux)
-	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip -O /tmp/protoc.zip
-else ifeq ($(shell go env GOOS),darwin)
-	@wget https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-osx-x86_64.zip -O /tmp/protoc.zip
-else
-	@echo "unsupported platform"
-	@exit 1
-endif
-	@unzip /tmp/protoc.zip -d /tmp/protoc/
-	@mv /tmp/protoc/bin/protoc ${GOPATH}/bin/protoc
-	@rm -rf /tmp/protoc/ /tmp/protoc.zip
-
-setup: devdeps protoc
+setup: devdeps
