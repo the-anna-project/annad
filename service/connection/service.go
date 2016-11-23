@@ -41,14 +41,34 @@ func (s *service) Boot() {
 	}
 }
 
+func (s *service) ConnectPeers(a, b objectspec.Peer) error {
+	key := fmt.Sprintf("peer:%s", a.Value())
+
+	err := s.Service().Storage().Connection().PushToList(key, b.Value())
+	if err != nil {
+		return maskAny(err)
+	}
+
+	return nil
+}
+
 func (s *service) Create(a, b objectspec.Peer) error {
 	a, b = s.sortPeers(a, b)
 
+	// TODO process in parallel
 	err := s.CreatePeer(a)
 	if err != nil {
 		return maskAny(err)
 	}
 	err = s.CreatePeer(b)
+	if err != nil {
+		return maskAny(err)
+	}
+	err = s.ConnectPeers(a, b)
+	if err != nil {
+		return maskAny(err)
+	}
+	err = s.ConnectPeers(b, a)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -130,6 +150,11 @@ func (s *service) CreatePosition() (string, error) {
 	position := strings.Join(coordinates, ",")
 
 	return position, nil
+}
+
+// TODO
+func (s *service) GetAll(peer objectspec.Peer) ([]objectspec.Peer, error) {
+	return nil, nil
 }
 
 func (s *service) Metadata() map[string]string {
