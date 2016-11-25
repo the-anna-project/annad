@@ -75,7 +75,7 @@ type StorageService interface {
 	// Set.
 	//
 
-	// GetAllFromSet returns all elements from the stored stored under key.
+	// GetAllFromSet returns all elements from the stored set under key.
 	GetAllFromSet(key string) ([]string, error)
 	// PushToSet adds the given element to the set identified by the given key.
 	// Note that a set is an unordered collection of distinct elements.
