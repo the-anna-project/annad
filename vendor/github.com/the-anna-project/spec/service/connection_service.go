@@ -1,9 +1,5 @@
 package spec
 
-import (
-	objectspec "github.com/the-anna-project/spec/object"
-)
-
 // ConnectionService represents a service being able to manage connections
 // within the connection space.
 //
@@ -36,52 +32,37 @@ import (
 //         importance.
 //
 // Following is an example of a possible storage key structure, to illustrate
-// persisted connections.
+// persisted connections. The given peers being used to create the peer and
+// connection keys are ordered as such, that they form directed and reproducible
+// storage keys. This means a connection can only be resolved into a certain,
+// desired direction.
 //
-//     Storage key of the peer "sum" and its corresponding hash map value.
+//     This is a peer pointing to other peers. The key on the left is a string
+//     being formed by a prefix and a peer value. The value on the right is a
+//     list of strings being formed by peer values.
 //
-//         peer:sum
+//         peer:sum     $id1
+//         peer:$id1    sum,$id2,$id4
+//         peer:$id2    $id3
+//         peer:$id4    $id5
 //
-//             created     1478992355
-//             kind        behaviour
-//             position    432.8,4342,54.334
-//             updated     1478992355
+//     This is a connection holding metadata. The key on the left is a string
+//     being formed by a prefix and the values of the two peers forming the
+//     connection. The order of the peers within the key expresses the
+//     connection direction. The value on the right is a map of strings.
 //
-//     Storage key of the peer "number" and its corresponding hash map value.
-//
-//         peer:number
-//
-//             created     1478992355
-//             kind        information
-//             position    432.8,4342,54.334
-//             updated     1478992355
-//
-//     Storage key of the connection between the peer "sum" and "number" and its
-//     corresponding hash map value. The two given peers being used to create
-//     the connection key are ordered alpha numerically beforehand, regardless
-//     of their kind.
-//
-//         peer:number:peer:sum
-//
-//             created    1478992355
-//             updated    1478992355
-//             weight     278.0082
-//
-//     Backreference from positions to peers and its corresponding list value.
-//
-//         position:432.8,4342,54.334    peer,peer
+//         connection:sum:$id1     weight 23.775
+//         connection:$id1:sum     weight 23.775
+//         connection:$id1:$id2    weight 23.775
+//         connection:$id1:$id4    weight 23.775
+//         connection:$id2:$id3    weight 23.775
+//         connection:$id4:$id5    weight 23.775
 //
 type ConnectionService interface {
 	Boot()
-	// Create manages the creation of a connection.
-	//
-	//     peer
-	//     peer
-	//     connection
-	//     if not exist
-	//     ensure transaction
-	//
-	Create(a, b objectspec.Peer) error
+	Create(peerA, peerB string) error
+	Find(peerA, peerB string) (map[string]string, error)
+	FindPeers(peer string) ([]string, error)
 	Metadata() map[string]string
 	Service() ServiceCollection
 	SetDimensionCount(dimensionCount int)
