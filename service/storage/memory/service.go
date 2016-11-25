@@ -70,6 +70,8 @@ func (s *service) Boot() {
 	newRedisStorage.SetBackoffFactory(func() objectspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
+	newRedisStorage.SetServiceCollection(s.Service())
+	newRedisStorage.Boot()
 
 	s.closer = closer
 	s.redisStorage = newRedisStorage
