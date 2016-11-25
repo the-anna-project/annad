@@ -153,6 +153,6 @@ func (c *Command) Shutdown() {
 
 		wg.Wait()
 
-		os.Exit(0)
+		c.ForceShutdown()
 	})
 }
