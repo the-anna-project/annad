@@ -7,7 +7,6 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/the-anna-project/annad/service/activator"
-	"github.com/the-anna-project/annad/service/connection"
 	"github.com/the-anna-project/annad/service/feature"
 	"github.com/the-anna-project/annad/service/forwarder"
 	"github.com/the-anna-project/annad/service/network"
@@ -16,6 +15,7 @@ import (
 	"github.com/the-anna-project/annad/service/storage/redis"
 	"github.com/the-anna-project/annad/service/tracker"
 	servicecollection "github.com/the-anna-project/collection"
+	connectionservice "github.com/the-anna-project/connection/service"
 	memoryfs "github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
 	inputcollection "github.com/the-anna-project/input/collection"
@@ -82,7 +82,7 @@ func (c *Command) newActivatorService() servicespec.ActivatorService {
 }
 
 func (c *Command) newConnectionService() servicespec.ConnectionService {
-	newService := connection.New()
+	newService := connectionservice.New()
 
 	newService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
 	newService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
