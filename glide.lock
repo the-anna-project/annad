@@ -95,6 +95,10 @@ imports:
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/the-anna-project/collection
   version: 00966e288654f98bd2eb71e9c0b41b5f08b536ec
+- name: github.com/the-anna-project/connection
+  version: 027a7da182ef78859b9944f0fb00bb969136eca5
+  subpackages:
+  - service
 - name: github.com/the-anna-project/fs
   version: 48be206e218d2e382b9104bae2638136b98b4e95
   subpackages:
@@ -133,7 +137,7 @@ imports:
   - service/metric
   - service/text
 - name: github.com/the-anna-project/spec
-  version: e4664ca4dc8d9d23e29c41eede681c9e83382878
+  version: dbde286e767dc22b9ab478908709bd4b47666d7a
   subpackages:
   - api
   - object
