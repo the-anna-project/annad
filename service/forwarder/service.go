@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/the-anna-project/annad/object/networkpayload"
-	"github.com/the-anna-project/annad/service/storage"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 // New creates a new forwarder service.
@@ -104,7 +104,7 @@ func (s *service) GetNetworkPayloads(CLG servicespec.CLGService, networkPayload 
 	}
 	behaviourIDsKey := fmt.Sprintf("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	newBehaviourIDs, err := s.Service().Storage().General().GetAllFromSet(behaviourIDsKey)
-	if storage.IsNotFound(err) {
+	if storagecollection.IsNotFound(err) {
 		// No configuration of behaviour IDs is stored. Thus we return an error.
 		// Eventually some other lookup is able to find sufficient network payloads.
 		return nil, maskAny(networkPayloadsNotFoundError)

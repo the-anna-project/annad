@@ -1,4 +1,6 @@
-package storage
+// Package collection implements services to persist data. The storage
+// collection bundles storage instances to pass them around.
+package collection
 
 import (
 	"sync"
@@ -6,17 +8,17 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-// NewCollection creates a new storage collection.
-func NewCollection() servicespec.StorageCollection {
+// New creates a new storage collection.
+func New() servicespec.StorageCollection {
 	return &collection{}
 }
 
 type collection struct {
 	// Dependencies.
 
-	connection servicespec.StorageService
-	feature    servicespec.StorageService
-	general    servicespec.StorageService
+	connectionService servicespec.StorageService
+	featureService    servicespec.StorageService
+	generalService    servicespec.StorageService
 
 	// Settings.
 
@@ -30,27 +32,27 @@ func (c *collection) Boot() {
 }
 
 func (c *collection) Connection() servicespec.StorageService {
-	return c.connection
+	return c.connectionService
 }
 
 func (c *collection) Feature() servicespec.StorageService {
-	return c.feature
+	return c.featureService
 }
 
 func (c *collection) General() servicespec.StorageService {
-	return c.general
+	return c.generalService
 }
 
-func (c *collection) SetConnection(conn servicespec.StorageService) {
-	c.connection = conn
+func (c *collection) SetConnection(connectionService servicespec.StorageService) {
+	c.connectionService = connectionService
 }
 
-func (c *collection) SetFeature(f servicespec.StorageService) {
-	c.feature = f
+func (c *collection) SetFeature(featureService servicespec.StorageService) {
+	c.featureService = featureService
 }
 
-func (c *collection) SetGeneral(g servicespec.StorageService) {
-	c.general = g
+func (c *collection) SetGeneral(generalService servicespec.StorageService) {
+	c.generalService = generalService
 }
 
 func (c *collection) Shutdown() {

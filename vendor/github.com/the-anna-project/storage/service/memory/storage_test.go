@@ -16,6 +16,7 @@ import (
 	"github.com/the-anna-project/log"
 	"github.com/the-anna-project/random"
 	servicespec "github.com/the-anna-project/spec/service"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 func testNewStorage() servicespec.StorageService {
@@ -863,7 +864,7 @@ func Test_StringStorage_GetSetGet(t *testing.T) {
 	defer newStorage.Shutdown()
 
 	_, err := newStorage.Get("foo")
-	if !IsNotFound(err) {
+	if !storagecollection.IsNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 
@@ -904,7 +905,7 @@ func Test_StringStorage_SetGetRemoveGet(t *testing.T) {
 	}
 
 	_, err = newStorage.Get("foo")
-	if !IsNotFound(err) {
+	if !storagecollection.IsNotFound(err) {
 		t.Fatal("expected", true, "got", false)
 	}
 }

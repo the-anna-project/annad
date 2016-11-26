@@ -1,3 +1,5 @@
+// Package memory implements a service to store data in memory. This can be used
+// for development and testing.
 package memory
 
 import (
@@ -8,9 +10,9 @@ import (
 	"github.com/cenk/backoff"
 	"github.com/garyburd/redigo/redis"
 
-	redisstorage "github.com/the-anna-project/annad/service/storage/redis"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
+	redisstorage "github.com/the-anna-project/storage/service/redis"
 )
 
 // New creates a new memory storage service. Therefore it manages an in-memory

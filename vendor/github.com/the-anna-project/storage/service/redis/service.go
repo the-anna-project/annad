@@ -1,3 +1,5 @@
+// Package redis implements a service to store data in redis. This can be used
+// in production.
 package redis
 
 import (

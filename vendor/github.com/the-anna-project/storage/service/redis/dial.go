@@ -38,21 +38,19 @@ func NewDial(config DialConfig) func() (redis.Conn, error) {
 	return newDial
 }
 
-// mock
-
-type mockDialConfig struct {
+type MockDialConfig struct {
 	RedisConn redis.Conn
 }
 
-func defaultMockDialConfig() mockDialConfig {
-	newConfig := mockDialConfig{
+func DefaultMockDialConfig() MockDialConfig {
+	newConfig := MockDialConfig{
 		RedisConn: redigomock.NewConn(),
 	}
 
 	return newConfig
 }
 
-func newMockDial(config mockDialConfig) func() (redis.Conn, error) {
+func NewMockDial(config MockDialConfig) func() (redis.Conn, error) {
 	newDial := func() (redis.Conn, error) {
 		return config.RedisConn, nil
 	}

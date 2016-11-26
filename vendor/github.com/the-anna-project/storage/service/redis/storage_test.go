@@ -20,9 +20,9 @@ import (
 func testMustNewStorageWithConn(t *testing.T, c redis.Conn) servicespec.StorageService {
 	storageService := New()
 	newPoolConfig := DefaultPoolConfig()
-	newMockDialConfig := defaultMockDialConfig()
+	newMockDialConfig := DefaultMockDialConfig()
 	newMockDialConfig.RedisConn = c
-	newPoolConfig.Dial = newMockDial(newMockDialConfig)
+	newPoolConfig.Dial = NewMockDial(newMockDialConfig)
 	newPool := NewPool(newPoolConfig)
 	storageService.SetPool(newPool)
 

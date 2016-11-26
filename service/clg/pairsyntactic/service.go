@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/the-anna-project/annad/service/storage"
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 // TODO there is nothing that reads pairs
-func (s *service) calculate(ctx spec.Context) error {
+func (s *service) calculate(ctx objectspec.Context) error {
 	// The counter keeps track of the work already being done. We only increment
 	// the counter in case we were not able to do our job. As soon as some
 	// threshold is reached, we stop trying.
@@ -55,7 +55,7 @@ func (s *service) calculate(ctx spec.Context) error {
 		// Write the new pair into the general storage.
 		pairIDKey := fmt.Sprintf("pair:syntactic:feature:%s:pair-id", pair)
 		_, err = s.Service().Storage().General().Get(pairIDKey)
-		if storage.IsNotFound(err) {
+		if storagecollection.IsNotFound(err) {
 			// The created pair was not found within the feature storage. That means
 			// we created a new one which we can store. Once we stored the new pair,
 			// we break the outer loop to be done.
