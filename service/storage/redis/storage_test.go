@@ -1,30 +1,52 @@
 package redis
 
 import (
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/garyburd/redigo/redis"
+	kitlog "github.com/go-kit/kit/log"
+	"github.com/rafaeljusto/redigomock"
 
-	"github.com/the-anna-project/spec/service"
+	"github.com/the-anna-project/collection"
+	"github.com/the-anna-project/id"
+	memoryinstrumentor "github.com/the-anna-project/instrumentor/memory"
+	"github.com/the-anna-project/log"
+	"github.com/the-anna-project/random"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
-func testMustNewStorageWithConn(t *testing.T, c redis.Conn) spec.Storage {
+func testMustNewStorageWithConn(t *testing.T, c redis.Conn) servicespec.StorageService {
+	storageService := New()
 	newPoolConfig := DefaultPoolConfig()
 	newMockDialConfig := defaultMockDialConfig()
-	newMockDialConfig.RedisConn = redisConn
+	newMockDialConfig.RedisConn = c
 	newPoolConfig.Dial = newMockDial(newMockDialConfig)
 	newPool := NewPool(newPoolConfig)
+	storageService.SetPool(newPool)
 
-	// storage
-	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.pool = newPool
-	newStorage, err := NewStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	idService := id.New()
+	instrumentorService := memoryinstrumentor.New()
+	logService := log.New()
+	logService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
+	randomService := random.New()
 
-	return newStorage
+	serviceCollection := collection.New()
+	serviceCollection.SetIDService(idService)
+	serviceCollection.SetInstrumentorService(instrumentorService)
+	serviceCollection.SetLogService(logService)
+	serviceCollection.SetRandomService(randomService)
+
+	idService.SetServiceCollection(serviceCollection)
+	instrumentorService.SetServiceCollection(serviceCollection)
+	logService.SetServiceCollection(serviceCollection)
+	randomService.SetServiceCollection(serviceCollection)
+	storageService.SetServiceCollection(serviceCollection)
+
+	storageService.Boot()
+
+	return storageService
 }
 
 func Test_ListStorage_PopFromList(t *testing.T) {
@@ -519,56 +541,9 @@ func Test_SetStorage_WalkSet_CallbackError(t *testing.T) {
 	}
 }
 
-func Test_Storage_DefaultStorageConfigWithAddr(t *testing.T) {
-	newStorageConfig := DefaultStorageConfigWithAddr("foo")
-	_, err := newStorageConfig.Pool.Dial()
-	if err.Error() != "dial tcp: missing port in address foo" {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_Storage_NewRedisStorage_Error_BackoffFactory(t *testing.T) {
-	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.BackoffFactory = nil
-	_, err := NewStorage(newStorageConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", nil, "got", err)
-	}
-}
-
-func Test_Storage_NewRedisStorage_Error_Log(t *testing.T) {
-	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.Log = nil
-	_, err := NewStorage(newStorageConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_Storage_NewRedisStorage_Error_Pool(t *testing.T) {
-	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.Pool = nil
-	_, err := NewStorage(newStorageConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
-func Test_Storage_NewRedisStorage_Error_Prefix(t *testing.T) {
-	newStorageConfig := DefaultStorageConfig()
-	newStorageConfig.Prefix = ""
-	_, err := NewStorage(newStorageConfig)
-	if !IsInvalidConfig(err) {
-		t.Fatal("expected", true, "got", false)
-	}
-}
-
 func Test_Storage_Shutdown(t *testing.T) {
-	newStorageConfig := DefaultStorageConfig()
-	newStorage, err := NewStorage(newStorageConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	newStorage := testMustNewStorageWithConn(t, nil)
+
 	newStorage.Shutdown()
 	newStorage.Shutdown()
 	newStorage.Shutdown()

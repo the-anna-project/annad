@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/cenk/backoff"
+	"github.com/garyburd/redigo/redis"
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/the-anna-project/annad/service/activator"
@@ -12,7 +13,7 @@ import (
 	"github.com/the-anna-project/annad/service/network"
 	"github.com/the-anna-project/annad/service/storage"
 	memorystorage "github.com/the-anna-project/annad/service/storage/memory"
-	"github.com/the-anna-project/annad/service/storage/redis"
+	redisstorage "github.com/the-anna-project/annad/service/storage/redis"
 	"github.com/the-anna-project/annad/service/tracker"
 	servicecollection "github.com/the-anna-project/collection"
 	connectionservice "github.com/the-anna-project/connection/service"
@@ -176,12 +177,22 @@ func (c *Command) newRandomService() servicespec.RandomService {
 func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	newCollection := storage.NewCollection()
 
+	newPool := func(addr string) *redis.Pool {
+		newDialConfig := redisstorage.DefaultDialConfig()
+		newDialConfig.Addr = addr
+		newPoolConfig := redisstorage.DefaultPoolConfig()
+		newPoolConfig.Dial = redisstorage.NewDial(newDialConfig)
+		newPool := redisstorage.NewPool(newPoolConfig)
+
+		return newPool
+	}
+
 	// Connection.
 	switch c.configCollection.Storage().Connection().Kind() {
 	case "redis":
-		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().Connection().Address())
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().Connection().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
@@ -193,9 +204,9 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// Feature.
 	switch c.configCollection.Storage().Feature().Kind() {
 	case "redis":
-		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().Feature().Address())
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().Feature().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
@@ -207,9 +218,9 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// General.
 	switch c.configCollection.Storage().General().Kind() {
 	case "redis":
-		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().General().Address())
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().General().Address()))
 		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":

@@ -1,14 +1,50 @@
 package memory
 
 import (
+	"fmt"
+	"os"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
+
+	kitlog "github.com/go-kit/kit/log"
+
+	"github.com/the-anna-project/collection"
+	"github.com/the-anna-project/id"
+	memoryinstrumentor "github.com/the-anna-project/instrumentor/memory"
+	"github.com/the-anna-project/log"
+	"github.com/the-anna-project/random"
+	servicespec "github.com/the-anna-project/spec/service"
 )
 
+func testNewStorage() servicespec.StorageService {
+	idService := id.New()
+	instrumentorService := memoryinstrumentor.New()
+	logService := log.New()
+	logService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
+	randomService := random.New()
+	storageService := New()
+
+	serviceCollection := collection.New()
+	serviceCollection.SetIDService(idService)
+	serviceCollection.SetInstrumentorService(instrumentorService)
+	serviceCollection.SetLogService(logService)
+	serviceCollection.SetRandomService(randomService)
+
+	idService.SetServiceCollection(serviceCollection)
+	instrumentorService.SetServiceCollection(serviceCollection)
+	logService.SetServiceCollection(serviceCollection)
+	randomService.SetServiceCollection(serviceCollection)
+	storageService.SetServiceCollection(serviceCollection)
+
+	storageService.Boot()
+
+	return storageService
+}
+
 func Test_ListStorage_PushToListPopFromList(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	var err error
@@ -48,25 +84,27 @@ func Test_ListStorage_PushToListPopFromList(t *testing.T) {
 		t.Fatal("expected", "element3", "got", element)
 	}
 
-	timeOut := make(chan struct{}, 1)
+	fail := make(chan error, 1)
 	go func() {
 		// Fetching elements from a list removes the fetched elements from the list.
 		// After all elements are fetched from the list, the list must be empty.
 		element, err = newStorage.PopFromList("key")
 		if err != nil {
-			t.Fatal("expected", nil, "got", err)
+			fail <- maskAny(err)
+			return
 		}
 		if element != "" {
-			t.Fatal("expected", "", "got", element)
+			fail <- maskAny(fmt.Errorf("test failed"))
+			return
 		}
-		timeOut <- struct{}{}
+		fail <- maskAny(fmt.Errorf("test failed"))
 	}()
 
 	select {
 	case <-time.After(100 * time.Millisecond):
 		// The test succeeded.
-	case <-timeOut:
-		t.Fatal("expected", "success", "got", "timeout")
+	case err := <-fail:
+		t.Fatal("expected", nil, "got", err)
 	}
 }
 
@@ -211,7 +249,8 @@ func Test_ScoredSetStorage_GetElementsByScore(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := MustNew()
+		newStorage := testNewStorage()
+		defer newStorage.Shutdown()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore(testCase.Key, e, s)
@@ -363,7 +402,8 @@ func Test_ScoredSetStorage_GetHighestScoredElements(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := MustNew()
+		newStorage := testNewStorage()
+		defer newStorage.Shutdown()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore(testCase.Key, e, s)
@@ -463,7 +503,8 @@ func Test_ScoredSetStorage_RemoveScoredElement(t *testing.T) {
 
 	for i, testCase := range testCases {
 		// Setup
-		newStorage := MustNew()
+		newStorage := testNewStorage()
+		defer newStorage.Shutdown()
 
 		for e, s := range testCase.Elements {
 			err := newStorage.SetElementByScore("test-key", e, s)
@@ -501,7 +542,7 @@ func Test_ScoredSetStorage_RemoveScoredElement(t *testing.T) {
 }
 
 func Test_ScoredSetStorage_SetWalkRemove(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	err := newStorage.SetElementByScore("test-key", "test-value-1", 0.8)
@@ -575,7 +616,7 @@ func Test_ScoredSetStorage_SetWalkRemove(t *testing.T) {
 }
 
 func Test_ScoredSetStorage_WalkScoredSet(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	err := newStorage.SetElementByScore("test-key", "test-value", 0.8)
@@ -607,7 +648,7 @@ func Test_ScoredSetStorage_WalkScoredSet(t *testing.T) {
 }
 
 func Test_SetStorage_PushGetAll(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	var err error
@@ -655,7 +696,7 @@ func Test_SetStorage_PushGetAll(t *testing.T) {
 }
 
 func Test_SetStorage_WalkPushRemove(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	// Check the set is empty by default
@@ -705,7 +746,7 @@ func Test_SetStorage_WalkPushRemove(t *testing.T) {
 }
 
 func Test_SetStorage_WalkSet_Closer(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	err := newStorage.PushToSet("test-key", "test-value")
@@ -732,7 +773,7 @@ func Test_SetStorage_WalkSet_Closer(t *testing.T) {
 }
 
 func Test_Storage_Shutdown(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 
 	newStorage.Shutdown()
 	newStorage.Shutdown()
@@ -740,7 +781,7 @@ func Test_Storage_Shutdown(t *testing.T) {
 }
 
 func Test_StringMapStorage_GetSetGet(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	value, err := newStorage.GetStringMap("foo")
@@ -773,7 +814,7 @@ func Test_StringMapStorage_GetSetGet(t *testing.T) {
 }
 
 func Test_StringStorage_GetRandom(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	// We store 3 keys in each map of the memory storage to verify that we fetch a
@@ -795,7 +836,7 @@ func Test_StringStorage_GetRandom(t *testing.T) {
 
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -818,7 +859,7 @@ func Test_StringStorage_GetRandom(t *testing.T) {
 }
 
 func Test_StringStorage_GetSetGet(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	_, err := newStorage.Get("foo")
@@ -841,7 +882,7 @@ func Test_StringStorage_GetSetGet(t *testing.T) {
 }
 
 func Test_StringStorage_SetGetRemoveGet(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	err := newStorage.Set("foo", "bar")
@@ -869,7 +910,7 @@ func Test_StringStorage_SetGetRemoveGet(t *testing.T) {
 }
 
 func Test_StringStorage_WalkSetRemove(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	// Verify the key space is empty by default.
@@ -925,7 +966,7 @@ func Test_StringStorage_WalkSetRemove(t *testing.T) {
 }
 
 func Test_StringStorage_WalkKeys_Closer(t *testing.T) {
-	newStorage := MustNew()
+	newStorage := testNewStorage()
 	defer newStorage.Shutdown()
 
 	err := newStorage.PushToSet("test-key", "test-value")
