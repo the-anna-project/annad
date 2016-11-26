@@ -137,7 +137,7 @@ imports:
   - service/metric
   - service/text
 - name: github.com/the-anna-project/spec
-  version: dbde286e767dc22b9ab478908709bd4b47666d7a
+  version: b6720484f1b61ea070130f95bddd5d366daa695e
   subpackages:
   - api
   - object
