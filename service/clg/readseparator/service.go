@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	storagecollection "github.com/giantswarm/cluster-service/service/storage"
 	objectspec "github.com/the-anna-project/spec/object"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 func (s *service) calculate(ctx objectspec.Context) (string, error) {
