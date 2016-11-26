@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/cenk/backoff"
+	"github.com/garyburd/redigo/redis"
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/the-anna-project/annad/service/activator"
@@ -176,12 +177,22 @@ func (c *Command) newRandomService() servicespec.RandomService {
 func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	newCollection := storage.NewCollection()
 
+	newPool := func(addr string) *redis.Pool {
+		newDialConfig := redis.DefaultDialConfig()
+		newDialConfig.Addr = addr
+		newPoolConfig := redis.DefaultPoolConfig()
+		newPoolConfig.Dial = redis.NewDial(newDialConfig)
+		newPool := redis.NewPool(newPoolConfig)
+
+		return newPool
+	}
+
 	// Connection.
 	switch c.configCollection.Storage().Connection().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().Connection().Address())
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().Connection().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
@@ -194,8 +205,8 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	switch c.configCollection.Storage().Feature().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().Feature().Address())
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().Feature().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
@@ -208,8 +219,8 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	switch c.configCollection.Storage().General().Kind() {
 	case "redis":
 		newService := redis.New()
-		newService.SetAddress(c.configCollection.Storage().General().Address())
 		newService.SetBackoffFactory(c.newBackoffFactory())
+		newService.SetPool(newPool(c.configCollection.Storage().General().Address()))
 		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
 		newCollection.SetConnection(newService)
 	case "memory":
