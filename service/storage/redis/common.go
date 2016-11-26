@@ -6,7 +6,7 @@ import (
 )
 
 func (s *service) retryErrorLogger(err error, d time.Duration) {
-	s.Service().Log().Line("msg", "retry error: %#v", maskAny(err))
+	s.Service().Log().Line("msg", "retry error", maskAny(err))
 }
 
 func (s *service) withPrefix(keys ...string) string {

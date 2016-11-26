@@ -13,7 +13,20 @@ import (
 
 // New creates a new redis storage service.
 func New() servicespec.StorageService {
-	return &service{}
+	newDialConfig := DefaultDialConfig()
+	newDialConfig.Addr = "127.0.0.1:6379"
+	newPoolConfig := DefaultPoolConfig()
+	newPoolConfig.Dial = NewDial(newDialConfig)
+	newPool := NewPool(newPoolConfig)
+
+	return &service{
+		backoffFactory: func() objectspec.Backoff {
+			return &backoff.StopBackOff{}
+		},
+		pool:         newPool,
+		prefix:       "prefix",
+		shutdownOnce: sync.Once{},
+	}
 }
 
 type service struct {
@@ -23,7 +36,6 @@ type service struct {
 
 	// Settings.
 
-	address string
 	// backoffFactory is supposed to be able to create a new spec.Backoff. Retry
 	// implementations can make use of this to decide when to retry.
 	backoffFactory func() objectspec.Backoff
@@ -44,18 +56,6 @@ func (s *service) Boot() {
 		"name": "storage",
 		"type": "service",
 	}
-
-	s.backoffFactory = func() objectspec.Backoff {
-		return &backoff.StopBackOff{}
-	}
-	// pool
-	newDialConfig := DefaultDialConfig()
-	newDialConfig.Addr = s.address
-	newPoolConfig := DefaultPoolConfig()
-	newPoolConfig.Dial = NewDial(newDialConfig)
-	s.pool = NewPool(newPoolConfig)
-	s.prefix = "prefix"
-	s.shutdownOnce = sync.Once{}
 }
 
 func (s *service) Get(key string) (string, error) {
@@ -408,10 +408,6 @@ func (s *service) Set(key, value string) error {
 	return nil
 }
 
-func (s *service) SetAddress(a string) {
-	s.address = a
-}
-
 func (s *service) SetBackoffFactory(bf func() objectspec.Backoff) {
 	s.backoffFactory = bf
 }
@@ -439,12 +435,16 @@ func (s *service) SetElementByScore(key, element string, score float64) error {
 	return nil
 }
 
-func (s *service) SetPrefix(p string) {
-	s.prefix = p
+func (s *service) SetPool(pool *redis.Pool) {
+	s.pool = pool
 }
 
-func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
-	s.serviceCollection = sc
+func (s *service) SetPrefix(prefix string) {
+	s.prefix = prefix
+}
+
+func (s *service) SetServiceCollection(serviceCollection servicespec.ServiceCollection) {
+	s.serviceCollection = serviceCollection
 }
 
 func (s *service) SetStringMap(key string, stringMap map[string]string) error {

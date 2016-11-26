@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/the-anna-project/collection"
 	"github.com/the-anna-project/log"
 	servicespec "github.com/the-anna-project/spec/service"
 )
@@ -16,15 +17,20 @@ type rootLogger struct {
 func (rl *rootLogger) ArgsToString() string {
 	args := ""
 	for _, v := range rl.Args {
+		if arg, ok := v.(error); ok {
+			args += " " + arg.Error()
+		}
 		if arg, ok := v.(string); ok {
-			args += arg
+			args += " " + arg
 		}
 	}
-	return args
+
+	return args[1:]
 }
 
-func (rl *rootLogger) Println(v ...interface{}) {
+func (rl *rootLogger) Log(v ...interface{}) error {
 	rl.Args = v
+	return nil
 }
 
 func (rl *rootLogger) ResetArgs() {
@@ -36,22 +42,21 @@ func testMustNewRootLogger(t *testing.T) servicespec.RootLogger {
 }
 
 func Test_RedisStorage_retryErrorLogger(t *testing.T) {
-	newRootLogger := testMustNewRootLogger(t)
+	storageService := New()
+	storageService.SetPrefix("test-prefix")
 
-	newLog := log.New()
-	newLog.SetRootLogger(newRootLogger)
+	logService := log.New()
+	rootLoggerService := testMustNewRootLogger(t)
+	logService.SetRootLogger(rootLoggerService)
 
-	err := newLog.Validate()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-	err := newLog.Configure()
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	serviceCollection := collection.New()
+	serviceCollection.SetLogService(logService)
 
-	newStorage.(*storage).retryErrorLogger(invalidConfigError, 0)
-	result := newRootLogger.(*rootLogger).ArgsToString()
+	logService.SetServiceCollection(serviceCollection)
+	storageService.SetServiceCollection(serviceCollection)
+
+	storageService.(*service).retryErrorLogger(invalidConfigError, 0)
+	result := rootLoggerService.(*rootLogger).ArgsToString()
 
 	if !strings.Contains(result, invalidConfigError.Error()) {
 		t.Fatal("expected", invalidConfigError.Error(), "got", result)
@@ -59,30 +64,22 @@ func Test_RedisStorage_retryErrorLogger(t *testing.T) {
 }
 
 func Test_RedisStorage_withPrefix(t *testing.T) {
-	newConfig := DefaultStorageConfig()
-	newConfig.Prefix = "test-prefix"
-	newStorage, err := NewStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	storageService := New()
+	storageService.SetPrefix("test-prefix")
 
 	expected := "test-prefix:my:test:key"
-	newKey := newStorage.(*storage).withPrefix("my", "test", "key")
+	newKey := storageService.(*service).withPrefix("my", "test", "key")
 	if newKey != expected {
 		t.Fatal("expected", expected, "got", newKey)
 	}
 }
 
 func Test_RedisStorage_withPrefix_Empty(t *testing.T) {
-	newConfig := DefaultStorageConfig()
-	newConfig.Prefix = "test-prefix"
-	newStorage, err := NewStorage(newConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	storageService := New()
+	storageService.SetPrefix("test-prefix")
 
-	newKey := newStorage.(*storage).withPrefix()
-	if newKey != newConfig.Prefix {
-		t.Fatal("expected", newConfig.Prefix, "got", newKey)
+	newKey := storageService.(*service).withPrefix()
+	if newKey != "test-prefix" {
+		t.Fatal("expected", "test-prefix", "got", newKey)
 	}
 }
