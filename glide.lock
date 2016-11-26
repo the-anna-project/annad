@@ -136,6 +136,12 @@ imports:
   - collection
   - service/metric
   - service/text
+- name: github.com/the-anna-project/storage
+  version: 828dfaebe89e925cfd7e4adef75b22a3a3975753
+  subpackages:
+  - collection
+  - service/memory
+  - service/redis
 - name: github.com/the-anna-project/spec
   version: b6720484f1b61ea070130f95bddd5d366daa695e
   subpackages:
