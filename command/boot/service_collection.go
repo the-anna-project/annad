@@ -13,7 +13,7 @@ import (
 	"github.com/the-anna-project/annad/service/network"
 	"github.com/the-anna-project/annad/service/storage"
 	memorystorage "github.com/the-anna-project/annad/service/storage/memory"
-	"github.com/the-anna-project/annad/service/storage/redis"
+	redisstorage "github.com/the-anna-project/annad/service/storage/redis"
 	"github.com/the-anna-project/annad/service/tracker"
 	servicecollection "github.com/the-anna-project/collection"
 	connectionservice "github.com/the-anna-project/connection/service"
@@ -178,11 +178,11 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	newCollection := storage.NewCollection()
 
 	newPool := func(addr string) *redis.Pool {
-		newDialConfig := redis.DefaultDialConfig()
+		newDialConfig := redisstorage.DefaultDialConfig()
 		newDialConfig.Addr = addr
-		newPoolConfig := redis.DefaultPoolConfig()
-		newPoolConfig.Dial = redis.NewDial(newDialConfig)
-		newPool := redis.NewPool(newPoolConfig)
+		newPoolConfig := redisstorage.DefaultPoolConfig()
+		newPoolConfig.Dial = redisstorage.NewDial(newDialConfig)
+		newPool := redisstorage.NewPool(newPoolConfig)
 
 		return newPool
 	}
@@ -190,7 +190,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// Connection.
 	switch c.configCollection.Storage().Connection().Kind() {
 	case "redis":
-		newService := redis.New()
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
 		newService.SetPool(newPool(c.configCollection.Storage().Connection().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
@@ -204,7 +204,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// Feature.
 	switch c.configCollection.Storage().Feature().Kind() {
 	case "redis":
-		newService := redis.New()
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
 		newService.SetPool(newPool(c.configCollection.Storage().Feature().Address()))
 		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
@@ -218,7 +218,7 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// General.
 	switch c.configCollection.Storage().General().Kind() {
 	case "redis":
-		newService := redis.New()
+		newService := redisstorage.New()
 		newService.SetBackoffFactory(c.newBackoffFactory())
 		newService.SetPool(newPool(c.configCollection.Storage().General().Address()))
 		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
