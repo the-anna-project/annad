@@ -42,17 +42,18 @@ func (s *service) CLGIDs(CLG servicespec.CLGService, networkPayload objectspec.N
 	errors := make(chan error, len(sourceIDs))
 	wg := sync.WaitGroup{}
 
-	for _, str := range sourceIDs {
+	for _, sourceID := range sourceIDs {
 		wg.Add(1)
-		go func(str string) {
-			// Persist the single CLG ID connections.
-			behaviourIDKey := fmt.Sprintf("behaviour-id:%s:o:tracker:behaviour-ids", str)
-			err := s.Service().Storage().General().PushToSet(behaviourIDKey, destinationID)
+		go func(sourceID string) {
+			defer wg.Done()
+
+			// Connect source and destination ID of the CLG in the behaviour layer of
+			// the connection space.
+			err := s.Service().Layer().Behaviour().CreateConnection(sourceID, destinationID)
 			if err != nil {
 				errors <- maskAny(err)
 			}
-			wg.Done()
-		}(str)
+		}(sourceID)
 	}
 
 	wg.Wait()
@@ -76,27 +77,28 @@ func (s *service) CLGNames(CLG servicespec.CLGService, networkPayload objectspec
 	errors := make(chan error, len(sourceIDs))
 	wg := sync.WaitGroup{}
 
-	for _, str := range sourceIDs {
+	for _, sourceID := range sourceIDs {
 		wg.Add(1)
-		go func(str string) {
-			behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", str)
-			name, err := s.Service().Storage().General().Get(behaviourNameKey)
+		go func(sourceID string) {
+			defer wg.Done()
+
+			// Resolve behaviour ID to CLG name.
+			//
+			// TODO handle mapping of CLG ID/Name in separate service
+			behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", sourceID)
+			sourceName, err := s.Service().Storage().General().Get(behaviourNameKey)
 			if err != nil {
 				errors <- maskAny(err)
-			} else {
-				// The errors channel is capable of buffering one error for each source
-				// ID. The else clause is necessary to queue only one possible error for
-				// each source ID. So in case the name lookup was successful, we are
-				// able to actually persist the single CLG name connection.
-				behaviourNameKey := fmt.Sprintf("behaviour-name:%s:o:tracker:behaviour-names", name)
-				err := s.Service().Storage().General().PushToSet(behaviourNameKey, destinationName)
-				if err != nil {
-					errors <- maskAny(err)
-				}
+				return
 			}
 
-			wg.Done()
-		}(str)
+			// Connect source and destination name of the CLG in the behaviour layer
+			// of the connection space.
+			err = s.Service().Layer().Behaviour().CreateConnection(sourceName, destinationName)
+			if err != nil {
+				errors <- maskAny(err)
+			}
+		}(sourceID)
 	}
 
 	wg.Wait()
