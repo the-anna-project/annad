@@ -19,6 +19,8 @@ import (
 	inputcollection "github.com/the-anna-project/input/collection"
 	textinputservice "github.com/the-anna-project/input/service/text"
 	"github.com/the-anna-project/instrumentor/prometheus"
+	layercollection "github.com/the-anna-project/layer/collection"
+	layerservice "github.com/the-anna-project/layer/service"
 	"github.com/the-anna-project/log"
 	outputcollection "github.com/the-anna-project/output/collection"
 	textoutputservice "github.com/the-anna-project/output/service/text"
@@ -47,6 +49,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetIDService(c.newIDService())
 	collection.SetInputCollection(c.newInputCollection())
 	collection.SetInstrumentorService(c.newInstrumentorService())
+	collection.SetLayerCollection(c.newLayerCollection())
 	collection.SetLogService(c.newLogService())
 	collection.SetNetworkService(c.newNetworkService())
 	collection.SetOutputCollection(c.newOutputCollection())
@@ -65,6 +68,9 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.ID().SetServiceCollection(collection)
 	collection.Input().Text().SetServiceCollection(collection)
 	collection.Instrumentor().SetServiceCollection(collection)
+	collection.Layer().Behaviour().SetServiceCollection(collection)
+	collection.Layer().Information().SetServiceCollection(collection)
+	collection.Layer().Position().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
 	collection.Network().SetServiceCollection(collection)
 	collection.Output().Text().SetServiceCollection(collection)
