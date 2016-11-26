@@ -5,8 +5,8 @@ package input
 import (
 	"fmt"
 
-	"github.com/the-anna-project/annad/service/storage"
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 // calculate fetches the information ID associated with the given information
@@ -14,10 +14,10 @@ import (
 // storage, a new information ID is generated and used to store the given
 // information sequence. In any case the information ID is added to the given
 // context.
-func (s *service) calculate(ctx spec.Context, informationSequence string) error {
+func (s *service) calculate(ctx objectspec.Context, informationSequence string) error {
 	informationIDKey := fmt.Sprintf("information-sequence:%s:information-id", informationSequence)
 	informationID, err := s.Service().Storage().General().Get(informationIDKey)
-	if storage.IsNotFound(err) {
+	if storagecollection.IsNotFound(err) {
 		// The given information sequence was never seen before. Thus we register it
 		// now with its own very unique information ID.
 		newID, err := s.Service().ID().New()

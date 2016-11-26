@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/the-anna-project/annad/service/storage"
-	"github.com/the-anna-project/spec/object"
+	storagecollection "github.com/giantswarm/cluster-service/service/storage"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
-func (s *service) calculate(ctx spec.Context) (string, error) {
+func (s *service) calculate(ctx objectspec.Context) (string, error) {
 	behaviourID, ok := ctx.GetBehaviourID()
 	if !ok {
 		return "", maskAnyf(invalidBehaviourIDError, "must not be empty")
@@ -18,7 +18,7 @@ func (s *service) calculate(ctx spec.Context) (string, error) {
 
 	behaviourIDKey := fmt.Sprintf("behaviour-id:%s:separator", behaviourID)
 	separator, err := s.Service().Storage().General().Get(behaviourIDKey)
-	if storage.IsNotFound(err) {
+	if storagecollection.IsNotFound(err) {
 		randomKey, err := s.Service().Storage().Feature().GetRandom()
 		if err != nil {
 			return "", maskAny(err)

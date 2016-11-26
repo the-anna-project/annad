@@ -10,10 +10,10 @@ import (
 
 	"github.com/the-anna-project/annad/object/context"
 	"github.com/the-anna-project/annad/object/networkpayload"
-	"github.com/the-anna-project/annad/service/storage"
-	"github.com/the-anna-project/annad/service/storage/redis"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
+	storagecollection "github.com/the-anna-project/storage/collection"
+	redisstorage "github.com/the-anna-project/storage/service/redis"
 )
 
 type testErrorIDService struct{}
@@ -84,32 +84,28 @@ func testMustNewServiceCollection(t *testing.T) servicespec.ServiceCollection {
 }
 
 func testMustNewStorageCollection(t *testing.T) servicespec.StorageCollection {
-	newCollection, err := storage.NewCollection(storage.DefaultCollectionConfig())
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	storageCollection := storagecollection.New()
 
-	return newCollection
+	return storageCollection
 }
 
 func testMustNewStorageCollectionWithConn(t *testing.T, c redigo.Conn) servicespec.StorageCollection {
-	newFeatureStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
+	newStorageService := func() servicespec.StorageService {
+		storageService := redisstorage.New()
+		newPoolConfig := redisstorage.DefaultPoolConfig()
+		newMockDialConfig := redisstorage.DefaultMockDialConfig()
+		newMockDialConfig.RedisConn = c
+		newPoolConfig.Dial = redisstorage.NewMockDial(newMockDialConfig)
+		newPool := redisstorage.NewPool(newPoolConfig)
+		storageService.SetPool(newPool)
+
+		return storageService
 	}
 
-	newGeneralStorage, err := redis.NewStorage(redis.DefaultStorageConfigWithConn(c))
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
-
-	newStorageCollectionConfig := storage.DefaultCollectionConfig()
-	newStorageCollectionConfig.FeatureStorage = newFeatureStorage
-	newStorageCollectionConfig.GeneralStorage = newGeneralStorage
-	newStorageCollection, err := storage.NewCollection(newStorageCollectionConfig)
-	if err != nil {
-		t.Fatal("expected", nil, "got", err)
-	}
+	storageCollection := storagecollection.New()
+	storageCollection.SetConnection(newStorageService())
+	storageCollection.SetFeatureStorage(newStorageService())
+	storageCollection.SetGeneralStorage(newStorageService())
 
 	return newStorageCollection
 }

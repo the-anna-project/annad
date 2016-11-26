@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/the-anna-project/annad/service/storage"
 	permutationlist "github.com/the-anna-project/permutation/object/list"
 	"github.com/the-anna-project/permutation/service"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
+	storagecollection "github.com/the-anna-project/storage/collection"
 )
 
 // New creates a new activator service.
@@ -145,7 +145,7 @@ func (s *service) GetNetworkPayload(CLG servicespec.CLGService, queue []objectsp
 	}
 	behaviourIDsKey := fmt.Sprintf("activate:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	str, err := s.Service().Storage().General().Get(behaviourIDsKey)
-	if storage.IsNotFound(err) {
+	if storagecollection.IsNotFound(err) {
 		// No successful combination of behaviour IDs is stored. Thus we return an
 		// error. Eventually some other lookup is able to find a sufficient network
 		// payload.

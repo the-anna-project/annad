@@ -11,9 +11,6 @@ import (
 	"github.com/the-anna-project/annad/service/feature"
 	"github.com/the-anna-project/annad/service/forwarder"
 	"github.com/the-anna-project/annad/service/network"
-	"github.com/the-anna-project/annad/service/storage"
-	memorystorage "github.com/the-anna-project/annad/service/storage/memory"
-	redisstorage "github.com/the-anna-project/annad/service/storage/redis"
 	"github.com/the-anna-project/annad/service/tracker"
 	servicecollection "github.com/the-anna-project/collection"
 	connectionservice "github.com/the-anna-project/connection/service"
@@ -32,6 +29,9 @@ import (
 	textendpoint "github.com/the-anna-project/server/service/text"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
+	storagecollection "github.com/the-anna-project/storage/collection"
+	memorystorage "github.com/the-anna-project/storage/service/memory"
+	redisstorage "github.com/the-anna-project/storage/service/redis"
 )
 
 func (c *Command) newServiceCollection() servicespec.ServiceCollection {
@@ -175,7 +175,7 @@ func (c *Command) newRandomService() servicespec.RandomService {
 }
 
 func (c *Command) newStorageCollection() servicespec.StorageCollection {
-	newCollection := storage.NewCollection()
+	newCollection := storagecollection.New()
 
 	newPool := func(addr string) *redis.Pool {
 		newDialConfig := redisstorage.DefaultDialConfig()
