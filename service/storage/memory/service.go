@@ -6,8 +6,9 @@ import (
 
 	"github.com/alicebob/miniredis"
 	"github.com/cenk/backoff"
+	"github.com/garyburd/redigo/redis"
 
-	"github.com/the-anna-project/annad/service/storage/redis"
+	redisstorage "github.com/the-anna-project/annad/service/storage/redis"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
 )
@@ -16,7 +17,10 @@ import (
 // redis instance which can be shut down using the configured closer. This is
 // used for local development.
 func New() servicespec.StorageService {
-	return &service{}
+	return &service{
+		prefix:       "prefix",
+		shutdownOnce: sync.Once{},
+	}
 }
 
 type service struct {
@@ -28,6 +32,8 @@ type service struct {
 
 	closer       chan struct{}
 	metadata     map[string]string
+	pool         *redis.Pool
+	prefix       string
 	redisStorage servicespec.StorageService
 	shutdownOnce sync.Once
 }
@@ -65,17 +71,22 @@ func (s *service) Boot() {
 		redisAddr = addr
 	}
 
-	newRedisStorage := redis.New()
-	newRedisStorage.SetAddress(redisAddr)
+	newRedisStorage := redisstorage.New()
 	newRedisStorage.SetBackoffFactory(func() objectspec.Backoff {
 		return backoff.NewExponentialBackOff()
 	})
+	newDialConfig := redisstorage.DefaultDialConfig()
+	newDialConfig.Addr = redisAddr
+	newPoolConfig := redisstorage.DefaultPoolConfig()
+	newPoolConfig.Dial = redisstorage.NewDial(newDialConfig)
+	newPool := redisstorage.NewPool(newPoolConfig)
+	newRedisStorage.SetPool(newPool)
+	newRedisStorage.SetPrefix(s.prefix)
 	newRedisStorage.SetServiceCollection(s.Service())
 	newRedisStorage.Boot()
 
 	s.closer = closer
 	s.redisStorage = newRedisStorage
-	s.shutdownOnce = sync.Once{}
 }
 
 func (s *service) Get(key string) (string, error) {
@@ -229,9 +240,6 @@ func (s *service) Set(key, value string) error {
 	return nil
 }
 
-func (s *service) SetAddress(a string) {
-}
-
 func (s *service) SetBackoffFactory(bf func() objectspec.Backoff) {
 }
 
@@ -246,7 +254,12 @@ func (s *service) SetElementByScore(key, element string, score float64) error {
 	return nil
 }
 
-func (s *service) SetPrefix(p string) {
+func (s *service) SetPrefix(prefix string) {
+	s.prefix = prefix
+}
+
+func (s *service) SetPool(pool *redis.Pool) {
+	s.pool = pool
 }
 
 func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
