@@ -83,13 +83,13 @@ func (c *Command) newActivatorService() servicespec.ActivatorService {
 }
 
 func (c *Command) newConnectionService() servicespec.ConnectionService {
-	newService := connectionservice.New()
+	connectionService := connectionservice.New()
 
-	newService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
-	newService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
-	newService.SetWeight(c.configCollection.Space().Connection().Weight())
+	connectionService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
+	connectionService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
+	connectionService.SetWeight(c.configCollection.Space().Connection().Weight())
 
-	return newService
+	return connectionService
 }
 
 func (c *Command) newBackoffFactory() func() objectspec.Backoff {
@@ -142,12 +142,29 @@ func (c *Command) newInstrumentorService() servicespec.InstrumentorService {
 	return prometheus.New()
 }
 
+func (c *Command) newLayerCollection() servicespec.LayerCollection {
+	layerCollection := layercollection.New()
+
+	behaviourService := layerservice.New()
+	behaviourService.SetKind("behaviour")
+	informationService := layerservice.New()
+	informationService.SetKind("information")
+	positionService := layerservice.New()
+	positionService.SetKind("position")
+
+	layerCollection.SetBehaviourService(behaviourService)
+	layerCollection.SetInformationService(informationService)
+	layerCollection.SetPositionService(positionService)
+
+	return layerCollection
+}
+
 func (c *Command) newLogService() servicespec.LogService {
-	newService := log.New()
+	logService := log.New()
 
-	newService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
+	logService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
 
-	return newService
+	return logService
 }
 
 func (c *Command) newNetworkService() servicespec.NetworkService {
@@ -167,11 +184,11 @@ func (c *Command) newPermutationService() servicespec.PermutationService {
 }
 
 func (c *Command) newRandomService() servicespec.RandomService {
-	newService := random.New()
+	randomService := random.New()
 
-	newService.SetBackoffFactory(c.newBackoffFactory())
+	randomService.SetBackoffFactory(c.newBackoffFactory())
 
-	return newService
+	return randomService
 }
 
 func (c *Command) newStorageCollection() servicespec.StorageCollection {
@@ -190,13 +207,13 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// Connection.
 	switch c.configCollection.Storage().Connection().Kind() {
 	case "redis":
-		newService := redisstorage.New()
-		newService.SetBackoffFactory(c.newBackoffFactory())
-		newService.SetPool(newPool(c.configCollection.Storage().Connection().Address()))
-		newService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
-		newCollection.SetConnection(newService)
+		connectionService := redisstorage.New()
+		connectionService.SetBackoffFactory(c.newBackoffFactory())
+		connectionService.SetPool(newPool(c.configCollection.Storage().Connection().Address()))
+		connectionService.SetPrefix(c.configCollection.Storage().Connection().Prefix())
+		newCollection.SetConnectionService(connectionService)
 	case "memory":
-		newCollection.SetConnection(memorystorage.New())
+		newCollection.SetConnectionService(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Connection().Kind()))
 	}
@@ -204,13 +221,13 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// Feature.
 	switch c.configCollection.Storage().Feature().Kind() {
 	case "redis":
-		newService := redisstorage.New()
-		newService.SetBackoffFactory(c.newBackoffFactory())
-		newService.SetPool(newPool(c.configCollection.Storage().Feature().Address()))
-		newService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
-		newCollection.SetConnection(newService)
+		featureService := redisstorage.New()
+		featureService.SetBackoffFactory(c.newBackoffFactory())
+		featureService.SetPool(newPool(c.configCollection.Storage().Feature().Address()))
+		featureService.SetPrefix(c.configCollection.Storage().Feature().Prefix())
+		newCollection.SetFeatureService(featureService)
 	case "memory":
-		newCollection.SetFeature(memorystorage.New())
+		newCollection.SetFeatureService(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Feature().Kind()))
 	}
@@ -218,13 +235,13 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 	// General.
 	switch c.configCollection.Storage().General().Kind() {
 	case "redis":
-		newService := redisstorage.New()
-		newService.SetBackoffFactory(c.newBackoffFactory())
-		newService.SetPool(newPool(c.configCollection.Storage().General().Address()))
-		newService.SetPrefix(c.configCollection.Storage().General().Prefix())
-		newCollection.SetConnection(newService)
+		generalService := redisstorage.New()
+		generalService.SetBackoffFactory(c.newBackoffFactory())
+		generalService.SetPool(newPool(c.configCollection.Storage().General().Address()))
+		generalService.SetPrefix(c.configCollection.Storage().General().Prefix())
+		newCollection.SetGeneralService(generalService)
 	case "memory":
-		newCollection.SetGeneral(memorystorage.New())
+		newCollection.SetGeneralService(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().General().Kind()))
 	}
