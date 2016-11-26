@@ -71,6 +71,8 @@ func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.
 		break
 	}
 
+	// TODO create event collection with network service to handle network events.
+	//
 	// Forward the found network payloads to other CLGs by adding them to the
 	// queue so other processes can fetch them.
 	for _, np := range newNetworkPayloads {
