@@ -1,6 +1,6 @@
 package spec
 
-// ServiceCollection represents a collection of factories. This scopes different
+// ServiceCollection represents a collection of services. This scopes different
 // service implementations in a simple container, which can easily be passed
 // around.
 type ServiceCollection interface {
@@ -18,6 +18,7 @@ type ServiceCollection interface {
 	ID() IDService
 	Input() InputCollection
 	Instrumentor() InstrumentorService
+	Layer() LayerCollection
 	// Log returns a log service. It is used to print log messages.
 	Log() LogService
 	Network() NetworkService
@@ -36,6 +37,7 @@ type ServiceCollection interface {
 	SetIDService(idService IDService)
 	SetInputCollection(inputCollection InputCollection)
 	SetInstrumentorService(instrumentorService InstrumentorService)
+	SetLayerCollection(layerCollection LayerCollection)
 	SetLogService(logService LogService)
 	SetNetworkService(networkService NetworkService)
 	SetOutputCollection(outputCollection OutputCollection)

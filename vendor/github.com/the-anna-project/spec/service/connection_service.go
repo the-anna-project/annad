@@ -37,26 +37,34 @@ package spec
 // storage keys. This means a connection can only be resolved into a certain,
 // desired direction.
 //
-//     This is a peer pointing to other peers. The key on the left is a string
-//     being formed by a prefix and a peer value. The value on the right is a
-//     list of strings being formed by peer values.
+// This is a peer pointing to other peers. The key on the left is a string
+// being formed by a prefix and a peer value. The value on the right is a
+// list of strings being formed by peer values.
 //
-//         peer:sum     $id1
-//         peer:$id1    sum,$id2,$id4
-//         peer:$id2    $id3
-//         peer:$id4    $id5
+//     peer:sum     $id1
+//     peer:$id1    sum,$id2,$id4
+//     peer:$id2    $id3
+//     peer:$id4    $id5
 //
-//     This is a connection holding metadata. The key on the left is a string
-//     being formed by a prefix and the values of the two peers forming the
-//     connection. The order of the peers within the key expresses the
-//     connection direction. The value on the right is a map of strings.
+// This is a connection holding metadata. The key on the left is a string
+// being formed by a prefix and the values of the two peers forming the
+// connection. The order of the peers within the key expresses the
+// connection direction. The value on the right is a map of strings.
 //
-//         connection:sum:$id1     weight 23.775
-//         connection:$id1:sum     weight 23.775
-//         connection:$id1:$id2    weight 23.775
-//         connection:$id1:$id4    weight 23.775
-//         connection:$id2:$id3    weight 23.775
-//         connection:$id4:$id5    weight 23.775
+//     connection:sum:$id1     weight 23.775
+//     connection:$id1:sum     weight 23.775
+//     connection:$id1:$id2    weight 23.775
+//     connection:$id1:$id4    weight 23.775
+//     connection:$id2:$id3    weight 23.775
+//     connection:$id4:$id5    weight 23.775
+//
+// Following is a list of properties each peer has applied in form of
+// connections to itself.
+//
+//     created
+//     kind
+//     position
+//     updated
 //
 type ConnectionService interface {
 	Boot()

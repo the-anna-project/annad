@@ -23,6 +23,7 @@ type collection struct {
 	idService           servicespec.IDService
 	inputCollection     servicespec.InputCollection
 	instrumentorService servicespec.InstrumentorService
+	layerCollection     servicespec.LayerCollection
 	logService          servicespec.LogService
 	networkService      servicespec.NetworkService
 	outputCollection    servicespec.OutputCollection
@@ -91,6 +92,10 @@ func (c *collection) Instrumentor() servicespec.InstrumentorService {
 	return c.instrumentorService
 }
 
+func (c *collection) Layer() servicespec.LayerCollection {
+	return c.layerCollection
+}
+
 func (c *collection) Log() servicespec.LogService {
 	return c.logService
 }
@@ -145,6 +150,10 @@ func (c *collection) SetInputCollection(inputCollection servicespec.InputCollect
 
 func (c *collection) SetInstrumentorService(instrumentorService servicespec.InstrumentorService) {
 	c.instrumentorService = instrumentorService
+}
+
+func (c *collection) SetLayerCollection(layerCollection servicespec.LayerCollection) {
+	c.layerCollection = layerCollection
 }
 
 func (c *collection) SetLogService(logService servicespec.LogService) {

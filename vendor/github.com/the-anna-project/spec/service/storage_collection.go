@@ -1,8 +1,8 @@
 package spec
 
-// StorageCollection represents a collection of storage instances. This scopes
-// different storage implementations in a simple container, which can easily be
-// passed around.
+// StorageCollection represents a collection of storage services. This scopes
+// different storage service implementations in a simple container, which can
+// easily be passed around.
 type StorageCollection interface {
 	Boot()
 	Connection() StorageService
@@ -13,13 +13,17 @@ type StorageCollection interface {
 	// retrieved more efficiently when there are only keys belonging to features.
 	// Other data structures in here would make the scanning algorithms less
 	// efficient.
+	//
+	// TODO rename to information service???
 	Feature() StorageService
+	// TODO add behaviour service???
+
 	// General represents a general storage. It is used to store general data
 	// which is not stored in specialized storage instances.
 	General() StorageService
-	SetConnection(c StorageService)
-	SetFeature(c StorageService)
-	SetGeneral(c StorageService)
+	SetConnectionService(connectionService StorageService)
+	SetFeatureService(featureService StorageService)
+	SetGeneralService(generalService StorageService)
 	// Shutdown ends all processes of the storage collection like shutting down a
 	// machine. The call to Shutdown blocks until the storage collection is
 	// completely shut down, so you might want to call it in a separate goroutine.

@@ -27,10 +27,10 @@ type ForwarderService interface {
 	// created and the list of new network payloads is returned. If there could
 	// not any behaviour ID be found, an error is returned.
 	GetNetworkPayloads(clgService CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error)
-	// News creates new connections to other CLGs in a pseudo random
+	// NewNetworkpayloads creates new connections to other CLGs in a pseudo random
 	// manner. For each connection one network payload is created. The resulting
 	// list is returned.
-	News(clgService CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error)
+	NewNetworkpayloads(clgService CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error)
 	Service() ServiceCollection
 	SetServiceCollection(serviceCollection ServiceCollection)
 }
