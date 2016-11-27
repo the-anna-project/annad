@@ -6,8 +6,7 @@ The makefile is used to ease the development of the project. You may want to
 make use of the following targets.
 
 ### all
-This target starts code generation and compiles binaries like `annad` and
-`annactl`.
+This target starts code generation and compiles the `annad` binary.
 ```
 make all
 ```
@@ -25,13 +24,6 @@ launch Anna as process running on your system.
 make annad
 ```
 
-### annactl
-This target compiles the client binary `annactl`. This binary can be executed
-to interact with Anna over network.
-```
-make annactl
-```
-
 ### dockerimage
 This target builds a docker image using the [Dockerfile](/Dockerfile).
 Therefore docker as dev dependency is required.
@@ -46,12 +38,6 @@ required as well as access to the docker repository. This might be only
 interesting for the maintainers.
 ```
 make dockerpush
-```
-
-### clean
-This removes the `.workspace/` directory and other files maybe flying around.
-```
-make clean
 ```
 
 ### devdeps
