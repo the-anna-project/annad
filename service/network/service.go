@@ -81,20 +81,26 @@ func (s *service) Boot() {
 			// Create a new execute config for the worker service to execute the
 			// input listener.
 			executeConfig := s.Service().Worker().ExecuteConfig()
-			executeConfig.SetAction(s.InputListener)
+			executeConfig.SetActions([]func(canceler <-chan struct{}) error{s.InputListener})
 			executeConfig.SetCanceler(s.closer)
 			executeConfig.SetNumWorkers(1)
-			s.logWorkerErrors(s.Service().Worker().Execute(executeConfig))
+			err := s.Service().Worker().Execute(executeConfig)
+			if err != nil {
+				s.Service().Log().Line("msg", maskAny(err))
+			}
 		}()
 
 		go func() {
 			// Create a new execute config for the worker service to execute the
 			// event listener.
 			executeConfig := s.Service().Worker().ExecuteConfig()
-			executeConfig.SetAction(s.EventListener)
+			executeConfig.SetActions([]func(canceler <-chan struct{}) error{s.EventListener})
 			executeConfig.SetCanceler(s.closer)
 			executeConfig.SetNumWorkers(10)
-			s.logWorkerErrors(s.Service().Worker().Execute(executeConfig))
+			err := s.Service().Worker().Execute(executeConfig)
+			if err != nil {
+				s.Service().Log().Line("msg", maskAny(err))
+			}
 		}()
 	})
 }
@@ -166,7 +172,10 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		case <-canceler:
 			return maskAny(workerCanceledError)
 		default:
-			s.logNetworkError(invokeEventHandler())
+			err := invokeEventHandler()
+			if err != nil {
+				s.Service().Log().Line("msg", maskAny(err))
+			}
 		}
 	}
 }
