@@ -3,10 +3,10 @@
 package islesser
 
 import (
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // calculate checks whether the first given number is lesser than the other.
-func (s *service) calculate(ctx spec.Context, a, b float64) bool {
+func (s *service) calculate(ctx objectspec.Context, a, b float64) bool {
 	return a < b
 }

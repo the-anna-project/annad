@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/the-anna-project/annad/object/context"
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // Config represents the configuration used to create a new
@@ -17,7 +17,7 @@ type Config struct {
 	// execution.
 	Args []reflect.Value
 
-	Context spec.Context
+	Context objectspec.Context
 
 	// Destination represents the object ID of the CLG receiving the current
 	// network payload.
@@ -47,7 +47,7 @@ func DefaultConfig() Config {
 }
 
 // New creates a new configured network payload object.
-func New(config Config) (spec.NetworkPayload, error) {
+func New(config Config) (objectspec.NetworkPayload, error) {
 	newObject := &networkPayload{
 		Config: config,
 
@@ -59,7 +59,7 @@ func New(config Config) (spec.NetworkPayload, error) {
 
 // MustNew creates either a new default configured network payload
 // object, or panics.
-func MustNew() spec.NetworkPayload {
+func MustNew() objectspec.NetworkPayload {
 	newObject, err := New(DefaultConfig())
 	if err != nil {
 		panic(err)
@@ -78,7 +78,7 @@ func (np *networkPayload) GetArgs() []reflect.Value {
 	return np.Args
 }
 
-func (np *networkPayload) GetContext() spec.Context {
+func (np *networkPayload) GetContext() objectspec.Context {
 	return np.Context
 }
 

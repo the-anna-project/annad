@@ -3,11 +3,11 @@
 package isbetween
 
 import (
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // calculate checks whether a given number lies between two given numbers.
-func (s *service) calculate(ctx spec.Context, n, min, max float64) bool {
+func (s *service) calculate(ctx objectspec.Context, n, min, max float64) bool {
 	if n < min {
 		return false
 	}

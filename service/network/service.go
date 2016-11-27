@@ -16,8 +16,6 @@ import (
 	"github.com/the-anna-project/annad/object/networkpayload"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-
-	workerpool "github.com/xh3b4sd/worker-pool"
 )
 
 // New creates a new network service.
@@ -80,31 +78,23 @@ func (s *service) Boot() {
 		s.delay = 0
 
 		go func() {
-			// Create a new worker pool for the input listener.
-			inputPoolConfig := workerpool.DefaultConfig()
-			inputPoolConfig.Canceler = s.closer
-			inputPoolConfig.NumWorkers = 1
-			inputPoolConfig.WorkerFunc = s.InputListener
-			inputPool, err := workerpool.New(inputPoolConfig)
-			if err != nil {
-				s.Service().Log().Line("msg", "%#v", maskAny(err))
-			}
-			// Execute the worker pool and block until all work is done.
-			s.logWorkerErrors(inputPool.Execute())
+			// Create a new execute config for the worker service to execute the
+			// input listener.
+			executeConfig := s.Service().Worker().ExecuteConfig()
+			executeConfig.SetAction(s.InputListener)
+			executeConfig.SetCanceler(s.closer)
+			executeConfig.SetNumWorkers(1)
+			s.logWorkerErrors(s.Service().Worker().Execute(executeConfig))
 		}()
 
 		go func() {
-			// Create a new worker pool for the event listener.
-			eventPoolConfig := workerpool.DefaultConfig()
-			eventPoolConfig.Canceler = s.closer
-			eventPoolConfig.NumWorkers = 10
-			eventPoolConfig.WorkerFunc = s.EventListener
-			eventPool, err := workerpool.New(eventPoolConfig)
-			if err != nil {
-				s.Service().Log().Line("msg", "%#v", maskAny(err))
-			}
-			// Execute the worker pool and block until all work is done.
-			s.logWorkerErrors(eventPool.Execute())
+			// Create a new execute config for the worker service to execute the
+			// event listener.
+			executeConfig := s.Service().Worker().ExecuteConfig()
+			executeConfig.SetAction(s.EventListener)
+			executeConfig.SetCanceler(s.closer)
+			executeConfig.SetNumWorkers(10)
+			s.logWorkerErrors(s.Service().Worker().Execute(executeConfig))
 		}()
 	})
 }

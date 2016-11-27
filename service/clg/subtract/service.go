@@ -3,10 +3,10 @@
 package subtract
 
 import (
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // calculate creates the difference of the given float64s.
-func (s *service) calculate(ctx spec.Context, a, b float64) float64 {
+func (s *service) calculate(ctx objectspec.Context, a, b float64) float64 {
 	return a - b
 }
