@@ -20,7 +20,14 @@ import (
 
 // New creates a new network service.
 func New() servicespec.NetworkService {
-	return &service{}
+	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
+		closer:   make(chan struct{}, 1),
+		metadata: map[string]string{},
+	}
 }
 
 type service struct {
