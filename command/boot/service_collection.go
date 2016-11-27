@@ -34,6 +34,7 @@ import (
 	storagecollection "github.com/the-anna-project/storage/collection"
 	memorystorage "github.com/the-anna-project/storage/service/memory"
 	redisstorage "github.com/the-anna-project/storage/service/redis"
+	workerservice "github.com/the-anna-project/worker/service"
 )
 
 func (c *Command) newServiceCollection() servicespec.ServiceCollection {
@@ -57,6 +58,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetRandomService(c.newRandomService())
 	collection.SetStorageCollection(c.newStorageCollection())
 	collection.SetTrackerService(c.newTrackerService())
+	collection.SetWorkerService(c.newWorkerService())
 
 	collection.Activator().SetServiceCollection(collection)
 	collection.Connection().SetServiceCollection(collection)
@@ -80,6 +82,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.Storage().Feature().SetServiceCollection(collection)
 	collection.Storage().General().SetServiceCollection(collection)
 	collection.Tracker().SetServiceCollection(collection)
+	collection.Worker().SetServiceCollection(collection)
 
 	return collection
 }
@@ -257,4 +260,8 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 
 func (c *Command) newTrackerService() servicespec.TrackerService {
 	return tracker.New()
+}
+
+func (c *Command) newWorkerService() servicespec.WorkerService {
+	return workerservice.New()
 }
