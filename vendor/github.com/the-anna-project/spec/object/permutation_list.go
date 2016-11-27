@@ -1,4 +1,4 @@
-package spec
+package object
 
 // PermutationList is supposed to be permuted by a permutation service.
 type PermutationList interface {

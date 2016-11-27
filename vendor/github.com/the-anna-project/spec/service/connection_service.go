@@ -1,4 +1,4 @@
-package spec
+package service
 
 // ConnectionService represents a service being able to manage connections
 // within the connection space.

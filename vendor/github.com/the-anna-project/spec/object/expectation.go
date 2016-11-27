@@ -1,4 +1,4 @@
-package spec
+package object
 
 // Expectation represents a description of what output is to be expected when
 // requesting calculations by providing some input.

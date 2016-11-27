@@ -1,4 +1,4 @@
-package spec
+package service
 
 // StorageCollection represents a collection of storage services. This scopes
 // different storage service implementations in a simple container, which can

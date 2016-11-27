@@ -1,4 +1,4 @@
-package spec
+package service
 
 import (
 	objectspec "github.com/the-anna-project/spec/object"

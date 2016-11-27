@@ -1,4 +1,4 @@
-package spec
+package service
 
 // LayerCollection represents a collection of layer services. This scopes
 // different layer service implementations in a simple container, which can

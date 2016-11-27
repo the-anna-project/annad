@@ -1,4 +1,4 @@
-package spec
+package service
 
 // EndpointCollection represents a collection of endpoint services. This scopes
 // different endpoint service implementations in a simple container, which can

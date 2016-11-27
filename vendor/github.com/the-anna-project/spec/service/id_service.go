@@ -1,4 +1,4 @@
-package spec
+package service
 
 // IDService creates pseudo random hash generation used for ID assignment.
 type IDService interface {

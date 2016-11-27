@@ -31,6 +31,7 @@ type collection struct {
 	randomService       servicespec.RandomService
 	storageCollection   servicespec.StorageCollection
 	trackerService      servicespec.TrackerService
+	workerService       servicespec.WorkerService
 
 	// Settings.
 
@@ -58,6 +59,7 @@ func (c *collection) Boot() {
 	go c.Random().Boot()
 	go c.Storage().Boot()
 	go c.Tracker().Boot()
+	go c.Worker().Boot()
 }
 
 func (c *collection) Connection() servicespec.ConnectionService {
@@ -184,6 +186,10 @@ func (c *collection) SetTrackerService(trackerService servicespec.TrackerService
 	c.trackerService = trackerService
 }
 
+func (c *collection) SetWorkerService(workerService servicespec.WorkerService) {
+	c.workerService = workerService
+}
+
 func (c *collection) Shutdown() {
 	c.shutdownOnce.Do(func() {
 		var wg sync.WaitGroup
@@ -216,4 +222,8 @@ func (c *collection) Storage() servicespec.StorageCollection {
 
 func (c *collection) Tracker() servicespec.TrackerService {
 	return c.trackerService
+}
+
+func (c *collection) Worker() servicespec.WorkerService {
+	return c.workerService
 }

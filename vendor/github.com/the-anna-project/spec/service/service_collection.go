@@ -1,4 +1,4 @@
-package spec
+package service
 
 // ServiceCollection represents a collection of services. This scopes different
 // service implementations in a simple container, which can easily be passed
@@ -45,10 +45,12 @@ type ServiceCollection interface {
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)
 	SetTrackerService(trackerService TrackerService)
+	SetWorkerService(workerService WorkerService)
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
 	Tracker() TrackerService
+	Worker() WorkerService
 }

@@ -1,4 +1,4 @@
-package spec
+package service
 
 // OutputCollection represents a collection of output services. This scopes
 // different output service implementations in a simple container, which can

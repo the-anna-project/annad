@@ -1,4 +1,4 @@
-package spec
+package service
 
 // LogService represents a log service used to print log messages.
 type LogService interface {

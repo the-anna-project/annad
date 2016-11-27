@@ -1,4 +1,4 @@
-package spec
+package object
 
 import (
 	"time"

@@ -1,4 +1,4 @@
-package spec
+package service
 
 // LayerService provides business logic to manage connections inside network
 // layers. There are three different kinds of layer service implementations in
