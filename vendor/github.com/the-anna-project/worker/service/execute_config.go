@@ -6,10 +6,10 @@ func newExecuteConfig() objectspec.WorkerExecuteConfig {
 	return &executeConfig{
 		// Settings.
 
-		action:        nil,
+		actions:       []func(canceler <-chan struct{}) error{},
 		canceler:      nil,
 		cancelOnError: true,
-		numWorkers:    10,
+		numWorkers:    1,
 	}
 }
 
@@ -17,8 +17,8 @@ func newExecuteConfig() objectspec.WorkerExecuteConfig {
 type executeConfig struct {
 	// Settings.
 
-	// action represents the function executed by workers.
-	action func(canceler <-chan struct{}) error
+	// actions represents the function executed by workers.
+	actions []func(canceler <-chan struct{}) error
 	// canceler can be used to end the worker pool's processes pro-actively. The
 	// signal received here will be redirected to the canceler provided to the
 	// worker functions.
@@ -31,8 +31,8 @@ type executeConfig struct {
 	numWorkers int
 }
 
-func (ec *executeConfig) Action() func(canceler <-chan struct{}) error {
-	return ec.action
+func (ec *executeConfig) Actions() []func(canceler <-chan struct{}) error {
+	return ec.actions
 }
 
 func (ec *executeConfig) Canceler() chan struct{} {
@@ -47,8 +47,8 @@ func (ec *executeConfig) NumWorkers() int {
 	return ec.numWorkers
 }
 
-func (ec *executeConfig) SetAction(action func(canceler <-chan struct{}) error) {
-	ec.action = action
+func (ec *executeConfig) SetActions(actions []func(canceler <-chan struct{}) error) {
+	ec.actions = actions
 }
 
 func (ec *executeConfig) SetCanceler(canceler chan struct{}) {

@@ -47,57 +47,58 @@ func (s *service) ExecuteConfig() objectspec.WorkerExecuteConfig {
 	return newExecuteConfig()
 }
 
-func (s *service) Execute(config objectspec.WorkerExecuteConfig) chan error {
+func (s *service) Execute(config objectspec.WorkerExecuteConfig) error {
 	var wg sync.WaitGroup
 	var once sync.Once
 
 	canceler := make(chan struct{}, 1)
-	errors := make(chan error, config.NumWorkers())
+	errors := make(chan error, 1)
 
 	if config.Canceler() != nil {
 		go func() {
-			select {
-			case <-config.Canceler():
-				// Receiving a signal from the global canceler will forward the
-				// cancelation to all workers. Simply closing the workers canceler wil
-				// broadcast the signal to each listener. Here we also make sure we do
-				// not close on a closed channel by only closing once.
-				once.Do(func() {
-					close(canceler)
-				})
-			}
+			<-config.Canceler()
+			// Receiving a signal from the global canceler will forward the
+			// cancelation to all workers. Simply closing the workers canceler wil
+			// broadcast the signal to each listener. Here we also make sure we do
+			// not close on a closed channel by only closing once.
+			once.Do(func() {
+				close(canceler)
+			})
 		}()
 	}
 
 	for n := 0; n < config.NumWorkers(); n++ {
-		wg.Add(1)
 		go func() {
-			defer wg.Done()
+			for _, action := range config.Actions() {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
 
-			err := config.Action()(canceler)
-			if err != nil {
-				if config.CancelOnError() && config.Canceler() != nil {
-					// Closing the canceler channel acts as broadcast to all workers that
-					// should listen to the canceler. Here we also make sure we do not
-					// close on a closed channel by only closing once.
-					once.Do(func() {
-						close(config.Canceler())
-					})
-				}
-				errors <- err
+					err := action(canceler)
+					if err != nil {
+						if config.CancelOnError() && config.Canceler() != nil {
+							// Closing the canceler channel acts as broadcast to all workers that
+							// should listen to the canceler. Here we also make sure we do not
+							// close on a closed channel by only closing once.
+							once.Do(func() {
+								close(config.Canceler())
+							})
+						}
+						errors <- err
+					}
+				}()
 			}
 		}()
 	}
 
 	wg.Wait()
 
-	// We can savely close the error and canceler channels here because nobody
-	// can write into it anymore. Thus we can clean the environment to not leave
-	// uncollectable garbage. It is still save to read from the closed error
-	// channel.
-	close(errors)
-
-	return errors
+	select {
+	case err := <-errors:
+		return err
+	default:
+		return nil
+	}
 }
 
 func (s *service) Metadata() map[string]string {
