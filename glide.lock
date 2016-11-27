@@ -94,7 +94,7 @@ imports:
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/the-anna-project/collection
-  version: 23408c1f2d4adb5c0cf3f831116abfdd0a7551b4
+  version: 185887c84da45bd52f4b5dfda1a9ed2395034023
 - name: github.com/the-anna-project/connection
   version: 027a7da182ef78859b9944f0fb00bb969136eca5
   subpackages:
@@ -148,17 +148,17 @@ imports:
   - service/memory
   - service/redis
 - name: github.com/the-anna-project/spec
-  version: 35590aacf28567051cd0fea8105958ec67fb7aab
+  version: 48193e67844ec188219b236d79b6ab27862e4dbe
   subpackages:
   - api
   - object
   - service
+- name: github.com/the-anna-project/worker
+  version: e8c39fefb7ca973fe0d538fe7783c3122d0869b6
+  subpackages:
+  - service
 - name: github.com/tylerb/graceful
   version: 50a48b6e73fcc75b45e22c05b79629a67c79e938
-- name: github.com/xh3b4sd/worker-pool
-  version: 10e09858097d478ec9994d8ef0113456d1f226db
-  subpackages:
-  - spec
 - name: golang.org/x/net
   version: 4971afdc2f162e82d185353533d3cf16188a9f4e
   subpackages:
