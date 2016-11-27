@@ -148,13 +148,13 @@ imports:
   - service/memory
   - service/redis
 - name: github.com/the-anna-project/spec
-  version: 48193e67844ec188219b236d79b6ab27862e4dbe
+  version: 92d21a39e186cdf4f8e4066e7dc78613a26474dd
   subpackages:
   - api
   - object
   - service
 - name: github.com/the-anna-project/worker
-  version: e8c39fefb7ca973fe0d538fe7783c3122d0869b6
+  version: 81fa0915135a0470ff4d2fae0cd7ac5fdbacf81e
   subpackages:
   - service
 - name: github.com/tylerb/graceful
