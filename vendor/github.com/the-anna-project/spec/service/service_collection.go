@@ -27,6 +27,7 @@ type ServiceCollection interface {
 	// Permutation returns a permutation service. It is used to permute instances
 	// of type PermutationList.
 	Permutation() PermutationService
+	Position() PositionService
 	// Random returns a random service. It is used to create random numbers.
 	Random() RandomService
 	SetActivatorService(activatorService ActivatorService)
@@ -44,6 +45,7 @@ type ServiceCollection interface {
 	SetOutputCollection(outputCollection OutputCollection)
 	SetPeerService(peerService PeerService)
 	SetPermutationService(permutationService PermutationService)
+	SetPositionService(positionService PositionService)
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)
 	SetTrackerService(trackerService TrackerService)

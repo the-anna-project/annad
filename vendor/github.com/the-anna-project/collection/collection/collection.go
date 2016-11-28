@@ -29,6 +29,7 @@ type collection struct {
 	outputCollection    servicespec.OutputCollection
 	peerService         servicespec.PeerService
 	permutationService  servicespec.PermutationService
+	positionService     servicespec.PositionService
 	randomService       servicespec.RandomService
 	storageCollection   servicespec.StorageCollection
 	trackerService      servicespec.TrackerService
@@ -120,6 +121,10 @@ func (c *collection) Permutation() servicespec.PermutationService {
 	return c.permutationService
 }
 
+func (c *collection) Position() servicespec.PositionService {
+	return c.positionService
+}
+
 func (c *collection) Random() servicespec.RandomService {
 	return c.randomService
 }
@@ -182,6 +187,10 @@ func (c *collection) SetPeerService(peerService servicespec.PeerService) {
 
 func (c *collection) SetPermutationService(permutationService servicespec.PermutationService) {
 	c.permutationService = permutationService
+}
+
+func (c *collection) SetPositionService(positionService servicespec.PositionService) {
+	c.positionService = positionService
 }
 
 func (c *collection) SetRandomService(randomService servicespec.RandomService) {
