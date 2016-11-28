@@ -21,6 +21,7 @@ import (
 	"github.com/the-anna-project/instrumentor/prometheus"
 	layercollection "github.com/the-anna-project/layer/collection"
 	layerservice "github.com/the-anna-project/layer/service"
+	positionservice "github.com/the-anna-project/position/service"
 	"github.com/the-anna-project/log"
 	outputcollection "github.com/the-anna-project/output/collection"
 	textoutputservice "github.com/the-anna-project/output/service/text"
@@ -57,6 +58,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetOutputCollection(c.newOutputCollection())
 	collection.SetPeerService(c.newPeerService())
 	collection.SetPermutationService(c.newPermutationService())
+	collection.SetPositionService(c.newPositionService())
 	collection.SetRandomService(c.newRandomService())
 	collection.SetStorageCollection(c.newStorageCollection())
 	collection.SetTrackerService(c.newTrackerService())
@@ -79,6 +81,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.Output().Text().SetServiceCollection(collection)
 	collection.Peer().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
+	collection.Position().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
 	collection.Storage().Connection().SetServiceCollection(collection)
 	collection.Storage().Feature().SetServiceCollection(collection)
@@ -156,6 +159,7 @@ func (c *Command) newLayerCollection() servicespec.LayerCollection {
 
 	behaviourService := layerservice.New()
 	behaviourService.SetKind("behaviour")
+
 	informationService := layerservice.New()
 	informationService.SetKind("information")
 
@@ -188,14 +192,20 @@ func (c *Command) newOutputCollection() servicespec.OutputCollection {
 func (c *Command) newPeerService() servicespec.PeerService {
 	peerService := peerservice.New()
 
-	peerService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
-	peerService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
-
 	return peerService
 }
 
 func (c *Command) newPermutationService() servicespec.PermutationService {
 	return permutation.New()
+}
+
+func (c *Command) newPositionService() servicespec.PositionService {
+	positionService := positionservice.New()
+
+	positionService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
+	positionService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
+
+	return positionService
 }
 
 func (c *Command) newRandomService() servicespec.RandomService {
