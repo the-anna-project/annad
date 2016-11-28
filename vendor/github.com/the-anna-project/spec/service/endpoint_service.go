@@ -1,4 +1,4 @@
-package spec
+package service
 
 // EndpointService represents a simple bootable object being able to serve
 // network resources.

@@ -1,5 +1,20 @@
 # guidelines
 
+### code
+This section documents some code guidelines that should be considered when
+working in the codebase.
+
+###### CRUD operations
+When a service implements [CRUD
+operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) the
+following naming should be considered.
+```
+create
+search
+update
+delete
+```
+
 ### trace
 Having insides into complex systems is key. Events going through neural
 networks need to be highly comprehensible in detail. A lot of different things

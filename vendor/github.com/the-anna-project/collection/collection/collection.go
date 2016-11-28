@@ -23,13 +23,16 @@ type collection struct {
 	idService           servicespec.IDService
 	inputCollection     servicespec.InputCollection
 	instrumentorService servicespec.InstrumentorService
+	layerCollection     servicespec.LayerCollection
 	logService          servicespec.LogService
 	networkService      servicespec.NetworkService
 	outputCollection    servicespec.OutputCollection
+	peerService         servicespec.PeerService
 	permutationService  servicespec.PermutationService
 	randomService       servicespec.RandomService
 	storageCollection   servicespec.StorageCollection
 	trackerService      servicespec.TrackerService
+	workerService       servicespec.WorkerService
 
 	// Settings.
 
@@ -53,10 +56,12 @@ func (c *collection) Boot() {
 	go c.Log().Boot()
 	go c.Network().Boot()
 	go c.Output().Boot()
+	go c.Peer().Boot()
 	go c.Permutation().Boot()
 	go c.Random().Boot()
 	go c.Storage().Boot()
 	go c.Tracker().Boot()
+	go c.Worker().Boot()
 }
 
 func (c *collection) Connection() servicespec.ConnectionService {
@@ -91,6 +96,10 @@ func (c *collection) Instrumentor() servicespec.InstrumentorService {
 	return c.instrumentorService
 }
 
+func (c *collection) Layer() servicespec.LayerCollection {
+	return c.layerCollection
+}
+
 func (c *collection) Log() servicespec.LogService {
 	return c.logService
 }
@@ -101,6 +110,10 @@ func (c *collection) Network() servicespec.NetworkService {
 
 func (c *collection) Output() servicespec.OutputCollection {
 	return c.outputCollection
+}
+
+func (c *collection) Peer() servicespec.PeerService {
+	return c.peerService
 }
 
 func (c *collection) Permutation() servicespec.PermutationService {
@@ -147,6 +160,10 @@ func (c *collection) SetInstrumentorService(instrumentorService servicespec.Inst
 	c.instrumentorService = instrumentorService
 }
 
+func (c *collection) SetLayerCollection(layerCollection servicespec.LayerCollection) {
+	c.layerCollection = layerCollection
+}
+
 func (c *collection) SetLogService(logService servicespec.LogService) {
 	c.logService = logService
 }
@@ -157,6 +174,10 @@ func (c *collection) SetNetworkService(networkService servicespec.NetworkService
 
 func (c *collection) SetOutputCollection(outputCollection servicespec.OutputCollection) {
 	c.outputCollection = outputCollection
+}
+
+func (c *collection) SetPeerService(peerService servicespec.PeerService) {
+	c.peerService = peerService
 }
 
 func (c *collection) SetPermutationService(permutationService servicespec.PermutationService) {
@@ -173,6 +194,10 @@ func (c *collection) SetStorageCollection(storageCollection servicespec.StorageC
 
 func (c *collection) SetTrackerService(trackerService servicespec.TrackerService) {
 	c.trackerService = trackerService
+}
+
+func (c *collection) SetWorkerService(workerService servicespec.WorkerService) {
+	c.workerService = workerService
 }
 
 func (c *collection) Shutdown() {
@@ -207,4 +232,8 @@ func (c *collection) Storage() servicespec.StorageCollection {
 
 func (c *collection) Tracker() servicespec.TrackerService {
 	return c.trackerService
+}
+
+func (c *collection) Worker() servicespec.WorkerService {
+	return c.workerService
 }

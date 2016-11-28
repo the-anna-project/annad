@@ -14,12 +14,12 @@ import (
 
 	"github.com/the-anna-project/annad/object/networkpayload"
 	textoutputobject "github.com/the-anna-project/output/object/text"
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // TODO there is no CLG to read from the certenty pyramid
 
-func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence string) error {
+func (s *service) forwardNetworkPayload(ctx objectspec.Context, informationSequence string) error {
 	// Find the original information sequence using the information ID from the
 	// context.
 	informationID, ok := ctx.GetInformationID()
@@ -85,7 +85,7 @@ func (s *service) forwardNetworkPayload(ctx spec.Context, informationSequence st
 	return nil
 }
 
-func (s *service) calculate(ctx spec.Context, informationSequence string) error {
+func (s *service) calculate(ctx objectspec.Context, informationSequence string) error {
 	// Check the calculated output against the provided expectation, if any. In
 	// case there is no expectation provided, we simply go with what we
 	// calculated. This then means we are probably not in a training situation.
@@ -124,7 +124,7 @@ func (s *service) calculate(ctx spec.Context, informationSequence string) error 
 	return maskAnyf(expectationNotMetError, "'%s' != '%s'", informationSequence, calculatedOutput)
 }
 
-func (s *service) sendTextOutput(ctx spec.Context, informationSequence string) error {
+func (s *service) sendTextOutput(ctx objectspec.Context, informationSequence string) error {
 	// Return the calculated output to the requesting client, if the
 	// current CLG is the output CLG.
 	textOutputObject := textoutputobject.New()

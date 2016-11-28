@@ -1,4 +1,4 @@
-package spec
+package object
 
 // TextInput represents a streamed request being send to the neural network.
 // This is basically good for requesting calculations from the neural network

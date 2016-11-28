@@ -1,4 +1,4 @@
-package spec
+package service
 
 // InputCollection represents a collection of input services. This scopes
 // different input service implementations in a simple container, which can

@@ -1,4 +1,4 @@
-package spec
+package service
 
 // CLGService represents the CLGs interacting with each other within the neural
 // network. Each CLG  is registered in the neural network. From there signal are

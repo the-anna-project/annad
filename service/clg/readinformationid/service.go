@@ -5,12 +5,12 @@ package readinformationid
 import (
 	"fmt"
 
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // calculate fetches the information sequence stored under a specific
 // information ID. The information ID is provided by the given context.
-func (s *service) calculate(ctx spec.Context) (string, error) {
+func (s *service) calculate(ctx objectspec.Context) (string, error) {
 	informationID, ok := ctx.GetInformationID()
 	if !ok {
 		return "", maskAnyf(invalidInformationIDError, "must not be empty")

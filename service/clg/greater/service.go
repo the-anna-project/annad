@@ -3,11 +3,11 @@
 package greater
 
 import (
-	"github.com/the-anna-project/spec/object"
+	objectspec "github.com/the-anna-project/spec/object"
 )
 
 // calculate returns the number that is greater than the other.
-func (s *service) calculate(ctx spec.Context, a, b float64) float64 {
+func (s *service) calculate(ctx objectspec.Context, a, b float64) float64 {
 	if a > b {
 		return a
 	}

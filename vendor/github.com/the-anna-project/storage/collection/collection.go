@@ -43,15 +43,15 @@ func (c *collection) General() servicespec.StorageService {
 	return c.generalService
 }
 
-func (c *collection) SetConnection(connectionService servicespec.StorageService) {
+func (c *collection) SetConnectionService(connectionService servicespec.StorageService) {
 	c.connectionService = connectionService
 }
 
-func (c *collection) SetFeature(featureService servicespec.StorageService) {
+func (c *collection) SetFeatureService(featureService servicespec.StorageService) {
 	c.featureService = featureService
 }
 
-func (c *collection) SetGeneral(generalService servicespec.StorageService) {
+func (c *collection) SetGeneralService(generalService servicespec.StorageService) {
 	c.generalService = generalService
 }
 

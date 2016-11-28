@@ -1,4 +1,4 @@
-package spec
+package object
 
 // InstrumentorCounter is a metric that can be arbitrarily incremented.
 type InstrumentorCounter interface {

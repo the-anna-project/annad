@@ -1,4 +1,4 @@
-package spec
+package object
 
 // TextOutput represents a streamed response being send to the client. This
 // is basically good for responding calculated output of the neural network.

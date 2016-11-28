@@ -1,6 +1,6 @@
-package spec
+package service
 
-// ServiceCollection represents a collection of factories. This scopes different
+// ServiceCollection represents a collection of services. This scopes different
 // service implementations in a simple container, which can easily be passed
 // around.
 type ServiceCollection interface {
@@ -18,10 +18,12 @@ type ServiceCollection interface {
 	ID() IDService
 	Input() InputCollection
 	Instrumentor() InstrumentorService
+	Layer() LayerCollection
 	// Log returns a log service. It is used to print log messages.
 	Log() LogService
 	Network() NetworkService
 	Output() OutputCollection
+	Peer() PeerService
 	// Permutation returns a permutation service. It is used to permute instances
 	// of type PermutationList.
 	Permutation() PermutationService
@@ -36,17 +38,21 @@ type ServiceCollection interface {
 	SetIDService(idService IDService)
 	SetInputCollection(inputCollection InputCollection)
 	SetInstrumentorService(instrumentorService InstrumentorService)
+	SetLayerCollection(layerCollection LayerCollection)
 	SetLogService(logService LogService)
 	SetNetworkService(networkService NetworkService)
 	SetOutputCollection(outputCollection OutputCollection)
+	SetPeerService(peerService PeerService)
 	SetPermutationService(permutationService PermutationService)
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)
 	SetTrackerService(trackerService TrackerService)
+	SetWorkerService(workerService WorkerService)
 	// Shutdown ends all processes of the service collection like shutting down a
 	// machine. The call to Shutdown blocks until the service collection is
 	// completely shut down, so you might want to call it in a separate goroutine.
 	Shutdown()
 	Storage() StorageCollection
 	Tracker() TrackerService
+	Worker() WorkerService
 }

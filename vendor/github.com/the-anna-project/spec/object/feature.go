@@ -1,4 +1,4 @@
-package spec
+package object
 
 // Feature represents a charactistic within a sequence. During pattern
 // recognition it is tried to detect features. Their distributions describe

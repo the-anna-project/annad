@@ -1,4 +1,4 @@
-.PHONY: all annad clean devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck setup
+.PHONY: all annad devdeps dockerimage dockerpush gofmt gogenerate gotest projectcheck setup
 
 
 
@@ -31,10 +31,6 @@ annad: gogenerate
 			-X main.projectVersion=${PROJECT_VERSION} \
 		" \
 		.
-
-clean:
-	@rm -rf coverage.txt profile.out
-	@# TODO remove generated code
 
 devdeps:
 	@# Fetch dev dependencies.

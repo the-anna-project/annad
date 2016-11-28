@@ -1,4 +1,4 @@
-package connection
+package service
 
 import (
 	"fmt"
@@ -20,13 +20,6 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	newErr.(*errgo.Err).SetLocation(1)
 
 	return newErr
-}
-
-var invalidPeerError = errgo.New("invalid config")
-
-// IsInvalidPeer asserts invalidPeerError.
-func IsInvalidPeer(err error) bool {
-	return errgo.Cause(err) == invalidPeerError
 }
 
 var connectionNotFoundError = errgo.New("connection not found")

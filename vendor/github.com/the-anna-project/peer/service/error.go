@@ -1,4 +1,4 @@
-package workerpool
+package service
 
 import (
 	"fmt"
@@ -22,9 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var invalidConfigError = errgo.New("invalid config")
+var peerNotFoundError = errgo.New("peer not found")
 
-// IsInvalidConfig asserts invalidConfigError.
-func IsInvalidConfig(err error) bool {
-	return errgo.Cause(err) == invalidConfigError
+// IsPeerNotFound asserts peerNotFoundError.
+func IsPeerNotFound(err error) bool {
+	return errgo.Cause(err) == peerNotFoundError
 }

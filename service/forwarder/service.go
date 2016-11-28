@@ -49,7 +49,7 @@ func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.
 	// This is the list of lookup functions which is executed seuqentially.
 	lookups := []func(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error){
 		s.GetNetworkPayloads,
-		s.News,
+		s.NewNetworkpayloads,
 	}
 
 	// Execute one lookup after another. As soon as we find some behaviour IDs, we
@@ -71,6 +71,8 @@ func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.
 		break
 	}
 
+	// TODO create event collection with network service to handle network events.
+	//
 	// Forward the found network payloads to other CLGs by adding them to the
 	// queue so other processes can fetch them.
 	for _, np := range newNetworkPayloads {
@@ -140,7 +142,7 @@ func (s *service) Metadata() map[string]string {
 	return s.metadata
 }
 
-func (s *service) News(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
+func (s *service) NewNetworkpayloads(CLG servicespec.CLGService, networkPayload objectspec.NetworkPayload) ([]objectspec.NetworkPayload, error) {
 	ctx := networkPayload.GetContext()
 
 	// Decide how many new behaviour IDs should be created. This defines the

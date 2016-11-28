@@ -16,13 +16,18 @@ import (
 	"github.com/the-anna-project/annad/object/networkpayload"
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
-
-	workerpool "github.com/xh3b4sd/worker-pool"
 )
 
 // New creates a new network service.
 func New() servicespec.NetworkService {
-	return &service{}
+	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
+		closer:   make(chan struct{}, 1),
+		metadata: map[string]string{},
+	}
 }
 
 type service struct {
@@ -80,31 +85,29 @@ func (s *service) Boot() {
 		s.delay = 0
 
 		go func() {
-			// Create a new worker pool for the input listener.
-			inputPoolConfig := workerpool.DefaultConfig()
-			inputPoolConfig.Canceler = s.closer
-			inputPoolConfig.NumWorkers = 1
-			inputPoolConfig.WorkerFunc = s.InputListener
-			inputPool, err := workerpool.New(inputPoolConfig)
+			// Create a new execute config for the worker service to execute the
+			// input listener.
+			executeConfig := s.Service().Worker().ExecuteConfig()
+			executeConfig.SetActions([]func(canceler <-chan struct{}) error{s.InputListener})
+			executeConfig.SetCanceler(s.closer)
+			executeConfig.SetNumWorkers(1)
+			err := s.Service().Worker().Execute(executeConfig)
 			if err != nil {
-				s.Service().Log().Line("msg", "%#v", maskAny(err))
+				s.Service().Log().Line("msg", maskAny(err))
 			}
-			// Execute the worker pool and block until all work is done.
-			s.logWorkerErrors(inputPool.Execute())
 		}()
 
 		go func() {
-			// Create a new worker pool for the event listener.
-			eventPoolConfig := workerpool.DefaultConfig()
-			eventPoolConfig.Canceler = s.closer
-			eventPoolConfig.NumWorkers = 10
-			eventPoolConfig.WorkerFunc = s.EventListener
-			eventPool, err := workerpool.New(eventPoolConfig)
+			// Create a new execute config for the worker service to execute the
+			// event listener.
+			executeConfig := s.Service().Worker().ExecuteConfig()
+			executeConfig.SetActions([]func(canceler <-chan struct{}) error{s.EventListener})
+			executeConfig.SetCanceler(s.closer)
+			executeConfig.SetNumWorkers(10)
+			err := s.Service().Worker().Execute(executeConfig)
 			if err != nil {
-				s.Service().Log().Line("msg", "%#v", maskAny(err))
+				s.Service().Log().Line("msg", maskAny(err))
 			}
-			// Execute the worker pool and block until all work is done.
-			s.logWorkerErrors(eventPool.Execute())
 		}()
 	})
 }
@@ -176,7 +179,10 @@ func (s *service) EventListener(canceler <-chan struct{}) error {
 		case <-canceler:
 			return maskAny(workerCanceledError)
 		default:
-			s.logNetworkError(invokeEventHandler())
+			err := invokeEventHandler()
+			if err != nil {
+				s.Service().Log().Line("msg", maskAny(err))
+			}
 		}
 	}
 }

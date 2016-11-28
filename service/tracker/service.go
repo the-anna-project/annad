@@ -2,7 +2,6 @@ package tracker
 
 import (
 	"fmt"
-	"sync"
 
 	objectspec "github.com/the-anna-project/spec/object"
 	servicespec "github.com/the-anna-project/spec/service"
@@ -10,7 +9,14 @@ import (
 
 // New creates a new tracker service.
 func New() servicespec.TrackerService {
-	return &service{}
+	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
+		closer:   make(chan struct{}, 1),
+		metadata: map[string]string{},
+	}
 }
 
 type service struct {
@@ -20,6 +26,7 @@ type service struct {
 
 	// Settings.
 
+	closer   chan struct{}
 	metadata map[string]string
 }
 
@@ -39,31 +46,35 @@ func (s *service) CLGIDs(CLG servicespec.CLGService, networkPayload objectspec.N
 	destinationID := string(networkPayload.GetDestination())
 	sourceIDs := networkPayload.GetSources()
 
-	errors := make(chan error, len(sourceIDs))
-	wg := sync.WaitGroup{}
-
-	for _, str := range sourceIDs {
-		wg.Add(1)
-		go func(str string) {
-			// Persist the single CLG ID connections.
-			behaviourIDKey := fmt.Sprintf("behaviour-id:%s:o:tracker:behaviour-ids", str)
-			err := s.Service().Storage().General().PushToSet(behaviourIDKey, destinationID)
-			if err != nil {
-				errors <- maskAny(err)
-			}
-			wg.Done()
-		}(str)
+	// Prepare a queue to synchronise the workload.
+	queue := make(chan string, len(sourceIDs))
+	for _, sourceID := range sourceIDs {
+		queue <- sourceID
 	}
 
-	wg.Wait()
+	// Define the action being executed by the worker service. This action is
+	// supposed to be executed concurrently. Therefore the queue we just created
+	// is used to synchronize the workload.
+	action := func(canceler <-chan struct{}) error {
+		sourceID := <-queue
 
-	select {
-	case err := <-errors:
+		// Connect source and destination ID of the CLG in the behaviour layer of
+		// the connection space.
+		err := s.Service().Layer().Behaviour().CreateConnection(sourceID, destinationID)
 		if err != nil {
 			return maskAny(err)
 		}
-	default:
-		// Nothing do here. No error occurred. All good.
+
+		return nil
+	}
+
+	executeConfig := s.Service().Worker().ExecuteConfig()
+	executeConfig.SetActions([]func(canceler <-chan struct{}) error{action})
+	executeConfig.SetCanceler(s.closer)
+	executeConfig.SetNumWorkers(len(sourceIDs))
+	err := s.Service().Worker().Execute(executeConfig)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
@@ -73,41 +84,44 @@ func (s *service) CLGNames(CLG servicespec.CLGService, networkPayload objectspec
 	destinationName := CLG.Metadata()["name"]
 	sourceIDs := networkPayload.GetSources()
 
-	errors := make(chan error, len(sourceIDs))
-	wg := sync.WaitGroup{}
-
-	for _, str := range sourceIDs {
-		wg.Add(1)
-		go func(str string) {
-			behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", str)
-			name, err := s.Service().Storage().General().Get(behaviourNameKey)
-			if err != nil {
-				errors <- maskAny(err)
-			} else {
-				// The errors channel is capable of buffering one error for each source
-				// ID. The else clause is necessary to queue only one possible error for
-				// each source ID. So in case the name lookup was successful, we are
-				// able to actually persist the single CLG name connection.
-				behaviourNameKey := fmt.Sprintf("behaviour-name:%s:o:tracker:behaviour-names", name)
-				err := s.Service().Storage().General().PushToSet(behaviourNameKey, destinationName)
-				if err != nil {
-					errors <- maskAny(err)
-				}
-			}
-
-			wg.Done()
-		}(str)
+	// Prepare a queue to synchronise the workload.
+	queue := make(chan string, len(sourceIDs))
+	for _, sourceID := range sourceIDs {
+		queue <- sourceID
 	}
 
-	wg.Wait()
+	// Define the action being executed by the worker service. This action is
+	// supposed to be executed concurrently. Therefore the queue we just created
+	// is used to synchronize the workload.
+	action := func(canceler <-chan struct{}) error {
+		sourceID := <-queue
 
-	select {
-	case err := <-errors:
+		// Resolve behaviour ID to CLG name.
+		//
+		// TODO handle mapping of CLG ID/Name in separate service
+		behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", sourceID)
+		sourceName, err := s.Service().Storage().General().Get(behaviourNameKey)
 		if err != nil {
 			return maskAny(err)
 		}
-	default:
-		// Nothing do here. No error occurred. All good.
+
+		// Connect source and destination name of the CLG in the behaviour layer
+		// of the connection space.
+		err = s.Service().Layer().Behaviour().CreateConnection(sourceName, destinationName)
+		if err != nil {
+			return maskAny(err)
+		}
+
+		return nil
+	}
+
+	executeConfig := s.Service().Worker().ExecuteConfig()
+	executeConfig.SetActions([]func(canceler <-chan struct{}) error{action})
+	executeConfig.SetCanceler(s.closer)
+	executeConfig.SetNumWorkers(len(sourceIDs))
+	err := s.Service().Worker().Execute(executeConfig)
+	if err != nil {
+		return maskAny(err)
 	}
 
 	return nil
@@ -135,6 +149,8 @@ func (s *service) Track(CLG servicespec.CLGService, networkPayload objectspec.Ne
 	}
 
 	// Execute one lookup after another to track connection path patterns.
+	//
+	// TODO execute concurrently
 	var err error
 	for _, l := range lookups {
 		err = l(CLG, networkPayload)

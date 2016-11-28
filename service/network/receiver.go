@@ -20,28 +20,6 @@ import (
 	servicespec "github.com/the-anna-project/spec/service"
 )
 
-// logNetworkError logs the given error in a specific way dependening on the
-// given error. If the given error is nil, nothing will be logged.
-func (s *service) logNetworkError(err error) {
-	if output.IsExpectationNotMet(err) {
-		s.Service().Log().Line("msg", "%#v", maskAny(err))
-	} else if err != nil {
-		s.Service().Log().Line("msg", "%#v", maskAny(err))
-	}
-}
-
-// logWorkerErrors logs all errors that are may be queued by the provided error
-// channel using the configured logger with log level E and verbosity 4.
-func (s *service) logWorkerErrors(errors chan error) {
-	for err := range errors {
-		if IsWorkerCanceled(err) {
-			continue
-		}
-
-		s.Service().Log().Line("msg", "%#v", maskAny(err))
-	}
-}
-
 // newCLGs returns a list of all CLGs which are configured and ready to be used
 // within the neural network.
 func (s *service) newCLGs() map[string]servicespec.CLGService {
