@@ -27,6 +27,7 @@ type collection struct {
 	logService          servicespec.LogService
 	networkService      servicespec.NetworkService
 	outputCollection    servicespec.OutputCollection
+	peerService         servicespec.PeerService
 	permutationService  servicespec.PermutationService
 	randomService       servicespec.RandomService
 	storageCollection   servicespec.StorageCollection
@@ -55,6 +56,7 @@ func (c *collection) Boot() {
 	go c.Log().Boot()
 	go c.Network().Boot()
 	go c.Output().Boot()
+	go c.Peer().Boot()
 	go c.Permutation().Boot()
 	go c.Random().Boot()
 	go c.Storage().Boot()
@@ -108,6 +110,10 @@ func (c *collection) Network() servicespec.NetworkService {
 
 func (c *collection) Output() servicespec.OutputCollection {
 	return c.outputCollection
+}
+
+func (c *collection) Peer() servicespec.PeerService {
+	return c.peerService
 }
 
 func (c *collection) Permutation() servicespec.PermutationService {
@@ -168,6 +174,10 @@ func (c *collection) SetNetworkService(networkService servicespec.NetworkService
 
 func (c *collection) SetOutputCollection(outputCollection servicespec.OutputCollection) {
 	c.outputCollection = outputCollection
+}
+
+func (c *collection) SetPeerService(peerService servicespec.PeerService) {
+	c.peerService = peerService
 }
 
 func (c *collection) SetPermutationService(permutationService servicespec.PermutationService) {

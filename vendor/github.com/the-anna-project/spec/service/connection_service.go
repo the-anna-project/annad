@@ -41,22 +41,22 @@ package service
 // being formed by a prefix and a peer value. The value on the right is a
 // list of strings being formed by peer values.
 //
-//     peer:sum     $id1
-//     peer:$id1    sum,$id2,$id4
-//     peer:$id2    $id3
-//     peer:$id4    $id5
+//     layer:information:peer:sum     layer:information:$id1
+//     layer:information:peer:$id1    layer:information:sum,layer:information:$id2,layer:information:$id4
+//     layer:information:peer:$id2    layer:information:$id3
+//     layer:information:peer:$id4    layer:information:$id5
 //
 // This is a connection holding metadata. The key on the left is a string
 // being formed by a prefix and the values of the two peers forming the
 // connection. The order of the peers within the key expresses the
 // connection direction. The value on the right is a map of strings.
 //
-//     connection:sum:$id1     weight 23.775
-//     connection:$id1:sum     weight 23.775
-//     connection:$id1:$id2    weight 23.775
-//     connection:$id1:$id4    weight 23.775
-//     connection:$id2:$id3    weight 23.775
-//     connection:$id4:$id5    weight 23.775
+//     connection:layer:information:sum:layer:information:$id1     weight 23.775
+//     connection:layer:information:$id1:layer:information:sum     weight 23.775
+//     connection:layer:information:$id1:layer:information:$id2    weight 23.775
+//     connection:layer:information:$id1:layer:information:$id4    weight 23.775
+//     connection:layer:information:$id2:layer:information:$id3    weight 23.775
+//     connection:layer:information:$id4:layer:information:$id5    weight 23.775
 //
 // Following is a list of properties each peer has applied in form of
 // connections to itself.
@@ -64,17 +64,21 @@ package service
 //     created
 //     kind
 //     position
+//
+// Following is a list of properties each connection has applied in form of
+// metadata to itself.
+//
+//     created
 //     updated
+//     weight
 //
 type ConnectionService interface {
 	Boot()
 	Create(peerA, peerB string) error
-	Find(peerA, peerB string) (map[string]string, error)
-	FindPeers(peer string) ([]string, error)
+	Delete(peerA, peerB string) error
 	Metadata() map[string]string
+	Search(peerA, peerB string) (map[string]string, error)
 	Service() ServiceCollection
-	SetDimensionCount(dimensionCount int)
-	SetDimensionDepth(dimensionDepth int)
 	SetServiceCollection(serviceCollection ServiceCollection)
 	SetWeight(weight int)
 }

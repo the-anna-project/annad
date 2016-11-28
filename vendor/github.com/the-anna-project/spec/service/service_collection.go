@@ -23,6 +23,7 @@ type ServiceCollection interface {
 	Log() LogService
 	Network() NetworkService
 	Output() OutputCollection
+	Peer() PeerService
 	// Permutation returns a permutation service. It is used to permute instances
 	// of type PermutationList.
 	Permutation() PermutationService
@@ -41,6 +42,7 @@ type ServiceCollection interface {
 	SetLogService(logService LogService)
 	SetNetworkService(networkService NetworkService)
 	SetOutputCollection(outputCollection OutputCollection)
+	SetPeerService(peerService PeerService)
 	SetPermutationService(permutationService PermutationService)
 	SetRandomService(randomService RandomService)
 	SetStorageCollection(storageCollection StorageCollection)

@@ -11,6 +11,7 @@ func New() servicespec.LayerService {
 		serviceCollection: nil,
 
 		// Settings.
+		closer:   make(chan struct{}, 1),
 		kind:     "",
 		metadata: map[string]string{},
 	}
@@ -23,6 +24,7 @@ type service struct {
 
 	// Settings.
 
+	closer   chan struct{}
 	kind     string
 	metadata map[string]string
 }
@@ -35,20 +37,78 @@ func (s *service) Boot() {
 	s.metadata = map[string]string{
 		"id":   id,
 		"kind": s.kind,
-		"name": "storage",
+		"name": "layer",
 		"type": "service",
 	}
 }
 
-// TODO
 func (s *service) CreateConnection(peerA, peerB string) error {
 	s.Service().Log().Line("func", "CreateConnection")
+
+	actions := []func(canceler <-chan struct{}) error{
+		func(canceler <-chan struct{}) error {
+			err := s.Service().Peer().Create(peerA, peerB)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			return nil
+		},
+		func(canceler <-chan struct{}) error {
+			err := s.Service().Connection().Create(peerA, peerB)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			return nil
+		},
+	}
+
+	executeConfig := s.Service().Worker().ExecuteConfig()
+	executeConfig.SetActions(actions)
+	executeConfig.SetCanceler(s.closer)
+	executeConfig.SetNumWorkers(2)
+	err := s.Service().Worker().Execute(executeConfig)
+	if err != nil {
+		return maskAny(err)
+	}
+
 	return nil
 }
 
-// TODO
 func (s *service) DeleteConnection(peerA, peerB string) error {
 	s.Service().Log().Line("func", "DeleteConnection")
+
+	// TODO prefix keys with layer information (kind)
+
+	actions := []func(canceler <-chan struct{}) error{
+		func(canceler <-chan struct{}) error {
+			err := s.Service().Peer().Delete(peerA)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			return nil
+		},
+		func(canceler <-chan struct{}) error {
+			err := s.Service().Connection().Delete(peerA, peerB)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			return nil
+		},
+	}
+
+	executeConfig := s.Service().Worker().ExecuteConfig()
+	executeConfig.SetActions(actions)
+	executeConfig.SetCanceler(s.closer)
+	executeConfig.SetNumWorkers(2)
+	err := s.Service().Worker().Execute(executeConfig)
+	if err != nil {
+		return maskAny(err)
+	}
+
 	return nil
 }
 

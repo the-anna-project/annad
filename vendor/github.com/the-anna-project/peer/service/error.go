@@ -22,9 +22,9 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var connectionNotFoundError = errgo.New("connection not found")
+var peerNotFoundError = errgo.New("peer not found")
 
-// IsConnectionNotFound asserts connectionNotFoundError.
-func IsConnectionNotFound(err error) bool {
-	return errgo.Cause(err) == connectionNotFoundError
+// IsPeerNotFound asserts peerNotFoundError.
+func IsPeerNotFound(err error) bool {
+	return errgo.Cause(err) == peerNotFoundError
 }

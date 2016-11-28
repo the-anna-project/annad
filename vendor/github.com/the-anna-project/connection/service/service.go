@@ -1,11 +1,10 @@
-// Package connection provides a service able to manage connections of the
+// Package service provides a service able to manage connections of the
 // connection space.
-package connection
+package service
 
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	servicespec "github.com/the-anna-project/spec/service"
@@ -13,7 +12,14 @@ import (
 
 // New creates a new connection service.
 func New() servicespec.ConnectionService {
-	return &service{}
+	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
+		metadata: map[string]string{},
+		weight:   0,
+	}
 }
 
 type service struct {
@@ -23,10 +29,8 @@ type service struct {
 
 	// Settings.
 
-	metadata       map[string]string
-	dimensionCount int
-	dimensionDepth int
-	weight         int
+	metadata map[string]string
+	weight   int
 }
 
 func (s *service) Boot() {
@@ -42,33 +46,8 @@ func (s *service) Boot() {
 }
 
 func (s *service) Create(peerA, peerB string) error {
-	// Make sure a peer is not connected with itself.
-	if peerA == peerB {
-		return maskAnyf(invalidPeerError, "peers must be different")
-	}
+	s.Service().Log().Line("func", "Create")
 
-	_, err := s.Find(peerA, peerB)
-	if IsConnectionNotFound(err) {
-		// If there is no connection yet created, we can go ahead and create the
-		// requested peer and connection.
-		//
-		// TODO process in parallel
-		err := s.CreatePeer(peerA, peerB)
-		if err != nil {
-			return maskAny(err)
-		}
-		err = s.CreateConnection(peerA, peerB)
-		if err != nil {
-			return maskAny(err)
-		}
-	} else if err != nil {
-		return maskAny(err)
-	}
-
-	return nil
-}
-
-func (s *service) CreateConnection(peerA, peerB string) error {
 	key := fmt.Sprintf("connecion:%s:%s", peerA, peerB)
 
 	seconds := fmt.Sprintf("%d", time.Now().Unix())
@@ -87,10 +66,12 @@ func (s *service) CreateConnection(peerA, peerB string) error {
 	return nil
 }
 
-func (s *service) CreatePeer(peerA, peerB string) error {
-	key := fmt.Sprintf("peer:%s", peerA)
+func (s *service) Delete(peerA, peerB string) error {
+	s.Service().Log().Line("func", "Delete")
 
-	err := s.Service().Storage().Connection().PushToSet(key, peerB)
+	key := fmt.Sprintf("connecion:%s:%s", peerA, peerB)
+
+	err := s.Service().Storage().Connection().Remove(key)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -98,40 +79,12 @@ func (s *service) CreatePeer(peerA, peerB string) error {
 	return nil
 }
 
-func (s *service) CreatePosition() (string, error) {
-	nums, err := s.Service().Random().CreateNMax(s.dimensionCount, s.dimensionDepth)
-	if err != nil {
-		return "", maskAny(err)
-	}
+func (s *service) Search(peerA, peerB string) (map[string]string, error) {
+	s.Service().Log().Line("func", "Search")
 
-	coordinates := []string{}
-	for _, n := range nums {
-		coordinates = append(coordinates, strconv.Itoa(n))
-	}
-	position := strings.Join(coordinates, ",")
-
-	return position, nil
-}
-
-func (s *service) Find(peerA, peerB string) (map[string]string, error) {
 	key := fmt.Sprintf("connecion:%s:%s", peerA, peerB)
 
 	result, err := s.Service().Storage().Connection().GetStringMap(key)
-	if err != nil {
-		return nil, maskAny(err)
-	}
-
-	if len(result) == 0 {
-		return nil, maskAny(connectionNotFoundError)
-	}
-
-	return result, nil
-}
-
-func (s *service) FindPeers(peer string) ([]string, error) {
-	key := fmt.Sprintf("peer:%s", peer)
-
-	result, err := s.Service().Storage().Connection().GetAllFromSet(key)
 	if err != nil {
 		return nil, maskAny(err)
 	}
@@ -149,14 +102,6 @@ func (s *service) Metadata() map[string]string {
 
 func (s *service) Service() servicespec.ServiceCollection {
 	return s.serviceCollection
-}
-
-func (s *service) SetDimensionCount(dimensionCount int) {
-	s.dimensionCount = dimensionCount
-}
-
-func (s *service) SetDimensionDepth(dimensionDepth int) {
-	s.dimensionDepth = dimensionDepth
 }
 
 func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
