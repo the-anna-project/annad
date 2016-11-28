@@ -12,7 +12,7 @@ import (
 	"github.com/the-anna-project/annad/service/forwarder"
 	"github.com/the-anna-project/annad/service/network"
 	"github.com/the-anna-project/annad/service/tracker"
-	servicecollection "github.com/the-anna-project/collection"
+	servicecollection "github.com/the-anna-project/collection/collection"
 	connectionservice "github.com/the-anna-project/connection/service"
 	memoryfs "github.com/the-anna-project/fs/memory"
 	"github.com/the-anna-project/id"
@@ -24,6 +24,7 @@ import (
 	"github.com/the-anna-project/log"
 	outputcollection "github.com/the-anna-project/output/collection"
 	textoutputservice "github.com/the-anna-project/output/service/text"
+	peerservice "github.com/the-anna-project/peer/service"
 	"github.com/the-anna-project/permutation/service"
 	"github.com/the-anna-project/random"
 	endpointcollection "github.com/the-anna-project/server/collection"
@@ -54,6 +55,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.SetLogService(c.newLogService())
 	collection.SetNetworkService(c.newNetworkService())
 	collection.SetOutputCollection(c.newOutputCollection())
+	collection.SetPeerService(c.newPeerService())
 	collection.SetPermutationService(c.newPermutationService())
 	collection.SetRandomService(c.newRandomService())
 	collection.SetStorageCollection(c.newStorageCollection())
@@ -72,10 +74,10 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.Instrumentor().SetServiceCollection(collection)
 	collection.Layer().Behaviour().SetServiceCollection(collection)
 	collection.Layer().Information().SetServiceCollection(collection)
-	collection.Layer().Position().SetServiceCollection(collection)
 	collection.Log().SetServiceCollection(collection)
 	collection.Network().SetServiceCollection(collection)
 	collection.Output().Text().SetServiceCollection(collection)
+	collection.Peer().SetServiceCollection(collection)
 	collection.Permutation().SetServiceCollection(collection)
 	collection.Random().SetServiceCollection(collection)
 	collection.Storage().Connection().SetServiceCollection(collection)
@@ -94,8 +96,6 @@ func (c *Command) newActivatorService() servicespec.ActivatorService {
 func (c *Command) newConnectionService() servicespec.ConnectionService {
 	connectionService := connectionservice.New()
 
-	connectionService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
-	connectionService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
 	connectionService.SetWeight(c.configCollection.Space().Connection().Weight())
 
 	return connectionService
@@ -158,12 +158,9 @@ func (c *Command) newLayerCollection() servicespec.LayerCollection {
 	behaviourService.SetKind("behaviour")
 	informationService := layerservice.New()
 	informationService.SetKind("information")
-	positionService := layerservice.New()
-	positionService.SetKind("position")
 
 	layerCollection.SetBehaviourService(behaviourService)
 	layerCollection.SetInformationService(informationService)
-	layerCollection.SetPositionService(positionService)
 
 	return layerCollection
 }
@@ -186,6 +183,15 @@ func (c *Command) newOutputCollection() servicespec.OutputCollection {
 	newCollection.SetTextService(textoutputservice.New())
 
 	return newCollection
+}
+
+func (c *Command) newPeerService() servicespec.PeerService {
+	peerService := peerservice.New()
+
+	peerService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
+	peerService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
+
+	return peerService
 }
 
 func (c *Command) newPermutationService() servicespec.PermutationService {
