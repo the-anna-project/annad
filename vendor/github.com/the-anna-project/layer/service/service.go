@@ -2,7 +2,11 @@
 // layers.
 package service
 
-import servicespec "github.com/the-anna-project/spec/service"
+import (
+	"fmt"
+
+	servicespec "github.com/the-anna-project/spec/service"
+)
 
 // New creates a new layer service.
 func New() servicespec.LayerService {
@@ -24,6 +28,7 @@ type service struct {
 
 	// Settings.
 
+	// TODO add Shutdown
 	closer   chan struct{}
 	kind     string
 	metadata map[string]string
@@ -42,12 +47,14 @@ func (s *service) Boot() {
 	}
 }
 
-func (s *service) CreateConnection(peerA, peerB string) error {
-	s.Service().Log().Line("func", "CreateConnection")
+func (s *service) CreatePeer(peer string) (string, error) {
+	s.Service().Log().Line("func", "CreatePeer")
+
+	peer = fmt.Sprintf("layer:%s:peer:%s", s.kind, peer)
 
 	actions := []func(canceler <-chan struct{}) error{
 		func(canceler <-chan struct{}) error {
-			err := s.Service().Peer().Create(peerA, peerB)
+			err := s.Service().Peer().Create(peer)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -55,7 +62,12 @@ func (s *service) CreateConnection(peerA, peerB string) error {
 			return nil
 		},
 		func(canceler <-chan struct{}) error {
-			err := s.Service().Connection().Create(peerA, peerB)
+			position, err := s.Service().Position().Create(peer)
+			if err != nil {
+				return maskAny(err)
+			}
+
+			err = s.Service().Connection().Create(peer, position)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -67,23 +79,23 @@ func (s *service) CreateConnection(peerA, peerB string) error {
 	executeConfig := s.Service().Worker().ExecuteConfig()
 	executeConfig.SetActions(actions)
 	executeConfig.SetCanceler(s.closer)
-	executeConfig.SetNumWorkers(2)
+	executeConfig.SetNumWorkers(len(actions))
 	err := s.Service().Worker().Execute(executeConfig)
 	if err != nil {
-		return maskAny(err)
+		return "", maskAny(err)
 	}
 
-	return nil
+	return peer, nil
 }
 
-func (s *service) DeleteConnection(peerA, peerB string) error {
-	s.Service().Log().Line("func", "DeleteConnection")
+func (s *service) DeletePeer(peer string) (string, error) {
+	s.Service().Log().Line("func", "DeletePeer")
 
-	// TODO prefix keys with layer information (kind)
+	peer = fmt.Sprintf("layer:%s:peer:%s", s.kind, peer)
 
 	actions := []func(canceler <-chan struct{}) error{
 		func(canceler <-chan struct{}) error {
-			err := s.Service().Peer().Delete(peerA)
+			err := s.Service().Peer().Delete(peer)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -91,7 +103,11 @@ func (s *service) DeleteConnection(peerA, peerB string) error {
 			return nil
 		},
 		func(canceler <-chan struct{}) error {
-			err := s.Service().Connection().Delete(peerA, peerB)
+			position, err := s.Service().Position().Delete(peer)
+			if err != nil {
+				return maskAny(err)
+			}
+			err = s.Service().Connection().Delete(peer, position)
 			if err != nil {
 				return maskAny(err)
 			}
@@ -103,13 +119,13 @@ func (s *service) DeleteConnection(peerA, peerB string) error {
 	executeConfig := s.Service().Worker().ExecuteConfig()
 	executeConfig.SetActions(actions)
 	executeConfig.SetCanceler(s.closer)
-	executeConfig.SetNumWorkers(2)
+	executeConfig.SetNumWorkers(len(actions))
 	err := s.Service().Worker().Execute(executeConfig)
 	if err != nil {
-		return maskAny(err)
+		return "", maskAny(err)
 	}
 
-	return nil
+	return peer, nil
 }
 
 func (s *service) Metadata() map[string]string {

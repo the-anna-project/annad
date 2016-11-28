@@ -4,12 +4,10 @@ package service
 // space.
 type PeerService interface {
 	Boot()
-	Create(peerA, peerB string) error
-	Delete(peerA string) error
+	Create(peer string) error
+	Delete(peer string) error
 	Metadata() map[string]string
-	Search(peer string) ([]string, error)
+	Search(peer string) (map[string]string, error)
 	Service() ServiceCollection
-	SetDimensionCount(dimensionCount int)
-	SetDimensionDepth(dimensionDepth int)
 	SetServiceCollection(serviceCollection ServiceCollection)
 }

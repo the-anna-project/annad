@@ -55,21 +55,31 @@ func (s *service) CLGIDs(CLG servicespec.CLGService, networkPayload objectspec.N
 	// Define the action being executed by the worker service. This action is
 	// supposed to be executed concurrently. Therefore the queue we just created
 	// is used to synchronize the workload.
-	action := func(canceler <-chan struct{}) error {
-		sourceID := <-queue
+	actions := []func(canceler <-chan struct{}) error{
+		func(canceler <-chan struct{}) error {
+			sourceID := <-queue
 
-		// Connect source and destination ID of the CLG in the behaviour layer of
-		// the connection space.
-		err := s.Service().Layer().Behaviour().CreateConnection(sourceID, destinationID)
-		if err != nil {
-			return maskAny(err)
-		}
+			// Connect source and destination ID of the CLG in the behaviour layer of
+			// the connection space.
+			peerA, err := s.Service().Layer().Behaviour().CreatePeer(sourceID)
+			if err != nil {
+				return maskAny(err)
+			}
+			peerB, err := s.Service().Layer().Behaviour().CreatePeer(destinationID)
+			if err != nil {
+				return maskAny(err)
+			}
+			err = s.Service().Connection().Create(peerA, peerB)
+			if err != nil {
+				return maskAny(err)
+			}
 
-		return nil
+			return nil
+		},
 	}
 
 	executeConfig := s.Service().Worker().ExecuteConfig()
-	executeConfig.SetActions([]func(canceler <-chan struct{}) error{action})
+	executeConfig.SetActions(actions)
 	executeConfig.SetCanceler(s.closer)
 	executeConfig.SetNumWorkers(len(sourceIDs))
 	err := s.Service().Worker().Execute(executeConfig)
@@ -93,30 +103,40 @@ func (s *service) CLGNames(CLG servicespec.CLGService, networkPayload objectspec
 	// Define the action being executed by the worker service. This action is
 	// supposed to be executed concurrently. Therefore the queue we just created
 	// is used to synchronize the workload.
-	action := func(canceler <-chan struct{}) error {
-		sourceID := <-queue
+	actions := []func(canceler <-chan struct{}) error{
+		func(canceler <-chan struct{}) error {
+			sourceID := <-queue
 
-		// Resolve behaviour ID to CLG name.
-		//
-		// TODO handle mapping of CLG ID/Name in separate service
-		behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", sourceID)
-		sourceName, err := s.Service().Storage().General().Get(behaviourNameKey)
-		if err != nil {
-			return maskAny(err)
-		}
+			// Resolve behaviour ID to CLG name.
+			//
+			// TODO handle mapping of CLG ID/Name in separate service
+			behaviourNameKey := fmt.Sprintf("behaviour-id:%s:behaviour-name", sourceID)
+			sourceName, err := s.Service().Storage().General().Get(behaviourNameKey)
+			if err != nil {
+				return maskAny(err)
+			}
 
-		// Connect source and destination name of the CLG in the behaviour layer
-		// of the connection space.
-		err = s.Service().Layer().Behaviour().CreateConnection(sourceName, destinationName)
-		if err != nil {
-			return maskAny(err)
-		}
+			// Connect source and destination name of the CLG in the behaviour layer
+			// of the connection space.
+			peerA, err := s.Service().Layer().Behaviour().CreatePeer(sourceName)
+			if err != nil {
+				return maskAny(err)
+			}
+			peerB, err := s.Service().Layer().Behaviour().CreatePeer(destinationName)
+			if err != nil {
+				return maskAny(err)
+			}
+			err = s.Service().Connection().Create(peerA, peerB)
+			if err != nil {
+				return maskAny(err)
+			}
 
-		return nil
+			return nil
+		},
 	}
 
 	executeConfig := s.Service().Worker().ExecuteConfig()
-	executeConfig.SetActions([]func(canceler <-chan struct{}) error{action})
+	executeConfig.SetActions(actions)
 	executeConfig.SetCanceler(s.closer)
 	executeConfig.SetNumWorkers(len(sourceIDs))
 	err := s.Service().Worker().Execute(executeConfig)
