@@ -86,6 +86,7 @@ func (c *Command) newServiceCollection() servicespec.ServiceCollection {
 	collection.Storage().Connection().SetServiceCollection(collection)
 	collection.Storage().Feature().SetServiceCollection(collection)
 	collection.Storage().General().SetServiceCollection(collection)
+	collection.Storage().Peer().SetServiceCollection(collection)
 	collection.Tracker().SetServiceCollection(collection)
 	collection.Worker().SetServiceCollection(collection)
 
@@ -269,6 +270,20 @@ func (c *Command) newStorageCollection() servicespec.StorageCollection {
 		newCollection.SetGeneralService(memorystorage.New())
 	default:
 		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().General().Kind()))
+	}
+
+	// Peer.
+	switch c.configCollection.Storage().Peer().Kind() {
+	case "redis":
+		peerService := redisstorage.New()
+		peerService.SetBackoffFactory(c.newBackoffFactory())
+		peerService.SetPool(newPool(c.configCollection.Storage().Peer().Address()))
+		peerService.SetPrefix(c.configCollection.Storage().Peer().Prefix())
+		newCollection.SetPeerService(peerService)
+	case "memory":
+		newCollection.SetPeerService(memorystorage.New())
+	default:
+		panic(maskAnyf(invalidStorageKindError, "%s", c.configCollection.Storage().Peer().Kind()))
 	}
 
 	return newCollection
