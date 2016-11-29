@@ -94,7 +94,7 @@ imports:
 - name: github.com/spf13/viper
   version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/the-anna-project/collection
-  version: ba16e876895689911f3cc298d7744f72a98d61dc
+  version: 264212e183a257ec60f7295886b3a7fa20df2b84
   subpackages:
   - collection
 - name: github.com/the-anna-project/connection
@@ -131,7 +131,7 @@ imports:
   - object/text
   - service/text
 - name: github.com/the-anna-project/peer
-  version: d35895eb57ff882f01f1360ad7dd567ed38c4acb
+  version: afe0577713a9cad35ff83bc96595ee1d6e9ecbbe
   subpackages:
   - service
 - name: github.com/the-anna-project/permutation
@@ -152,13 +152,13 @@ imports:
   - service/metric
   - service/text
 - name: github.com/the-anna-project/storage
-  version: cebbe48d6f041658e8c795290a8905a708286e22
+  version: 59d53ec428b1fc06f541c19ad4df3f3a2e4d6e1b
   subpackages:
   - collection
   - service/memory
   - service/redis
 - name: github.com/the-anna-project/spec
-  version: 0e93ab1140cc3d493b091c1a40ec04a094a894ae
+  version: b0f7706f96bd44e18c35e5ac91b2d3027e3a860c
   subpackages:
   - api
   - object
