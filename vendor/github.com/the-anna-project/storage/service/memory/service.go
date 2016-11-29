@@ -20,7 +20,12 @@ import (
 // used for local development.
 func New() servicespec.StorageService {
 	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
 		prefix:       "prefix",
+		metadata:     map[string]string{},
 		shutdownOnce: sync.Once{},
 	}
 }

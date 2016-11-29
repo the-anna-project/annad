@@ -10,7 +10,9 @@ import (
 
 // New creates a new storage collection.
 func New() servicespec.StorageCollection {
-	return &collection{}
+	return &collection{
+		shutdownOnce: sync.Once{},
+	}
 }
 
 type collection struct {
@@ -19,6 +21,7 @@ type collection struct {
 	connectionService servicespec.StorageService
 	featureService    servicespec.StorageService
 	generalService    servicespec.StorageService
+	peerService       servicespec.StorageService
 
 	// Settings.
 
@@ -29,6 +32,7 @@ func (c *collection) Boot() {
 	go c.Connection().Boot()
 	go c.Feature().Boot()
 	go c.General().Boot()
+	go c.Peer().Boot()
 }
 
 func (c *collection) Connection() servicespec.StorageService {
@@ -43,6 +47,10 @@ func (c *collection) General() servicespec.StorageService {
 	return c.generalService
 }
 
+func (c *collection) Peer() servicespec.StorageService {
+	return c.peerService
+}
+
 func (c *collection) SetConnectionService(connectionService servicespec.StorageService) {
 	c.connectionService = connectionService
 }
@@ -53,6 +61,10 @@ func (c *collection) SetFeatureService(featureService servicespec.StorageService
 
 func (c *collection) SetGeneralService(generalService servicespec.StorageService) {
 	c.generalService = generalService
+}
+
+func (c *collection) SetPeerService(peerService servicespec.StorageService) {
+	c.peerService = peerService
 }
 
 func (c *collection) Shutdown() {
@@ -74,6 +86,12 @@ func (c *collection) Shutdown() {
 		wg.Add(1)
 		go func() {
 			c.General().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
+			c.Peer().Shutdown()
 			wg.Done()
 		}()
 

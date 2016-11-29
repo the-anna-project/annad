@@ -10,7 +10,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 
-	"github.com/the-anna-project/collection"
+	servicecollection "github.com/the-anna-project/collection/collection"
 	"github.com/the-anna-project/id"
 	memoryinstrumentor "github.com/the-anna-project/instrumentor/memory"
 	"github.com/the-anna-project/log"
@@ -27,7 +27,7 @@ func testNewStorage() servicespec.StorageService {
 	randomService := random.New()
 	storageService := New()
 
-	serviceCollection := collection.New()
+	serviceCollection := servicecollection.New()
 	serviceCollection.SetIDService(idService)
 	serviceCollection.SetInstrumentorService(instrumentorService)
 	serviceCollection.SetLogService(logService)

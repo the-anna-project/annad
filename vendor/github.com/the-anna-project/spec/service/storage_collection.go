@@ -21,9 +21,11 @@ type StorageCollection interface {
 	// General represents a general storage. It is used to store general data
 	// which is not stored in specialized storage instances.
 	General() StorageService
+	Peer() StorageService
 	SetConnectionService(connectionService StorageService)
 	SetFeatureService(featureService StorageService)
 	SetGeneralService(generalService StorageService)
+	SetPeerService(peerService StorageService)
 	// Shutdown ends all processes of the storage collection like shutting down a
 	// machine. The call to Shutdown blocks until the storage collection is
 	// completely shut down, so you might want to call it in a separate goroutine.

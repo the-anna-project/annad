@@ -2,7 +2,13 @@
 // space.
 package service
 
-import servicespec "github.com/the-anna-project/spec/service"
+import (
+	"fmt"
+	"sync"
+	"time"
+
+	servicespec "github.com/the-anna-project/spec/service"
+)
 
 // New creates a new peer service.
 func New() servicespec.PeerService {
@@ -11,9 +17,9 @@ func New() servicespec.PeerService {
 		serviceCollection: nil,
 
 		// Settings.
-		// TODO add Shutdown
-		closer:   make(chan struct{}, 1),
-		metadata: map[string]string{},
+		closer:       make(chan struct{}, 1),
+		metadata:     map[string]string{},
+		shutdownOnce: sync.Once{},
 	}
 }
 
@@ -22,8 +28,9 @@ type service struct {
 	serviceCollection servicespec.ServiceCollection
 
 	// Settings.
-	closer   chan struct{}
-	metadata map[string]string
+	closer       chan struct{}
+	metadata     map[string]string
+	shutdownOnce sync.Once
 }
 
 func (s *service) Boot() {
@@ -41,7 +48,17 @@ func (s *service) Boot() {
 func (s *service) Create(peer string) error {
 	s.Service().Log().Line("func", "Create")
 
-	// TODO
+	key := fmt.Sprintf("peer:%s", peer)
+
+	seconds := fmt.Sprintf("%d", time.Now().Unix())
+	val := map[string]string{
+		"created": seconds,
+	}
+
+	err := s.Service().Storage().Peer().SetStringMap(key, val)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }
@@ -49,7 +66,12 @@ func (s *service) Create(peer string) error {
 func (s *service) Delete(peer string) error {
 	s.Service().Log().Line("func", "Delete")
 
-	// TODO
+	key := fmt.Sprintf("peer:%s", peer)
+
+	err := s.Service().Storage().Peer().Remove(key)
+	if err != nil {
+		return maskAny(err)
+	}
 
 	return nil
 }
@@ -57,9 +79,18 @@ func (s *service) Delete(peer string) error {
 func (s *service) Search(peer string) (map[string]string, error) {
 	s.Service().Log().Line("func", "Search")
 
-	// TODO
+	key := fmt.Sprintf("peer:%s", peer)
 
-	return nil, nil
+	result, err := s.Service().Storage().Peer().GetStringMap(key)
+	if err != nil {
+		return nil, maskAny(err)
+	}
+
+	if len(result) == 0 {
+		return nil, maskAny(peerNotFoundError)
+	}
+
+	return result, nil
 }
 
 func (s *service) Metadata() map[string]string {
@@ -72,4 +103,12 @@ func (s *service) Service() servicespec.ServiceCollection {
 
 func (s *service) SetServiceCollection(sc servicespec.ServiceCollection) {
 	s.serviceCollection = sc
+}
+
+func (s *service) Shutdown() {
+	s.Service().Log().Line("func", "Shutdown")
+
+	s.shutdownOnce.Do(func() {
+		close(s.closer)
+	})
 }

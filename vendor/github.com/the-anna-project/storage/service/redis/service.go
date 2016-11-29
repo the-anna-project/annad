@@ -22,11 +22,16 @@ func New() servicespec.StorageService {
 	newPool := NewPool(newPoolConfig)
 
 	return &service{
+		// Dependencies.
+		serviceCollection: nil,
+
+		// Settings.
 		backoffFactory: func() objectspec.Backoff {
 			return &backoff.StopBackOff{}
 		},
 		pool:         newPool,
 		prefix:       "prefix",
+		metadata:     map[string]string{},
 		shutdownOnce: sync.Once{},
 	}
 }
