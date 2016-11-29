@@ -9,7 +9,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/rafaeljusto/redigomock"
 
-	"github.com/the-anna-project/collection"
+	servicecollection "github.com/the-anna-project/collection/collection"
 	"github.com/the-anna-project/id"
 	memoryinstrumentor "github.com/the-anna-project/instrumentor/memory"
 	"github.com/the-anna-project/log"
@@ -32,7 +32,7 @@ func testMustNewStorageWithConn(t *testing.T, c redis.Conn) servicespec.StorageS
 	logService.SetRootLogger(kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr)))
 	randomService := random.New()
 
-	serviceCollection := collection.New()
+	serviceCollection := servicecollection.New()
 	serviceCollection.SetIDService(idService)
 	serviceCollection.SetInstrumentorService(instrumentorService)
 	serviceCollection.SetLogService(logService)

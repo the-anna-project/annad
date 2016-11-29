@@ -25,8 +25,9 @@ func New() servicespec.NetworkService {
 		serviceCollection: nil,
 
 		// Settings.
-		closer:   make(chan struct{}, 1),
-		metadata: map[string]string{},
+		closer:       make(chan struct{}, 1),
+		metadata:     map[string]string{},
+		shutdownOnce: sync.Once{},
 	}
 }
 

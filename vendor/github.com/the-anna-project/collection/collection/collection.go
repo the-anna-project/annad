@@ -227,6 +227,12 @@ func (c *collection) Shutdown() {
 
 		wg.Add(1)
 		go func() {
+			c.Peer().Shutdown()
+			wg.Done()
+		}()
+
+		wg.Add(1)
+		go func() {
 			c.Storage().Shutdown()
 			wg.Done()
 		}()

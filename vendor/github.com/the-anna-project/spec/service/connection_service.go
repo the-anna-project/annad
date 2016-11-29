@@ -41,22 +41,22 @@ package service
 // being formed by a prefix and a peer value. The value on the right is a
 // list of strings being formed by peer values.
 //
-//     layer:information:peer:sum     layer:information:$id1
-//     layer:information:peer:$id1    layer:information:sum,layer:information:$id2,layer:information:$id4
-//     layer:information:peer:$id2    layer:information:$id3
-//     layer:information:peer:$id4    layer:information:$id5
+//     peer:layer:information:sum     peer:layer:information:$id1
+//     peer:layer:information:$id1    peer:layer:information:sum,peer:layer:information:$id2,peer:layer:information:$id4
+//     peer:layer:information:$id2    peer:layer:information:$id3
+//     peer:layer:information:$id4    peer:layer:information:$id5
 //
 // This is a connection holding metadata. The key on the left is a string
 // being formed by a prefix and the values of the two peers forming the
 // connection. The order of the peers within the key expresses the
 // connection direction. The value on the right is a map of strings.
 //
-//     connection:layer:information:sum:layer:information:$id1     weight 23.775
-//     connection:layer:information:$id1:layer:information:sum     weight 23.775
-//     connection:layer:information:$id1:layer:information:$id2    weight 23.775
-//     connection:layer:information:$id1:layer:information:$id4    weight 23.775
-//     connection:layer:information:$id2:layer:information:$id3    weight 23.775
-//     connection:layer:information:$id4:layer:information:$id5    weight 23.775
+//     connection:peer:layer:information:sum:peer:layer:information:$id1     weight 23.775
+//     connection:peer:layer:information:$id1:peer:layer:information:sum     weight 23.775
+//     connection:peer:layer:information:$id1:peer:layer:information:$id2    weight 23.775
+//     connection:peer:layer:information:$id1:peer:layer:information:$id4    weight 23.775
+//     connection:peer:layer:information:$id2:peer:layer:information:$id3    weight 23.775
+//     connection:peer:layer:information:$id4:peer:layer:information:$id5    weight 23.775
 //
 // Following is a list of properties each peer has applied in form of
 // connections to itself.

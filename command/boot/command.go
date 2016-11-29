@@ -92,6 +92,10 @@ func (c *Command) New() *cobra.Command {
 	c.configCollection.Storage().General().SetKind(newCmd.PersistentFlags().String("storage.general.kind", "memory", "storage kind to use for persistency (e.g. redis)"))
 	c.configCollection.Storage().General().SetPrefix(newCmd.PersistentFlags().String("storage.general.prefix", "anna", "prefix used to prepend to general storage keys"))
 
+	c.configCollection.Storage().Peer().SetAddress(newCmd.PersistentFlags().String("storage.peer.address", "127.0.0.1:6381", "host:port to connect to peer storage"))
+	c.configCollection.Storage().Peer().SetKind(newCmd.PersistentFlags().String("storage.peer.kind", "memory", "storage kind to use for persistency (e.g. redis)"))
+	c.configCollection.Storage().Peer().SetPrefix(newCmd.PersistentFlags().String("storage.peer.prefix", "anna", "prefix used to prepend to peer storage keys"))
+
 	return newCmd
 }
 

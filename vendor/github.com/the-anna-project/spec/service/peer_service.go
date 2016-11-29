@@ -10,4 +10,5 @@ type PeerService interface {
 	Search(peer string) (map[string]string, error)
 	Service() ServiceCollection
 	SetServiceCollection(serviceCollection ServiceCollection)
+	Shutdown()
 }

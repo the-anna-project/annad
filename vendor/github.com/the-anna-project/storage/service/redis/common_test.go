@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/the-anna-project/collection"
+	servicecollection "github.com/the-anna-project/collection/collection"
 	"github.com/the-anna-project/log"
 	servicespec "github.com/the-anna-project/spec/service"
 )
@@ -49,7 +49,7 @@ func Test_RedisStorage_retryErrorLogger(t *testing.T) {
 	rootLoggerService := testMustNewRootLogger(t)
 	logService.SetRootLogger(rootLoggerService)
 
-	serviceCollection := collection.New()
+	serviceCollection := servicecollection.New()
 	serviceCollection.SetLogService(logService)
 
 	logService.SetServiceCollection(serviceCollection)
