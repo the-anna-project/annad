@@ -10,13 +10,67 @@ import:
   version: ~0.3.0
   subpackages:
   - log
-- package: github.com/prometheus/client_golang
-  version: ~0.8.0
+- package: github.com/juju/errgo
+- package: github.com/spf13/cobra
+- package: github.com/spf13/pflag
+- package: github.com/spf13/viper
+- package: github.com/the-anna-project/collection
+  subpackages:
+  - collection
+- package: github.com/the-anna-project/connection
+  subpackages:
+  - service
+- package: github.com/the-anna-project/fs
+  subpackages:
+  - memory
+- package: github.com/the-anna-project/id
+- package: github.com/the-anna-project/input
+  subpackages:
+  - collection
+  - service/text
+- package: github.com/the-anna-project/instrumentor
   subpackages:
   - prometheus
+- package: github.com/the-anna-project/layer
+  subpackages:
+  - collection
+  - service
+- package: github.com/the-anna-project/log
+- package: github.com/the-anna-project/output
+  subpackages:
+  - collection
+  - object/text
+  - service/text
+- package: github.com/the-anna-project/peer
+  subpackages:
+  - service
+- package: github.com/the-anna-project/permutation
+  subpackages:
+  - object/list
+  - service
+- package: github.com/the-anna-project/position
+  subpackages:
+  - service
+- package: github.com/the-anna-project/random
+- package: github.com/the-anna-project/server
+  subpackages:
+  - collection
+  - service/metric
+  - service/text
+- package: github.com/the-anna-project/spec
+  subpackages:
+  - object
+  - service
+- package: github.com/the-anna-project/storage
+  subpackages:
+  - collection
+  - service/memory
+  - service/redis
+- package: github.com/the-anna-project/worker
+  subpackages:
+  - service
+- package: golang.org/x/net
+  subpackages:
+  - context
 - package: github.com/rafaeljusto/redigomock
   version: ~2.0.0
-- package: github.com/tylerb/graceful
-  version: ~1.2.13
-- package: google.golang.org/grpc
-  version: ~1.0.4

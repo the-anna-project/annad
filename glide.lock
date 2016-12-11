@@ -1,5 +1,5 @@
-hash: 78714d5ced42b35fef5f7549088415e25f925d095274cab1e1060f0153120d70
-updated: 2016-11-23T00:08:23.791976682+01:00
+hash: 055eaba4ea57c1927e810fc6a5d1ccdebe0b79c46e50813b049308b596075f79
+updated: 2016-12-11T16:05:17.385464537+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -29,11 +29,11 @@ imports:
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
   - proto
 - name: github.com/hashicorp/hcl
-  version: 7cb7455c285ca3bf3362aa4ba6a06a6d6f5c3ba0
+  version: 37ab263305aaeb501a60eb16863e808d426e37f2
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -50,17 +50,17 @@ imports:
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 - name: github.com/magiconair/properties
-  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+  version: 9c47895dc1ce54302908ab8a43385d1f5df2c11c
 - name: github.com/matttproud/golang_protobuf_extensions
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: f3009df150dadf309fdee4a54ed65c124afad715
+  version: 5a0325d7fafaac12dda6e7fb8bd222ec1b69875e
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml
-  version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
+  version: ce7be745f09fe4ff89af8e3ea744e1deabf20ee3
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -70,17 +70,17 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 0d5de9d6d8629cb8bee6d4674da4127cd8b615a3
+  version: 195bde7883f7c39ea62b0d92ab7359b5327065cb
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: abf152e5f3e97f2fafac028d2cc06c1feb87ffa5
+  version: fcdb11ccb4389efb1b210b7ffb623ab71c5fdd60
 - name: github.com/rafaeljusto/redigomock
   version: ca49a8af34fc0c903a37409317576da14b3f1cbd
 - name: github.com/spf13/afero
-  version: 06b7e5f50606ecd49148a01a6008942d9b669217
+  version: 2f30b2a92c0e5700bcfe4715891adb1f2a7a406d
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -151,18 +151,18 @@ imports:
   - collection
   - service/metric
   - service/text
-- name: github.com/the-anna-project/storage
-  version: 59d53ec428b1fc06f541c19ad4df3f3a2e4d6e1b
-  subpackages:
-  - collection
-  - service/memory
-  - service/redis
 - name: github.com/the-anna-project/spec
   version: b0f7706f96bd44e18c35e5ac91b2d3027e3a860c
   subpackages:
   - api
   - object
   - service
+- name: github.com/the-anna-project/storage
+  version: 59d53ec428b1fc06f541c19ad4df3f3a2e4d6e1b
+  subpackages:
+  - collection
+  - service/memory
+  - service/redis
 - name: github.com/the-anna-project/worker
   version: 81fa0915135a0470ff4d2fae0cd7ac5fdbacf81e
   subpackages:
@@ -170,26 +170,25 @@ imports:
 - name: github.com/tylerb/graceful
   version: 50a48b6e73fcc75b45e22c05b79629a67c79e938
 - name: golang.org/x/net
-  version: 4971afdc2f162e82d185353533d3cf16188a9f4e
+  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
   - context
   - http2
   - http2/hpack
-  - idna
   - internal/timeseries
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 30237cf4eefd639b184d1f2cb77a581ea0be8947
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: a263ba8db058568bb9beba166777d9c9dbe75d68
+  version: 2910a502d2bf9e43193af9d68ca516529614eed3
   subpackages:
   - transform
   - unicode/norm
 - name: google.golang.org/grpc
-  version: 777daa17ff9b5daef1cfdf915088a2ada3332bf0
+  version: 8712952b7d646dbbbc6fb73a782174f3115060f3
   subpackages:
   - codes
   - credentials
@@ -198,6 +197,8 @@ imports:
   - metadata
   - naming
   - peer
+  - stats
+  - tap
   - transport
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
