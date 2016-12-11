@@ -40,6 +40,8 @@ func (s *service) Boot() {
 		"type": "service",
 	}
 
+	// TODO constant for magic number
+	// TODO make configurable
 	s.maxSignals = 5
 }
 
