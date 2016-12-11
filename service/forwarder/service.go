@@ -40,6 +40,8 @@ func (s *service) Boot() {
 		"type": "service",
 	}
 
+	// TODO constant for magic number
+	// TODO make configurable
 	s.maxSignals = 5
 }
 
@@ -91,7 +93,7 @@ func (s *service) Forward(CLG servicespec.CLGService, networkPayload objectspec.
 	return nil
 }
 
-func (s *service) GetMaxSignals() int {
+func (s *service) MaxSignals() int {
 	return s.maxSignals
 }
 
@@ -150,7 +152,7 @@ func (s *service) NewNetworkpayloads(CLG servicespec.CLGService, networkPayload 
 	// pseudo random decision. CreateMax takes a max paramater which is exclusive.
 	// Therefore we increment the configuration for the maximum signals desired by
 	// one, to reflect the maximum setting properly.
-	maxSignals, err := s.Service().Random().CreateMax(s.GetMaxSignals() + 1)
+	maxSignals, err := s.Service().Random().CreateMax(s.MaxSignals() + 1)
 	if err != nil {
 		return nil, maskAny(err)
 	}

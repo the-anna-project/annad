@@ -18,9 +18,9 @@ type ForwarderService interface {
 	// The network payloads being found by any of the lookup functions listed
 	// above are queued by Forward.
 	Forward(clgService CLGService, networkPayload objectspec.NetworkPayload) error
-	// GetMaxSignals returns the maximum number of signals being forwarded by one
+	// MaxSignals returns the maximum number of signals being forwarded by one
 	// CLG.
-	GetMaxSignals() int
+	MaxSignals() int
 	// GetNetworkPayloads tries to lookup behaviour IDs that can be used to
 	// forward a certain network payload from the requested CLG to other CLGs. If
 	// there are behaviour IDs found, a network payload for each behaviour ID is
