@@ -1,5 +1,5 @@
-hash: 055eaba4ea57c1927e810fc6a5d1ccdebe0b79c46e50813b049308b596075f79
-updated: 2016-12-11T16:05:17.385464537+01:00
+hash: 2584be42a781c71f26cb892a524b66f3f37f17325d786e022a11c1c912aef663
+updated: 2016-12-11T20:16:42.377678929+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -98,7 +98,7 @@ imports:
   subpackages:
   - collection
 - name: github.com/the-anna-project/connection
-  version: f9ce3aea284287cf002dcad2394cab383588330e
+  version: eeb5c9acc8459612df5b960b1dd0461af6aa3745
   subpackages:
   - service
 - name: github.com/the-anna-project/fs
@@ -118,7 +118,7 @@ imports:
   subpackages:
   - prometheus
 - name: github.com/the-anna-project/layer
-  version: 65f55b0aba241ab037f2945b7cefd237bf4b0620
+  version: bcf73df8009789303c48b2f28b25c9d3d9d440cd
   subpackages:
   - collection
   - service
@@ -131,7 +131,7 @@ imports:
   - object/text
   - service/text
 - name: github.com/the-anna-project/peer
-  version: afe0577713a9cad35ff83bc96595ee1d6e9ecbbe
+  version: 9d1e6c81fd810a21507e93304f458fa2f04867ea
   subpackages:
   - service
 - name: github.com/the-anna-project/permutation
@@ -140,7 +140,7 @@ imports:
   - object/list
   - service
 - name: github.com/the-anna-project/position
-  version: 4b24484c472c4ce465671082c4be773e7be87668
+  version: 9346a5465540150a21ef8ca5830b8e98dd8b302d
   subpackages:
   - service
 - name: github.com/the-anna-project/random
@@ -152,7 +152,7 @@ imports:
   - service/metric
   - service/text
 - name: github.com/the-anna-project/spec
-  version: b0f7706f96bd44e18c35e5ac91b2d3027e3a860c
+  version: 88bcb579104f3c9f5812d85f401da387557aac73
   subpackages:
   - api
   - object
