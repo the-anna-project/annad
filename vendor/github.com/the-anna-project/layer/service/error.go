@@ -21,3 +21,17 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 
 	return newErr
 }
+
+var invalidConfigError = errgo.New("invalid config")
+
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return errgo.Cause(err) == invalidConfigError
+}
+
+var invalidPeerError = errgo.New("invalid peer")
+
+// IsInvalidPeer asserts invalidPeerError.
+func IsInvalidPeer(err error) bool {
+	return errgo.Cause(err) == invalidPeerError
+}
