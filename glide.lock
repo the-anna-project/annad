@@ -1,5 +1,5 @@
-hash: 2584be42a781c71f26cb892a524b66f3f37f17325d786e022a11c1c912aef663
-updated: 2016-12-11T20:16:42.377678929+01:00
+hash: 121d6cd0ead2f16d5aa7c59dd54ab790f74c372d551ef9bb062c55621d9e535e
+updated: 2016-12-12T00:32:36.428445779+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -152,7 +152,7 @@ imports:
   - service/metric
   - service/text
 - name: github.com/the-anna-project/spec
-  version: 88bcb579104f3c9f5812d85f401da387557aac73
+  version: 219e647225f7dec2a2600c848717d31b268c0611
   subpackages:
   - api
   - object
