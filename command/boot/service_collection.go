@@ -98,9 +98,13 @@ func (c *Command) newActivatorService() servicespec.ActivatorService {
 }
 
 func (c *Command) newConnectionService() servicespec.ConnectionService {
-	connectionService := connectionservice.New()
+	config := connectionservice.DefaultConfig()
+	config.Weight = float64(c.configCollection.Space().Connection().Weight())
 
-	connectionService.SetWeight(c.configCollection.Space().Connection().Weight())
+	connectionService, err := connectionservice.New(config)
+	if err != nil {
+		panic(err)
+	}
 
 	return connectionService
 }
@@ -156,16 +160,45 @@ func (c *Command) newInstrumentorService() servicespec.InstrumentorService {
 }
 
 func (c *Command) newLayerCollection() servicespec.LayerCollection {
+	var err error
+
+	var behaviourService servicespec.LayerService
+	{
+		config := layerservice.DefaultConfig()
+		config.Kind = layerservice.KindBehaviour
+
+		behaviourService, err = layerservice.New(config)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	var informationService servicespec.LayerService
+	{
+		config := layerservice.DefaultConfig()
+		config.Kind = layerservice.KindInformation
+
+		informationService, err = layerservice.New(config)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	var positionService servicespec.LayerService
+	{
+		config := layerservice.DefaultConfig()
+		config.Kind = layerservice.KindPosition
+
+		positionService, err = layerservice.New(config)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	layerCollection := layercollection.New()
-
-	behaviourService := layerservice.New()
-	behaviourService.SetKind("behaviour")
-
-	informationService := layerservice.New()
-	informationService.SetKind("information")
-
 	layerCollection.SetBehaviourService(behaviourService)
 	layerCollection.SetInformationService(informationService)
+	layerCollection.SetPositionService(positionService)
 
 	return layerCollection
 }
@@ -201,10 +234,14 @@ func (c *Command) newPermutationService() servicespec.PermutationService {
 }
 
 func (c *Command) newPositionService() servicespec.PositionService {
-	positionService := positionservice.New()
+	config := positionservice.DefaultConfig()
+	config.DimensionCount = c.configCollection.Space().Dimension().Count()
+	config.DimensionDepth = c.configCollection.Space().Dimension().Depth()
 
-	positionService.SetDimensionCount(c.configCollection.Space().Dimension().Count())
-	positionService.SetDimensionDepth(c.configCollection.Space().Dimension().Depth())
+	positionService, err := positionservice.New(config)
+	if err != nil {
+		panic(err)
+	}
 
 	return positionService
 }
