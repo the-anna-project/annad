@@ -22,9 +22,16 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var peerNotFoundError = errgo.New("peer not found")
+var alreadyExistsError = errgo.New("already exists")
 
-// IsPeerNotFound asserts peerNotFoundError.
-func IsPeerNotFound(err error) bool {
-	return errgo.Cause(err) == peerNotFoundError
+// IsAlreadyExists asserts alreadyExistsError.
+func IsAlreadyExists(err error) bool {
+	return errgo.Cause(err) == alreadyExistsError
+}
+
+var notFoundError = errgo.New("not found")
+
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return errgo.Cause(err) == notFoundError
 }

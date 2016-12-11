@@ -50,12 +50,28 @@ func (s *service) Create(peer string) error {
 
 	key := fmt.Sprintf("peer:%s", peer)
 
-	seconds := fmt.Sprintf("%d", time.Now().Unix())
-	val := map[string]string{
-		"created": seconds,
+	// Check of the peer requested to be created does already exist. We only want
+	// to create peers ones, so we return an error in case the peer does already
+	// exist.
+	value, err := s.Search(key)
+	if IsNotFound(err) {
+		// There is no peer like that so we can create one and ignore the error to
+		// go ahead.
+	} else if err != nil {
+		return maskAny(err)
 	}
 
-	err := s.Service().Storage().Peer().SetStringMap(key, val)
+	if len(value) != 0 {
+		return maskAnyf(alreadyExistsError, peer)
+	}
+
+	// Here the peer is unknown and therefore we are able to create a new one for
+	// the given peer.
+	seconds := fmt.Sprintf("%d", time.Now().Unix())
+	value = map[string]string{
+		"created": seconds,
+	}
+	err = s.Service().Storage().Peer().SetStringMap(key, value)
 	if err != nil {
 		return maskAny(err)
 	}
@@ -87,7 +103,7 @@ func (s *service) Search(peer string) (map[string]string, error) {
 	}
 
 	if len(result) == 0 {
-		return nil, maskAny(peerNotFoundError)
+		return nil, maskAny(notFoundError)
 	}
 
 	return result, nil

@@ -22,9 +22,16 @@ func maskAnyf(err error, f string, v ...interface{}) error {
 	return newErr
 }
 
-var connectionNotFoundError = errgo.New("connection not found")
+var invalidConfigError = errgo.New("invalid config")
 
-// IsConnectionNotFound asserts connectionNotFoundError.
-func IsConnectionNotFound(err error) bool {
-	return errgo.Cause(err) == connectionNotFoundError
+// IsInvalidConfig asserts invalidConfigError.
+func IsInvalidConfig(err error) bool {
+	return errgo.Cause(err) == invalidConfigError
+}
+
+var notFoundError = errgo.New("not found")
+
+// IsNotFound asserts notFoundError.
+func IsNotFound(err error) bool {
+	return errgo.Cause(err) == notFoundError
 }

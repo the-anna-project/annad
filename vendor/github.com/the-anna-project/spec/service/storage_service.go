@@ -16,8 +16,6 @@ import (
 //     }
 //
 type StorageService interface {
-	Boot()
-
 	//
 	// List.
 	//
@@ -103,10 +101,6 @@ type StorageService interface {
 	GetStringMap(key string) (map[string]string, error)
 	// SetStringMap stores the given stringMap under the given key.
 	SetStringMap(key string, stringMap map[string]string) error
-	// Shutdown ends all processes of the storage like shutting down a machine.
-	// The call to Shutdown blocks until the storage is completely shut down, so
-	// you might want to call it in a separate goroutine.
-	Shutdown()
 
 	//
 	// String.
@@ -133,9 +127,17 @@ type StorageService interface {
 	// is walked completely. The given closer can be used to end the walk
 	// immediately.
 	WalkKeys(glob string, closer <-chan struct{}, cb func(key string) error) error
+
+	// Common storage methods.
+
+	Boot()
 	SetBackoffFactory(backoffFactory func() objectspec.Backoff)
 	SetPool(pool *redis.Pool)
 	SetPrefix(prefix string)
 	Service() ServiceCollection
 	SetServiceCollection(serviceCollection ServiceCollection)
+	// Shutdown ends all processes of the storage like shutting down a machine.
+	// The call to Shutdown blocks until the storage is completely shut down, so
+	// you might want to call it in a separate goroutine.
+	Shutdown()
 }
