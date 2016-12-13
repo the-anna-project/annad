@@ -106,6 +106,12 @@ func (s *service) GetNetworkPayloads(CLG servicespec.CLGService, networkPayload 
 	if !ok {
 		return nil, maskAnyf(invalidBehaviourIDError, "must not be empty")
 	}
+	//
+	// TODO here should connections be used to make decisions. We can use
+	//
+	//     - connections created in the tracker based on past events
+	//     - connections created in the forwarder (below) based on new (random) events
+	//
 	behaviourIDsKey := fmt.Sprintf("forward:configuration:behaviour-id:%s:behaviour-ids", behaviourID)
 	newBehaviourIDs, err := s.Service().Storage().General().GetAllFromSet(behaviourIDsKey)
 	if storagecollection.IsNotFound(err) {
@@ -168,7 +174,14 @@ func (s *service) NewNetworkpayloads(CLG servicespec.CLGService, networkPayload 
 	}
 
 	// TODO find a CLG name that can be connected to the current CLG for each new
-	// behaviour ID and pair these combinations (network event tracker)
+	// behaviour ID and pair these combinations (network event tracker). NOTE that
+	// SearchPeers has to exclude the position peer.
+	//
+	// peers, err := s.Service().Layer().Behaviour().SearchPeers(currentBehaviourID)
+	// if err != nil {
+	// 	return nil, maskAny(err)
+	// }
+	//
 
 	// Store each new behaviour ID in the underlying storage.
 	behaviourID, ok := ctx.GetBehaviourID()
