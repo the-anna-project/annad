@@ -1,5 +1,5 @@
-hash: 121d6cd0ead2f16d5aa7c59dd54ab790f74c372d551ef9bb062c55621d9e535e
-updated: 2016-12-12T00:32:36.428445779+01:00
+hash: 8d2754be39c878787afd092c737c502e63d8ef36c40f6243272a03f3874fd217
+updated: 2016-12-13T01:35:33.23481388+01:00
 imports:
 - name: github.com/alicebob/miniredis
   version: 10ddf01f45bee3c40d1af5dbaad9aa71e6f20835
@@ -101,6 +101,8 @@ imports:
   version: eeb5c9acc8459612df5b960b1dd0461af6aa3745
   subpackages:
   - service
+- name: github.com/the-anna-project/context
+  version: 4152505c89f5c47bd3d4112089ebde50cae9d876
 - name: github.com/the-anna-project/fs
   version: 48be206e218d2e382b9104bae2638136b98b4e95
   subpackages:

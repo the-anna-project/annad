@@ -18,7 +18,6 @@ import:
   subpackages:
   - collection
 - package: github.com/the-anna-project/connection
-  version: eeb5c9acc8459612df5b960b1dd0461af6aa3745
   subpackages:
   - service
 - package: github.com/the-anna-project/fs
@@ -33,7 +32,6 @@ import:
   subpackages:
   - prometheus
 - package: github.com/the-anna-project/layer
-  version: bcf73df8009789303c48b2f28b25c9d3d9d440cd
   subpackages:
   - collection
   - service
@@ -44,7 +42,6 @@ import:
   - object/text
   - service/text
 - package: github.com/the-anna-project/peer
-  version: 9d1e6c81fd810a21507e93304f458fa2f04867ea
   subpackages:
   - service
 - package: github.com/the-anna-project/permutation
@@ -52,7 +49,6 @@ import:
   - object/list
   - service
 - package: github.com/the-anna-project/position
-  version: 9346a5465540150a21ef8ca5830b8e98dd8b302d
   subpackages:
   - service
 - package: github.com/the-anna-project/random
@@ -62,7 +58,6 @@ import:
   - service/metric
   - service/text
 - package: github.com/the-anna-project/spec
-  version: 219e647225f7dec2a2600c848717d31b268c0611
   subpackages:
   - object
   - service
@@ -79,3 +74,4 @@ import:
   - context
 - package: github.com/rafaeljusto/redigomock
   version: ~2.0.0
+- package: github.com/the-anna-project/context
